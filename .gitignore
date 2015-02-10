@@ -23,13 +23,12 @@ _testmain.go
 *.test
 *.prof
 
-# gofem 
+# binaries 
+t_*_main
+
+# temporary files
 inp/results
 fem/results
-fem/t_bh16_main
-fem/fem.test
-
-syntax: glob
 *.vtu
 *.pvd
 *.goa
