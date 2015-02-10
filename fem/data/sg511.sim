@@ -1,0 +1,30 @@
+{
+  "data" : {
+    "desc"    : "Smith-Griffiths (5th ed) Figure 5.11 p180",
+    "matfile" : "data/sg.mat",
+    "steady"  : true
+  },
+  "functions" : [
+    { "name":"uy", "type":"cte", "prms":[ {"n":"c", "v":-1e-5} ] }
+  ],
+  "regions" : [
+    {
+      "desc"     : "flexible footing",
+      "mshfile"  : "data/sg511.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"SG-5.11-M1", "type":"u", "extra":"!nip:4" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply face displacement",
+      "facebcs" : [
+        { "tag":-10, "keys":["ux","uy"], "funcs":["zero","zero"] },
+        { "tag":-11, "keys":["ux"     ], "funcs":["zero"     ] },
+        { "tag":-12, "keys":[     "uy"], "funcs":[     "uy"] },
+        { "tag":-13, "keys":["ux"     ], "funcs":["zero"     ] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "functions" : [],
+  "materials" : [
+    {
+      "name"  : "SG-5.2-M1",
+      "desc"  : "Smith-Griffiths Figure 5.2 p173",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":1e+06},
+        {"n":"nu",   "v":0.3  },
+        {"n":"RhoS", "v":1    }
+      ]
+    },
+    {
+      "name"  : "SG-5.7-M1",
+      "desc"  : "Smith-Griffiths Figure 5.7 p178",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":100000},
+        {"n":"nu",   "v":0.3   },
+        {"n":"RhoS", "v":1     }
+      ]
+    },
+    {
+      "name"  : "SG-5.11-M1",
+      "desc"  : "Smith-Griffiths Figure 5.11 p178",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":1e+06},
+        {"n":"nu",   "v":0.3  },
+        {"n":"RhoS", "v":1    }
+      ]
+    },
+    {
+      "name"  : "SG-5.15-M1",
+      "desc"  : "Smith-Griffiths Figure 5.15 p181",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":1e+06},
+        {"n":"nu",   "v":0.3  },
+        {"n":"RhoS", "v":1    }
+      ]
+    },
+    {
+      "name"  : "SG-5.17-M1",
+      "desc"  : "Smith-Griffiths Figure 5.17 p187",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":100},
+        {"n":"nu",   "v":0.3},
+        {"n":"RhoS", "v":1  }
+      ]
+    },
+    {
+      "name"  : "SG-5.17-M2",
+      "desc"  : "Smith-Griffiths Figure 5.17 p187",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":1000},
+        {"n":"nu",   "v":0.45},
+        {"n":"RhoS", "v":1   }
+      ]
+    },
+    {
+      "name"  : "SG-5.24-M1",
+      "desc"  : "Smith-Griffiths Figure 5.24 p193",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":100},
+        {"n":"nu",   "v":0.3},
+        {"n":"RhoS", "v":1  }
+      ]
+    },
+    {
+      "name"  : "SG-5.24-M2",
+      "desc"  : "Smith-Griffiths Figure 5.24 p193",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":50 },
+        {"n":"nu",   "v":0.3},
+        {"n":"RhoS", "v":1  }
+      ]
+    },
+    {
+      "name"  : "SG-5.30-M1",
+      "desc"  : "Smith-Griffiths Figure 5.30 p202",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":100},
+        {"n":"nu",   "v":0.3},
+        {"n":"RhoS", "v":1  }
+      ]
+    },
+    {
+      "name"  : "SG-11.1",
+      "desc"  : "Smith-Griffiths Figure 11.1 p470",
+      "model" : "beam-elast",
+      "prms"  : [
+        {"n":"E",   "v":3.194},
+        {"n":"A",   "v":1    },
+        {"n":"Izz", "v":1    },
+        {"n":"ρ",   "v":1    }
+      ]
+    },
+    {
+      "name"  : "SG-11.4",
+      "desc"  : "Smith-Griffiths Figure 11.4 p475",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":1  },
+        {"n":"nu",   "v":0.3},
+        {"n":"RhoS", "v":1  }
+      ]
+    },
+    {
+      "name"  : "SG-11.4_mises",
+      "desc"  : "Smith-Griffiths Figure 11.4 p475",
+      "model" : "von-mises",
+      "prms"  : [
+        {"n":"E",    "v":1  },
+        {"n":"nu",   "v":0.3},
+        {"n":"qy0",  "v":5  },
+        {"n":"H",    "v":0  },
+        {"n":"RhoS", "v":1  }
+      ]
+    },
+    {
+      "name"  : "SG-11.19",
+      "desc"  : "Smith-Griffiths Figure 11.19 p500",
+      "model" : "von-mises",
+      "prms"  : [
+        {"n":"E",    "v":3e+07   },
+        {"n":"nu",   "v":0.3     },
+        {"n":"qy0",  "v":50000   },
+        {"n":"H",    "v":0       },
+        {"n":"RhoS", "v":0.000733}
+      ]
+    }
+  ]
+}

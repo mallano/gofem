@@ -1,0 +1,32 @@
+{
+  "data" : {
+    "desc"   : "Smith-Griffiths (5th ed.) Figure 5.17 p187",
+    "matfile": "data/sg.mat",
+    "axisym" : true,
+    "steady" : true
+  },
+  "functions" : [
+    { "name":"qn", "type":"cte", "prms":[ {"n":"c", "v":-1} ] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "flexible footing (axisymmetric)",
+      "mshfile"  : "data/sg517.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"SG-5.17-M1", "type":"u", "extra":"!nip:9" },
+        { "tag":-2, "mat":"SG-5.17-M2", "type":"u", "extra":"!nip:9" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply distributed load",
+      "facebcs" : [
+        { "tag":-10, "keys":["ux","uy"], "funcs":["zero","zero"] },
+        { "tag":-11, "keys":["ux" ],     "funcs":["zero"] },
+        { "tag":-12, "keys":["aqn"],     "funcs":["qn"  ] },
+        { "tag":-13, "keys":["ux" ],     "funcs":["zero"] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "data" : {
+    "desc"    : "Bhatti Example 1.6 p32",
+    "matfile" : "data/bh.mat",
+    "steady"  : true,
+    "pstress" : true
+  },
+  "linsol" : {
+    "name" : "mumps"
+  },
+  "functions" : [
+    { "name":"load", "type":"cte", "prms":[ {"n":"c", "v":-20} ] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "bracket",
+      "mshfile"   : "data/bh16.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"B-1.6-M1", "type":"u", "extra":"!thick:0.25" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply loading",
+      "facebcs" : [
+        { "tag":-10, "keys":["qn"], "funcs":["load"] }
+      ],
+      "nodebcs" : [
+        { "tag":-100, "keys":["ux","uy"], "funcs":["zero","zero"] }
+      ],
+      "control_" : {
+        "dt"    : 0.01,
+        "dtout" : 0.1
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "data" : {
+    "desc"    : "four layers",
+    "matfile" : "data/layers.mat",
+    "steady"  : true,
+    "showR"   : true
+  },
+  "functions" : [
+    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
+    { "name":"load", "type":"cte", "prms":[{"n":"c", "v":-10}] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "square",
+      "mshfile"   : "data/fourlayers.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"elast01", "type":"u",    "inact":false },
+        { "tag":-2, "mat":"elast01", "type":"u",    "inact":true  },
+        { "tag":-3, "mat":"dp01",    "type":"u",    "inact":true  },
+        { "tag":-4, "mat":"elast01", "type":"u",    "inact":true  },
+        { "tag":-5, "mat":"beam01",  "type":"beam", "inact":false },
+        { "tag":-6, "mat":"beam01",  "type":"beam", "inact":true  },
+        { "tag":-7, "mat":"beam01",  "type":"beam", "inact":true  }
+      ]
+    }
+  ],
+  "solver" : {
+  },
+  "stages" : [
+    {
+      "desc"    : "run first layer under gravity",
+      "facebcs" : [
+        { "tag":-10, "keys":["uy"], "funcs":["zero"] },
+        { "tag":-13, "keys":["ux"], "funcs":["zero"] }
+      ],
+      "eleconds" : [
+        { "tag":-1, "keys":["g"], "funcs":["grav"] },
+        { "tag":-5, "keys":["g"], "funcs":["grav"] }
+      ]
+    },
+    {
+      "desc"     : "activate next layer",
+      "activate" : [-2, -6],
+      "facebcs"  : [
+        { "tag":-10, "keys":["uy"], "funcs":["zero"] },
+        { "tag":-13, "keys":["ux"], "funcs":["zero"] }
+      ],
+      "eleconds" : [
+        { "tag":-1, "keys":["g"], "funcs":["grav"] },
+        { "tag":-2, "keys":["g"], "funcs":["grav"] },
+        { "tag":-5, "keys":["g"], "funcs":["grav"] },
+        { "tag":-6, "keys":["g"], "funcs":["grav"] }
+      ]
+    },
+    {
+      "desc"     : "activate next layer",
+      "activate" : [-3, -7],
+      "facebcs"  : [
+        { "tag":-10, "keys":["uy"], "funcs":["zero"] },
+        { "tag":-12, "keys":["qn"], "funcs":["load"] },
+        { "tag":-13, "keys":["ux"], "funcs":["zero"] }
+      ],
+      "eleconds" : [
+        { "tag":-1, "keys":["g"], "funcs":["grav"] },
+        { "tag":-2, "keys":["g"], "funcs":["grav"] },
+        { "tag":-3, "keys":["g"], "funcs":["grav"] },
+        { "tag":-5, "keys":["g"], "funcs":["grav"] },
+        { "tag":-6, "keys":["g"], "funcs":["grav"] },
+        { "tag":-7, "keys":["g"], "funcs":["grav"] }
+      ]
+    },
+    {
+      "desc"     : "activate next layer and apply load",
+      "activate" : [-4],
+      "facebcs"  : [
+        { "tag":-10, "keys":["uy"], "funcs":["zero"] },
+        { "tag":-13, "keys":["ux"], "funcs":["zero"] },
+        { "tag":-12, "keys":["qn"], "funcs":["load"] }
+      ],
+      "eleconds" : [
+        { "tag":-1, "keys":["g"], "funcs":["grav"] },
+        { "tag":-2, "keys":["g"], "funcs":["grav"] },
+        { "tag":-3, "keys":["g"], "funcs":["grav"] },
+        { "tag":-4, "keys":["g"], "funcs":["grav"] },
+        { "tag":-5, "keys":["g"], "funcs":["grav"] },
+        { "tag":-6, "keys":["g"], "funcs":["grav"] },
+        { "tag":-7, "keys":["g"], "funcs":["grav"] }
+      ]
+    }
+  ]
+}

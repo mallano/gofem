@@ -1,0 +1,46 @@
+{
+  "data" : {
+    "desc"    : "de Souza Neto, Peric, Owen: Example 7.5.1 p244",
+    "matfile" : "data/spo.mat",
+    "steady"  : true,
+    "showR"   : true
+  },
+  "functions" : [
+    { "name":"pres", "type":"lin", "prms":[ {"n":"m", "v":-0.2} ] },
+    { "name":"dt",   "type":"pts", "prms":[
+        {"n":"t0", "v":0.00}, {"n":"y0", "v":0.50},
+        {"n":"t1", "v":0.50}, {"n":"y1", "v":0.20},
+        {"n":"t2", "v":0.70}, {"n":"y2", "v":0.20},
+        {"n":"t3", "v":0.90}, {"n":"y3", "v":0.05},
+        {"n":"t4", "v":0.95}, {"n":"y4", "v":0.01},
+        {"n":"t5", "v":0.96}, {"n":"y5", "v":0.00}
+    ] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "slice of cylinder",
+      "mshfile"   : "data/spo751.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"M.7.5.1-mises", "type":"u", "extra":"!nip:4" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply internal pressure",
+      "nodebcs" : [
+        { "tag":-200, "keys":["uy"],     "funcs":["zero"] },
+        { "tag":-201, "keys":["uy"],     "funcs":["zero"] },
+        { "tag":-202, "keys":["uy"],     "funcs":["zero"] },
+        { "tag":-300, "keys":["incsup"], "funcs":["zero"], "extra":"!alp:120" }
+      ],
+      "facebcs" : [
+        { "tag":-10, "keys":["qn"], "funcs":["pres"] }
+      ],
+      "control" : {
+        "tf"    : 0.96,
+        "dtfcn" : "dt"
+      }
+    }
+  ]
+}

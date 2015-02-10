@@ -1,0 +1,63 @@
+{
+  "functions" : [],
+  "materials" : [
+    {
+      "name"  : "elast01",
+      "desc"  : "Linear elastic for Hostun Sand",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E"   , "v":3000 , "u":"kPa"},
+        {"n":"nu"  , "v":0.2  , "u":"-"},
+        {"n":"RhoS", "v":2.7  , "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "dp01",
+      "desc"  : "Drucker-Prager for Hostun Sand",
+      "model" : "dp",
+      "prms"  : [
+        {"n":"E"   , "v":3000 , "u":"kPa"},
+        {"n":"nu"  , "v":0.2  , "u":"-"},
+        {"n":"c"   , "v":10   , "u":"kPa"},
+        {"n":"phi" , "v":20   , "u":"°"},
+        {"n":"typ" , "v":3    , "u":"-"},
+        {"n":"H"   , "v":0    , "u":"kPa"},
+        {"n":"RhoS", "v":2.7  , "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "lrm01",
+      "desc"  : "Water retention curve model for Hostun Sand",
+      "model" : "lrm-m1",
+      "prms"  : [
+        {"n":"lamD", "v":3.42 },
+        {"n":"xrd" , "v":0.94 },
+        {"n":"yr"  , "v":0.057},
+        {"n":"xrw" , "v":0.58 },
+        {"n":"betD", "v":2.41 },
+        {"n":"betW", "v":3.44 },
+        {"n":"bet1", "v":1.14 }
+      ]
+    },
+    {
+      "name"  : "lrm02",
+      "desc"  : "Water retention curve model for Hostun Sand",
+      "model" : "brooks-corey",
+      "prms"  : [
+        {"n":"lam" , "v":0.051},
+        {"n":"pcae", "v":1.8  },
+        {"n":"smin", "v":0.01 }
+      ]
+    },
+    {
+      "name"  : "beam01",
+      "model" : "beam-elast",
+      "prms"  : [
+        {"n":"E",   "v":1e+3,    "u":"kPa"},
+        {"n":"A",   "v":0.3,     "u":"m2"},
+        {"n":"Izz", "v":2.25e-3, "u":"m4"},
+        {"n":"rho", "v":2.5,     "u":"Mg/m3"}
+      ]
+    }
+  ]
+}

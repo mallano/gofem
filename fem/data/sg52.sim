@@ -1,0 +1,34 @@
+{
+  "data" : {
+    "desc"    : "Smith-Griffiths (5th ed) Figure 5.2 p173",
+    "matfile" : "data/sg.mat",
+    "steady"  : true
+  },
+  "functions" : [
+    { "name":"fa", "type":"cte", "prms":[ {"n":"c", "v":-0.25} ] },
+    { "name":"fb", "type":"cte", "prms":[ {"n":"c", "v":-0.50} ] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "plane-strain section",
+      "mshfile"   : "data/sg52.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"SG-5.2-M1", "type":"u", "extra":"!nip:1" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply forces",
+      "nodebcs" : [
+        { "tag":-1, "keys":["ux","fy"], "funcs":["zero","fa"] },
+        { "tag":-2, "keys":[     "fy"], "funcs":[       "fb"] },
+        { "tag":-3, "keys":[     "fy"], "funcs":[       "fa"] },
+        { "tag":-4, "keys":["ux"     ], "funcs":["zero"     ] },
+        { "tag":-7, "keys":["ux","uy"], "funcs":["zero","zero"] },
+        { "tag":-8, "keys":[     "uy"], "funcs":[       "zero"] },
+        { "tag":-9, "keys":[     "uy"], "funcs":[       "zero"] }
+      ]
+    }
+  ]
+}

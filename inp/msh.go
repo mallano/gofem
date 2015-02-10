@@ -1,0 +1,227 @@
+// Copyright 2012 Dorival Pedroso & Raul Durand. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package inp
+
+import (
+	"encoding/json"
+	"log"
+	"math"
+
+	"github.com/cpmech/gofem/shp"
+
+	"github.com/cpmech/gosl/utl"
+)
+
+// constants
+const Ztol = 1e-7
+
+// Vert holds vertex data
+type Vert struct {
+	Id  int       // id
+	Tag int       // tag
+	C   []float64 // coordinates (size==2 or 3)
+}
+
+// Cell holds cell data
+type Cell struct {
+	Id     int    // id
+	Tag    int    // tag
+	Geo    int    // geometry type (gemlab code)
+	Type   string // geometry type (string)
+	Part   int    // partition id
+	Verts  []int  // vertices
+	FTags  []int  // edge (2D) or face (3D) tags
+	STags  []int  // seam tags (for 3D only; it is actually a 3D edge tag)
+	JlinId int    // joint line id
+	JsldId int    // joint solid id
+
+	// derived
+	Shp *shp.Shape // shape structure
+}
+
+// CellFaceId structure
+type CellFaceId struct {
+	C   *Cell // cell
+	Fid int   // face id
+}
+
+// CellSeamId structure
+type CellSeamId struct {
+	C   *Cell // cell
+	Sid int   // seam id
+}
+
+// Mesh holds a mesh for FE analyses
+type Mesh struct {
+
+	// from JSON
+	Verts []*Vert // vertices
+	Cells []*Cell // cells
+
+	// derived
+	Ndim int // space dimension
+
+	// derived: maps
+	VertTag2verts map[int][]*Vert      // vertex tag => set of vertices
+	CellTag2cells map[int][]*Cell      // cell tag => set of cells
+	FaceTag2cells map[int][]CellFaceId // face tag => set of cells
+	SeamTag2cells map[int][]CellSeamId // seam tag => set of cells
+	Ctype2cells   map[string][]*Cell   // cell type => set of cells
+	Part2cells    map[int][]*Cell      // partition number => set of cells
+}
+
+// ReadMsh reads a mesh for FE analyses
+func ReadMsh(fn string, dolog bool) (o *Mesh) {
+
+	// new mesh
+	o = new(Mesh)
+
+	// read file
+	b, err := utl.ReadFile(fn)
+	if err != nil {
+		utl.Panic("%v", err.Error())
+	}
+
+	// decode
+	err = json.Unmarshal(b, o)
+	if err != nil {
+		utl.Panic("%v", err.Error())
+	}
+
+	// vertex related derived data
+	o.Ndim = 2
+	o.VertTag2verts = make(map[int][]*Vert)
+	for i, v := range o.Verts {
+
+		// check vertex id
+		if v.Id != i {
+			utl.Panic("vertices must be sequentially numbered")
+		}
+
+		// ndim
+		nd := len(v.C)
+		if nd < 2 || nd > 4 {
+			utl.Panic("ndim must be 2 or 3")
+		}
+		if nd == 3 {
+			if math.Abs(v.C[2]) > Ztol {
+				o.Ndim = 3
+			}
+		}
+
+		// tags
+		if v.Tag < 0 {
+			verts := o.VertTag2verts[v.Tag]
+			o.VertTag2verts[v.Tag] = append(verts, v)
+		}
+	}
+
+	// derived data
+	o.CellTag2cells = make(map[int][]*Cell)
+	o.FaceTag2cells = make(map[int][]CellFaceId)
+	o.SeamTag2cells = make(map[int][]CellSeamId)
+	o.Ctype2cells = make(map[string][]*Cell)
+	o.Part2cells = make(map[int][]*Cell)
+	for i, c := range o.Cells {
+
+		// shape
+		c.Shp = shp.Get(c.Type)
+
+		// check id and tag
+		if c.Id != i {
+			utl.Panic("cells must be sequentially numbered")
+		}
+		if c.Tag >= 0 {
+			utl.Panic("cell tags must be negative")
+		}
+
+		// face tags
+		cells := o.CellTag2cells[c.Tag]
+		o.CellTag2cells[c.Tag] = append(cells, c)
+		for i, ftag := range c.FTags {
+			if ftag < 0 {
+				pairs := o.FaceTag2cells[ftag]
+				o.FaceTag2cells[ftag] = append(pairs, CellFaceId{c, i})
+			}
+		}
+
+		// seam tags
+		if c.Shp.Gndim == 3 {
+			for i, stag := range c.STags {
+				if stag < 0 {
+					pairs := o.SeamTag2cells[stag]
+					o.SeamTag2cells[stag] = append(pairs, CellSeamId{c, i})
+				}
+			}
+		}
+
+		// cell type => cells
+		cells = o.Ctype2cells[c.Type]
+		o.Ctype2cells[c.Type] = append(cells, c)
+
+		// partition => cells
+		cells = o.Part2cells[c.Part]
+		o.Part2cells[c.Part] = append(cells, c)
+	}
+
+	// log
+	if dolog {
+		log.Printf("msh: fn=%s nverts=%d ncells=%d ncelltags=%d nfacetags=%d nseamtags=%d nverttags=%d ncelltypes=%d npart=%d\n", fn, len(o.Verts), len(o.Cells), len(o.CellTag2cells), len(o.FaceTag2cells), len(o.SeamTag2cells), len(o.VertTag2verts), len(o.Ctype2cells), len(o.Part2cells))
+	}
+	return
+}
+
+// String returns a JSON representation of *Vert
+func (o *Vert) String() string {
+	l := utl.Sf("{\"id\":%4d, \"tag\":%6d, \"c\":[", o.Id, o.Tag)
+	for i, x := range o.C {
+		if i > 0 {
+			l += ", "
+		}
+		l += utl.Sf("%23.15e", x)
+	}
+	l += "] }"
+	return l
+}
+
+// String returns a JSON representation of *Cell
+func (o *Cell) String() string {
+	l := utl.Sf("{\"id\":%d, \"tag\":%d, \"type\":%q, \"part\":%d, \"verts\":[", o.Id, o.Tag, o.Type, o.Part)
+	for i, x := range o.Verts {
+		if i > 0 {
+			l += ", "
+		}
+		l += utl.Sf("%d", x)
+	}
+	l += "], \"ftags\":["
+	for i, x := range o.FTags {
+		if i > 0 {
+			l += ", "
+		}
+		l += utl.Sf("%d", x)
+	}
+	l += "] }"
+	return l
+}
+
+// String returns a JSON representation of *Mesh
+func (o Mesh) String() string {
+	l := "{\n  \"verts\" : [\n"
+	for i, x := range o.Verts {
+		if i > 0 {
+			l += ",\n"
+		}
+		l += utl.Sf("    %v", x)
+	}
+	l += "\n  ],\n  \"cells\" : [\n"
+	for i, x := range o.Cells {
+		if i > 0 {
+			l += ",\n"
+		}
+		l += utl.Sf("    %v", x)
+	}
+	l += "\n  ]\n}"
+	return l
+}

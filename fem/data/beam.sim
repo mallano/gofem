@@ -1,0 +1,36 @@
+{
+  "data" : {
+    "desc"    : "Beam example",
+    "matfile" : "data/beams.mat"
+  },
+  "functions" : [
+    { "name":"qnL", "type":"cte", "prms":["c"], "vals":[-1.0] },
+    { "name":"qnR", "type":"cte", "prms":["c"], "vals":[-1.0] },
+    { "name":"qt", "type":"cte", "prms":["c"], "vals":[0.0] },
+    { "name":"zero", "type":"cte", "prms":["c"], "vals":[0.0] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "beam",
+      "mshfile"   : "data/beam.msh",
+      "elemsdata" : [
+        { "tag":-1, "matname":"beam01", "type":"u" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"     : "apply loading",
+      "nodebcs" : [
+        { "tag":-101, "keys":["ux","uy"], "funcs":["zero","zero"] 
+        { "tag":-102, "keys":["uy"], "funcs":["zero"] }
+      ],
+      "eleconds" : [
+        { "tag":-1, "keys":["qnqt"], "funcs":["qnL", "qnR", "qt"] },
+      "solver" : {
+        "steady" : true
+      }
+    }
+  ]
+}
+

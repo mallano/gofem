@@ -1,0 +1,2318 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Gofem &ndash; package fem</title>
+<link type="text/css" rel="stylesheet" href="static/style.css">
+<script type="text/javascript" src="static/godocs.js"></script>
+<style type="text/css"></style>
+</head>
+<body>
+<div id="page"><h1>Gofem &ndash; <b>fem</b> &ndash; finite element method</h1>
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script type='text/javascript'>
+	document.ANALYSIS_DATA = ;
+	document.CALLGRAPH = ;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/cpmech/gofem/fem"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+				<dd><a href="#pkg-subdirectories">Subdirectories</a></dd>
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+				<dd><a href="#pkg-constants">Constants</a></dd>
+			
+			
+			
+				
+				<dd><a href="#BuildCoordsMatrix">func BuildCoordsMatrix(c *inp.Cell, msh *inp.Mesh) (x [][]float64)</a></dd>
+			
+				
+				<dd><a href="#DerivSig">func DerivSig(DσDun [][]float64, n, ndim int, G, D [][]float64)</a></dd>
+			
+				
+				<dd><a href="#FlushLog">func FlushLog()</a></dd>
+			
+				
+				<dd><a href="#GetIsEssenKeyMap">func GetIsEssenKeyMap() map[string]bool</a></dd>
+			
+				
+				<dd><a href="#InitLogFile">func InitLogFile(dirout, fnkey string)</a></dd>
+			
+				
+				<dd><a href="#IpAddToKt">func IpAddToKt(Kt [][]float64, nne, ndim int, coef float64, G, D [][]float64)</a></dd>
+			
+				
+				<dd><a href="#IpBmatrix">func IpBmatrix(B [][]float64, ndim, nne int, G [][]float64, axisym bool, radius float64, S []float64)</a></dd>
+			
+				
+				<dd><a href="#IpBmatrix_sparse">func IpBmatrix_sparse(B *la.Triplet, ndim, nne int, G [][]float64, axisym bool, radius float64, S []float64)</a></dd>
+			
+				
+				<dd><a href="#IpStrains">func IpStrains(εs []float64, nne, ndim int, u []float64, Usmap []int, G [][]float64)</a></dd>
+			
+				
+				<dd><a href="#IpStrainsAndInc">func IpStrainsAndInc(εs, Δεs []float64, nne, ndim int, u, Δu []float64, Usmap []int, G [][]float64)</a></dd>
+			
+				
+				<dd><a href="#IpStrainsAndIncB">func IpStrainsAndIncB(εs, Δεs []float64, nσ, nu int, B [][]float64, u, Δu []float64, Usmap []int)</a></dd>
+			
+				
+				<dd><a href="#RunSim">func RunSim(simfilepath string, verbose bool, skipstages map[int]bool) (domains []*Domain)</a></dd>
+			
+			
+				
+				<dd><a href="#Beam">type Beam</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Beam.AddToKb">func (o Beam) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Beam.AddToRhs">func (o Beam) AddToRhs(fb []float64, sol *Solution) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Beam.InterpStarVars">func (o *Beam) InterpStarVars(sol *Solution) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Beam.SetEleConds">func (o *Beam) SetEleConds(key string, f fun.Func, extra string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Beam.SetEqs">func (o *Beam) SetEqs(eqs [][]int, mixedform_eqs []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Beam.SetSurfLoads">func (o *Beam) SetSurfLoads(key string, idxface int, f fun.Func, extra string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Beam.Update">func (o *Beam) Update(sol *Solution) (err error)</a></dd>
+				
+			
+				
+				<dd><a href="#Decoder">type Decoder</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#GetDecoder">func GetDecoder(r io.Reader) Decoder</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Dof">type Dof</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Dof.String">func (o *Dof) String() string</a></dd>
+				
+			
+				
+				<dd><a href="#Domain">type Domain</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewDomain">func NewDomain(reg *inp.Region) (o *Domain)</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Domain.Out">func (o *Domain) Out(tidx int) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Domain.ReadIvs">func (o *Domain) ReadIvs(tidx int) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Domain.ReadSol">func (o *Domain) ReadSol(tidx int) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Domain.SaveIvs">func (o Domain) SaveIvs(tidx int) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Domain.SaveSol">func (o Domain) SaveSol(tidx int) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Domain.SetStage">func (o *Domain) SetStage(idxstg int, stg *inp.Stage)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Domain.Stop">func (o *Domain) Stop(err error, msg string) bool</a></dd>
+				
+			
+				
+				<dd><a href="#DynCoefs">type DynCoefs</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#DynCoefs.CalcAlphas">func (o *DynCoefs) CalcAlphas(Δt float64) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#DynCoefs.CalcBetas">func (o *DynCoefs) CalcBetas(Δt float64) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#DynCoefs.CalcBoth">func (o *DynCoefs) CalcBoth(Δt float64) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#DynCoefs.Init">func (o *DynCoefs) Init(dat *inp.SolverData)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#DynCoefs.Print">func (o *DynCoefs) Print()</a></dd>
+				
+			
+				
+				<dd><a href="#Elem">type Elem</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewElem">func NewElem(edat *inp.ElemData, cid int, msh *inp.Mesh) Elem</a></dd>
+				
+				
+			
+				
+				<dd><a href="#ElemConnector">type ElemConnector</a></dd>
+				
+				
+			
+				
+				<dd><a href="#ElemIntvars">type ElemIntvars</a></dd>
+				
+				
+			
+				
+				<dd><a href="#ElemP">type ElemP</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.AddToKb">func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.AddToRhs">func (o ElemP) AddToRhs(fb []float64, sol *Solution) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.BackupIvs">func (o *ElemP) BackupIvs()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.InitIvs">func (o *ElemP) InitIvs(sol *Solution)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.InterpStarVars">func (o *ElemP) InterpStarVars(sol *Solution) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.RestoreIvs">func (o *ElemP) RestoreIvs()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.SetEleConds">func (o *ElemP) SetEleConds(key string, f fun.Func, extra string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.SetEqs">func (o *ElemP) SetEqs(eqs [][]int, mixedform_eqs []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.SetIvs">func (o *ElemP) SetIvs(zvars map[string][]float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.SetSurfLoads">func (o *ElemP) SetSurfLoads(key string, idxface int, f fun.Func, extra string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemP.Update">func (o *ElemP) Update(sol *Solution) (err error)</a></dd>
+				
+			
+				
+				<dd><a href="#ElemU">type ElemU</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.AddToKb">func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.AddToRhs">func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.BackupIvs">func (o *ElemU) BackupIvs()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.Decode">func (o ElemU) Decode(dec Decoder) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.Encode">func (o ElemU) Encode(enc Encoder) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.InitIvs">func (o *ElemU) InitIvs(sol *Solution)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.InterpStarVars">func (o *ElemU) InterpStarVars(sol *Solution) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.RestoreIvs">func (o *ElemU) RestoreIvs()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.SetEleConds">func (o *ElemU) SetEleConds(key string, f fun.Func, extra string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.SetEqs">func (o *ElemU) SetEqs(eqs [][]int, mixedform_eqs []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.SetIvs">func (o *ElemU) SetIvs(zvars map[string][]float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.SetSurfLoads">func (o *ElemU) SetSurfLoads(key string, idxface int, f fun.Func, extra string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemU.Update">func (o *ElemU) Update(sol *Solution) (err error)</a></dd>
+				
+			
+				
+				<dd><a href="#ElemUP">type ElemUP</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.AddToKb">func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.AddToRhs">func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.BackupIvs">func (o *ElemUP) BackupIvs()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.InitIvs">func (o *ElemUP) InitIvs(sol *Solution)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.InterpStarVars">func (o *ElemUP) InterpStarVars(sol *Solution) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.RestoreIvs">func (o *ElemUP) RestoreIvs()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.SetEleConds">func (o *ElemUP) SetEleConds(key string, f fun.Func, extra string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.SetEqs">func (o *ElemUP) SetEqs(eqs [][]int, mixedform_eqs []int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.SetIvs">func (o *ElemUP) SetIvs(zvars map[string][]float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.SetSurfLoads">func (o *ElemUP) SetSurfLoads(key string, idxface int, f fun.Func, extra string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ElemUP.Update">func (o *ElemUP) Update(sol *Solution) (err error)</a></dd>
+				
+			
+				
+				<dd><a href="#ElemWriter">type ElemWriter</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Encoder">type Encoder</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#GetEncoder">func GetEncoder(w io.Writer) Encoder</a></dd>
+				
+				
+			
+				
+				<dd><a href="#EssenBc">type EssenBc</a></dd>
+				
+				
+			
+				
+				<dd><a href="#EssentialBcs">type EssentialBcs</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#EssentialBcs.AddToRhs">func (o EssentialBcs) AddToRhs(fb []float64, sol *Solution)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#EssentialBcs.Build">func (o *EssentialBcs) Build(ny int) (nλ, nnzA int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#EssentialBcs.List">func (o *EssentialBcs) List(t float64) (l string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#EssentialBcs.Reset">func (o *EssentialBcs) Reset(ndim int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#EssentialBcs.Set">func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string)</a></dd>
+				
+			
+				
+				<dd><a href="#Info">type Info</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#GetElemInfo">func GetElemInfo(edat *inp.ElemData, cid int, msh *inp.Mesh) Info</a></dd>
+				
+				
+			
+				
+				<dd><a href="#NaturalBc">type NaturalBc</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Node">type Node</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewNode">func NewNode(v *inp.Vert) *Node</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Node.AddDofAndEq">func (o *Node) AddDofAndEq(ukey string, eqnum int) (nexteq int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Node.GetDof">func (o *Node) GetDof(ukey string) *Dof</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Node.GetDofOrPanic">func (o *Node) GetDofOrPanic(ukey string) *Dof</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Node.GetEq">func (o *Node) GetEq(ukey string) (eqNumber int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Node.SetEq">func (o *Node) SetEq(ukey string, eqNumber int)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Node.String">func (o *Node) String() string</a></dd>
+				
+			
+				
+				<dd><a href="#PtNaturalBc">type PtNaturalBc</a></dd>
+				
+				
+			
+				
+				<dd><a href="#PtNaturalBcs">type PtNaturalBcs</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#PtNaturalBcs.AddToRhs">func (o PtNaturalBcs) AddToRhs(fb []float64, t float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#PtNaturalBcs.List">func (o *PtNaturalBcs) List(t float64) (l string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#PtNaturalBcs.Reset">func (o *PtNaturalBcs) Reset()</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#PtNaturalBcs.Set">func (o *PtNaturalBcs) Set(key string, nod *Node, fcn fun.Func, extra string)</a></dd>
+				
+			
+				
+				<dd><a href="#Solution">type Solution</a></dd>
+				
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/cpmech/gofem/fem/auxiliary.go">auxiliary.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/auxsolid.go">auxsolid.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/domain.go">domain.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/dyncoefs.go">dyncoefs.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/e_beam.go">e_beam.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/e_p.go">e_p.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/e_u.go">e_u.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/e_up.go">e_up.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/element.go">element.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/essenbcs.go">essenbcs.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/fileio.go">fileio.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/loganderrors.go">loganderrors.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/naturalbcs.go">naturalbcs.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/node.go">node.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/ptnatbcs.go">ptnatbcs.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/solver.go">solver.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/fem/testing.go">testing.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		<div id="pkg-callgraph" class="toggle" style="display: none">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Internal Call Graph section">Internal call graph ▹</h2>
+		</div> <!-- .expanded -->
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Internal Call Graph section">Internal call graph ▾</h2>
+			<p>
+			  In the call graph viewer below, each node
+			  is a function belonging to this package
+			  and its children are the functions it
+			  calls&mdash;perhaps dynamically.
+			</p>
+			<p>
+			  The root nodes are the entry points of the
+			  package: functions that may be called from
+			  outside the package.
+			  There may be non-exported or anonymous
+			  functions among them if they are called
+			  dynamically from another package.
+			</p>
+			<p>
+			  Click a node to visit that function's source code.
+			  From there you can visit its callers by
+			  clicking its declaring <code>func</code>
+			  token.
+			</p>
+			<p>
+			  Functions may be omitted if they were
+			  determined to be unreachable in the
+			  particular programs or tests that were
+			  analyzed.
+			</p>
+			<!-- Zero means show all package entry points. -->
+			<ul style="margin-left: 0.5in" id="callgraph-0" class="treeview"></ul>
+		</div>
+		</div> <!-- #pkg-callgraph -->
+
+		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				<pre>const <span id="SQ2">SQ2</span> = <a href="/pkg/math/">math</a>.<a href="/pkg/math/#Sqrt2">Sqrt2</a></pre>
+				
+			
+		
+		
+		
+			
+			
+			<h2 id="BuildCoordsMatrix">func <a href="/src/target/element.go?s=3287:3353#L78">BuildCoordsMatrix</a></h2>
+			<pre>func BuildCoordsMatrix(c *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Cell">Cell</a>, msh *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Mesh">Mesh</a>) (x [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+			<p>
+BuildCoordsMatrix returns the coordinate matrix of a particular Cell
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="DerivSig">func <a href="/src/target/auxsolid.go?s=5953:6017#L116">DerivSig</a></h2>
+			<pre>func DerivSig(DσDun [][]<a href="/pkg/builtin/#float64">float64</a>, n, ndim <a href="/pkg/builtin/#int">int</a>, G, D [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+			<p>
+DerivSig returns the derivative of σ (Mandel) with respect to displacement at nodes
+</p>
+<pre>Note: DσDun = ∂σ/∂un  [nσ][ndim]
+</pre>
+
+			
+			
+
+		
+			
+			
+			<h2 id="FlushLog">func <a href="/src/target/loganderrors.go?s=889:904#L30">FlushLog</a></h2>
+			<pre>func FlushLog()</pre>
+			<p>
+FlusLog saves log (flushes to disk)
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="GetIsEssenKeyMap">func <a href="/src/target/essenbcs.go?s=3701:3740#L116">GetIsEssenKeyMap</a></h2>
+			<pre>func GetIsEssenKeyMap() map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+GetFirstYandCmap returns the initial &#34;yandc&#34; map with additional keys that EssentialBcs can handle
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="InitLogFile">func <a href="/src/target/loganderrors.go?s=420:458#L9">InitLogFile</a></h2>
+			<pre>func InitLogFile(dirout, fnkey <a href="/pkg/builtin/#string">string</a>)</pre>
+			<p>
+InitLogFile initialises logger. e.g. dirout=&#34;/tmp/gofem&#34;, fnkey=&#34;mysim01&#34;
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="IpAddToKt">func <a href="/src/target/auxsolid.go?s=1296:1373#L48">IpAddToKt</a></h2>
+			<pre>func IpAddToKt(Kt [][]<a href="/pkg/builtin/#float64">float64</a>, nne, ndim <a href="/pkg/builtin/#int">int</a>, coef <a href="/pkg/builtin/#float64">float64</a>, G, D [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="IpBmatrix">func <a href="/src/target/auxsolid.go?s=8086:8187#L148">IpBmatrix</a></h2>
+			<pre>func IpBmatrix(B [][]<a href="/pkg/builtin/#float64">float64</a>, ndim, nne <a href="/pkg/builtin/#int">int</a>, G [][]<a href="/pkg/builtin/#float64">float64</a>, axisym <a href="/pkg/builtin/#bool">bool</a>, radius <a href="/pkg/builtin/#float64">float64</a>, S []<a href="/pkg/builtin/#float64">float64</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="IpBmatrix_sparse">func <a href="/src/target/auxsolid.go?s=9126:9234#L191">IpBmatrix_sparse</a></h2>
+			<pre>func IpBmatrix_sparse(B *<a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#Triplet">Triplet</a>, ndim, nne <a href="/pkg/builtin/#int">int</a>, G [][]<a href="/pkg/builtin/#float64">float64</a>, axisym <a href="/pkg/builtin/#bool">bool</a>, radius <a href="/pkg/builtin/#float64">float64</a>, S []<a href="/pkg/builtin/#float64">float64</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="IpStrains">func <a href="/src/target/auxsolid.go?s=4775:4860#L75">IpStrains</a></h2>
+			<pre>func IpStrains(εs []<a href="/pkg/builtin/#float64">float64</a>, nne, ndim <a href="/pkg/builtin/#int">int</a>, u []<a href="/pkg/builtin/#float64">float64</a>, Usmap []<a href="/pkg/builtin/#int">int</a>, G [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="IpStrainsAndInc">func <a href="/src/target/auxsolid.go?s=5217:5320#L93">IpStrainsAndInc</a></h2>
+			<pre>func IpStrainsAndInc(εs, Δεs []<a href="/pkg/builtin/#float64">float64</a>, nne, ndim <a href="/pkg/builtin/#int">int</a>, u, Δu []<a href="/pkg/builtin/#float64">float64</a>, Usmap []<a href="/pkg/builtin/#int">int</a>, G [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="IpStrainsAndIncB">func <a href="/src/target/auxsolid.go?s=8855:8957#L181">IpStrainsAndIncB</a></h2>
+			<pre>func IpStrainsAndIncB(εs, Δεs []<a href="/pkg/builtin/#float64">float64</a>, nσ, nu <a href="/pkg/builtin/#int">int</a>, B [][]<a href="/pkg/builtin/#float64">float64</a>, u, Δu []<a href="/pkg/builtin/#float64">float64</a>, Usmap []<a href="/pkg/builtin/#int">int</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="RunSim">func <a href="/src/target/solver.go?s=1311:1401#L40">RunSim</a></h2>
+			<pre>func RunSim(simfilepath <a href="/pkg/builtin/#string">string</a>, verbose <a href="/pkg/builtin/#bool">bool</a>, skipstages map[<a href="/pkg/builtin/#int">int</a>]<a href="/pkg/builtin/#bool">bool</a>) (domains []*<a href="#Domain">Domain</a>)</pre>
+			<p>
+RunSim runs FE simulation
+</p>
+
+			
+			
+
+		
+		
+			
+			
+			<h2 id="Beam">type <a href="/src/target/e_beam.go?s=409:1673#L8">Beam</a></h2>
+			<pre>type Beam struct {
+
+    <span class="comment">// basic data</span>
+    Cell *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Cell">Cell</a>   <span class="comment">// cell</span>
+    X    [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// matrix of nodal coordinates [ndim][nnode]</span>
+    Ndim <a href="/pkg/builtin/#int">int</a>         <span class="comment">// space dimension</span>
+    Nu   <a href="/pkg/builtin/#int">int</a>         <span class="comment">// total number of unknowns == 2 * nsn</span>
+
+    <span class="comment">// parameters</span>
+    E   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Young&#39;s modulus</span>
+    A   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// cross-sectional area</span>
+    Izz <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Inertia zz</span>
+
+    <span class="comment">// variables for dynamics</span>
+    Rho  <a href="/pkg/builtin/#float64">float64</a>  <span class="comment">// density of solids</span>
+    Gfcn <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a> <span class="comment">// gravity function</span>
+
+    <span class="comment">// vectors and matrices</span>
+    T   [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// global-to-local transformation matrix [nnode*ndim][nnode*ndim]</span>
+    Kl  [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// local K matrix</span>
+    K   [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// global K matrix</span>
+    Ml  [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// local M matrices</span>
+    M   [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// global M matrices</span>
+    Rus []<a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// residual: Rus = fi - fx</span>
+
+    <span class="comment">// problem variables</span>
+    Umap []<a href="/pkg/builtin/#int">int</a>    <span class="comment">// assembly map (location array/element equations)</span>
+    Hasq <a href="/pkg/builtin/#bool">bool</a>     <span class="comment">// has distributed loads</span>
+    QnL  <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a> <span class="comment">// distributed normal load functions: left</span>
+    QnR  <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a> <span class="comment">// distributed normal load functions: right</span>
+    Qt   <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a> <span class="comment">// distributed tangential load</span>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+Beam represents a structural beam element (Euler-Bernoulli, linear elastic)
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="Beam.AddToKb">func (Beam) <a href="/src/target/e_beam.go?s=6740:6818#L278">AddToKb</a></h3>
+				<pre>func (o <a href="#Beam">Beam</a>) AddToKb(Kb *<a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#Triplet">Triplet</a>, sol *<a href="#Solution">Solution</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+adds element K to global Jacobian matrix Kb
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Beam.AddToRhs">func (Beam) <a href="/src/target/e_beam.go?s=5897:5960#L243">AddToRhs</a></h3>
+				<pre>func (o <a href="#Beam">Beam</a>) AddToRhs(fb []<a href="/pkg/builtin/#float64">float64</a>, sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+adds -R to global residual vector fb
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Beam.InterpStarVars">func (*Beam) <a href="/src/target/e_beam.go?s=5710:5766#L231">InterpStarVars</a></h3>
+				<pre>func (o *<a href="#Beam">Beam</a>) InterpStarVars(sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+InterpStarVars interpolates star variables to integration points
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Beam.SetEleConds">func (*Beam) <a href="/src/target/e_beam.go?s=5166:5230#L205">SetEleConds</a></h3>
+				<pre>func (o *<a href="#Beam">Beam</a>) SetEleConds(key <a href="/pkg/builtin/#string">string</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+SetEleConds set element conditions
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Beam.SetEqs">func (*Beam) <a href="/src/target/e_beam.go?s=4906:4961#L193">SetEqs</a></h3>
+				<pre>func (o *<a href="#Beam">Beam</a>) SetEqs(eqs [][]<a href="/pkg/builtin/#int">int</a>, mixedform_eqs []<a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+SetEqs set equations [2][?]. Format of eqs == format of info.Dofs
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Beam.SetSurfLoads">func (*Beam) <a href="/src/target/e_beam.go?s=5558:5636#L227">SetSurfLoads</a></h3>
+				<pre>func (o *<a href="#Beam">Beam</a>) SetSurfLoads(key <a href="/pkg/builtin/#string">string</a>, idxface <a href="/pkg/builtin/#int">int</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+SetSurfLoads set surface loads (natural boundary conditions)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Beam.Update">func (*Beam) <a href="/src/target/e_beam.go?s=7002:7050#L292">Update</a></h3>
+				<pre>func (o *<a href="#Beam">Beam</a>) Update(sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Update perform (tangent) update
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Decoder">type <a href="/src/target/fileio.go?s=442:497#L14">Decoder</a></h2>
+			<pre>type Decoder interface {
+    Decode(e interface{}) <a href="/pkg/builtin/#error">error</a>
+}</pre>
+			<p>
+Decoder defines decoders; e.g. gob or json
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="GetDecoder">func <a href="/src/target/fileio.go?s=700:736#L27">GetDecoder</a></h3>
+				<pre>func GetDecoder(r <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Reader">Reader</a>) <a href="#Decoder">Decoder</a></pre>
+				<p>
+GetDecoder returns a new decoder
+</p>
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="Dof">type <a href="/src/target/node.go?s=334:433#L4">Dof</a></h2>
+			<pre>type Dof struct {
+    Ukey <a href="/pkg/builtin/#string">string</a> <span class="comment">// primary variable key. e.g. &#34;ux&#34;</span>
+    Eq   <a href="/pkg/builtin/#int">int</a>    <span class="comment">// equation number</span>
+}</pre>
+			<p>
+Dof holds information about a degree-of-freedom == solution variable
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="Dof.String">func (*Dof) <a href="/src/target/node.go?s=491:520#L10">String</a></h3>
+				<pre>func (o *<a href="#Dof">Dof</a>) String() <a href="/pkg/builtin/#string">string</a></pre>
+				<p>
+String returns the string representation of this Dof
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Domain">type <a href="/src/target/domain.go?s=1202:3564#L32">Domain</a></h2>
+			<pre>type Domain struct {
+
+    <span class="comment">// init: region, mesh, linear solver</span>
+    Reg *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Region">Region</a> <span class="comment">// region data</span>
+    Msh *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Mesh">Mesh</a>   <span class="comment">// mesh data</span>
+    Lis <a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#LinSol">LinSol</a>   <span class="comment">// linear solver</span>
+
+    <span class="comment">// stage: nodes (active) and elements (active AND in this processor)</span>
+    Nodes []*<a href="#Node">Node</a> <span class="comment">// active nodes (for each stage)</span>
+    Elems []<a href="#Elem">Elem</a>  <span class="comment">// only active elements in this processor (for each stage)</span>
+
+    <span class="comment">// stage: auxiliary maps for dofs and equation types</span>
+    F2Y      map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#string">string</a> <span class="comment">// converts f-keys to y-keys; e.g.: &#34;ux&#34; =&gt; &#34;fx&#34;</span>
+    YandC    map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#bool">bool</a>   <span class="comment">// y and constraints keys; e.g. &#34;ux&#34;, &#34;pl&#34;, &#34;H&#34;, &#34;incsup&#34;, &#34;rigid&#34;</span>
+    Dof2Tnum map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#int">int</a>    <span class="comment">// {t1,t2}-types: dof =&gt; t_number; e.g. &#34;ux&#34; =&gt; 2, &#34;pl&#34; =&gt; 1</span>
+
+    <span class="comment">// stage: auxiliary maps for nodes and elements</span>
+    Vid2node   []*<a href="#Node">Node</a> <span class="comment">// [nverts] VertexId =&gt; index in Nodes. Inactive vertices are &#39;nil&#39;</span>
+    Cid2elem   []<a href="#Elem">Elem</a>  <span class="comment">// [ncells] CellId =&gt; index in Elems. Cells in other processors or inactive are &#39;nil&#39;</span>
+    Cid2active []<a href="/pkg/builtin/#bool">bool</a>  <span class="comment">// [ncells] CellId =&gt; whether cell is active or not in ANY processor</span>
+
+    <span class="comment">// stage: subsets of elements</span>
+    ElemIntvars []<a href="#ElemIntvars">ElemIntvars</a>   <span class="comment">// elements with internal vars in this processor</span>
+    ElemConnect []<a href="#ElemConnector">ElemConnector</a> <span class="comment">// connector elements in this processor</span>
+    ElemWriters []<a href="#ElemWriter">ElemWriter</a>    <span class="comment">// writer elements in this processor</span>
+
+    <span class="comment">// stage: coefficients and prescribed forces</span>
+    EssenBcs <a href="#EssentialBcs">EssentialBcs</a> <span class="comment">// constraints (Lagrange multipliers)</span>
+    PtNatBcs <a href="#PtNaturalBcs">PtNaturalBcs</a> <span class="comment">// point loads such as prescribed forces at nodes</span>
+
+    <span class="comment">// stage: t1 and t2 variables</span>
+    T1eqs []<a href="/pkg/builtin/#int">int</a> <span class="comment">// first t-derivative variables; e.g.:  dp/dt vars (subset of ykeys)</span>
+    T2eqs []<a href="/pkg/builtin/#int">int</a> <span class="comment">// second t-derivative variables; e.g.: d²u/dt² vars (subset of ykeys)</span>
+
+    <span class="comment">// stage: dimensions</span>
+    NnzKb <a href="/pkg/builtin/#int">int</a> <span class="comment">// number of nonzeros in Kb matrix</span>
+    Ny    <a href="/pkg/builtin/#int">int</a> <span class="comment">// total number of dofs, except λ</span>
+    Nlam  <a href="/pkg/builtin/#int">int</a> <span class="comment">// total number of Lagrange multipliers</span>
+    NnzA  <a href="/pkg/builtin/#int">int</a> <span class="comment">// number of nonzeros in A (constraints) matrix</span>
+    Nyb   <a href="/pkg/builtin/#int">int</a> <span class="comment">// total number of equations: ny + nλ</span>
+
+    <span class="comment">// stage: solution and linear solver</span>
+    Sol     *<a href="#Solution">Solution</a>   <span class="comment">// solution state</span>
+    Kb      *<a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#Triplet">Triplet</a> <span class="comment">// Jacobian == dRdy</span>
+    Fb      []<a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// residual == -fb</span>
+    Wb      []<a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// workspace</span>
+    InitLis <a href="/pkg/builtin/#bool">bool</a>        <span class="comment">// flag telling that linear solver needs to be initialised prior to any further call</span>
+
+    <span class="comment">// stage: workspaces for communication in distributed runs</span>
+    WspcStop    []<a href="/pkg/builtin/#int">int</a> <span class="comment">// stop flags [nprocs]</span>
+    WspcInteger []<a href="/pkg/builtin/#int">int</a> <span class="comment">// workspace of integer numbers [nprocs]</span>
+}</pre>
+			<p>
+Domain holds all Nodes and Elements active during a stage in addition to the Solution at nodes.
+Only elements in this processor are recorded here; however information from
+all cells might be recorded as well.
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewDomain">func <a href="/src/target/domain.go?s=3600:3643#L86">NewDomain</a></h3>
+				<pre>func NewDomain(reg *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Region">Region</a>) (o *<a href="#Domain">Domain</a>)</pre>
+				<p>
+NewDomain returns a new domain
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="Domain.Out">func (*Domain) <a href="/src/target/fileio.go?s=3023:3065#L157">Out</a></h3>
+				<pre>func (o *<a href="#Domain">Domain</a>) Out(tidx <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Out performs output of Solution and Internal values to files
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Domain.ReadIvs">func (*Domain) <a href="/src/target/fileio.go?s=2648:2694#L136">ReadIvs</a></h3>
+				<pre>func (o *<a href="#Domain">Domain</a>) ReadIvs(tidx <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ReadSol reads elements&#39;s internal values from a file which name is set with tidx (time output index)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Domain.ReadSol">func (*Domain) <a href="/src/target/fileio.go?s=1555:1601#L74">ReadSol</a></h3>
+				<pre>func (o *<a href="#Domain">Domain</a>) ReadSol(tidx <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ReadSol reads Solution from a file which name is set with tidx (time output index)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Domain.SaveIvs">func (Domain) <a href="/src/target/fileio.go?s=2161:2206#L111">SaveIvs</a></h3>
+				<pre>func (o <a href="#Domain">Domain</a>) SaveIvs(tidx <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+SaveIvs saves elements&#39;s internal values to a file which name is set with tidx (time output index)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Domain.SaveSol">func (Domain) <a href="/src/target/fileio.go?s=913:958#L35">SaveSol</a></h3>
+				<pre>func (o <a href="#Domain">Domain</a>) SaveSol(tidx <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+SaveSol saves Solution to a file which name is set with tidx (time output index)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Domain.SetStage">func (*Domain) <a href="/src/target/domain.go?s=3856:3909#L95">SetStage</a></h3>
+				<pre>func (o *<a href="#Domain">Domain</a>) SetStage(idxstg <a href="/pkg/builtin/#int">int</a>, stg *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Stage">Stage</a>)</pre>
+				<p>
+SetStage set nodes, equation numbers and auxiliary data for given stage
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Domain.Stop">func (*Domain) <a href="/src/target/loganderrors.go?s=1079:1128#L38">Stop</a></h3>
+				<pre>func (o *<a href="#Domain">Domain</a>) Stop(err <a href="/pkg/builtin/#error">error</a>, msg <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+				<p>
+Stop decides whether a serial or parallel execution has to be stopped or not
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="DynCoefs">type <a href="/src/target/dyncoefs.go?s=646:891#L10">DynCoefs</a></h2>
+			<pre>type DynCoefs struct {
+    Ray, HHT   <a href="/pkg/builtin/#bool">bool</a>
+    RayM, RayK <a href="/pkg/builtin/#float64">float64</a>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+DynCoefs calculates θ-method, Newmark&#39;s or HHT coefficients.
+</p>
+<pre>Notes:
+ θ1  -- Newmark parameter (gamma)  [0 &lt;= θ1 &lt;= 1]
+ θ2  -- Newmark parameter (2*beta) [0 &lt;= θ2 &lt;= 1]
+ HHT -- use Hilber-Hughes-Taylor method ?
+ α   -- Hilber-Hughes-Taylor parameter [-1/3 &lt;= α &lt;= 0]
+ if HHT==True, θ1 and θ2 are automatically calculated for unconditional stability
+</pre>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="DynCoefs.CalcAlphas">func (*DynCoefs) <a href="/src/target/dyncoefs.go?s=2192:2246#L95">CalcAlphas</a></h3>
+				<pre>func (o *<a href="#DynCoefs">DynCoefs</a>) CalcAlphas(Δt <a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CalcAlphas computes only alphas
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="DynCoefs.CalcBetas">func (*DynCoefs) <a href="/src/target/dyncoefs.go?s=1918:1971#L79">CalcBetas</a></h3>
+				<pre>func (o *<a href="#DynCoefs">DynCoefs</a>) CalcBetas(Δt <a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CalcBetas computes only betas
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="DynCoefs.CalcBoth">func (*DynCoefs) <a href="/src/target/dyncoefs.go?s=1741:1793#L69">CalcBoth</a></h3>
+				<pre>func (o *<a href="#DynCoefs">DynCoefs</a>) CalcBoth(Δt <a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CalcBoth computes betas and alphas
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="DynCoefs.Init">func (*DynCoefs) <a href="/src/target/dyncoefs.go?s=928:972#L27">Init</a></h3>
+				<pre>func (o *<a href="#DynCoefs">DynCoefs</a>) Init(dat *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#SolverData">SolverData</a>)</pre>
+				<p>
+Init initialises this structure
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="DynCoefs.Print">func (*DynCoefs) <a href="/src/target/dyncoefs.go?s=2789:2815#L126">Print</a></h3>
+				<pre>func (o *<a href="#DynCoefs">DynCoefs</a>) Print()</pre>
+				<p>
+Print prints coefficients
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Elem">type <a href="/src/target/element.go?s=366:1165#L6">Elem</a></h2>
+			<pre>type Elem interface {
+
+    <span class="comment">// initialisation</span>
+    SetEqs(eqs [][]<a href="/pkg/builtin/#int">int</a>, mixedform_eqs []<a href="/pkg/builtin/#int">int</a>) <span class="comment">// set equations</span>
+
+    <span class="comment">// conditions (natural BCs and element&#39;s)</span>
+    SetEleConds(key <a href="/pkg/builtin/#string">string</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)               <span class="comment">// set element conditions</span>
+    SetSurfLoads(key <a href="/pkg/builtin/#string">string</a>, idxface <a href="/pkg/builtin/#int">int</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>) <span class="comment">// set surface loads (natural boundary conditions)</span>
+
+    <span class="comment">// called for each time step</span>
+    InterpStarVars(sol *<a href="#Solution">Solution</a>) <a href="/pkg/builtin/#error">error</a> <span class="comment">// interpolate star variables to integration points</span>
+
+    <span class="comment">// called for each iteration</span>
+    AddToRhs(fb []<a href="/pkg/builtin/#float64">float64</a>, sol *<a href="#Solution">Solution</a>) <a href="/pkg/builtin/#error">error</a>                <span class="comment">// adds -R to global residual vector fb</span>
+    AddToKb(Kb *<a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#Triplet">Triplet</a>, sol *<a href="#Solution">Solution</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#error">error</a> <span class="comment">// adds element K to global Jacobian matrix Kb</span>
+    Update(sol *<a href="#Solution">Solution</a>) <a href="/pkg/builtin/#error">error</a>                                <span class="comment">// perform (tangent) update</span>
+}</pre>
+			<p>
+Elem defines what elements must calculate
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewElem">func <a href="/src/target/element.go?s=3004:3065#L69">NewElem</a></h3>
+				<pre>func NewElem(edat *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#ElemData">ElemData</a>, cid <a href="/pkg/builtin/#int">int</a>, msh *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Mesh">Mesh</a>) <a href="#Elem">Elem</a></pre>
+				<p>
+NewElem returns a new element from its type; e.g. &#34;p&#34;, &#34;u&#34; or &#34;up&#34;
+</p>
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="ElemConnector">type <a href="/src/target/element.go?s=1245:1391#L25">ElemConnector</a></h2>
+			<pre>type ElemConnector interface {
+    Connect(elems []<a href="#Elem">Elem</a>, cid2elem []<a href="#Elem">Elem</a>) <span class="comment">// connect multiple elements; e.g.: connect rod/solid elements in Rjoints</span>
+}</pre>
+			<p>
+ElemConnector defines connector elements; elements that depend upon others
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="ElemIntvars">type <a href="/src/target/element.go?s=1741:2139#L37">ElemIntvars</a></h2>
+			<pre>type ElemIntvars interface {
+    InitIvs(sol *<a href="#Solution">Solution</a>)             <span class="comment">// reset (and fix) internal variables after primary variables have been changed</span>
+    SetIvs(zvars map[<a href="/pkg/builtin/#string">string</a>][]<a href="/pkg/builtin/#float64">float64</a>) <span class="comment">// set secondary variables; e.g. during initialisation via files</span>
+    BackupIvs()                        <span class="comment">// create copy of internal variables</span>
+    RestoreIvs()                       <span class="comment">// restore internal variables from copies</span>
+}</pre>
+			<p>
+ElemIntvars defines elements with {z,q} internal variables
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="ElemP">type <a href="/src/target/e_p.go?s=474:1723#L10">ElemP</a></h2>
+			<pre>type ElemP struct {
+
+    <span class="comment">// basic data</span>
+    Cell *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Cell">Cell</a>   <span class="comment">// cell</span>
+    X    [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// matrix of nodal coordinates [ndim][nnode]</span>
+    Ndim <a href="/pkg/builtin/#int">int</a>         <span class="comment">// space dimension</span>
+    Np   <a href="/pkg/builtin/#int">int</a>         <span class="comment">// total number of unknowns == number of vertices</span>
+
+    <span class="comment">// gravity</span>
+    Gfcn <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a> <span class="comment">// gravity function</span>
+
+    <span class="comment">// integration points</span>
+    IpsElem []*<a href="/pkg/github.com/cpmech/gofem/shp/">shp</a>.<a href="/pkg/github.com/cpmech/gofem/shp/#Ipoint">Ipoint</a> <span class="comment">// integration points of element</span>
+    IpsFace []*<a href="/pkg/github.com/cpmech/gofem/shp/">shp</a>.<a href="/pkg/github.com/cpmech/gofem/shp/#Ipoint">Ipoint</a> <span class="comment">// integration points corresponding to faces</span>
+
+    <span class="comment">// material model and internal variables</span>
+    Model *<a href="/pkg/github.com/cpmech/gofem/mporous/">mporous</a>.<a href="/pkg/github.com/cpmech/gofem/mporous/#Model">Model</a>
+
+    <span class="comment">// problem variables</span>
+    Pmap []<a href="/pkg/builtin/#int">int</a> <span class="comment">// assembly map (location array/element equations)</span>
+
+    <span class="comment">// internal variables</span>
+    States    []*<a href="/pkg/github.com/cpmech/gofem/mporous/">mporous</a>.<a href="/pkg/github.com/cpmech/gofem/mporous/#StateLG">StateLG</a>
+    StatesBkp []*<a href="/pkg/github.com/cpmech/gofem/mporous/">mporous</a>.<a href="/pkg/github.com/cpmech/gofem/mporous/#StateLG">StateLG</a>
+
+    <span class="comment">// natural boundary conditions</span>
+    NatBcs []*<a href="#NaturalBc">NaturalBc</a> <span class="comment">//natural boundary conditions</span>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+ElemP represents a solid element with p (e.g. pressure) as primary variable
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="ElemP.AddToKb">func (ElemP) <a href="/src/target/e_p.go?s=5511:5590#L207">AddToKb</a></h3>
+				<pre>func (o <a href="#ElemP">ElemP</a>) AddToKb(Kb *<a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#Triplet">Triplet</a>, sol *<a href="#Solution">Solution</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+adds element K to global Jacobian matrix Kb
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.AddToRhs">func (ElemP) <a href="/src/target/e_p.go?s=4804:4868#L175">AddToRhs</a></h3>
+				<pre>func (o <a href="#ElemP">ElemP</a>) AddToRhs(fb []<a href="/pkg/builtin/#float64">float64</a>, sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+adds -R to global residual vector fb
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.BackupIvs">func (*ElemP) <a href="/src/target/e_p.go?s=6902:6929#L261">BackupIvs</a></h3>
+				<pre>func (o *<a href="#ElemP">ElemP</a>) BackupIvs()</pre>
+				<p>
+BackupIvs create copy of internal variables
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.InitIvs">func (*ElemP) <a href="/src/target/e_p.go?s=6683:6721#L253">InitIvs</a></h3>
+				<pre>func (o *<a href="#ElemP">ElemP</a>) InitIvs(sol *<a href="#Solution">Solution</a>)</pre>
+				<p>
+InitIvs reset (and fix) internal variables after primary variables have been changed
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.InterpStarVars">func (*ElemP) <a href="/src/target/e_p.go?s=4313:4370#L152">InterpStarVars</a></h3>
+				<pre>func (o *<a href="#ElemP">ElemP</a>) InterpStarVars(sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+InterpStarVars interpolates star variables to integration points
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.RestoreIvs">func (*ElemP) <a href="/src/target/e_p.go?s=6988:7016#L265">RestoreIvs</a></h3>
+				<pre>func (o *<a href="#ElemP">ElemP</a>) RestoreIvs()</pre>
+				<p>
+RestoreIvs restore internal variables from copies
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.SetEleConds">func (*ElemP) <a href="/src/target/e_p.go?s=3916:3981#L140">SetEleConds</a></h3>
+				<pre>func (o *<a href="#ElemP">ElemP</a>) SetEleConds(key <a href="/pkg/builtin/#string">string</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+SetEleConds set element conditions
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.SetEqs">func (*ElemP) <a href="/src/target/e_p.go?s=3719:3775#L132">SetEqs</a></h3>
+				<pre>func (o *<a href="#ElemP">ElemP</a>) SetEqs(eqs [][]<a href="/pkg/builtin/#int">int</a>, mixedform_eqs []<a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+SetEqs set equations
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.SetIvs">func (*ElemP) <a href="/src/target/e_p.go?s=6799:6849#L257">SetIvs</a></h3>
+				<pre>func (o *<a href="#ElemP">ElemP</a>) SetIvs(zvars map[<a href="/pkg/builtin/#string">string</a>][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+SetIvs set secondary variables; e.g. during initialisation via files
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.SetSurfLoads">func (*ElemP) <a href="/src/target/e_p.go?s=4095:4174#L147">SetSurfLoads</a></h3>
+				<pre>func (o *<a href="#ElemP">ElemP</a>) SetSurfLoads(key <a href="/pkg/builtin/#string">string</a>, idxface <a href="/pkg/builtin/#int">int</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+SetSurfLoads set surface loads (natural boundary conditions)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemP.Update">func (*ElemP) <a href="/src/target/e_p.go?s=6417:6466#L245">Update</a></h3>
+				<pre>func (o *<a href="#ElemP">ElemP</a>) Update(sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Update perform (tangent) update
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="ElemU">type <a href="/src/target/e_u.go?s=502:2510#L11">ElemU</a></h2>
+			<pre>type ElemU struct {
+
+    <span class="comment">// basic data</span>
+    Cell *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Cell">Cell</a>   <span class="comment">// cell</span>
+    X    [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// matrix of nodal coordinates [ndim][nnode]</span>
+    Ndim <a href="/pkg/builtin/#int">int</a>         <span class="comment">// space dimension</span>
+    Nu   <a href="/pkg/builtin/#int">int</a>         <span class="comment">// total number of unknowns</span>
+
+    <span class="comment">// variables for dynamics</span>
+    Rho  <a href="/pkg/builtin/#float64">float64</a>  <span class="comment">// density of solids</span>
+    Gfcn <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a> <span class="comment">// gravity function</span>
+
+    <span class="comment">// optional data</span>
+    UseB      <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// use B matrix</span>
+    Thickness <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// thickness (for plane-stress)</span>
+    Debug     <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// debugging flag</span>
+
+    <span class="comment">// integration points</span>
+    IpsElem []*<a href="/pkg/github.com/cpmech/gofem/shp/">shp</a>.<a href="/pkg/github.com/cpmech/gofem/shp/#Ipoint">Ipoint</a> <span class="comment">// integration points of element</span>
+    IpsFace []*<a href="/pkg/github.com/cpmech/gofem/shp/">shp</a>.<a href="/pkg/github.com/cpmech/gofem/shp/#Ipoint">Ipoint</a> <span class="comment">// integration points corresponding to faces</span>
+
+    <span class="comment">// material model and internal variables</span>
+    MatInfo  *<a href="/pkg/github.com/cpmech/gofem/msolid/">msolid</a>.<a href="/pkg/github.com/cpmech/gofem/msolid/#Info">Info</a> <span class="comment">// material info</span>
+    Model    <a href="/pkg/github.com/cpmech/gofem/msolid/">msolid</a>.<a href="/pkg/github.com/cpmech/gofem/msolid/#Solid">Solid</a> <span class="comment">// material model</span>
+    MdlSmall <a href="/pkg/github.com/cpmech/gofem/msolid/">msolid</a>.<a href="/pkg/github.com/cpmech/gofem/msolid/#Small">Small</a> <span class="comment">// model specialisation for small strains</span>
+    MdlLarge <a href="/pkg/github.com/cpmech/gofem/msolid/">msolid</a>.<a href="/pkg/github.com/cpmech/gofem/msolid/#Large">Large</a> <span class="comment">// model specialisation for large deformations</span>
+
+    <span class="comment">// problem variables</span>
+    Umap []<a href="/pkg/builtin/#int">int</a> <span class="comment">// assembly map (location array/element equations)</span>
+
+    <span class="comment">// internal variables</span>
+    States    []*<a href="/pkg/github.com/cpmech/gofem/msolid/">msolid</a>.<a href="/pkg/github.com/cpmech/gofem/msolid/#State">State</a>
+    StatesBkp []*<a href="/pkg/github.com/cpmech/gofem/msolid/">msolid</a>.<a href="/pkg/github.com/cpmech/gofem/msolid/#State">State</a>
+
+    <span class="comment">// natural boundary conditions</span>
+    NatBcs []*<a href="#NaturalBc">NaturalBc</a>
+
+    K [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [nu][nu] consistent tangent (stiffness) matrix</span>
+    B [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [nsig][nu] B matrix for axisymetric case</span>
+    D [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [nsig][nsig] constitutive consistent tangent matrix</span>
+
+    Δε []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// incremental strains leading to updated strains</span>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+ElemU represents a solid element with displacements u as primary variables
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="ElemU.AddToKb">func (*ElemU) <a href="/src/target/e_u.go?s=8800:8880#L315">AddToKb</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) AddToKb(Kb *<a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#Triplet">Triplet</a>, sol *<a href="#Solution">Solution</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+adds element K to global Jacobian matrix Kb
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.AddToRhs">func (*ElemU) <a href="/src/target/e_u.go?s=7414:7479#L259">AddToRhs</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) AddToRhs(fb []<a href="/pkg/builtin/#float64">float64</a>, sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+adds -R to global residual vector fb
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.BackupIvs">func (*ElemU) <a href="/src/target/e_u.go?s=11767:11794#L436">BackupIvs</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) BackupIvs()</pre>
+				<p>
+BackupIvs create copy of internal variables
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.Decode">func (ElemU) <a href="/src/target/e_u.go?s=12293:12339#L457">Decode</a></h3>
+				<pre>func (o <a href="#ElemU">ElemU</a>) Decode(dec <a href="#Decoder">Decoder</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Decode decodes internal variables
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.Encode">func (ElemU) <a href="/src/target/e_u.go?s=12175:12221#L452">Encode</a></h3>
+				<pre>func (o <a href="#ElemU">ElemU</a>) Encode(enc <a href="#Encoder">Encoder</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Encode encodes internal variables
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.InitIvs">func (*ElemU) <a href="/src/target/e_u.go?s=11471:11509#L425">InitIvs</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) InitIvs(sol *<a href="#Solution">Solution</a>)</pre>
+				<p>
+InitIvs reset (and fix) internal variables after primary variables have been changed
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.InterpStarVars">func (*ElemU) <a href="/src/target/e_u.go?s=6649:6706#L224">InterpStarVars</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) InterpStarVars(sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+InterpStarVars interpolates star variables to integration points
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.RestoreIvs">func (*ElemU) <a href="/src/target/e_u.go?s=11927:11955#L443">RestoreIvs</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) RestoreIvs()</pre>
+				<p>
+RestoreIvs restore internal variables from copies
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.SetEleConds">func (*ElemU) <a href="/src/target/e_u.go?s=6252:6317#L212">SetEleConds</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) SetEleConds(key <a href="/pkg/builtin/#string">string</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+SetEleConds set element conditions
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.SetEqs">func (*ElemU) <a href="/src/target/e_u.go?s=5997:6053#L201">SetEqs</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) SetEqs(eqs [][]<a href="/pkg/builtin/#int">int</a>, mixedform_eqs []<a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+SetEqs set equations
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.SetIvs">func (*ElemU) <a href="/src/target/e_u.go?s=11664:11714#L432">SetIvs</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) SetIvs(zvars map[<a href="/pkg/builtin/#string">string</a>][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+SetIvs set secondary variables; e.g. during initialisation via files
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.SetSurfLoads">func (*ElemU) <a href="/src/target/e_u.go?s=6431:6510#L219">SetSurfLoads</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) SetSurfLoads(key <a href="/pkg/builtin/#string">string</a>, idxface <a href="/pkg/builtin/#int">int</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+SetSurfLoads set surface loads (natural boundary conditions)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemU.Update">func (*ElemU) <a href="/src/target/e_u.go?s=10402:10451#L385">Update</a></h3>
+				<pre>func (o *<a href="#ElemU">ElemU</a>) Update(sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Update perform (tangent) update
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="ElemUP">type <a href="/src/target/e_up.go?s=473:794#L10">ElemUP</a></h2>
+			<pre>type ElemUP struct {
+
+    <span class="comment">// basic data</span>
+    Ndim <a href="/pkg/builtin/#int">int</a> <span class="comment">// space dimension</span>
+
+    <span class="comment">// flags</span>
+    Lbb <a href="/pkg/builtin/#bool">bool</a> <span class="comment">// Ladyženskaja-Babuška-Brezzi element</span>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+ElemUP represents an element for porous media based on the u-p formulation
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="ElemUP.AddToKb">func (ElemUP) <a href="/src/target/e_up.go?s=3777:3857#L150">AddToKb</a></h3>
+				<pre>func (o <a href="#ElemUP">ElemUP</a>) AddToKb(Kb *<a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#Triplet">Triplet</a>, sol *<a href="#Solution">Solution</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+adds element K to global Jacobian matrix Kb
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.AddToRhs">func (ElemUP) <a href="/src/target/e_up.go?s=3651:3716#L145">AddToRhs</a></h3>
+				<pre>func (o <a href="#ElemUP">ElemUP</a>) AddToRhs(fb []<a href="/pkg/builtin/#float64">float64</a>, sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+adds -R to global residual vector fb
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.BackupIvs">func (*ElemUP) <a href="/src/target/e_up.go?s=4536:4564#L179">BackupIvs</a></h3>
+				<pre>func (o *<a href="#ElemUP">ElemUP</a>) BackupIvs()</pre>
+				<p>
+BackupIvs create copy of internal variables
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.InitIvs">func (*ElemUP) <a href="/src/target/e_up.go?s=4241:4280#L167">InitIvs</a></h3>
+				<pre>func (o *<a href="#ElemUP">ElemUP</a>) InitIvs(sol *<a href="#Solution">Solution</a>)</pre>
+				<p>
+InitIvs reset (and fix) internal variables after primary variables have been changed
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.InterpStarVars">func (*ElemUP) <a href="/src/target/e_up.go?s=3455:3513#L136">InterpStarVars</a></h3>
+				<pre>func (o *<a href="#ElemUP">ElemUP</a>) InterpStarVars(sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+InterpStarVars interpolates star variables to integration points
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.RestoreIvs">func (*ElemUP) <a href="/src/target/e_up.go?s=4657:4686#L185">RestoreIvs</a></h3>
+				<pre>func (o *<a href="#ElemUP">ElemUP</a>) RestoreIvs()</pre>
+				<p>
+RestoreIvs restore internal variables from copies
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.SetEleConds">func (*ElemUP) <a href="/src/target/e_up.go?s=2946:3012#L120">SetEleConds</a></h3>
+				<pre>func (o *<a href="#ElemUP">ElemUP</a>) SetEleConds(key <a href="/pkg/builtin/#string">string</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+SetEleConds set element conditions
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.SetEqs">func (*ElemUP) <a href="/src/target/e_up.go?s=2525:2582#L105">SetEqs</a></h3>
+				<pre>func (o *<a href="#ElemUP">ElemUP</a>) SetEqs(eqs [][]<a href="/pkg/builtin/#int">int</a>, mixedform_eqs []<a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+SetEqs set equations
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.SetIvs">func (*ElemUP) <a href="/src/target/e_up.go?s=4394:4445#L173">SetIvs</a></h3>
+				<pre>func (o *<a href="#ElemUP">ElemUP</a>) SetIvs(zvars map[<a href="/pkg/builtin/#string">string</a>][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+SetIvs set secondary variables; e.g. during initialisation via files
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.SetSurfLoads">func (*ElemUP) <a href="/src/target/e_up.go?s=3146:3226#L126">SetSurfLoads</a></h3>
+				<pre>func (o *<a href="#ElemUP">ElemUP</a>) SetSurfLoads(key <a href="/pkg/builtin/#string">string</a>, idxface <a href="/pkg/builtin/#int">int</a>, f <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+SetSurfLoads set surface loads (natural boundary conditions)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="ElemUP.Update">func (*ElemUP) <a href="/src/target/e_up.go?s=3918:3968#L156">Update</a></h3>
+				<pre>func (o *<a href="#ElemUP">ElemUP</a>) Update(sol *<a href="#Solution">Solution</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Update perform (tangent) update
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="ElemWriter">type <a href="/src/target/element.go?s=1446:1677#L30">ElemWriter</a></h2>
+			<pre>type ElemWriter interface {
+    Encode(enc <a href="#Encoder">Encoder</a>) (err <a href="/pkg/builtin/#error">error</a>) <span class="comment">// encodes internal variables</span>
+    Decode(dec <a href="#Decoder">Decoder</a>) (err <a href="/pkg/builtin/#error">error</a>) <span class="comment">// decodes internal variables</span>
+
+}</pre>
+			<p>
+ElemWriter defines elements that can write output
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Encoder">type <a href="/src/target/fileio.go?s=339:394#L9">Encoder</a></h2>
+			<pre>type Encoder interface {
+    Encode(e interface{}) <a href="/pkg/builtin/#error">error</a>
+}</pre>
+			<p>
+Encoder defines encoders; e.g. gob or json
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="GetEncoder">func <a href="/src/target/fileio.go?s=535:571#L19">GetEncoder</a></h3>
+				<pre>func GetEncoder(w <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Writer">Writer</a>) <a href="#Encoder">Encoder</a></pre>
+				<p>
+GetEncoder returns a new encoder
+</p>
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="EssenBc">type <a href="/src/target/essenbcs.go?s=821:1051#L18">EssenBc</a></h2>
+			<pre>type EssenBc struct {
+    Key   <a href="/pkg/builtin/#string">string</a>    <span class="comment">// ux, uy, rigid, incsup</span>
+    Eqs   []<a href="/pkg/builtin/#int">int</a>     <span class="comment">// equations</span>
+    ValsA []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// values for matrix A</span>
+    Fcn   <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>  <span class="comment">// function that implements the &#34;c&#34; in A * y = c</span>
+    Inact <a href="/pkg/builtin/#bool">bool</a>      <span class="comment">// inactive</span>
+}</pre>
+			<p>
+EssenBc holds information about essential bounday conditions such as constrained nodes.
+Lagrange multipliers are used to implement both single- and multi-point constraints.
+</p>
+<pre>In general, essential bcs / constraints are defined by means of:
+
+    A * y = c
+
+The resulting Kb matrix will then have the following form:
+    _       _
+   |  K  At  | / δy \   / -R - At*λ \
+   |         | |    | = |           |
+   |_ A   0 _| \ δλ /   \  c - A*y  /
+       Kb       δyb          fb
+</pre>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="EssentialBcs">type <a href="/src/target/essenbcs.go?s=1214:1596#L28">EssentialBcs</a></h2>
+			<pre>type EssentialBcs struct {
+    Ndim   <a href="/pkg/builtin/#int">int</a>           <span class="comment">// space dimension</span>
+    BcsTmp []*<a href="#EssenBc">EssenBc</a>    <span class="comment">// temporary essential bcs / constraints, including inactive ones</span>
+    Eq2idx map[<a href="/pkg/builtin/#int">int</a>][]<a href="/pkg/builtin/#int">int</a> <span class="comment">// maps eq number to indices in cstmp</span>
+    Bcs    []*<a href="#EssenBc">EssenBc</a>    <span class="comment">// active essential bcs / constraints</span>
+    A      <a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#Triplet">Triplet</a>    <span class="comment">// matrix of coefficients &#39;A&#39;</span>
+    Am     *<a href="/pkg/code.google.com/p/gosl/la/">la</a>.<a href="/pkg/code.google.com/p/gosl/la/#CCMatrix">CCMatrix</a>  <span class="comment">// compressed form of A matrix</span>
+}</pre>
+			<p>
+EssentialBcs implements a structure to record the definition of essential bcs / constraints.
+Each constraint will have a unique Lagrange multiplier index.
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="EssentialBcs.AddToRhs">func (EssentialBcs) <a href="/src/target/essenbcs.go?s=2589:2648#L76">AddToRhs</a></h3>
+				<pre>func (o <a href="#EssentialBcs">EssentialBcs</a>) AddToRhs(fb []<a href="/pkg/builtin/#float64">float64</a>, sol *<a href="#Solution">Solution</a>)</pre>
+				<p>
+AddtoRhs adds the essential bcs / constraints terms to the augmented fb vector
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="EssentialBcs.Build">func (*EssentialBcs) <a href="/src/target/essenbcs.go?s=2031:2083#L48">Build</a></h3>
+				<pre>func (o *<a href="#EssentialBcs">EssentialBcs</a>) Build(ny <a href="/pkg/builtin/#int">int</a>) (nλ, nnzA <a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Build builds this structure and its iternal data
+</p>
+<pre>nλ -- is the number of essential bcs / constraints == number of Lagrange multipliers
+nnzA -- is the number of non-zeros in matrix &#39;A&#39;
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="EssentialBcs.List">func (*EssentialBcs) <a href="/src/target/essenbcs.go?s=6219:6268#L220">List</a></h3>
+				<pre>func (o *<a href="#EssentialBcs">EssentialBcs</a>) List(t <a href="/pkg/builtin/#float64">float64</a>) (l <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+List returns a simple list logging bcs at time t
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="EssentialBcs.Reset">func (*EssentialBcs) <a href="/src/target/essenbcs.go?s=1684:1722#L38">Reset</a></h3>
+				<pre>func (o *<a href="#EssentialBcs">EssentialBcs</a>) Reset(ndim <a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Reset initialises this structure. It also performs a reset of internal structures.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="EssentialBcs.Set">func (*EssentialBcs) <a href="/src/target/essenbcs.go?s=4161:4242#L125">Set</a></h3>
+				<pre>func (o *<a href="#EssentialBcs">EssentialBcs</a>) Set(key <a href="/pkg/builtin/#string">string</a>, nodes []*<a href="#Node">Node</a>, fcn <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+Set sets a constraint if it does NOT exist yet.
+</p>
+<pre>key   -- can be Dof key such as &#34;ux&#34;, &#34;uy&#34; or constraint type such as &#34;mpc&#34; or &#34;rigid&#34;
+extra -- is a keycode-style data. e.g. &#34;!type:incsup2d !alp:30&#34;
+Notes: 1) the default for key is single point constraint; e.g. &#34;ux&#34;, &#34;uy&#34;, ...
+       2) hydraulic head can be set with key == &#34;H&#34;
+</pre>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Info">type <a href="/src/target/element.go?s=2206:2654#L45">Info</a></h2>
+			<pre>type Info struct {
+
+    <span class="comment">// essential</span>
+    Dofs [][]<a href="/pkg/builtin/#string">string</a>        <span class="comment">// solution variables PER NODE. ex for 2 nodes: [[&#34;ux&#34;, &#34;uy&#34;, &#34;rz&#34;], [&#34;ux&#34;, &#34;uy&#34;, &#34;rz&#34;]]</span>
+    Y2F  map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#string">string</a> <span class="comment">// maps &#34;y&#34; keys to &#34;f&#34; keys. ex: &#34;ux&#34; =&gt; &#34;fx&#34;, &#34;pl&#34; =&gt; &#34;ql&#34;</span>
+
+    <span class="comment">// internal Dofs; e.g. for mixed formulations</span>
+    NintDofs <a href="/pkg/builtin/#int">int</a> <span class="comment">// number of internal dofs</span>
+
+    <span class="comment">// t1 and t2 variables (time-derivatives of first and second order)</span>
+    T1vars []<a href="/pkg/builtin/#string">string</a> <span class="comment">// &#34;pl&#34;</span>
+    T2vars []<a href="/pkg/builtin/#string">string</a> <span class="comment">// &#34;ux&#34;, &#34;uy&#34;</span>
+}</pre>
+			<p>
+Info holds all information required to set a simulation stage
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="GetElemInfo">func <a href="/src/target/element.go?s=2719:2784#L60">GetElemInfo</a></h3>
+				<pre>func GetElemInfo(edat *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#ElemData">ElemData</a>, cid <a href="/pkg/builtin/#int">int</a>, msh *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Mesh">Mesh</a>) <a href="#Info">Info</a></pre>
+				<p>
+GetElemInfo returns information about elements/formulations
+</p>
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="NaturalBc">type <a href="/src/target/naturalbcs.go?s=346:557#L1">NaturalBc</a></h2>
+			<pre>type NaturalBc struct {
+    Key     <a href="/pkg/builtin/#string">string</a>   <span class="comment">// key such as qn, qn0, ql, seepH, seepP, etc...</span>
+    IdxFace <a href="/pkg/builtin/#int">int</a>      <span class="comment">// local index of face</span>
+    Fcn     <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a> <span class="comment">// function callback</span>
+    Extra   <a href="/pkg/builtin/#string">string</a>   <span class="comment">// extra information</span>
+}</pre>
+			<p>
+NaturalBc holds information on natural boundary conditioins such as
+distributed loads or fluxes acting on surfaces
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Node">type <a href="/src/target/node.go?s=634:751#L16">Node</a></h2>
+			<pre>type Node struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+Node holds node dofs information
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="NewNode">func <a href="/src/target/node.go?s=785:816#L22">NewNode</a></h3>
+				<pre>func NewNode(v *<a href="/pkg/github.com/cpmech/gofem/inp/">inp</a>.<a href="/pkg/github.com/cpmech/gofem/inp/#Vert">Vert</a>) *<a href="#Node">Node</a></pre>
+				<p>
+NewNode allocates a new Node
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="Node.AddDofAndEq">func (*Node) <a href="/src/target/node.go?s=1246:1309#L40">AddDofAndEq</a></h3>
+				<pre>func (o *<a href="#Node">Node</a>) AddDofAndEq(ukey <a href="/pkg/builtin/#string">string</a>, eqnum <a href="/pkg/builtin/#int">int</a>) (nexteq <a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+AddDof adds a new dof to thisnode; ignores it if it exists already
+</p>
+<pre>nexteq -- is the next equation number == eqnum + 1;
+          returns eqnum if dof exists already
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Node.GetDof">func (*Node) <a href="/src/target/node.go?s=1761:1800#L61">GetDof</a></h3>
+				<pre>func (o *<a href="#Node">Node</a>) GetDof(ukey <a href="/pkg/builtin/#string">string</a>) *<a href="#Dof">Dof</a></pre>
+				<p>
+GetDof returns the Dof structure for given Dof name (ukey)
+</p>
+<pre>Note: returns nil if not found
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Node.GetDofOrPanic">func (*Node) <a href="/src/target/node.go?s=1962:2008#L71">GetDofOrPanic</a></h3>
+				<pre>func (o *<a href="#Node">Node</a>) GetDofOrPanic(ukey <a href="/pkg/builtin/#string">string</a>) *<a href="#Dof">Dof</a></pre>
+				<p>
+GetDofOrPanic returns the Dof structure for given Dof name (ukey)
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Node.GetEq">func (*Node) <a href="/src/target/node.go?s=2243:2291#L83">GetEq</a></h3>
+				<pre>func (o *<a href="#Node">Node</a>) GetEq(ukey <a href="/pkg/builtin/#string">string</a>) (eqNumber <a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+GetEq returns the equation number for given Dof name (ukey)
+</p>
+<pre>Note: returns -1 if not found
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Node.SetEq">func (*Node) <a href="/src/target/node.go?s=1599:1646#L55">SetEq</a></h3>
+				<pre>func (o *<a href="#Node">Node</a>) SetEq(ukey <a href="/pkg/builtin/#string">string</a>, eqNumber <a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+SetEq numbers a specific Dof with the equation number in the current (stage) global system
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Node.String">func (*Node) <a href="/src/target/node.go?s=906:936#L27">String</a></h3>
+				<pre>func (o *<a href="#Node">Node</a>) String() <a href="/pkg/builtin/#string">string</a></pre>
+				<p>
+String returns the string representation of this node
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="PtNaturalBc">type <a href="/src/target/ptnatbcs.go?s=379:580#L4">PtNaturalBc</a></h2>
+			<pre>type PtNaturalBc struct {
+    Key   <a href="/pkg/builtin/#string">string</a>    <span class="comment">// key such as fux, fpl, etc...</span>
+    Eq    <a href="/pkg/builtin/#int">int</a>       <span class="comment">// equation</span>
+    X     []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// location</span>
+    Fcn   <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>  <span class="comment">// function</span>
+    Extra <a href="/pkg/builtin/#string">string</a>    <span class="comment">// extra information</span>
+}</pre>
+			<p>
+PtNaturalBc holds information on point natural boundary conditions such as
+prescribed forces or fluxes) at nodes
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="PtNaturalBcs">type <a href="/src/target/ptnatbcs.go?s=626:791#L13">PtNaturalBcs</a></h2>
+			<pre>type PtNaturalBcs struct {
+    Eq2idx map[<a href="/pkg/builtin/#int">int</a>]<a href="/pkg/builtin/#int">int</a>    <span class="comment">// maps eq number to indices in Bcs</span>
+    Bcs    []*<a href="#PtNaturalBc">PtNaturalBc</a> <span class="comment">//active boundary conditions such as prescribed forces</span>
+}</pre>
+			<p>
+PointLoads is a set of prescribed forces
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="PtNaturalBcs.AddToRhs">func (PtNaturalBcs) <a href="/src/target/ptnatbcs.go?s=1007:1062#L25">AddToRhs</a></h3>
+				<pre>func (o <a href="#PtNaturalBcs">PtNaturalBcs</a>) AddToRhs(fb []<a href="/pkg/builtin/#float64">float64</a>, t <a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+AddToRhs adds the boundary conditions terms to the augmented fb vector
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="PtNaturalBcs.List">func (*PtNaturalBcs) <a href="/src/target/ptnatbcs.go?s=1634:1683#L47">List</a></h3>
+				<pre>func (o *<a href="#PtNaturalBcs">PtNaturalBcs</a>) List(t <a href="/pkg/builtin/#float64">float64</a>) (l <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+List returns a simple list logging bcs at time t
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="PtNaturalBcs.Reset">func (*PtNaturalBcs) <a href="/src/target/ptnatbcs.go?s=834:864#L19">Reset</a></h3>
+				<pre>func (o *<a href="#PtNaturalBcs">PtNaturalBcs</a>) Reset()</pre>
+				<p>
+Reset initialises internal structures
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="PtNaturalBcs.Set">func (*PtNaturalBcs) <a href="/src/target/ptnatbcs.go?s=1182:1259#L32">Set</a></h3>
+				<pre>func (o *<a href="#PtNaturalBcs">PtNaturalBcs</a>) Set(key <a href="/pkg/builtin/#string">string</a>, nod *<a href="#Node">Node</a>, fcn <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>)</pre>
+				<p>
+Set sets new point natural boundary condition data
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Solution">type <a href="/src/target/domain.go?s=489:982#L13">Solution</a></h2>
+			<pre>type Solution struct {
+
+    <span class="comment">// state</span>
+    T      <a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// current time</span>
+    Y      []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// DOFs (solution variables); e.g. y = {u, p}</span>
+    Dydt   []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// dy/dt</span>
+    D2ydt2 []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// d²y/dt²</span>
+
+    <span class="comment">// auxiliary</span>
+    ΔY  []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// total increment (for nonlinear solver)</span>
+    Psi []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// t1 star vars; e.g. ψ* = β1.p + β2.dpdt</span>
+    Zet []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// t2 star vars; e.g. ζ* = α1.u + α2.v + α3.a</span>
+    Chi []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// t2 star vars; e.g. χ* = α4.u + α5.v + α6.a</span>
+    L   []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Lagrange multipliers</span>
+}</pre>
+			<p>
+Solution holds the solution data @ nodes.
+</p>
+<pre>      / u \         / u \
+      |   | =&gt; y =  |   |
+yb =  | p |         \ p / (ny x 1)
+      |   |
+      \ λ / (nyb x 1)
+</pre>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+	
+
+	
+
+
+
+
+
+	
+	
+		<h2 id="pkg-subdirectories">Subdirectories</h2>
+	
+	
+	<table class="dir">
+	<tr>
+	<th>Name</th>
+	<th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+	<th style="text-align: left; width: auto">Synopsis</th>
+	</tr>
+	
+		<tr>
+		<td><a href="..">..</a></td>
+		</tr>
+	
+	
+		
+			<tr>
+			<td class="name"><a href="cmp/">cmp</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+		
+			<tr>
+			<td class="name"><a href="data/">data</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+	</table>
+
+	
+
+</div><!-- page -->
+<div id="footer">
+<br /><br />
+<hr>
+<pre class="copyright">
+Copyright (c) 2015, Dorival Pedroso & Raul Durand
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of gofem nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+</pre><!-- copyright -->
+</div><!-- footer -->
+</body>
+</html>

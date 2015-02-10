@@ -1,0 +1,12 @@
+[
+  {
+    "name"  : "beam1-M1",
+    "model" : "beam-elast",
+    "prms"  : [
+      {"name":"E",   "value":1e+3,    "unit":"kPa"},
+      {"name":"A",   "value":0.3,     "unit":"m2"},
+      {"name":"Izz", "value":2.25e-3, "unit":"m4"},
+      {"name":"rho", "value":2.5,     "unit":"Mg/m3"}
+    ]
+  }
+]

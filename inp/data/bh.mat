@@ -1,0 +1,38 @@
+{
+  "functions" : [
+    {
+      "name":"varyE", "type":"distrGauss", "prms" : [
+        {"n":"mean", "v":10000},
+        {"n":"devi", "v":1    }
+      ]
+    },
+    {
+      "name":"varynu", "type":"distrGauss", "prms" : [
+        {"n":"mean", "v":0.2},
+        {"n":"devi", "v":0.1}
+      ]
+    }
+  ],
+  "materials" : [
+    {
+      "name"  : "B-1.6-M1",
+      "desc"  : "Bhatti Ex 1.6 p32: linear elastic model for bracket",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":10000},
+        {"n":"nu",   "v":0.2  },
+        {"n":"rhoS", "v":1    , "extra":"!hi", "inact":true, "setdef":true}
+      ]
+    },
+    {
+      "name"  : "beam1-M1",
+      "model" : "beam-elast",
+      "prms"  : [
+        {"n":"E",   "v":1000,    "u":"kPa"},
+        {"n":"A",   "v":0.3,     "u":"m2"},
+        {"n":"Izz", "v":0.00225, "u":"m4"},
+        {"n":"rho", "v":2.5,     "u":"Mg/m3"}
+      ]
+    }
+  ]
+}

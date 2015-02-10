@@ -1,0 +1,796 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Gofem &ndash; package shp</title>
+<link type="text/css" rel="stylesheet" href="static/style.css">
+<script type="text/javascript" src="static/godocs.js"></script>
+<style type="text/css"></style>
+</head>
+<body>
+<div id="page"><h1>Gofem &ndash; <b>shp</b> &ndash; shape structures and quadrature points</h1>
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script type='text/javascript'>
+	document.ANALYSIS_DATA = ;
+	document.CALLGRAPH = ;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/cpmech/gofem/shp"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+package shp implements shape structures/routines
+</p>
+
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+				<dd><a href="#pkg-constants">Constants</a></dd>
+			
+			
+			
+				
+				<dd><a href="#GetIps">func GetIps(geoType string, nips int) []*Ipoint</a></dd>
+			
+				
+				<dd><a href="#Hex20">func Hex20(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Hex8">func Hex8(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Lin2">func Lin2(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Lin3">func Lin3(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Lin4">func Lin4(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Lin5">func Lin5(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Qua12">func Qua12(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Qua16">func Qua16(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Qua4">func Qua4(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Qua8">func Qua8(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Qua9">func Qua9(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Tet10">func Tet10(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Tet4">func Tet4(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Tri10">func Tri10(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Tri15">func Tri15(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Tri3">func Tri3(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+				
+				<dd><a href="#Tri6">func Tri6(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
+			
+			
+				
+				<dd><a href="#Ipoint">type Ipoint</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Shape">type Shape</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Get">func Get(geoType string) *Shape</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Shape.AxisymGetRadius">func (o *Shape) AxisymGetRadius(x [][]float64) (radius float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Shape.AxisymGetRadiusF">func (o *Shape) AxisymGetRadiusF(x [][]float64, idxface int) (radius float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Shape.CalcAtFaceIp">func (o *Shape) CalcAtFaceIp(x [][]float64, ipf *Ipoint, idxface int) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Shape.CalcAtIp">func (o *Shape) CalcAtIp(x [][]float64, ip *Ipoint, derivs bool) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Shape.Extrapolator">func (o *Shape) Extrapolator(E, ips [][]float64) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Shape.GetIpsNatCoordsMat">func (o *Shape) GetIpsNatCoordsMat(ips [][]float64) (ξh [][]float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Shape.GetNodesNatCoordsMat">func (o *Shape) GetNodesNatCoordsMat() (ξ [][]float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Shape.GetShapeMatAtIps">func (o *Shape) GetShapeMatAtIps(ips [][]float64) (N [][]float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Shape.InvMap">func (o *Shape) InvMap(r, y []float64, x [][]float64) (err error)</a></dd>
+				
+			
+				
+				<dd><a href="#ShpFunc">type ShpFunc</a></dd>
+				
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/cpmech/gofem/shp/algos.go">algos.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/shp/hexs.go">hexs.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/shp/ipoints.go">ipoints.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/shp/lins.go">lins.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/shp/quads.go">quads.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/shp/shp.go">shp.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/shp/tets.go">tets.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/shp/tris.go">tris.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/shp/vtk.go">vtk.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		<div id="pkg-callgraph" class="toggle" style="display: none">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Internal Call Graph section">Internal call graph ▹</h2>
+		</div> <!-- .expanded -->
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Internal Call Graph section">Internal call graph ▾</h2>
+			<p>
+			  In the call graph viewer below, each node
+			  is a function belonging to this package
+			  and its children are the functions it
+			  calls&mdash;perhaps dynamically.
+			</p>
+			<p>
+			  The root nodes are the entry points of the
+			  package: functions that may be called from
+			  outside the package.
+			  There may be non-exported or anonymous
+			  functions among them if they are called
+			  dynamically from another package.
+			</p>
+			<p>
+			  Click a node to visit that function's source code.
+			  From there you can visit its callers by
+			  clicking its declaring <code>func</code>
+			  token.
+			</p>
+			<p>
+			  Functions may be omitted if they were
+			  determined to be unreachable in the
+			  particular programs or tests that were
+			  analyzed.
+			</p>
+			<!-- Zero means show all package entry points. -->
+			<ul style="margin-left: 0.5in" id="callgraph-0" class="treeview"></ul>
+		</div>
+		</div> <!-- #pkg-callgraph -->
+
+		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				<pre>const (
+    <span id="INVMAP_TOL">INVMAP_TOL</span> = 1.0e-10 <span class="comment">// tolerance for inverse mapping function</span>
+    <span id="INVMAP_NIT">INVMAP_NIT</span> = 25      <span class="comment">// maximum number of iterations for inverse mapping</span>
+)</pre>
+				<p>
+constants
+</p>
+
+			
+				<pre>const (
+    <span id="VTK_VERTEX">VTK_VERTEX</span>               = 1
+    <span id="VTK_POLY_VERTEX">VTK_POLY_VERTEX</span>          = 2
+    <span id="VTK_LINE">VTK_LINE</span>                 = 3
+    <span id="VTK_POLY_LINE">VTK_POLY_LINE</span>            = 4
+    <span id="VTK_TRIANGLE">VTK_TRIANGLE</span>             = 5
+    <span id="VTK_TRIANGLE_STRIP">VTK_TRIANGLE_STRIP</span>       = 6
+    <span id="VTK_POLYGON">VTK_POLYGON</span>              = 7
+    <span id="VTK_PIXEL">VTK_PIXEL</span>                = 8
+    <span id="VTK_QUAD">VTK_QUAD</span>                 = 9
+    <span id="VTK_TETRA">VTK_TETRA</span>                = 10
+    <span id="VTK_VOXEL">VTK_VOXEL</span>                = 11
+    <span id="VTK_HEXAHEDRON">VTK_HEXAHEDRON</span>           = 12
+    <span id="VTK_WEDGE">VTK_WEDGE</span>                = 13
+    <span id="VTK_PIRAMID">VTK_PIRAMID</span>              = 14
+    <span id="VTK_QUADRATIC_EDGE">VTK_QUADRATIC_EDGE</span>       = 21
+    <span id="VTK_QUADRATIC_TRIANGLE">VTK_QUADRATIC_TRIANGLE</span>   = 22
+    <span id="VTK_QUADRATIC_QUAD">VTK_QUADRATIC_QUAD</span>       = 23
+    <span id="VTK_QUADRATIC_TETRA">VTK_QUADRATIC_TETRA</span>      = 24
+    <span id="VTK_QUADRATIC_HEXAHEDRON">VTK_QUADRATIC_HEXAHEDRON</span> = 25
+)</pre>
+				
+			
+				<pre>const <span id="MINDET">MINDET</span> = 1.0e-14 <span class="comment">// minimum determinant allowed for dxdR</span>
+</pre>
+				<p>
+constants
+</p>
+
+			
+		
+		
+		
+			
+			
+			<h2 id="GetIps">func <a href="/src/target/ipoints.go?s=498:545#L12">GetIps</a></h2>
+			<pre>func GetIps(geoType <a href="/pkg/builtin/#string">string</a>, nips <a href="/pkg/builtin/#int">int</a>) []*<a href="#Ipoint">Ipoint</a></pre>
+			<p>
+GetIps returns a set of integration points
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Hex20">func <a href="/src/target/hexs.go?s=4157:4228#L118">Hex20</a></h2>
+			<pre>func Hex20(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Hex20 calculates the shape functions (S) and derivatives of shape functions (dSdR) of hex20
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Hex8">func <a href="/src/target/hexs.go?s=1961:2031#L53">Hex8</a></h2>
+			<pre>func Hex8(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Hex8 calculates the shape functions (S) and derivatives of shape functions (dSdR) of hex8
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Lin2">func <a href="/src/target/lins.go?s=1826:1896#L70">Lin2</a></h2>
+			<pre>func Lin2(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Lin2 calculates the shape functions (S) and derivatives of shape functions (dSdR) of lin2
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Lin3">func <a href="/src/target/lins.go?s=2255:2325#L88">Lin3</a></h2>
+			<pre>func Lin3(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Lin3 calculates the shape functions (S) and derivatives of shape functions (dSdR) of lin3
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Lin4">func <a href="/src/target/lins.go?s=2732:2802#L108">Lin4</a></h2>
+			<pre>func Lin4(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Lin4 calculates the shape functions (S) and derivatives of shape functions (dSdR) of lin4
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Lin5">func <a href="/src/target/lins.go?s=3538:3608#L131">Lin5</a></h2>
+			<pre>func Lin5(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Lin5 calculates the shape functions (S) and derivatives of shape functions (dSdR) of lin5
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Qua12">func <a href="/src/target/quads.go?s=7156:7227#L234">Qua12</a></h2>
+			<pre>func Qua12(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Qua12 calculates the shape functions (S) and derivatives of shape functions (dSdR) of qua12
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Qua16">func <a href="/src/target/quads.go?s=9919:9990#L301">Qua16</a></h2>
+			<pre>func Qua16(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Qua16 calculates the shape functions (S) and derivatives of shape functions (dSdR) of qua16
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Qua4">func <a href="/src/target/quads.go?s=3281:3351#L107">Qua4</a></h2>
+			<pre>func Qua4(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Qua4 calculates the shape functions (S) and derivatives of shape functions (dSdR) of qua4
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Qua8">func <a href="/src/target/quads.go?s=4093:4163#L138">Qua8</a></h2>
+			<pre>func Qua8(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Qua8 calculates the shape functions (S) and derivatives of shape functions (dSdR) of qua8
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Qua9">func <a href="/src/target/quads.go?s=5490:5560#L182">Qua9</a></h2>
+			<pre>func Qua9(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Qua9 calculates the shape functions (S) and derivatives of shape functions (dSdR) of qua9
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Tet10">func <a href="/src/target/tets.go?s=2935:3006#L108">Tet10</a></h2>
+			<pre>func Tet10(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Tet10 calculates the shape functions (S) and derivatives of shape functions (dSdR) of tet10
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Tet4">func <a href="/src/target/tets.go?s=1626:1696#L51">Tet4</a></h2>
+			<pre>func Tet4(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Tet4 calculates the shape functions (S) and derivatives of shape functions (dSdR) of tet4
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Tri10">func <a href="/src/target/tris.go?s=4472:4543#L166">Tri10</a></h2>
+			<pre>func Tri10(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Tri10 calculates the shape functions (S) and derivatives of shape functions (dSdR) of tri10
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Tri15">func <a href="/src/target/tris.go?s=6046:6117#L239">Tri15</a></h2>
+			<pre>func Tri15(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Tri15 calculates the shape functions (S) and derivatives of shape functions (dSdR) of tri15
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Tri3">func <a href="/src/target/tris.go?s=2674:2744#L89">Tri3</a></h2>
+			<pre>func Tri3(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Tri3 calculates the shape functions (S) and derivatives of shape functions (dSdR) of tri3
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Tri6">func <a href="/src/target/tris.go?s=3405:3475#L123">Tri6</a></h2>
+			<pre>func Tri6(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Tri6 calculates the shape functions (S) and derivatives of shape functions (dSdR) of tri6
+elements at {r,s,t} natural coordinates. The derivatives are calculated only if derivs==true.
+</p>
+
+			
+			
+
+		
+		
+			
+			
+			<h2 id="Ipoint">type <a href="/src/target/ipoints.go?s=315:357#L4">Ipoint</a></h2>
+			<pre>type Ipoint struct {
+    R, S, T, W <a href="/pkg/builtin/#float64">float64</a>
+}</pre>
+			<p>
+Ipoint implements integration point data: natural coordinates and weight
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Shape">type <a href="/src/target/shp.go?s=549:2249#L10">Shape</a></h2>
+			<pre>type Shape struct {
+
+    <span class="comment">// geometry</span>
+    Type       <a href="/pkg/builtin/#string">string</a>      <span class="comment">// name; e.g. &#34;lin2&#34;</span>
+    Func       <a href="#ShpFunc">ShpFunc</a>     <span class="comment">// shape/derivs function callback function</span>
+    FaceFunc   <a href="#ShpFunc">ShpFunc</a>     <span class="comment">// face shape/derivs function callback function</span>
+    BasicType  <a href="/pkg/builtin/#string">string</a>      <span class="comment">// geometry of basic element; e.g. &#34;qua8&#34; =&gt; &#34;qua4&#34;</span>
+    FaceType   <a href="/pkg/builtin/#string">string</a>      <span class="comment">// geometry of face; e.g. &#34;qua8&#34; =&gt; &#34;lin3&#34;</span>
+    Gndim      <a href="/pkg/builtin/#int">int</a>         <span class="comment">// geometry of shape; e.g. &#34;lin3&#34; =&gt; gnd == 1 (even in 3D simulations)</span>
+    Nverts     <a href="/pkg/builtin/#int">int</a>         <span class="comment">// number of vertices in cell; e.g. &#34;qua8&#34; =&gt; 8</span>
+    VtkCode    <a href="/pkg/builtin/#int">int</a>         <span class="comment">// VTK code</span>
+    FaceNverts <a href="/pkg/builtin/#int">int</a>         <span class="comment">// number of vertices on face</span>
+    FaceLocalV [][]<a href="/pkg/builtin/#int">int</a>     <span class="comment">// face local vertices [nfaces][FaceNverts]</span>
+    NatCoords  [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// natural coordinates [gndim][nverts]</span>
+
+    <span class="comment">// geometry: for seams (3D-edges)</span>
+    SeamType   <a href="/pkg/builtin/#int">int</a>     <span class="comment">// geometry of seam (3D-edge); e.g. &#34;hex8&#34; =&gt; &#34;lin2&#34;</span>
+    SeamLocalV [][]<a href="/pkg/builtin/#int">int</a> <span class="comment">// seam (3d-edge) local vertices [nseams][nVertsOnSeam]</span>
+
+    <span class="comment">// scratchpad: volume</span>
+    S []<a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// [nverts] shape functions</span>
+    G [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [nverts][gndim] G == dSdx. derivative of shape function</span>
+    J <a href="/pkg/builtin/#float64">float64</a>     <span class="comment">// Jacobian: determinant of dxdr</span>
+
+    <span class="comment">// scratchpad: face</span>
+    Sf    []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [facenverts] shape functions values</span>
+    Fnvec []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [gndim] face normal vector multiplied by Jf</span>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+Shape holds geometry data
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="Get">func <a href="/src/target/shp.go?s=2371:2402#L48">Get</a></h3>
+				<pre>func Get(geoType <a href="/pkg/builtin/#string">string</a>) *<a href="#Shape">Shape</a></pre>
+				<p>
+Get returns an existent Shape structure
+</p>
+
+				
+				
+			
+
+			
+				
+				<h3 id="Shape.AxisymGetRadius">func (*Shape) <a href="/src/target/shp.go?s=4626:4689#L132">AxisymGetRadius</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) AxisymGetRadius(x [][]<a href="/pkg/builtin/#float64">float64</a>) (radius <a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+AxisymGetRadius returns the x0 == radius for axisymmetric computations
+</p>
+<pre>Note: must be called after CalcAtIp
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Shape.AxisymGetRadiusF">func (*Shape) <a href="/src/target/shp.go?s=4894:4971#L141">AxisymGetRadiusF</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) AxisymGetRadiusF(x [][]<a href="/pkg/builtin/#float64">float64</a>, idxface <a href="/pkg/builtin/#int">int</a>) (radius <a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+AxisymGetRadiusF (face) returns the x0 == radius for axisymmetric computations
+</p>
+<pre>Note: must be called after CalcAtFaceIp
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Shape.CalcAtFaceIp">func (*Shape) <a href="/src/target/shp.go?s=3673:3754#L98">CalcAtFaceIp</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) CalcAtFaceIp(x [][]<a href="/pkg/builtin/#float64">float64</a>, ipf *<a href="#Ipoint">Ipoint</a>, idxface <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CalcAtFaceIp calculates face data such as Sf and Fnvec
+</p>
+<pre>Input:
+ x[ndim][nverts+?] -- coordinates matrix of solid element
+ ipf               -- local/natural coordinates of face
+ idxface           -- local index of face
+Output:
+ Sf and Fnvec
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Shape.CalcAtIp">func (*Shape) <a href="/src/target/shp.go?s=2771:2847#L62">CalcAtIp</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) CalcAtIp(x [][]<a href="/pkg/builtin/#float64">float64</a>, ip *<a href="#Ipoint">Ipoint</a>, derivs <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CalcAtIp calculates volume data such as S and G at natural coordinate r
+</p>
+<pre>Input:
+ x[ndim][nverts+?] -- coordinates matrix of solid element
+ ip                -- local/natural coordinates
+Output:
+ S, DSdR, DxdR, DRdx, G, and J
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Shape.Extrapolator">func (*Shape) <a href="/src/target/algos.go?s=3694:3754#L143">Extrapolator</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) Extrapolator(E, ips [][]<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Extrapolator computes the extrapolation matrix for this Shape with a combination of integration points &#39;ips&#39;
+</p>
+<pre>Note: E[nverts][nip] must be pre-allocated
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Shape.GetIpsNatCoordsMat">func (*Shape) <a href="/src/target/algos.go?s=2839:2908#L111">GetIpsNatCoordsMat</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) GetIpsNatCoordsMat(ips [][]<a href="/pkg/builtin/#float64">float64</a>) (ξh [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+GetIpsNatCoordsMat returns the matrix (\hat{ξ}) with natural coordinates of interation
+points, augmented by one column which is filled with ones [nip][ndim+1]
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Shape.GetNodesNatCoordsMat">func (*Shape) <a href="/src/target/algos.go?s=2437:2492#L98">GetNodesNatCoordsMat</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) GetNodesNatCoordsMat() (ξ [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+GetNodesNatCoordsMat returns the matrix (ξ) with natural coordinates of nodes,
+augmented by one column which is filled with ones [nverts][ndim+1]
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Shape.GetShapeMatAtIps">func (*Shape) <a href="/src/target/algos.go?s=3211:3276#L125">GetShapeMatAtIps</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) GetShapeMatAtIps(ips [][]<a href="/pkg/builtin/#float64">float64</a>) (N [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+GetShapeMatAtIps returns a matrix formed by computing the shape functions
+at all integration points [nip][nverts]
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Shape.InvMap">func (*Shape) <a href="/src/target/algos.go?s=733:798#L18">InvMap</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) InvMap(r, y []<a href="/pkg/builtin/#float64">float64</a>, x [][]<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+InvMap computes the natural coordinates r, given the real coordinate y
+</p>
+<pre>Input:
+ y[ndim]           -- are the 2D/3D point coordinates
+ x[ndim][nverts+?] -- coordinates matrix of solid element
+Output:
+ r[3] -- are the natural coordinates of given point
+</pre>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="ShpFunc">type <a href="/src/target/shp.go?s=440:518#L7">ShpFunc</a></h2>
+			<pre>type ShpFunc func(S []<a href="/pkg/builtin/#float64">float64</a>, dSdR [][]<a href="/pkg/builtin/#float64">float64</a>, r, s, t <a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+ShpFunc is the shape functions callback function
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+	
+
+	
+
+
+
+
+
+</div><!-- page -->
+<div id="footer">
+<br /><br />
+<hr>
+<pre class="copyright">
+Copyright (c) 2015, Dorival Pedroso & Raul Durand
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of gofem nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+</pre><!-- copyright -->
+</div><!-- footer -->
+</body>
+</html>

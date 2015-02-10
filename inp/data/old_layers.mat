@@ -1,0 +1,32 @@
+[
+  {
+    "name"  : "elast01",
+    "desc"  : "Linear elastic for Hostun Sand",
+    "model" : "lin-elast",
+    "prms"  : [  "E",  "ν",    "ρS"],
+    "vals"  : [ 3000,  0.2,     2.7],
+    "units" : ["kPa",  "-", "Mg/m3"]
+  },
+  {
+    "name"  : "dp01",
+    "desc"  : "Drucker-Prager for Hostun Sand",
+    "model" : "drucker-prager",
+    "prms"  : [  "E",  "ν",   "c", "φ", "typ",   "H",    "ρS"],
+    "vals"  : [ 3000,  0.2,   10,  20,     3,     0,      2.7],
+    "units" : ["kPa",  "-", "kPa", "°",   "-", "kPa", "Mg/m3"]
+  },
+  {
+    "name"  : "lrm01",
+    "desc"  : "Water retention curve model for Hostun Sand",
+    "model" : "lrm-m1",
+    "prms"  : ["λd", "xrd", "yr", "xrw", "βd", "βw", "β1"],
+    "vals"  : [3.42, 0.94, 0.057, 0.58, 2.41, 3.44, 1.14]
+  },
+  {
+    "name"  : "lrm02",
+    "desc"  : "Water retention curve model for Hostun Sand",
+    "model" : "brooks-corey",
+    "prms"  : [  "λ", "pcae", "smin"],
+    "vals"  : [0.051,    1.8,   0.01]
+  }
+]

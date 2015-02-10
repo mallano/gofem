@@ -1,0 +1,31 @@
+{
+  "data" : {
+    "desc"    : "Bhatti Example 1.4 p25",
+    "matfile" : "data/bh.mat",
+    "steady"  : true
+  },
+  "functions" : [
+    { "name":"load", "type":"cte", "prms":[ {"n":"c", "v":-150000} ] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "truss",
+      "mshfile"   : "data/bh14.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"B-1.4-M1", "type":"rod" },
+        { "tag":-2, "mat":"B-1.4-M2", "type":"rod" },
+        { "tag":-3, "mat":"B-1.4-M3", "type":"rod" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply loading",
+      "nodebcs" : [
+        { "tag":-100, "keys":["ux","uy"], "funcs":["zero","zero"] },
+        { "tag":-200, "keys":["fy"     ], "funcs":["load"] },
+        { "tag":-300, "keys":["ux","uy"], "funcs":["zero","zero"] }
+      ]
+    }
+  ]
+}
