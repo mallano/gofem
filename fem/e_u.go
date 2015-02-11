@@ -188,6 +188,7 @@ func init() {
 		// local starred variables
 		o.ζs = la.MatAlloc(nip, o.Ndim)
 		o.χs = la.MatAlloc(nip, o.Ndim)
+		o.divχs = make([]float64, nip)
 
 		// scratchpad. computed @ each ip
 		nsig := 2 * o.Ndim
