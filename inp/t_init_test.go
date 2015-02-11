@@ -24,7 +24,7 @@ func Test_msh01(tst *testing.T) {
 	defer func() {
 		utl.Tsilent = prevTs
 		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
+			tst.Error("[1;31mERROR:", err, "[0m\n")
 		}
 	}()
 
@@ -45,7 +45,7 @@ func Test_sim01(tst *testing.T) {
 	defer func() {
 		utl.Tsilent = prevTs
 		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
+			tst.Error("[1;31mERROR:", err, "[0m\n")
 		}
 	}()
 
@@ -69,7 +69,7 @@ func Test_mat01(tst *testing.T) {
 	defer func() {
 		utl.Tsilent = prevTs
 		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
+			tst.Error("[1;31mERROR:", err, "[0m\n")
 		}
 	}()
 
@@ -100,7 +100,7 @@ func Test_mat02(tst *testing.T) {
 	defer func() {
 		utl.Tsilent = prevTs
 		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
+			tst.Error("[1;31mERROR:", err, "[0m\n")
 		}
 	}()
 

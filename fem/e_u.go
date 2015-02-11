@@ -164,6 +164,9 @@ func init() {
 
 		// model and its specialisations
 		o.Model = msolid.GetModel(global.Sim.Data.FnameKey, matname, mdlname, false)
+		if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
+			return nil
+		}
 		o.Model.Init(o.Ndim, global.Sim.Data.Pstress, matdata.Prms)
 		switch m := o.Model.(type) {
 		case msolid.Small:
