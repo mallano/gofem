@@ -392,9 +392,9 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 			coef *= dc.α1 * o.Rho
 			for m := 0; m < nverts; m++ {
 				for i := 0; i < o.Ndim; i++ {
-					r := o.Umap[i+m*o.Ndim]
+					r := i + m*o.Ndim
 					for n := 0; n < nverts; n++ {
-						c := o.Umap[i+n*o.Ndim]
+						c := i + n*o.Ndim
 						o.K[r][c] += coef * S[m] * S[n]
 					}
 				}
