@@ -42,7 +42,7 @@ type Path struct {
 func (o *Path) Size() int { return o.size }
 
 // SetIsoCompS sets an isotropic compression path (stress driven)
-func (o *Path) SetIsoCompS(ndim, nincs, niout int, P []float64) {
+func (o *Path) SetIsoCompS(ndim, nincs, niout int, P []float64) (err error) {
 
 	// constants
 	o.Nincs, o.Niout = nincs, niout
@@ -55,11 +55,11 @@ func (o *Path) SetIsoCompS(ndim, nincs, niout int, P []float64) {
 	}
 
 	// set additional information
-	o.init(ndim)
+	return o.init(ndim)
 }
 
 // SetPQstrain sets a p-q path with w=1 (compression); but given in terms of strains
-func (o *Path) SetPQstrain(ndim, nincs, niout int, K, G, p0 float64, DP, DQ []float64, noise float64) {
+func (o *Path) SetPQstrain(ndim, nincs, niout int, K, G, p0 float64, DP, DQ []float64, noise float64) (err error) {
 
 	// constants
 	o.Nincs, o.Niout = nincs, niout
@@ -82,31 +82,31 @@ func (o *Path) SetPQstrain(ndim, nincs, niout int, K, G, p0 float64, DP, DQ []fl
 	}
 
 	// set additional information
-	o.init(ndim)
+	return o.init(ndim)
 }
 
 // ReadJson reads json file
-func (o *Path) ReadJson(ndim int, fname string) {
+func (o *Path) ReadJson(ndim int, fname string) (err error) {
 
 	// read file
 	b, err := utl.ReadFile(fname)
 	if err != nil {
-		utl.Panic(_path_err11, fname, err)
+		return utl.Err(_path_err11, fname, err)
 	}
 
 	// decode
 	err = json.Unmarshal(b, o)
 	if err != nil {
-		utl.Panic(_path_err12, fname, err)
+		return utl.Err(_path_err12, fname, err)
 	}
 
 	// set additional information
-	o.init(ndim)
+	return o.init(ndim)
 }
 
 // ReadTable loads path from datafile in table format
 //  Note: n -- number of lines to read. use -1 to read all lines
-func (o *Path) ReadTable(ndim, nincs, niout int, fname string, n int, mσ, mε float64, stresspath bool) {
+func (o *Path) ReadTable(ndim, nincs, niout int, fname string, n int, mσ, mε float64, stresspath bool) (err error) {
 
 	// constants
 	o.Nincs, o.Niout = nincs, niout
@@ -114,7 +114,7 @@ func (o *Path) ReadTable(ndim, nincs, niout int, fname string, n int, mσ, mε f
 	// read data table
 	keys, d, err := utl.ReadTable(fname)
 	if err != nil {
-		utl.Panic(_path_err01, fname)
+		return
 	}
 	if n < 0 {
 		n = len(d[keys[0]])
@@ -159,11 +159,11 @@ func (o *Path) ReadTable(ndim, nincs, niout int, fname string, n int, mσ, mε f
 	}
 
 	// set additional information
-	o.init(ndim)
+	return o.init(ndim)
 }
 
 // init initialises states variables after {Sx, Sy, Sz} or {Ex, Ey, Ez} have been set
-func (o *Path) init(ndim int) {
+func (o *Path) init(ndim int) (err error) {
 
 	// constants
 	o.ndim = ndim
@@ -195,19 +195,19 @@ func (o *Path) init(ndim int) {
 
 	// check nS
 	if nSx != nSy || nSx != nSz {
-		utl.Panic(_path_err02, nSx, nSy, nSz)
+		return utl.Err(_path_err02, nSx, nSy, nSz)
 	}
 
 	// check for initial stresses
 	if nSx < 1 || nSy < 1 || nSz < 1 {
-		utl.Panic(_path_err03)
+		return utl.Err(_path_err03)
 	}
 
 	// unset hasS if only initial stress were given
 	if nSx == 1 {
 		hasS, allE = false, true
 		if !hasE {
-			utl.Panic(_path_err04)
+			return utl.Err(_path_err04)
 		}
 	}
 
@@ -218,24 +218,24 @@ func (o *Path) init(ndim int) {
 	}
 	if hasE {
 		if nEx != nEy || nEx != nEz {
-			utl.Panic(_path_err05, nEx, nEy, nEz)
+			return utl.Err(_path_err05, nEx, nEy, nEz)
 		}
 		o.size = nEx
 	}
 	if hasS && hasE {
 		if nEx != nSx || nEy != nSx || nEz != nSx {
-			utl.Panic(_path_err06)
+			return utl.Err(_path_err06)
 		}
 	}
 	if !allS && !allE {
 		if len(o.UseS) != nSx || len(o.UseE) != nSx {
-			utl.Panic(_path_err07, len(o.UseS), len(o.UseE), nSx)
+			return utl.Err(_path_err07, len(o.UseS), len(o.UseE), nSx)
 		}
 	}
 
 	// check size and Nincs
 	if o.size < 2 {
-		utl.Panic(_path_err08)
+		return utl.Err(_path_err08)
 	}
 	if o.Nincs < 1 {
 		o.Nincs = 1
@@ -258,10 +258,11 @@ func (o *Path) init(ndim int) {
 		o.UseE = utl.IntVals(o.size, 1)
 		o.UseS = make([]int, o.size)
 	}
+	return
 }
 
 // CalcΔεElast calculates Δε corresponding to an elastic loading with Δp and Δq
-func CalcΔεElast(Δε []float64, K, G float64, Δp, Δq float64, axsym bool) (Δεv, Δεd float64) {
+func CalcΔεElast(Δε []float64, K, G float64, Δp, Δq float64, axsym bool) (Δεv, Δεd float64, err error) {
 	Δεv = -Δp / K
 	Δεd = Δq / (3.0 * G)
 	var Δεx, Δεy, Δεz float64
@@ -282,7 +283,7 @@ func CalcΔεElast(Δε []float64, K, G float64, Δp, Δq float64, axsym bool) (
 		if math.Abs(c-1.0) > 1e-15 {
 			d := 3.0 * (4.0*c - 1.0)
 			if d < 0.0 {
-				utl.Panic("discriminant < 0:  c=%v  d=%v", c, d)
+				return 0, 0, utl.Err("discriminant < 0:  c=%v  d=%v", c, d)
 			}
 			α1 := (1.0 + 2.0*c + math.Sqrt(d)) / (2.0 - 2.0*c)
 			α2 := (1.0 + 2.0*c - math.Sqrt(d)) / (2.0 - 2.0*c)
@@ -302,29 +303,29 @@ func CalcΔεElast(Δε []float64, K, G float64, Δp, Δq float64, axsym bool) (
 	Δεv_ := tsr.M_εv(Δε)
 	Δεd_ := tsr.M_εd(Δε)
 	if math.Abs(Δεv-Δεv_) > 1e-15 {
-		utl.Panic(_path_err09, Δεv, Δεv_)
+		return 0, 0, utl.Err(_path_err09, Δεv, Δεv_)
 	}
 	if Δεd < 0 {
 		Δεd_ = -Δεd_ // allow negative values
 	}
 	if math.Abs(Δεd-Δεd_) > 1e-15 {
-		utl.Panic(_path_err10, Δεd, Δεd_)
+		return 0, 0, utl.Err(_path_err10, Δεd, Δεd_)
 	}
 	return
 }
 
 // error messages
 var (
-	_path_err01 = "cannot read file <%s>"
-	_path_err02 = "all S slices must have the same size. nSx=%d, nSy=%d, nSz=%d"
-	_path_err03 = "at least one component of Sx,Sy,Sz must be given to initialise the stresses"
-	_path_err04 = "with only initial stresses given, E slices must be given"
-	_path_err05 = "all E slices must have the same size. nEx=%d, nEy=%d, nEz=%d"
-	_path_err06 = "when using S and E slices at the same time, all {S,E} slices must have the same size"
-	_path_err07 = "when using S and E slices, UseS and UseE must be given (with the same size as S and E). len(UseS)=%d, len(UseE)=%d, n{S,E}=%d"
-	_path_err08 = "number of path components must be at least 2"
-	_path_err09 = "failed on Δεv: %v ≠ %v"
-	_path_err10 = "failed on Δεd: %v ≠ %v"
-	_path_err11 = "cannot open file %v"
-	_path_err12 = "cannot unmarshal file %v"
+	_path_err01 = "cannot read file <%s>\n"
+	_path_err02 = "all S slices must have the same size. nSx=%d, nSy=%d, nSz=%d\n"
+	_path_err03 = "at least one component of Sx,Sy,Sz must be given to initialise the stresses\n"
+	_path_err04 = "with only initial stresses given, E slices must be given\n"
+	_path_err05 = "all E slices must have the same size. nEx=%d, nEy=%d, nEz=%d\n"
+	_path_err06 = "when using S and E slices at the same time, all {S,E} slices must have the same size\n"
+	_path_err07 = "when using S and E slices, UseS and UseE must be given (with the same size as S and E). len(UseS)=%d, len(UseE)=%d, n{S,E}=%d\n"
+	_path_err08 = "number of path components must be at least 2\n"
+	_path_err09 = "failed on Δεv: %v ≠ %v\n"
+	_path_err10 = "failed on Δεd: %v ≠ %v\n"
+	_path_err11 = "cannot open file %v\n"
+	_path_err12 = "cannot unmarshal file %v\n"
 )

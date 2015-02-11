@@ -16,7 +16,7 @@ func Test_path01(tst *testing.T) {
 	defer func() {
 		utl.Tsilent = prevTs
 		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
+			tst.Error("[1;31mERROR:", err, "[0m\n")
 		}
 	}()
 
@@ -25,7 +25,11 @@ func Test_path01(tst *testing.T) {
 
 	ndim := 2
 	var pth Path
-	pth.ReadJson(ndim, "data/path01.json")
+	err := pth.ReadJson(ndim, "data/path01.json")
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+		return
+	}
 	utl.Pforan("pth = %+v\n", pth)
 	utl.CheckVector(tst, "sx", 1e-17, pth.Sx, []float64{1, 1, 1, 0})
 }

@@ -29,9 +29,9 @@ import (
 
 // Solid defines the interface for solid models
 type Solid interface {
-	Init(ndim int, pstress bool, prms fun.Prms) // initialises model
-	GetPrms() fun.Prms                          // gets (an example) of parameters
-	InitIntVars() (*State, error)               // initialises AND allocates internal (secondary) variables
+	Init(ndim int, pstress bool, prms fun.Prms) error // initialises model
+	GetPrms() fun.Prms                                // gets (an example) of parameters
+	InitIntVars() (*State, error)                     // initialises AND allocates internal (secondary) variables
 }
 
 // Small defines rate type solid models for small strain analyses
@@ -57,13 +57,14 @@ type SmallStrainUpdater interface {
 //  matname   -- name of material
 //  modelname -- model name
 //  getnew    -- force a new allocation; i.e. do not use any model found in database
+//  Note: returns nil on errors
 func GetModel(simfnk, matname, modelname string, getnew bool) Solid {
 
 	// get new model, regardless wheter it exists in database or not
 	if getnew {
 		allocator, ok := allocators[modelname]
 		if !ok {
-			utl.Panic(_solid_err02, modelname, simfnk, matname, getnew)
+			return nil
 		}
 		return allocator()
 	}
@@ -77,7 +78,7 @@ func GetModel(simfnk, matname, modelname string, getnew bool) Solid {
 	// if not found, get new
 	allocator, ok := allocators[modelname]
 	if !ok {
-		utl.Panic(_solid_err02, modelname, simfnk, matname, getnew)
+		return nil
 	}
 	model := allocator()
 	_models[key] = model
@@ -89,8 +90,3 @@ var allocators = map[string]func() Solid{}
 
 // _models holds pre-allocated solid models (internal); key => Solid
 var _models = map[string]Solid{}
-
-// error messages
-var (
-	_solid_err02 = "cannot find solid model named %s (simfnk=%s, matname=%s, getnew=%v)"
-)

@@ -38,14 +38,18 @@ type Driver struct {
 }
 
 // Init initialises driver
-func (o *Driver) Init(simfnk, modelname string, ndim int, pstress bool, prms fun.Prms) {
+func (o *Driver) Init(simfnk, modelname string, ndim int, pstress bool, prms fun.Prms) (err error) {
 	o.nsig = 2 * ndim
 	getnew := false
 	o.model = GetModel(simfnk, "solidmat", modelname, getnew)
-	o.model.Init(ndim, pstress, prms)
+	err = o.model.Init(ndim, pstress, prms)
+	if err != nil {
+		return
+	}
 	o.D = la.MatAlloc(o.nsig, o.nsig)
 	o.TolD = 1e-8
 	o.VerD = true
+	return
 }
 
 // Run runs simulation
@@ -60,13 +64,13 @@ func (o *Driver) Run(pth *Path) (err error) {
 	case SmallStrainUpdater:
 		eup = m
 	default:
-		utl.Panic("cannot handle large-deformation models yet")
+		return utl.Err("cannot handle large-deformation models yet\n")
 	}
 
 	// allocate results arrays
 	nr := 1 + (pth.Size()-1)*pth.Nincs
 	if nr < 2 {
-		utl.Panic(_driver_err04, pth.Size(), pth.Nincs)
+		return utl.Err(_driver_err04, pth.Size(), pth.Nincs)
 	}
 	o.Res = make([]*State, nr)
 	o.Eps = la.MatAlloc(nr, o.nsig)
@@ -202,8 +206,8 @@ func (o *Driver) Run(pth *Path) (err error) {
 
 // error messages
 var (
-	_driver_err01 = "strain update failed\n%v"
-	_driver_err02 = "stress update failed\n%v"
-	_driver_err03 = "check of consistent matrix failed:\n %v\n"
-	_driver_err04 = "size of path is incorrect. Size=%d, Nincs=%d"
+	_driver_err01 = "strain update failed\n%v\n"
+	_driver_err02 = "stress update failed\n%v\n"
+	_driver_err03 = "check of consistent matrix failed:\n %v\n\n"
+	_driver_err04 = "size of path is incorrect. Size=%d, Nincs=%d\n"
 )

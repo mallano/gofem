@@ -40,7 +40,7 @@ func init() {
 }
 
 // Init initialises model
-func (o *Ogden) Init(ndim int, pstress bool, prms fun.Prms) {
+func (o *Ogden) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 
 	// basic data
 	o.Nsig = 2 * ndim
@@ -58,7 +58,7 @@ func (o *Ogden) Init(ndim int, pstress bool, prms fun.Prms) {
 		}
 	}
 	if len(o.Alp) != len(o.Mu) {
-		utl.Panic("number of alp must be equal to number of mu. %d != %d", len(o.Alp), len(o.Mu))
+		return utl.Err("number of alp must be equal to number of mu. %d != %d\n", len(o.Alp), len(o.Mu))
 	}
 
 	// auxiliary
@@ -68,6 +68,7 @@ func (o *Ogden) Init(ndim int, pstress bool, prms fun.Prms) {
 	o.λ = make([]float64, 3)
 	o.P = tsr.M_AllocEigenprojs(o.Nsig)
 	o.τ = make([]float64, 3)
+	return
 }
 
 // GetPrms gets (an example) of parameters
@@ -85,7 +86,7 @@ func (o *Ogden) InitIntVars() (s *State, err error) {
 func (o *Ogden) Update(s *State, F [][]float64) (err error) {
 
 	// TODO
-	utl.Panic("Ogden model is not implemented yet")
+	return utl.Err("Ogden model is not implemented yet")
 
 	// spectral decomposition
 	err = o.b_and_spectral_decomp(F)
@@ -114,7 +115,7 @@ func (o *Ogden) Update(s *State, F [][]float64) (err error) {
 func (o *Ogden) CalcA(A [][][][]float64, s *State, firstIt bool) (err error) {
 
 	// TODO
-	utl.Panic("Ogden model is not implemented yet")
+	return utl.Err("Ogden model is not implemented yet")
 
 	// spectral decomposition
 	err = o.b_and_spectral_decomp(s.F)

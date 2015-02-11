@@ -46,7 +46,7 @@ func Test_elast01(tst *testing.T) {
 	defer func() {
 		utl.Tsilent = prevTs
 		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
+			tst.Error("[1;31mERROR:", err, "[0m\n")
 		}
 	}()
 
@@ -63,7 +63,7 @@ func Test_elast02(tst *testing.T) {
 	defer func() {
 		utl.Tsilent = prevTs
 		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
+			tst.Error("[1;31mERROR:", err, "[0m\n")
 		}
 	}()
 
@@ -74,11 +74,15 @@ func Test_elast02(tst *testing.T) {
 
 	ndim, pstress := 2, false
 	var ec SmallElasticity
-	ec.Init(ndim, pstress, []*fun.Prm{
+	err := ec.Init(ndim, pstress, []*fun.Prm{
 		&fun.Prm{N: "K", V: K},
 		&fun.Prm{N: "G", V: G},
 	})
 	utl.Pforan("ec: %v\n", &ec)
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+		return
+	}
 
 	nsig, nalp, nphi, large := 2*ndim, 0, 0, false
 	state := NewState(nsig, nalp, nphi, large)

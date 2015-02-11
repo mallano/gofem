@@ -7,6 +7,7 @@ package msolid
 import (
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/tsr"
+	"github.com/cpmech/gosl/utl"
 )
 
 // VonMises implements von Mises plasticity model
@@ -23,21 +24,28 @@ func init() {
 }
 
 // Init initialises model
-func (o *VonMises) Init(ndim int, pstress bool, prms fun.Prms) {
+func (o *VonMises) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 
 	// parse parameters
-	o.SmallElasticity.Init(ndim, pstress, prms)
+	err = o.SmallElasticity.Init(ndim, pstress, prms)
+	if err != nil {
+		return
+	}
 	for _, p := range prms {
 		switch p.N {
 		case "qy0":
 			o.qy0 = p.V
 		case "H":
 			o.H = p.V
+		case "E", "Nu", "L", "G", "K": // ok => elastic constants
+		default:
+			return utl.Err("vm: parameter named %s is incorrect\n", p.N)
 		}
 	}
 
 	// auxiliary structures
 	o.ten = make([]float64, o.Nsig)
+	return
 }
 
 // GetPrms gets (an example) of parameters

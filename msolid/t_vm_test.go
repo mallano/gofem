@@ -17,7 +17,7 @@ func Test_vm01(tst *testing.T) {
 	defer func() {
 		utl.Tsilent = prevTs
 		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
+			tst.Error("[1;31mERROR:", err, "[0m\n")
 		}
 	}()
 
@@ -28,13 +28,17 @@ func Test_vm01(tst *testing.T) {
 	ndim, pstress := 2, false
 	simfnk, modelname := "test", "vm"
 	var drv Driver
-	drv.Init(simfnk, modelname, ndim, pstress, []*fun.Prm{
+	err := drv.Init(simfnk, modelname, ndim, pstress, []*fun.Prm{
 		&fun.Prm{N: "K", V: 1.5},
 		&fun.Prm{N: "G", V: 1},
 		&fun.Prm{N: "qy0", V: 2},
 		&fun.Prm{N: "H", V: 0.5},
 	})
 	drv.CheckD = true
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+		return
+	}
 
 	// vm model
 	vm := drv.model.(*VonMises)
@@ -50,12 +54,17 @@ func Test_vm01(tst *testing.T) {
 	niout := 1
 	noise := 0.0
 	var pth Path
-	pth.SetPQstrain(ndim, nincs, niout, vm.K, vm.G, p0, DP, DQ, noise)
+	err = pth.SetPQstrain(ndim, nincs, niout, vm.K, vm.G, p0, DP, DQ, noise)
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+		return
+	}
 
 	// run
-	err := drv.Run(&pth)
+	err = drv.Run(&pth)
 	if err != nil {
-		utl.Panic("%v", err.Error())
+		tst.Errorf("test failed: %v\n", err)
+		return
 	}
 
 	// plot

@@ -17,8 +17,8 @@ func init() {
 }
 
 // Init initialises model
-func (o *LinElast) Init(ndim int, pstress bool, prms fun.Prms) {
-	o.SmallElasticity.Init(ndim, pstress, prms)
+func (o *LinElast) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
+	return o.SmallElasticity.Init(ndim, pstress, prms)
 }
 
 // GetPrms gets (an example) of parameters

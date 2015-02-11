@@ -13,7 +13,7 @@ import (
 
 // KGcalculator defines calculators of elasticity coefficients K and G
 type KGcalculator interface {
-	Init(prms fun.Prms)
+	Init(prms fun.Prms) (err error)
 	Calc(s *State) (K, G float64)
 }
 
@@ -24,7 +24,7 @@ var kgcfactory = map[string]func() KGcalculator{}
 func GetKgc(name string, prms fun.Prms) KGcalculator {
 	allocator, ok := kgcfactory[name]
 	if !ok {
-		utl.Panic("cannot find KG calculator named %s", name)
+		return nil
 	}
 	o := allocator()
 	o.Init(prms)
@@ -42,7 +42,7 @@ type SmallElasticity struct {
 }
 
 // Init initialises this structure
-func (o *SmallElasticity) Init(ndim int, pstress bool, prms fun.Prms) {
+func (o *SmallElasticity) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 	o.Nsig = 2 * ndim
 	o.Pse = pstress
 	var has_E, has_ν, has_l, has_G, has_K bool
@@ -61,6 +61,13 @@ func (o *SmallElasticity) Init(ndim int, pstress bool, prms fun.Prms) {
 		}
 		if skgc, found := utl.Keycode(p.Extra, "kgc"); found {
 			o.Kgc = GetKgc(skgc, prms)
+			if o.Kgc == nil {
+				return utl.Err("cannot find kgc model named %s", skgc)
+			}
+			err = o.Kgc.Init(prms)
+			if err != nil {
+				return
+			}
 		}
 	}
 	switch {
@@ -81,8 +88,9 @@ func (o *SmallElasticity) Init(ndim int, pstress bool, prms fun.Prms) {
 		o.G = Calc_G_from_Knu(o.K, o.Nu)
 		o.L = Calc_l_from_Knu(o.K, o.Nu)
 	default:
-		utl.Panic("combination of Elastic constants is incorrect. options are {E,nu}, {l,G}, {K,G} and {K,nu}")
+		return utl.Err("combination of Elastic constants is incorrect. options are {E,nu}, {l,G}, {K,G} and {K,nu}\n")
 	}
+	return
 }
 
 // GetPrms gets (an example) of parameters
@@ -115,10 +123,10 @@ func (o *SmallElasticity) Update(s *State, ε []float64) (err error) {
 func (o *SmallElasticity) CalcD(D [][]float64, s *State) (err error) {
 	if o.Pse {
 		if o.Nsig != 4 {
-			utl.Panic("for plane-stress analyses, D must be 4x4. nsig = %d is incorrect.", o.Nsig)
+			return utl.Err("for plane-stress analyses, D must be 4x4. nsig = %d is incorrect.\n", o.Nsig)
 		}
 		if o.Kgc != nil {
-			utl.Panic("plane-stress analysis does not work with nonlinear K and G")
+			return utl.Err("plane-stress analysis does not work with nonlinear K and G\n")
 		}
 		c := o.E / (1.0 - o.Nu*o.Nu)
 		la.MatFill(D, 0)
