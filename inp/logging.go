@@ -16,7 +16,7 @@ import (
 var logFile os.File
 
 // InitLogFile initialises logger
-func InitLogFile(dirout, fnamekey string) {
+func InitLogFile(dirout, fnamekey string) (err error) {
 
 	// create log file
 	var rank int
@@ -25,14 +25,35 @@ func InitLogFile(dirout, fnamekey string) {
 	}
 	logFile, err := os.Create(utl.Sf("%s/%s_p%d.log", dirout, fnamekey, rank))
 	if err != nil {
-		utl.Panic("cannot create log file: %v", err)
+		return
 	}
 
 	// connect logger to output file
 	log.SetOutput(logFile)
+	return
 }
 
 // FlusLog saves log (flushes to disk)
 func FlushLog() {
 	logFile.Close()
+}
+
+// LogErr logs error and returs stop flag
+func LogErr(err error, msg string) (stop bool) {
+	if err != nil {
+		fullmsg := msg + " : " + err.Error() + "\n"
+		log.Printf(fullmsg)
+		return true
+	}
+	return false
+}
+
+// LogErr logs error using condition (==true) to stop and returs stop flag
+func LogErrCond(condition bool, msg string, prm ...interface{}) (stop bool) {
+	if condition {
+		fullmsg := utl.Sf(msg, prm...) + "\n"
+		log.Printf(fullmsg)
+		return true
+	}
+	return false
 }

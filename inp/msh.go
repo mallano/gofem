@@ -73,21 +73,21 @@ type Mesh struct {
 }
 
 // ReadMsh reads a mesh for FE analyses
-func ReadMsh(fn string, dolog bool) (o *Mesh) {
+//  Note: returns nil on errors
+func ReadMsh(fn string) *Mesh {
 
 	// new mesh
-	o = new(Mesh)
+	var o Mesh
 
 	// read file
 	b, err := utl.ReadFile(fn)
-	if err != nil {
-		utl.Panic("%v", err.Error())
+	if LogErr(err, "msh: ERROR: cannot open mesh file "+fn) {
+		return nil
 	}
 
 	// decode
-	err = json.Unmarshal(b, o)
-	if err != nil {
-		utl.Panic("%v", err.Error())
+	if LogErr(json.Unmarshal(b, &o), "msh: ERROR: cannot unmarshal mesh file "+fn) {
+		return nil
 	}
 
 	// vertex related derived data
@@ -96,14 +96,14 @@ func ReadMsh(fn string, dolog bool) (o *Mesh) {
 	for i, v := range o.Verts {
 
 		// check vertex id
-		if v.Id != i {
-			utl.Panic("vertices must be sequentially numbered")
+		if LogErrCond(v.Id != i, "msh: ERROR: vertices must be sequentially numbered. %d != %d\n", v.Id, i) {
+			return nil
 		}
 
 		// ndim
 		nd := len(v.C)
-		if nd < 2 || nd > 4 {
-			utl.Panic("ndim must be 2 or 3")
+		if LogErrCond(nd < 2 || nd > 4, "msh: ERROR: ndim must be 2 or 3\n") {
+			return nil
 		}
 		if nd == 3 {
 			if math.Abs(v.C[2]) > Ztol {
@@ -130,11 +130,11 @@ func ReadMsh(fn string, dolog bool) (o *Mesh) {
 		c.Shp = shp.Get(c.Type)
 
 		// check id and tag
-		if c.Id != i {
-			utl.Panic("cells must be sequentially numbered")
+		if LogErrCond(c.Id != i, "msh: ERROR: cells must be sequentially numbered. %d != %d\n", c.Id, i) {
+			return nil
 		}
-		if c.Tag >= 0 {
-			utl.Panic("cell tags must be negative")
+		if LogErrCond(c.Tag >= 0, "msh: ERROR: cell tags must be negative\n") {
+			return nil
 		}
 
 		// face tags
@@ -167,10 +167,8 @@ func ReadMsh(fn string, dolog bool) (o *Mesh) {
 	}
 
 	// log
-	if dolog {
-		log.Printf("msh: fn=%s nverts=%d ncells=%d ncelltags=%d nfacetags=%d nseamtags=%d nverttags=%d ncelltypes=%d npart=%d\n", fn, len(o.Verts), len(o.Cells), len(o.CellTag2cells), len(o.FaceTag2cells), len(o.SeamTag2cells), len(o.VertTag2verts), len(o.Ctype2cells), len(o.Part2cells))
-	}
-	return
+	log.Printf("msh: fn=%s nverts=%d ncells=%d ncelltags=%d nfacetags=%d nseamtags=%d nverttags=%d ncelltypes=%d npart=%d\n", fn, len(o.Verts), len(o.Cells), len(o.CellTag2cells), len(o.FaceTag2cells), len(o.SeamTag2cells), len(o.VertTag2verts), len(o.Ctype2cells), len(o.Part2cells))
+	return &o
 }
 
 // String returns a JSON representation of *Vert

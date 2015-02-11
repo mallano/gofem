@@ -31,38 +31,36 @@ type MatDb struct {
 }
 
 // ReadMat reads all materials data from a .mat JSON file
-func ReadMat(fn string, dolog bool) (o *MatDb) {
+//  Note: returns nil on errors
+func ReadMat(fn string) *MatDb {
 
 	// new mat
-	o = new(MatDb)
+	var o MatDb
 
 	// read file
 	b, err := utl.ReadFile(fn)
-	if err != nil {
-		utl.Panic("%v", err)
+	if LogErr(err, "mat: ERROR: cannot open materials file "+fn) {
+		return nil
 	}
 
 	// decode
-	err = json.Unmarshal(b, o)
-	if err != nil {
-		utl.Panic("%v", err)
+	if LogErr(json.Unmarshal(b, &o), "mat: ERROR: cannot unmarshal materials file "+fn) {
+		return nil
 	}
 
 	// log
-	if dolog {
-		log.Printf("mat: fn=%s nfunctions=%d nmaterials=%d\n", fn, len(o.Functions), len(o.Materials))
-	}
-	return
+	log.Printf("mat: fn=%s nfunctions=%d nmaterials=%d\n", fn, len(o.Functions), len(o.Materials))
+	return &o
 }
 
-// GetOrPanic returns a material
-func (o *MatDb) GetOrPanic(name string) *Material {
+// Get returns a material
+//  Note: returns nil if not found
+func (o *MatDb) Get(name string) *Material {
 	for _, mat := range o.Materials {
 		if mat.Name == name {
 			return mat
 		}
 	}
-	utl.Panic("cannot find material named %s in database", name)
 	return nil
 }
 
@@ -112,13 +110,15 @@ func MatfileOld2New(dirout string, fnnew, fnold string, convertsymbols bool) {
 	// read file
 	b, err := utl.ReadFile(fnold)
 	if err != nil {
-		utl.Panic("%v", err.Error())
+		utl.PfRed("cannot open file: %v", err.Error())
+		return
 	}
 
 	// decode
 	err = json.Unmarshal(b, &mats_old)
 	if err != nil {
-		utl.Panic("%v", err.Error())
+		utl.PfRed("cannot unmarshal file: %v", err.Error())
+		return
 	}
 
 	// new data holder

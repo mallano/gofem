@@ -5,6 +5,8 @@
 package inp
 
 import (
+	"io/ioutil"
+	"log"
 	"os"
 	"testing"
 
@@ -13,6 +15,7 @@ import (
 
 func init() {
 	utl.Tsilent = true
+	log.SetOutput(ioutil.Discard)
 }
 
 func Test_msh01(tst *testing.T) {
@@ -28,7 +31,11 @@ func Test_msh01(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("msh01")
 
-	msh := ReadMsh("data/bh16.msh", !utl.Tsilent)
+	msh := ReadMsh("data/bh16.msh")
+	if msh == nil {
+		tst.Errorf("test failed\n")
+		return
+	}
 	utl.Pforan("%v\n", msh)
 }
 
@@ -45,7 +52,11 @@ func Test_sim01(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("sim01")
 
-	sim := ReadSim("data/bh16.sim", true, !utl.Tsilent)
+	sim := ReadSim("data/bh16.sim", true)
+	if sim == nil {
+		tst.Errorf("test failed\n")
+		return
+	}
 	if !utl.Tsilent {
 		sim.GetInfo(os.Stdout)
 		utl.Pf("\n")
@@ -65,13 +76,21 @@ func Test_mat01(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("mat01")
 
-	mdb1 := ReadMat("data/bh.mat", !utl.Tsilent)
+	mdb1 := ReadMat("data/bh.mat")
+	if mdb1 == nil {
+		tst.Errorf("test failed\n")
+		return
+	}
 	utl.Pforan("bh.mat just read:\n%v\n", mdb1)
 
 	fn := "test_bh.mat"
 	utl.WriteFileSD("/tmp/gofem/inp", fn, mdb1.String())
 
-	mdb2 := ReadMat("/tmp/gofem/inp/"+fn, !utl.Tsilent)
+	mdb2 := ReadMat("/tmp/gofem/inp/" + fn)
+	if mdb2 == nil {
+		tst.Errorf("test failed\n")
+		return
+	}
 	utl.Pfblue2("\n%v\n", mdb2)
 }
 
@@ -91,6 +110,10 @@ func Test_mat02(tst *testing.T) {
 	convertsymbols := true
 	MatfileOld2New("/tmp/gofem/inp", "new_layers.mat", "data/old_layers.mat", convertsymbols)
 
-	mdb := ReadMat("/tmp/gofem/inp/new_layers.mat", !utl.Tsilent)
+	mdb := ReadMat("/tmp/gofem/inp/new_layers.mat")
+	if mdb == nil {
+		tst.Errorf("test failed\n")
+		return
+	}
 	utl.Pfblue2("%v\n", mdb)
 }

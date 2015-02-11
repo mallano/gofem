@@ -245,15 +245,18 @@ type Simulation struct {
 }
 
 // ReadSim reads all simulation data from a .sim JSON file
-func ReadSim(simfilepath string, erasefiles, dolog bool) (o *Simulation) {
+//  Notes:  1) this function initialises log file
+//          2) returns nil on errors
+func ReadSim(simfilepath string, erasefiles bool) *Simulation {
 
 	// new sim
-	o = new(Simulation)
+	var o Simulation
 
 	// read file
 	b, err := utl.ReadFile(simfilepath)
 	if err != nil {
-		utl.Panic("%v", err.Error())
+		utl.PfRed("sim: cannot read simulation file %s\n%v", simfilepath, err)
+		return nil
 	}
 
 	// set default values
@@ -262,15 +265,23 @@ func ReadSim(simfilepath string, erasefiles, dolog bool) (o *Simulation) {
 	o.LinSol.SetDefault()
 
 	// decode
-	err = json.Unmarshal(b, o)
+	err = json.Unmarshal(b, &o)
 	if err != nil {
-		utl.Panic("%v", err.Error())
+		utl.PfRed("sim: cannot unmarshal simulation file %s\n%v", simfilepath, err)
+		return nil
 	}
 
 	// derived data
 	o.Data.PostProcess(simfilepath, erasefiles)
 	o.LinSol.PostProcess()
 	o.Solver.PostProcess()
+
+	// init log file
+	err = InitLogFile(o.Data.DirOut, o.Data.FnameKey)
+	if err != nil {
+		utl.PfRed("sim: cannot create log file\n%v", err)
+		return nil
+	}
 
 	// for all regions
 	for _, reg := range o.Regions {
@@ -298,7 +309,10 @@ func ReadSim(simfilepath string, erasefiles, dolog bool) (o *Simulation) {
 			}
 			stg.Control.DtFunc = &fun.Cte{C: stg.Control.Dt}
 		} else {
-			stg.Control.DtFunc = o.Functions.GetOrPanic(stg.Control.DtFcn)
+			stg.Control.DtFunc = o.Functions.Get(stg.Control.DtFcn)
+			if LogErrCond(stg.Control.DtFunc == nil, "sim: ERROR: cannot get Dt function named %s", stg.Control.DtFcn) {
+				return nil
+			}
 			stg.Control.Dt = stg.Control.DtFunc.F(t, nil)
 		}
 
@@ -314,7 +328,10 @@ func ReadSim(simfilepath string, erasefiles, dolog bool) (o *Simulation) {
 				stg.Control.DtoFunc = &fun.Cte{C: stg.Control.DtOut}
 			}
 		} else {
-			stg.Control.DtoFunc = o.Functions.GetOrPanic(stg.Control.DtoFcn)
+			stg.Control.DtoFunc = o.Functions.Get(stg.Control.DtoFcn)
+			if LogErrCond(stg.Control.DtoFunc == nil, "sim: ERROR: cannot get DtOut function named %s", stg.Control.DtoFcn) {
+				return nil
+			}
 			stg.Control.DtOut = stg.Control.DtoFunc.F(t, nil)
 		}
 
@@ -323,27 +340,26 @@ func ReadSim(simfilepath string, erasefiles, dolog bool) (o *Simulation) {
 	}
 
 	// log
-	InitLogFile(o.Data.DirOut, o.Data.FnameKey)
-	if dolog {
-		log.Printf("sim: fn=%s desc=%s nfunctions=%d nregions=%d nstages=%d linsol=%s itol=%g\n", simfilepath, o.Data.Desc, len(o.Functions), len(o.Regions), len(o.Stages), o.LinSol.Name, o.Solver.Itol)
-	}
-	return
+	log.Printf("sim: fn=%s desc=%s nfunctions=%d nregions=%d nstages=%d linsol=%s itol=%g\n", simfilepath, o.Data.Desc, len(o.Functions), len(o.Regions), len(o.Stages), o.LinSol.Name, o.Solver.Itol)
+	return &o
 }
 
 // Etag2data returns the ElemData corresponding to element tag
+//  Note: returns nil if not found
 func (d *Region) Etag2data(etag int) *ElemData {
 	idx, ok := d.etag2idx[etag]
 	if !ok {
-		utl.Panic("cannot find element data with etag = %d", etag)
+		return nil
 	}
 	return d.ElemsData[idx]
 }
 
 // GetInfo returns formatted information
-func (o *Simulation) GetInfo(w io.Writer) {
+func (o *Simulation) GetInfo(w io.Writer) (err error) {
 	b, err := json.MarshalIndent(o, "", "  ")
 	if err != nil {
-		utl.Panic("cannot marshal Simulation data")
+		return err
 	}
 	w.Write(b)
+	return
 }

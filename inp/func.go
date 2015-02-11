@@ -19,8 +19,9 @@ type FuncData struct {
 // Funcs holds functions
 type FuncsData []*FuncData
 
-// GetOrPanic returns function or panic
-func (o FuncsData) GetOrPanic(name string) fun.Func {
+// Get returns function by name
+//  Note: returns nil if not found
+func (o FuncsData) Get(name string) fun.Func {
 	if name == "zero" {
 		return &fun.Zero
 	}
@@ -29,7 +30,6 @@ func (o FuncsData) GetOrPanic(name string) fun.Func {
 			return fun.New(f.Type, f.Prms)
 		}
 	}
-	utl.Panic("cannot find function named %s", name)
 	return nil
 }
 
