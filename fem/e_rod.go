@@ -109,7 +109,11 @@ func init() {
 		if s_nip, found := utl.Keycode(edat.Extra, "nip"); found {
 			nip = utl.Atoi(s_nip)
 		}
-		o.IpsElem = shp.GetIps(o.Cell.Shp.Type, nip)
+		var err error
+		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)
+		if LogErr(err, "GetIps failed") {
+			return nil
+		}
 		nip = len(o.IpsElem)
 
 		// state

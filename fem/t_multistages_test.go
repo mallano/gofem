@@ -40,11 +40,13 @@ func Test_fourlayers01(tst *testing.T) {
 	dom := NewDomain(global.Sim.Regions[0])
 	if dom == nil {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	utl.Pforan("stage # 0\n")
 	if !dom.SetStage(0, global.Sim.Stages[0]) {
 		tst.Errorf("test failed\n")
+		return
 	}
 	nids, eqs := get_nids_eqs(dom)
 	utl.CompareInts(tst, "nids", nids, []int{1, 2, 14, 12, 0, 10})
@@ -53,6 +55,7 @@ func Test_fourlayers01(tst *testing.T) {
 	utl.Pforan("stage # 1\n")
 	if !dom.SetStage(1, global.Sim.Stages[1]) {
 		tst.Errorf("test failed\n")
+		return
 	}
 	nids, eqs = get_nids_eqs(dom)
 	utl.CompareInts(tst, "nids", nids, []int{10, 12, 9, 6, 1, 2, 14, 0, 8})
@@ -61,6 +64,7 @@ func Test_fourlayers01(tst *testing.T) {
 	utl.Pforan("stage # 2\n")
 	if !dom.SetStage(2, global.Sim.Stages[2]) {
 		tst.Errorf("test failed\n")
+		return
 	}
 	nids, eqs = get_nids_eqs(dom)
 	utl.CompareInts(tst, "nids", nids, []int{10, 12, 9, 6, 1, 2, 14, 0, 7, 11, 8, 13})
@@ -69,6 +73,7 @@ func Test_fourlayers01(tst *testing.T) {
 	utl.Pforan("stage # 3\n")
 	if !dom.SetStage(3, global.Sim.Stages[3]) {
 		tst.Errorf("test failed\n")
+		return
 	}
 	nids, eqs = get_nids_eqs(dom)
 	utl.CompareInts(tst, "nids", nids, []int{7, 13, 5, 4, 10, 12, 9, 6, 1, 2, 14, 11, 3, 0, 8})

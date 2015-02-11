@@ -43,9 +43,11 @@ func (o *DruckerPrager) Init(ndim int, pstress bool, prms fun.Prms) (err error) 
 			o.qy0 = p.V
 		case "H":
 			o.H = p.V
-		case "E", "Nu", "L", "G", "K": // ok => elastic constants
+		case "E", "nu", "l", "G", "K", "RhoS":
+		case "c", "phi", "typ":
+			utl.Pfred("dp: warning: handling of 'c', 'phi' and 'typ' parameters is not implemented yet\n")
 		default:
-			return utl.Err("dp: parameter named %s is incorrect\n", p.N)
+			return utl.Err("dp: parameter named %q is incorrect\n", p.N)
 		}
 	}
 

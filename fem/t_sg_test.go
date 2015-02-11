@@ -153,10 +153,16 @@ func Test_sg52b(tst *testing.T) {
 	// run simulation
 	if !Start("data/sg52.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// make sure to flush log
 	defer End()
+
+	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	// check
@@ -184,10 +190,16 @@ func Test_sg57(tst *testing.T) {
 	// run simulation
 	if !Start("data/sg57.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// make sure to flush log
 	defer End()
+
+	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	// check
@@ -215,10 +227,16 @@ func Test_sg511(tst *testing.T) {
 	// run simulation
 	if !Start("data/sg511.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// make sure to flush log
 	defer End()
+
+	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	// check
@@ -246,10 +264,16 @@ func Test_sg515(tst *testing.T) {
 	// run simulation
 	if !Start("data/sg515.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// make sure to flush log
 	defer End()
+
+	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	// check
@@ -277,10 +301,16 @@ func Test_sg517(tst *testing.T) {
 	// run simulation
 	if !Start("data/sg517.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// make sure to flush log
 	defer End()
+
+	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	// check

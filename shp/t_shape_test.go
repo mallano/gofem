@@ -18,7 +18,7 @@ func Test_shape01(tst *testing.T) {
 	defer func() {
 		utl.Tsilent = prevTs
 		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
+			tst.Error("[1;31mERROR:", err, "[0m\n")
 		}
 	}()
 
@@ -51,7 +51,8 @@ func Test_shape01(tst *testing.T) {
 			}
 		}
 		if errS > tol {
-			utl.Panic("%s failed with err = %g", name, errS)
+			tst.Errorf("%s failed with err = %g\n", name, errS)
+			return
 		}
 
 		// check dSdR
@@ -83,7 +84,8 @@ func Test_shape01(tst *testing.T) {
 					tol2 = 1.0e-9
 				}
 				if math.Abs(shape.dSdR[n][i]-dSndRi) > tol2 {
-					utl.Panic("%s dS%ddR%d failed with err = %g", name, n, i, math.Abs(shape.dSdR[n][i]-dSndRi))
+					tst.Errorf("%s dS%ddR%d failed with err = %g\n", name, n, i, math.Abs(shape.dSdR[n][i]-dSndRi))
+					return
 				}
 				//utl.CheckScalar(tst, fmt.Sprintf("dS%ddR%d", n, i), tol2, dSdR[n][i], dSndRi)
 			}
@@ -119,7 +121,8 @@ func Test_shape01(tst *testing.T) {
 		}
 		utl.Pforan("%g\n", errS)
 		if errS > tol {
-			utl.Panic("%s failed with err = %g", name, errS)
+			tst.Errorf("%s failed with err = %g\n", name, errS)
+			return
 		}
 
 		utl.PfGreen("OK\n")

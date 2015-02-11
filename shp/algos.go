@@ -29,7 +29,7 @@ func (o *Shape) InvMap(r, y []float64, x [][]float64) (err error) {
 
 	// check
 	if o.Gndim == 1 {
-		utl.Panic("Inverse mapping is not implemented in 1D")
+		return utl.Err("Inverse mapping is not implemented in 1D\n")
 	}
 
 	var δRnorm float64

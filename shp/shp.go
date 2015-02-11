@@ -5,10 +5,7 @@
 // package shp implements shape structures/routines
 package shp
 
-import (
-	"github.com/cpmech/gosl/la"
-	"github.com/cpmech/gosl/utl"
-)
+import "github.com/cpmech/gosl/la"
 
 // constants
 const MINDET = 1.0e-14 // minimum determinant allowed for dxdR
@@ -59,10 +56,11 @@ type Shape struct {
 var factory = make(map[string]*Shape)
 
 // Get returns an existent Shape structure
+//  Note: returns nil on errors
 func Get(geoType string) *Shape {
 	s, ok := factory[geoType]
 	if !ok {
-		utl.Panic("cannot find shape with geometry type = %s", geoType)
+		return nil
 	}
 	return s
 }

@@ -19,13 +19,13 @@ type Ipoint struct {
 var ipsfactory = make(map[string][]*Ipoint)
 
 // GetIps returns a set of integration points
-func GetIps(geoType string, nips int) []*Ipoint {
+func GetIps(geoType string, nips int) (ips []*Ipoint, err error) {
 	key := utl.Sf("%s_%d", geoType, nips)
 	s, ok := ipsfactory[key]
 	if !ok {
-		utl.Panic("cannot find integration point set for geometry type = %s and nips = %d", geoType, nips)
+		return nil, utl.Err("cannot find integration point set for geometry type = %s and nips = %d\n", geoType, nips)
 	}
-	return s
+	return s, nil
 }
 
 var (

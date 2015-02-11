@@ -37,9 +37,9 @@ func (o *VonMises) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 			o.qy0 = p.V
 		case "H":
 			o.H = p.V
-		case "E", "Nu", "L", "G", "K": // ok => elastic constants
+		case "E", "nu", "l", "G", "K", "RhoS":
 		default:
-			return utl.Err("vm: parameter named %s is incorrect\n", p.N)
+			return utl.Err("vm: parameter named %q is incorrect\n", p.N)
 		}
 	}
 

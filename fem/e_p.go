@@ -104,8 +104,15 @@ func init() {
 		if s_nipf, found := utl.Keycode(edat.Extra, "nipf"); found {
 			nipf = utl.Atoi(s_nipf)
 		}
-		o.IpsElem = shp.GetIps(o.Cell.Shp.Type, nip)
-		o.IpsFace = shp.GetIps(o.Cell.Shp.FaceType, nipf)
+		var err error
+		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)
+		if LogErr(err, "GetIps failed for solid element") {
+			return nil
+		}
+		o.IpsFace, err = shp.GetIps(o.Cell.Shp.FaceType, nipf)
+		if LogErr(err, "GetIps failed for face") {
+			return nil
+		}
 		nip = len(o.IpsElem)
 		nipf = len(o.IpsFace)
 

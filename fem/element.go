@@ -71,7 +71,11 @@ func GetElemInfo(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info {
 	if LogErrCond(!ok, "cannot find element type = %s", edat.Type) {
 		return nil
 	}
-	return allocator(edat, cid, msh)
+	info := allocator(edat, cid, msh)
+	if LogErrCond(info == nil, "cannot find info from %q element", edat.Type) {
+		return nil
+	}
+	return info
 }
 
 // NewElem returns a new element from its type; e.g. "p", "u" or "up"
@@ -80,7 +84,11 @@ func NewElem(edat *inp.ElemData, cid int, msh *inp.Mesh) Elem {
 	if LogErrCond(!ok, "cannot find element type = %s", edat.Type) {
 		return nil
 	}
-	return allocator(edat, cid, msh)
+	ele := allocator(edat, cid, msh)
+	if LogErrCond(ele == nil, "cannot allocate %q element", edat.Type) {
+		return nil
+	}
+	return ele
 }
 
 // BuildCoordsMatrix returns the coordinate matrix of a particular Cell

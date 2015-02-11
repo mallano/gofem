@@ -134,10 +134,16 @@ func Test_bh16b(tst *testing.T) {
 	// run simulation
 	if !Start("data/bh16.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// make sure to flush log
 	defer End()
+
+	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	// check
@@ -166,10 +172,16 @@ func Test_bh14(tst *testing.T) {
 	// run simulation
 	if !Start("data/bh14.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// make sure to flush log
 	defer End()
+
+	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	// check

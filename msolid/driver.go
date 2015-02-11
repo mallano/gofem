@@ -42,6 +42,9 @@ func (o *Driver) Init(simfnk, modelname string, ndim int, pstress bool, prms fun
 	o.nsig = 2 * ndim
 	getnew := false
 	o.model = GetModel(simfnk, "solidmat", modelname, getnew)
+	if o.model == nil {
+		return utl.Err("cannot get model named %q\n", modelname)
+	}
 	err = o.model.Init(ndim, pstress, prms)
 	if err != nil {
 		return

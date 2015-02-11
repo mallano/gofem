@@ -149,8 +149,15 @@ func init() {
 		if s_nipf, found := utl.Keycode(edat.Extra, "nipf"); found {
 			nipf = utl.Atoi(s_nipf)
 		}
-		o.IpsElem = shp.GetIps(o.Cell.Shp.Type, nip)
-		o.IpsFace = shp.GetIps(o.Cell.Shp.FaceType, nipf)
+		var err error
+		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)
+		if LogErr(err, "GetIps failed for solid element") {
+			return nil
+		}
+		o.IpsFace, err = shp.GetIps(o.Cell.Shp.FaceType, nipf)
+		if LogErr(err, "GetIps failed for face") {
+			return nil
+		}
 		nip = len(o.IpsElem)
 		nipf = len(o.IpsFace)
 
@@ -167,7 +174,10 @@ func init() {
 		if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
 			return nil
 		}
-		o.Model.Init(o.Ndim, global.Sim.Data.Pstress, matdata.Prms)
+		err = o.Model.Init(o.Ndim, global.Sim.Data.Pstress, matdata.Prms)
+		if LogErr(err, "Model.Init failed") {
+			return nil
+		}
 		switch m := o.Model.(type) {
 		case msolid.Small:
 			o.MdlSmall = m

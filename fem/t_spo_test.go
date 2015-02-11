@@ -153,10 +153,16 @@ func Test_spo751b(tst *testing.T) {
 	// run simulation
 	if !Start("data/spo751.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// make sure to flush log
 	defer End()
+
+	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	// check
