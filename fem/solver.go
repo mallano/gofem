@@ -105,15 +105,13 @@ func Run() (runisok bool) {
 	defer func() {
 		for _, d := range domains {
 			d.LinSol.Clean()
-			if global.Verbose {
-				utl.Pfgrey(" . . . linear solver cleaned . . .\n")
-			}
 		}
 	}()
 
 	// current time and output time
 	t := 0.0
 	tout := 0.0
+	tidx := 0
 
 	// message
 	if global.Verbose {
@@ -126,15 +124,26 @@ func Run() (runisok bool) {
 		}()
 	}
 
+	// summary
+	nstg := len(global.Sim.Stages)
+	var sum Summary
+	sum.TidxIni = make([]int, nstg)
+	defer func() {
+		sum.NumTidx = tidx
+		SaveSum(&sum)
+	}()
+
 	// loop over stages
 	for stgidx, stg := range global.Sim.Stages {
+
+		// summary
+		sum.TidxIni[stgidx] = tidx
 
 		// time incrementers
 		Dt := stg.Control.DtFunc
 		DtOut := stg.Control.DtoFunc
 		tf := stg.Control.Tf
 		tout = t + DtOut.F(t, nil)
-		tidx := 0
 
 		// set stage
 		for _, d := range domains {
@@ -163,8 +172,11 @@ func Run() (runisok bool) {
 				lasttimestep = true
 			}
 			if Δt < global.Sim.Solver.DtMin {
-				return
+				return true
 			}
+
+			// dynamic coefficients
+			global.DynCoefs.CalcBoth(Δt)
 
 			// time update
 			t += Δt

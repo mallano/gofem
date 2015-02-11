@@ -8,6 +8,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -394,4 +395,75 @@ func Test_sg530(tst *testing.T) {
 	tols := 1e-15
 	verb := true
 	TestingCompareResultsU(tst, "data/sg530.sim", "cmp/sg530.cmp", tolK, tolu, tols, skipK, verb)
+}
+
+func Test_sg111(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
+	utl.Tsilent = false
+	utl.TTitle("sg111")
+
+	// run simulation
+	if !Start("data/sg111.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// make sure to flush log
+	defer End()
+
+	// run simulation
+	if !Run() {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// read summary
+	sum := ReadSum()
+	utl.Pfyel("sum = %v\n", sum)
+
+	// allocate domain
+	d := NewDomain(global.Sim.Regions[0])
+	if !d.SetStage(0, global.Sim.Stages[0]) {
+		tst.Errorf("SetStage failed\n")
+		return
+	}
+
+	// selected node and dof index
+	nidx := 1
+	didx := 1
+
+	// for each tidx
+	t := make([]float64, sum.NumTidx)
+	uy := make([]float64, sum.NumTidx)
+	for tidx := 0; tidx < sum.NumTidx; tidx++ {
+		if !d.ReadSol(tidx) {
+			tst.Errorf("test failed:\n")
+			return
+		}
+		nod := d.Nodes[nidx]
+		eq := nod.dofs[didx].Eq
+		t[tidx] = d.Sol.T
+		uy[tidx] = d.Sol.Y[eq]
+	}
+	plt.Plot(t, uy, "'ro-', clip_on=0")
+	plt.Gll("$t$", "$u_y$", "")
+	plt.Show()
+
+	if false {
+		// check
+		skipK := true
+		tolK := 1e-17
+		tolu := 1e-17
+		tols := 1e-15
+		verb := true
+		TestingCompareResultsU(tst, "data/sg111.sim", "cmp/sg111.cmp", tolK, tolu, tols, skipK, verb)
+	}
 }

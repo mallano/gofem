@@ -54,7 +54,7 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 		tst.Errorf("Unmarshal failed\n")
 	}
 
-	// run comparisions
+	// run comparisons
 	for idx, cmp := range cmp_set {
 
 		// time index

@@ -1,0 +1,37 @@
+{
+  "data" : {
+    "desc"    : "Smith-Griffiths (5th ed) Figure 11.1 p487",
+    "matfile" : "data/sg.mat",
+    "showR"   : true,
+    "encoder" : "json"
+  },
+  "functions" : [
+    { "name":"load", "type":"exc2", "prms":[ 
+      { "n":"ta", "v":1 },
+      { "n":"A",  "v":3.194 },
+      { "n":"b",  "v":1 } ]
+    }
+  ],
+  "regions" : [
+    {
+      "desc"      : "beam",
+      "mshfile"   : "data/sg111.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"SG-11.1", "type":"beam" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply loading",
+      "nodebcs" : [
+        { "tag":-100, "keys":["ux","uy","rz"], "funcs":["zero","zero","zero"] },
+        { "tag":-200, "keys":["fy"], "funcs":["load"] }
+      ],
+      "control" : {
+        "tf" : 5,
+        "dt" : 0.05
+      }
+    }
+  ]
+}

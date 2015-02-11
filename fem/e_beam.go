@@ -48,9 +48,9 @@ type Beam struct {
 
 	// scratchpad. computed @ each ip
 	grav []float64 // [ndim] gravity vector
-	us   []float64 // [ndim] displacements @ ip
 	fi   []float64 // [nu] internal forces
 	ue   []float64 // local u vector
+	ζe   []float64 // local ζ* vector
 	fxl  []float64 // local external force vector
 }
 
@@ -122,6 +122,7 @@ func init() {
 		o.Ml = la.MatAlloc(o.Nu, o.Nu)
 		o.M = la.MatAlloc(o.Nu, o.Nu)
 		o.ue = make([]float64, o.Nu)
+		o.ζe = make([]float64, o.Nu)
 		o.fxl = make([]float64, o.Nu)
 		o.Rus = make([]float64, o.Nu)
 
@@ -196,7 +197,6 @@ func init() {
 
 		// scratchpad. computed @ each ip
 		o.grav = make([]float64, o.Ndim)
-		o.us = make([]float64, o.Ndim)
 		o.fi = make([]float64, o.Nu)
 
 		// return new element
@@ -251,12 +251,15 @@ func (o *Beam) SetSurfLoads(key string, idxface int, f fun.Func, extra string) (
 // InterpStarVars interpolates star variables to integration points
 func (o *Beam) InterpStarVars(sol *Solution) (ok bool) {
 
-	// skip steady cases
+	// steady
 	if global.Sim.Data.Steady {
 		return true
 	}
 
-	// TODO
+	// dynamics
+	for i, I := range o.Umap {
+		o.ζe[i] = sol.Zet[I]
+	}
 	return true
 }
 
@@ -267,7 +270,21 @@ func (o Beam) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	for i, I := range o.Umap {
 		o.ue[i] = sol.Y[I]
 	}
-	la.MatVecMul(o.fi, 1, o.K, o.ue)
+
+	// steady
+	if global.Sim.Data.Steady {
+		la.MatVecMul(o.fi, 1, o.K, o.ue)
+
+		// dynamics
+	} else {
+		dc := global.DynCoefs
+		for i := 0; i < o.Nu; i++ {
+			o.fi[i] = 0
+			for j := 0; j < o.Nu; j++ {
+				o.fi[i] += o.M[i][j]*(dc.α1*o.ue[j]-o.ζe[j]) + o.K[i][j]*o.ue[j]
+			}
+		}
+	}
 
 	// distributed loads
 	if o.Hasq {
