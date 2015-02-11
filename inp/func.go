@@ -27,7 +27,11 @@ func (o FuncsData) Get(name string) fun.Func {
 	}
 	for _, f := range o {
 		if f.Name == name {
-			return fun.New(f.Type, f.Prms)
+			fcn, err := fun.New(f.Type, f.Prms)
+			if LogErr(err, "FuncsData.Get") {
+				return nil
+			}
+			return fcn
 		}
 	}
 	return nil
