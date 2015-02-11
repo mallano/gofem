@@ -89,19 +89,21 @@ type Domain struct {
 }
 
 // NewDomain returns a new domain
-func NewDomain(reg *inp.Region) (o *Domain) {
-	o = new(Domain)
-	o.Reg = reg
-	o.Msh = inp.ReadMsh(reg.Mshfile, global.Root)
+func NewDomain(reg *inp.Region) *Domain {
+	var dom Domain
+	dom.Reg = reg
+	dom.Msh = inp.ReadMsh(reg.Mshfile, true)
 	if global.Distr {
-		PanicOrNot(global.Nproc != len(o.Msh.Part2cells), "number of processors must be equal to number of partitions defined in mesh file. %d != %d", global.Nproc, len(o.Msh.Part2cells))
+		if LogErrCond(global.Nproc != len(dom.Msh.Part2cells), "number of processors must be equal to the number of partitions defined in mesh file. %d != %d", global.Nproc, len(dom.Msh.Part2cells)) {
+			return nil
+		}
 	}
-	o.LinSol = la.GetSolver(global.Sim.LinSol.Name)
-	return
+	dom.LinSol = la.GetSolver(global.Sim.LinSol.Name)
+	return &dom
 }
 
 // SetStage set nodes, equation numbers and auxiliary data for given stage
-func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
+func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 
 	// backup state
 	if idxstg > 0 {
@@ -143,6 +145,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
 		}
 		o.Cid2active[c.Id] = true
 		info := GetElemInfo(edat, c.Id, o.Msh)
+		if info == nil {
+			return
+		}
 		utl.IntAssert(len(info.Dofs), len(c.Verts))
 
 		// store y and f information
@@ -189,6 +194,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
 
 			// new element
 			ele := NewElem(edat, c.Id, o.Msh)
+			if ele == nil {
+				return
+			}
 			o.Cid2elem[c.Id] = ele
 			o.Elems = append(o.Elems, ele)
 
@@ -210,10 +218,8 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
 	}
 
 	// logging
-	if global.Root {
-		log.Printf("dom: stage # %d %s\n", idxstg, stg.Desc)
-		log.Printf("dom: nnodes=%d nelems=%d\n", len(o.Nodes), len(o.Elems))
-	}
+	log.Printf("dom: stage # %d %s\n", idxstg, stg.Desc)
+	log.Printf("dom: nnodes=%d nelems=%d\n", len(o.Nodes), len(o.Elems))
 
 	// element conditions, essential and natural boundary conditions --------------------------------
 
@@ -224,7 +230,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
 	// element conditions
 	for _, ec := range stg.EleConds {
 		cells, ok := o.Msh.CellTag2cells[ec.Tag]
-		PanicOrNot(!ok, "cannot find cells with tag = %d to assign conditions", ec.Tag)
+		if LogErrCond(!ok, "cannot find cells with tag = %d to assign conditions", ec.Tag) {
+			return
+		}
 		for _, c := range cells {
 			e := o.Cid2elem[c.Id]
 			if e != nil { // set conditions only for this processor's / active element
@@ -238,7 +246,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
 	// face boundary conditions
 	for _, fc := range stg.FaceBcs {
 		pairs, ok := o.Msh.FaceTag2cells[fc.Tag]
-		PanicOrNot(!ok, "cannot find cells with face tag = %d to assign face boundary conditions", fc.Tag)
+		if LogErrCond(!ok, "cannot find cells with face tag = %d to assign face boundary conditions", fc.Tag) {
+			return
+		}
 		for _, p := range pairs {
 			if !o.Cid2active[p.C.Id] { // skip inactive element
 				continue
@@ -251,11 +261,15 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
 			}
 			for j, key := range fc.Keys {
 				if o.YandC[key] {
-					o.EssenBcs.Set(key, enodes, global.Sim.Functions.GetOrPanic(fc.Funcs[j]), fc.Extra)
+					if !o.EssenBcs.Set(key, enodes, global.Sim.Functions.GetOrPanic(fc.Funcs[j]), fc.Extra) {
+						return
+					}
 				} else {
 					e := o.Cid2elem[p.C.Id]
 					if e != nil { // set natural BCs only for this processor's / active element
-						e.SetSurfLoads(key, p.Fid, global.Sim.Functions.GetOrPanic(fc.Funcs[j]), fc.Extra)
+						if !e.SetSurfLoads(key, p.Fid, global.Sim.Functions.GetOrPanic(fc.Funcs[j]), fc.Extra) {
+							return
+						}
 					}
 				}
 			}
@@ -265,7 +279,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
 	// vertex bounday conditions
 	for _, nc := range stg.NodeBcs {
 		verts, ok := o.Msh.VertTag2verts[nc.Tag]
-		PanicOrNot(!ok, "cannot find vertices with tag = %d to assign node boundary conditions", nc.Tag)
+		if LogErrCond(!ok, "cannot find vertices with tag = %d to assign node boundary conditions", nc.Tag) {
+			return
+		}
 		for _, v := range verts {
 			if o.Vid2node[v.Id] != nil { // set BCs only for active nodes
 				n := o.Vid2node[v.Id]
@@ -293,7 +309,8 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
 			case 2:
 				o.T2eqs = append(o.T2eqs, dof.Eq)
 			default:
-				PanicOrNot(true, "t1 and t2 equations are incorrectly set")
+				LogErrCond(true, "t1 and t2 equations are incorrectly set")
+				return
 			}
 		}
 	}
@@ -334,11 +351,12 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) {
 	}
 
 	// logging
-	if global.Root {
-		log.Printf("dom: essenbcs=%v\n", o.EssenBcs.List(stg.Control.Tf))
-		log.Printf("dom: ptnatbcs=%v\n", o.PtNatBcs.List(stg.Control.Tf))
-		log.Printf("dom: ny=%d nlam=%d nnzKb=%d nnzA=%d nt1eqs=%d nt2eqs=%d\n", o.Ny, o.Nlam, o.NnzKb, o.NnzA, len(o.T1eqs), len(o.T2eqs))
-	}
+	log.Printf("dom: essenbcs=%v\n", o.EssenBcs.List(stg.Control.Tf))
+	log.Printf("dom: ptnatbcs=%v\n", o.PtNatBcs.List(stg.Control.Tf))
+	log.Printf("dom: ny=%d nlam=%d nnzKb=%d nnzA=%d nt1eqs=%d nt2eqs=%d\n", o.Ny, o.Nlam, o.NnzKb, o.NnzA, len(o.T1eqs), len(o.T2eqs))
+
+	// success
+	return true
 }
 
 // auxiliary functions //////////////////////////////////////////////////////////////////////////////

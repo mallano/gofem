@@ -42,21 +42,19 @@ func GetDecoder(r io.Reader) Decoder {
 }
 
 // SaveSol saves Solution to a file which name is set with tidx (time output index)
-func (o Domain) SaveSol(tidx int) (err error) {
+func (o Domain) SaveSol(tidx int) (ok bool) {
 
 	// buffer and encoder
 	var buf bytes.Buffer
 	enc := GetEncoder(&buf)
 
 	// encode t
-	err = enc.Encode(o.Sol.T)
-	if err != nil {
+	if LogErr(enc.Encode(o.Sol.T), "SaveSol") {
 		return
 	}
 
 	// encode Y
-	err = enc.Encode(o.Sol.Y)
-	if err != nil {
+	if LogErr(enc.Encode(o.Sol.Y), "SaveSol") {
 		return
 	}
 
@@ -64,34 +62,32 @@ func (o Domain) SaveSol(tidx int) (err error) {
 	if !global.Sim.Data.Steady {
 
 		// encode Dydt
-		err = enc.Encode(o.Sol.Dydt)
-		if err != nil {
+		if LogErr(enc.Encode(o.Sol.Dydt), "SaveSol") {
 			return
 		}
 
 		// encode D2ydt2
-		err = enc.Encode(o.Sol.D2ydt2)
-		if err != nil {
+		if LogErr(enc.Encode(o.Sol.D2ydt2), "SaveSol") {
 			return
 		}
 	}
 
 	// save file
 	fil, err := os.Create(out_nod_path(tidx))
-	if err != nil {
+	if LogErr(err, "SaveSol") {
 		return
 	}
 	defer fil.Close()
 	fil.Write(buf.Bytes())
-	return
+	return true
 }
 
 // ReadSol reads Solution from a file which name is set with tidx (time output index)
-func (o *Domain) ReadSol(tidx int) (err error) {
+func (o *Domain) ReadSol(tidx int) (ok bool) {
 
 	// open file
 	fil, err := os.Open(out_nod_path(tidx))
-	if err != nil {
+	if LogErr(err, "ReadSol") {
 		return
 	}
 	defer fil.Close()
@@ -100,14 +96,12 @@ func (o *Domain) ReadSol(tidx int) (err error) {
 	dec := GetDecoder(fil)
 
 	// decode t
-	err = dec.Decode(&o.Sol.T)
-	if err != nil {
+	if LogErr(dec.Decode(&o.Sol.T), "ReadSol") {
 		return
 	}
 
 	// decode Y
-	err = dec.Decode(&o.Sol.Y)
-	if err != nil {
+	if LogErr(dec.Decode(&o.Sol.Y), "ReadSol") {
 		return
 	}
 
@@ -115,22 +109,20 @@ func (o *Domain) ReadSol(tidx int) (err error) {
 	if !global.Sim.Data.Steady {
 
 		// decode Dydt
-		err = dec.Decode(&o.Sol.Dydt)
-		if err != nil {
+		if LogErr(dec.Decode(&o.Sol.Dydt), "ReadSol") {
 			return
 		}
 
 		// decode D2ydt2
-		err = dec.Decode(&o.Sol.D2ydt2)
-		if err != nil {
+		if LogErr(dec.Decode(&o.Sol.D2ydt2), "ReadSol") {
 			return
 		}
 	}
-	return
+	return true
 }
 
 // SaveIvs saves elements's internal values to a file which name is set with tidx (time output index)
-func (o Domain) SaveIvs(tidx int) (err error) {
+func (o Domain) SaveIvs(tidx int) (ok bool) {
 
 	// buffer and encoder
 	var buf bytes.Buffer
@@ -138,28 +130,27 @@ func (o Domain) SaveIvs(tidx int) (err error) {
 
 	// encode internal variables
 	for _, e := range o.ElemWriters {
-		err = e.Encode(enc)
-		if err != nil {
+		if !e.Encode(enc) {
 			return
 		}
 	}
 
 	// save file
 	fil, err := os.Create(out_ele_path(tidx))
-	if err != nil {
+	if LogErr(err, "SaveIvs") {
 		return
 	}
 	defer fil.Close()
 	fil.Write(buf.Bytes())
-	return
+	return true
 }
 
 // ReadSol reads elements's internal values from a file which name is set with tidx (time output index)
-func (o *Domain) ReadIvs(tidx int) (err error) {
+func (o *Domain) ReadIvs(tidx int) (ok bool) {
 
 	// open file
 	fil, err := os.Open(out_ele_path(tidx))
-	if err != nil {
+	if LogErr(err, "ReadIvs") {
 		return
 	}
 	defer fil.Close()
@@ -167,32 +158,27 @@ func (o *Domain) ReadIvs(tidx int) (err error) {
 	// decode internal variables
 	dec := GetDecoder(fil)
 	for _, e := range o.ElemWriters {
-		err = e.Decode(dec)
-		if err != nil {
+		if !e.Decode(dec) {
 			return
 		}
 	}
-	return
+	return true
 }
 
 // Out performs output of Solution and Internal values to files
-func (o *Domain) Out(tidx int) (err error) {
-	err = o.SaveSol(tidx)
-	if err != nil {
+func (o *Domain) Out(tidx int) (ok bool) {
+	if !o.SaveSol(tidx) {
 		return
 	}
-	err = o.SaveIvs(tidx)
-	return
+	return o.SaveIvs(tidx)
 }
 
 // In performes the inverse operation from Out
-func (o *Domain) In(tidx int) (err error) {
-	err = o.ReadIvs(tidx)
-	if err != nil {
+func (o *Domain) In(tidx int) (ok bool) {
+	if !o.ReadIvs(tidx) {
 		return
 	}
-	err = o.ReadSol(tidx)
-	return
+	return o.ReadSol(tidx)
 }
 
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////

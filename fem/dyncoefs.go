@@ -34,30 +34,38 @@ type DynCoefs struct {
 }
 
 // Init initialises this structure
-func (o *DynCoefs) Init(dat *inp.SolverData) {
+func (o *DynCoefs) Init(dat *inp.SolverData) (ok bool) {
 
 	// hmin
-	//o.hmin = dat.Hmin TODO: check this
+	o.hmin = dat.DtMin
 
 	// HHT
 	o.HHT = dat.HHT
 
 	// θ-method
 	o.θ = dat.Theta
-	PanicOrNot(o.θ < 1e-5 || o.θ > 1.0, _dyncoefs_err1, o.θ)
+	if LogErrCond(o.θ < 1e-5 || o.θ > 1.0, _dyncoefs_err1, o.θ) {
+		return
+	}
 
 	// HHT method
 	if dat.HHT {
 		o.α = dat.HHTalp
-		PanicOrNot(o.α < -1.0/3.0 || o.α > 0.0, _dyncoefs_err2, o.α)
+		if LogErrCond(o.α < -1.0/3.0 || o.α > 0.0, _dyncoefs_err2, o.α) {
+			return
+		}
 		o.θ1 = (1.0 - 2.0*o.α) / 2.0
 		o.θ2 = (1.0 - o.α) * (1.0 - o.α) / 2.0
 
 		// Newmark's method
 	} else {
 		o.θ1, o.θ2 = dat.Theta1, dat.Theta2
-		PanicOrNot(o.θ1 < 0.0001 || o.θ1 > 1.0, _dyncoefs_err3, o.θ1)
-		PanicOrNot(o.θ2 < 0.0001 || o.θ2 > 1.0, _dyncoefs_err4, o.θ2)
+		if LogErrCond(o.θ1 < 0.0001 || o.θ1 > 1.0, _dyncoefs_err3, o.θ1) {
+			return
+		}
+		if LogErrCond(o.θ2 < 0.0001 || o.θ2 > 1.0, _dyncoefs_err4, o.θ2) {
+			return
+		}
 	}
 
 	// Rayleigh damping
@@ -65,6 +73,9 @@ func (o *DynCoefs) Init(dat *inp.SolverData) {
 	if dat.RayK > 0.0 || dat.RayM > 0.0 {
 		o.Ray = true
 	}
+
+	// success
+	return true
 }
 
 // CalcBoth computes betas and alphas

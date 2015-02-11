@@ -25,10 +25,17 @@ func Test_beam01(tst *testing.T) {
 	utl.TTitle("beam01")
 
 	// domain
-	Start("data/beam01.sim", true, !utl.Tsilent)
+	if !Start("data/beam01.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
 	dom := NewDomain(global.Sim.Regions[0])
-	dom.SetStage(0, global.Sim.Stages[0])
+	if dom == nil {
+		tst.Errorf("test failed\n")
+	}
+	if !dom.SetStage(0, global.Sim.Stages[0]) {
+		tst.Errorf("test failed\n")
+	}
 
 	// nodes and elements
 	utl.IntAssert(len(dom.Nodes), 2)
@@ -80,7 +87,7 @@ func Test_beam01(tst *testing.T) {
 		case "uy":
 			ct_uy_eqs = append(ct_uy_eqs, eq)
 		default:
-			tst.Fatalf("key %s is incorrect", c.Key)
+			tst.Errorf("key %s is incorrect", c.Key)
 		}
 	}
 	sort.Ints(ct_ux_eqs)

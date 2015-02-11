@@ -5,8 +5,6 @@
 package fem
 
 import (
-	"log"
-
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/msolid"
 	"github.com/cpmech/gofem/shp"
@@ -83,7 +81,10 @@ type ElemU struct {
 func init() {
 
 	// information allocator
-	iallocators["u"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) (info Info) {
+	iallocators["u"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info {
+
+		// new info
+		var info Info
 
 		// number of nodes in element
 		cell := msh.Cells[cid]
@@ -104,7 +105,7 @@ func init() {
 
 		// t1 and t2 variables
 		info.T2vars = ykeys
-		return
+		return &info
 	}
 
 	// element allocator
@@ -130,7 +131,9 @@ func init() {
 		o.Thickness = 1.0
 		if s_thick, found := utl.Keycode(edat.Extra, "thick"); found {
 			o.Thickness = utl.Atof(s_thick)
-			PanicOrNot(!global.Sim.Data.Pstress, "cannot specify 'thick' in element if Pstress=false in Global Data")
+			if LogErrCond(!global.Sim.Data.Pstress, "cannot specify 'thick' in element if Pstress=false in Global Data") {
+				return nil
+			}
 		}
 
 		// flag: debug
@@ -202,7 +205,7 @@ func init() {
 // implementation ///////////////////////////////////////////////////////////////////////////////////
 
 // SetEqs set equations
-func (o *ElemU) SetEqs(eqs [][]int, mixedform_eqs []int) {
+func (o *ElemU) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	o.Umap = make([]int, o.Nu)
 	for m := 0; m < o.Cell.Shp.Nverts; m++ {
 		for i := 0; i < o.Ndim; i++ {
@@ -210,34 +213,36 @@ func (o *ElemU) SetEqs(eqs [][]int, mixedform_eqs []int) {
 			o.Umap[r] = eqs[m][i]
 		}
 	}
+	return true
 }
 
 // SetEleConds set element conditions
-func (o *ElemU) SetEleConds(key string, f fun.Func, extra string) {
+func (o *ElemU) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 	if key == "g" { // gravity
 		o.Gfcn = f
 	}
+	return true
 }
 
 // SetSurfLoads set surface loads (natural boundary conditions)
-func (o *ElemU) SetSurfLoads(key string, idxface int, f fun.Func, extra string) {
+func (o *ElemU) SetSurfLoads(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
+	return true
 }
 
 // InterpStarVars interpolates star variables to integration points
-func (o *ElemU) InterpStarVars(sol *Solution) (err error) {
+func (o *ElemU) InterpStarVars(sol *Solution) (ok bool) {
 
 	// skip steady cases
 	if global.Sim.Data.Steady {
-		return
+		return true
 	}
 
 	// for each integration point
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions and gradients
-		err = o.log(o.Cell.Shp.CalcAtIp(o.X, ip, true), "InterpStarVars")
-		if err != nil {
+		if LogErr(o.Cell.Shp.CalcAtIp(o.X, ip, true), "InterpStarVars") {
 			return
 		}
 
@@ -254,13 +259,11 @@ func (o *ElemU) InterpStarVars(sol *Solution) (err error) {
 			}
 		}
 	}
-
-	// success
 	return
 }
 
 // adds -R to global residual vector fb
-func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (err error) {
+func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// clear fi vector if using B matrix
 	if o.UseB {
@@ -273,8 +276,7 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (err error) {
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions, gradients and variables @ ip
-		err = o.log(o.ipvars(idx, sol), "AddToRhs")
-		if err != nil {
+		if !o.ipvars(idx, sol) {
 			return
 		}
 		coef := o.Cell.Shp.J * ip.W * o.Thickness
@@ -320,12 +322,11 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (err error) {
 	}
 
 	// external forces
-	err = o.add_surfloads_to_rhs(fb, sol)
-	return
+	return o.add_surfloads_to_rhs(fb, sol)
 }
 
 // adds element K to global Jacobian matrix Kb
-func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error) {
+func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// zero K matrix
 	la.MatFill(o.K, 0)
@@ -336,22 +337,23 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error)
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions, gradients and variables @ ip
-		err = o.log(o.ipvars(idx, sol), "AddToKb")
-		if err != nil {
+		if !o.ipvars(idx, sol) {
 			return
 		}
 
 		// check Jacobian
 		if o.Cell.Shp.J < 0 {
-			log.Printf("e_u: eid=%d: Jacobian is negative = %g\n", o.Cell.Id, o.Cell.Shp.J)
+			LogErrCond(true, "ElemU: eid=%d: Jacobian is negative = %g\n", o.Cell.Id, o.Cell.Shp.J)
+			return
 		}
+
+		// coefficients
 		coef := o.Cell.Shp.J * ip.W * o.Thickness
 		S := o.Cell.Shp.S
 		G := o.Cell.Shp.G
 
 		// consistent tangent model matrix
-		err = o.log(o.MdlSmall.CalcD(o.D, o.States[idx], firstIt), "AddToKb")
-		if err != nil {
+		if LogErr(o.MdlSmall.CalcD(o.D, o.States[idx], firstIt), "AddToKb") {
 			return
 		}
 
@@ -389,21 +391,18 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error)
 			Kb.Put(I, J, o.K[i][j])
 		}
 	}
-
-	// success
-	return
+	return true
 }
 
 // Update perform (tangent) update
-func (o *ElemU) Update(sol *Solution) (err error) {
+func (o *ElemU) Update(sol *Solution) (ok bool) {
 
 	// for each integration point
 	nverts := o.Cell.Shp.Nverts
 	for idx, _ := range o.IpsElem {
 
 		// interpolation functions, gradients and variables @ ip
-		err = o.log(o.ipvars(idx, sol), "Update")
-		if err != nil {
+		if !o.ipvars(idx, sol) {
 			return
 		}
 		S := o.Cell.Shp.S
@@ -422,20 +421,17 @@ func (o *ElemU) Update(sol *Solution) (err error) {
 		}
 
 		// call model update => update stresses
-		err = o.log(o.MdlSmall.Update(o.States[idx], o.ε, o.Δε), "Update")
-		if err != nil {
+		if LogErr(o.MdlSmall.Update(o.States[idx], o.ε, o.Δε), "Update") {
 			return
 		}
 	}
-
-	// success
-	return
+	return true
 }
 
 // internal variables ///////////////////////////////////////////////////////////////////////////////
 
 // InitIvs reset (and fix) internal variables after primary variables have been changed
-func (o *ElemU) InitIvs(sol *Solution) {
+func (o *ElemU) InitIvs(sol *Solution) (ok bool) {
 	nip := len(o.IpsElem)
 	o.States = make([]*msolid.State, nip)
 	o.StatesBkp = make([]*msolid.State, nip)
@@ -443,60 +439,55 @@ func (o *ElemU) InitIvs(sol *Solution) {
 		o.States[i], _ = o.Model.InitIntVars()
 		o.StatesBkp[i] = o.States[i].GetCopy()
 	}
+	return true
 }
 
 // SetIvs set secondary variables; e.g. during initialisation via files
-func (o *ElemU) SetIvs(zvars map[string][]float64) {
+func (o *ElemU) SetIvs(zvars map[string][]float64) (ok bool) {
+	return true
 }
 
 // BackupIvs create copy of internal variables
-func (o *ElemU) BackupIvs() {
+func (o *ElemU) BackupIvs() (ok bool) {
 	for i, s := range o.StatesBkp {
 		s.Set(o.States[i])
 	}
+	return true
 }
 
 // RestoreIvs restore internal variables from copies
-func (o *ElemU) RestoreIvs() {
+func (o *ElemU) RestoreIvs() (ok bool) {
 	for i, s := range o.States {
 		s.Set(o.StatesBkp[i])
 	}
+	return true
 }
 
 // writer ///////////////////////////////////////////////////////////////////////////////////////////
 
 // Encode encodes internal variables
-func (o ElemU) Encode(enc Encoder) (err error) {
-	return enc.Encode(o.States)
+func (o ElemU) Encode(enc Encoder) (ok bool) {
+	return !LogErr(enc.Encode(o.States), "Encode")
 }
 
 // Decode decodes internal variables
-func (o ElemU) Decode(dec Decoder) (err error) {
-	return dec.Decode(&o.States)
+func (o ElemU) Decode(dec Decoder) (ok bool) {
+	return !LogErr(dec.Decode(&o.States), "Decode")
 }
 
 // auxiliary ////////////////////////////////////////////////////////////////////////////////////////
 
-// log logs errors
-func (o *ElemU) log(err error, msg string) error {
-	if err != nil {
-		log.Printf("ElemU: eid=%d %s failed with %v\n", o.Cell.Id, msg, err)
-	}
-	return err
-}
-
 // ipvars computes current values @ integration points. idx == index of integration point
-func (o *ElemU) ipvars(idx int, sol *Solution) (err error) {
+func (o *ElemU) ipvars(idx int, sol *Solution) (ok bool) {
 
 	// interpolation functions and gradients
-	err = o.log(o.Cell.Shp.CalcAtIp(o.X, o.IpsElem[idx], true), "ipvars")
-	if err != nil {
+	if LogErr(o.Cell.Shp.CalcAtIp(o.X, o.IpsElem[idx], true), "ipvars") {
 		return
 	}
 
 	// skip if steady (this must be after CalcAtIp, because callers will need S and G)
 	if global.Sim.Data.Steady {
-		return
+		return true
 	}
 
 	// clear variables
@@ -511,9 +502,7 @@ func (o *ElemU) ipvars(idx int, sol *Solution) (err error) {
 			o.us[i] += o.Cell.Shp.S[m] * sol.Y[r]
 		}
 	}
-
-	// success
-	return
+	return true
 }
 
 // surfloads_keys returns the keys that can be used to specify surface loads
@@ -522,7 +511,7 @@ func (o *ElemU) surfloads_keys() map[string]bool {
 }
 
 // add_surfloads_to_rhs adds surfaces loads to rhs
-func (o *ElemU) add_surfloads_to_rhs(fb []float64, sol *Solution) (err error) {
+func (o *ElemU) add_surfloads_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 	// debugging variables
 	if o.Debug {
@@ -536,8 +525,7 @@ func (o *ElemU) add_surfloads_to_rhs(fb []float64, sol *Solution) (err error) {
 	// compute surface integral
 	for _, load := range o.NatBcs {
 		for _, ip := range o.IpsFace {
-			err = o.log(o.Cell.Shp.CalcAtFaceIp(o.X, ip, load.IdxFace), "add_surfloads_to_rhs")
-			if err != nil {
+			if LogErr(o.Cell.Shp.CalcAtFaceIp(o.X, ip, load.IdxFace), "add_surfloads_to_rhs") {
 				return
 			}
 			switch load.Key {
@@ -564,7 +552,5 @@ func (o *ElemU) add_surfloads_to_rhs(fb []float64, sol *Solution) (err error) {
 			}
 		}
 	}
-
-	// success
-	return
+	return true
 }

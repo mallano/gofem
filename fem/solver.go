@@ -26,12 +26,12 @@ var global struct {
 	WspcStop []int // stop flags [nprocs]
 	WspcInum []int // workspace of integer numbers [nprocs]
 
-	// auxiliar structures
-	DynCoefs *DynCoefs // dynamic coefficients
-
 	// simulation and materials
 	Sim *inp.Simulation // simulation data
 	Mdb *inp.MatDb      // materials database
+
+	// auxiliar structures
+	DynCoefs *DynCoefs // dynamic coefficients
 }
 
 // End must be called and the end to flush log file
@@ -40,7 +40,7 @@ func End() {
 }
 
 // Start initialises 'global' and starts logging
-func Start(simfilepath string, erasefiles, verbose bool) {
+func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 
 	// multiprocessing data
 	global.Rank = 0
@@ -57,13 +57,8 @@ func Start(simfilepath string, erasefiles, verbose bool) {
 	if !global.Root {
 		global.Verbose = false
 	}
-	if global.Distr {
-		global.WspcStop = make([]int, global.Nproc)
-		global.WspcInum = make([]int, global.Nproc)
-	}
-
-	// auxiliar structures
-	global.DynCoefs = new(DynCoefs)
+	global.WspcStop = make([]int, global.Nproc)
+	global.WspcInum = make([]int, global.Nproc)
 
 	// simulation and  materials
 	dolog := true
@@ -74,15 +69,31 @@ func Start(simfilepath string, erasefiles, verbose bool) {
 	if !global.Root {
 		global.Sim.Data.ShowR = false
 	}
+
+	// auxiliar structures
+	global.DynCoefs = new(DynCoefs)
+	if !global.DynCoefs.Init(&global.Sim.Solver) {
+		return
+	}
+
+	// success
+	return true
 }
 
 // Run runs FE simulation
-func Run() {
+func Run() (runisok bool) {
 
 	// alloc domains
 	var domains []*Domain
 	for _, reg := range global.Sim.Regions {
-		domains = append(domains, NewDomain(reg))
+		dom := NewDomain(reg)
+		if dom == nil {
+			break
+		}
+		domains = append(domains, dom)
+	}
+	if Stop() {
+		return
 	}
 
 	// make sure to call linear solver clean up routines upon exit
@@ -122,11 +133,16 @@ func Run() {
 
 		// set stage
 		for _, d := range domains {
-			d.SetStage(stgidx, global.Sim.Stages[stgidx])
-			d.Sol.T = t
-			if Stop(d.Out(tidx), "Out") {
-				return
+			if !d.SetStage(stgidx, global.Sim.Stages[stgidx]) {
+				break
 			}
+			d.Sol.T = t
+			if !d.Out(tidx) {
+				break
+			}
+		}
+		if Stop() {
+			return
 		}
 		tidx += 1
 
@@ -163,8 +179,7 @@ func Run() {
 
 			// run iterations
 			for _, d := range domains {
-				stop := run_iterations(t, Δt, d)
-				if stop {
+				if !run_iterations(t, Δt, d) {
 					return
 				}
 			}
@@ -173,9 +188,12 @@ func Run() {
 			if t >= tout || lasttimestep {
 				//utl.Pfblue2("tout = %v\n", tout)
 				for _, d := range domains {
-					if Stop(d.Out(tidx), "Out") {
-						return
+					if !d.Out(tidx) {
+						break
 					}
+				}
+				if Stop() {
+					return
 				}
 				tout += Δtout
 				tidx += 1
@@ -183,11 +201,11 @@ func Run() {
 			}
 		}
 	}
-	return
+	return true
 }
 
 // run_iterations solves the nonlinear problem
-func run_iterations(t, Δt float64, d *Domain) (stop bool) {
+func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 	// zero accumulated increments
 	la.VecFill(d.Sol.ΔY, 0)
@@ -215,9 +233,12 @@ func run_iterations(t, Δt float64, d *Domain) (stop bool) {
 		// assemble right-hand side vector (fb) with negative of residuals
 		la.VecFill(d.Fb, 0)
 		for _, e := range d.Elems {
-			if Stop(e.AddToRhs(d.Fb, d.Sol), "right-hand side vector") {
-				return true // stop
+			if !e.AddToRhs(d.Fb, d.Sol) {
+				break
 			}
+		}
+		if Stop() {
+			return
 		}
 
 		// join all fb
@@ -255,9 +276,12 @@ func run_iterations(t, Δt float64, d *Domain) (stop bool) {
 			// assemble element matrices
 			d.Kb.Start()
 			for _, e := range d.Elems {
-				if Stop(e.AddToKb(d.Kb, d.Sol, it == 0), "assembly") {
-					return true // stop
+				if !e.AddToKb(d.Kb, d.Sol, it == 0) {
+					break
 				}
+			}
+			if Stop() {
+				return
 			}
 
 			// join A and tr(A) matrices into Kb
@@ -272,14 +296,16 @@ func run_iterations(t, Δt float64, d *Domain) (stop bool) {
 			}
 
 			// perform factorisation
-			if Stop(d.LinSol.Fact(), "factorisation") {
-				return true // stop
+			LogErr(d.LinSol.Fact(), "factorisation")
+			if Stop() {
+				return
 			}
 		}
 
 		// solve for wb := δyb
-		if Stop(d.LinSol.SolveR(d.Wb, d.Fb, false), "solve") {
-			return true // stop
+		LogErr(d.LinSol.SolveR(d.Wb, d.Fb, false), "solve")
+		if Stop() {
+			return
 		}
 
 		// update primary variables (y) and Lagrange multipliers (λ)
@@ -306,9 +332,12 @@ func run_iterations(t, Δt float64, d *Domain) (stop bool) {
 
 		// update secondary variables
 		for _, e := range d.Elems {
-			if Stop(e.Update(d.Sol), "update") {
-				return true // stop
+			if !e.Update(d.Sol) {
+				break
 			}
+		}
+		if Stop() {
+			return
 		}
 
 		// compute RMS norm of δu and check convegence on δu
@@ -332,5 +361,5 @@ func run_iterations(t, Δt float64, d *Domain) (stop bool) {
 	}
 
 	// success
-	return
+	return true
 }

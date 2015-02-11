@@ -58,7 +58,10 @@ type Beam struct {
 func init() {
 
 	// information allocator
-	iallocators["beam"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) (info Info) {
+	iallocators["beam"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info {
+
+		// new info
+		var info Info
 
 		// solution variables
 		ykeys := []string{"ux", "uy", "rz"}
@@ -75,14 +78,16 @@ func init() {
 
 		// t1 and t2 variables
 		info.T2vars = ykeys
-		return
+		return &info
 	}
 
 	// element allocator
 	eallocators["beam"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) Elem {
 
 		// check
-		PanicOrNot(msh.Ndim == 3, "beam is not implemented for 3D yet")
+		if LogErrCond(msh.Ndim == 3, "beam is not implemented for 3D yet") {
+			return nil
+		}
 
 		// basic data
 		var o Beam
@@ -197,7 +202,7 @@ func init() {
 }
 
 // SetEqs set equations [2][?]. Format of eqs == format of info.Dofs
-func (o *Beam) SetEqs(eqs [][]int, mixedform_eqs []int) {
+func (o *Beam) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	ndof := 3 * (o.Ndim - 1)
 	o.Umap = make([]int, o.Nu)
 	for m := 0; m < 2; m++ {
@@ -206,15 +211,16 @@ func (o *Beam) SetEqs(eqs [][]int, mixedform_eqs []int) {
 			o.Umap[r] = eqs[m][i]
 		}
 	}
+	return true
 }
 
 // SetEleConds set element conditions
-func (o *Beam) SetEleConds(key string, f fun.Func, extra string) {
+func (o *Beam) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 
 	// gravity
 	if key == "g" {
 		o.Gfcn = f
-		return
+		return true
 	}
 
 	// distributed loads
@@ -227,27 +233,32 @@ func (o *Beam) SetEleConds(key string, f fun.Func, extra string) {
 		o.Hasq, o.QnR = true, f
 	case "qt":
 		o.Hasq, o.Qt = true, f
+	default:
+		LogErrCond(true, "cannot handle boundary condition named %q", key)
+		return false
 	}
+	return true
 }
 
 // SetSurfLoads set surface loads (natural boundary conditions)
-func (o *Beam) SetSurfLoads(key string, idxface int, f fun.Func, extra string) {
+func (o *Beam) SetSurfLoads(key string, idxface int, f fun.Func, extra string) (ok bool) {
+	return true
 }
 
 // InterpStarVars interpolates star variables to integration points
-func (o *Beam) InterpStarVars(sol *Solution) (err error) {
+func (o *Beam) InterpStarVars(sol *Solution) (ok bool) {
 
 	// skip steady cases
 	if global.Sim.Data.Steady {
-		return
+		return true
 	}
 
-	// success
-	return
+	// TODO
+	return true
 }
 
 // adds -R to global residual vector fb
-func (o Beam) AddToRhs(fb []float64, sol *Solution) (err error) {
+func (o Beam) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// node displacements
 	for i, I := range o.Umap {
@@ -276,13 +287,11 @@ func (o Beam) AddToRhs(fb []float64, sol *Solution) (err error) {
 	for i, I := range o.Umap {
 		fb[I] -= o.fi[i]
 	}
-
-	// success
-	return
+	return true
 }
 
 // adds element K to global Jacobian matrix Kb
-func (o Beam) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error) {
+func (o Beam) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// add K to sparse matrix Kb
 	for i, I := range o.Umap {
@@ -290,13 +299,10 @@ func (o Beam) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error) {
 			Kb.Put(I, J, o.K[i][j])
 		}
 	}
-
-	// success
-	return
+	return true
 }
 
 // Update perform (tangent) update
-func (o *Beam) Update(sol *Solution) (err error) {
-	// success
-	return
+func (o *Beam) Update(sol *Solution) (ok bool) {
+	return true
 }

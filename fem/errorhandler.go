@@ -5,75 +5,52 @@
 package fem
 
 import (
+	"log"
+
 	"github.com/cpmech/gosl/mpi"
 	"github.com/cpmech/gosl/utl"
 )
 
-// Stop decides whether a serial or parallel execution has to be stopped or not
-func Stop(err error, msg string) bool {
-
-	// serial run
-	if !global.Distr {
-		if err != nil {
-			utl.Pf("\n")
-			utl.CallerInfo(3)
-			utl.CallerInfo(2)
-			utl.PfMag("simulation failed on %s with %v\n", msg, err)
-			return true // stop
-		}
-		return false // continue
-	}
-
-	// parallel run
-	for i := 0; i < global.Nproc; i++ {
-		global.WspcStop[i] = 0 // all continue
-	}
+func LogErr(err error, msg string) (stop bool) {
 	if err != nil {
-		utl.Pf("\n")
-		utl.CallerInfo(3)
-		utl.CallerInfo(2)
-		utl.PfMag("simulation failed in proc # %d on %s with %v\n", global.Rank, msg, err)
-		global.WspcStop[global.Rank] = 1 // this processor wants to stop
+		fullmsg := msg + " : " + err.Error()
+		log.Printf(fullmsg)
+		global.WspcStop[global.Rank] = 1
+		return true
 	}
-	mpi.IntAllReduceMax(global.WspcStop, global.WspcInum)
-	for i := 0; i < global.Nproc; i++ {
-		if global.WspcStop[i] > 0 {
-			return true // stop
-		}
-	}
-	return false // continue
+	return
 }
 
-// PanicOrNot decides to panic if any processor wants to panic
-func PanicOrNot(dopanic bool, msg string, prm ...interface{}) {
+func LogErrCond(condition bool, msg string, prm ...interface{}) (stop bool) {
+	if condition {
+		fullmsg := utl.Sf(msg, prm...)
+		log.Printf(fullmsg)
+		global.WspcStop[global.Rank] = 1
+		return true
+	}
+	return
+}
 
-	// serial run
+func Stop() bool {
 	if !global.Distr {
-		if dopanic {
-			utl.Pf("\n")
-			panic(utl.Sf(msg, prm...))
+		if global.WspcStop[global.Rank] > 0 {
+			utl.CallerInfo(3)
+			utl.CallerInfo(2)
+			utl.PfRed("simulation stopped due to errors. see log files\n")
+			return true
 		}
-		return
-	}
-
-	// parallel run
-	for i := 0; i < global.Nproc; i++ {
-		global.WspcStop[i] = 0 // all ok
-	}
-	if dopanic {
-		global.WspcStop[global.Rank] = 1 // this processor wants to panic
+		return false
 	}
 	mpi.IntAllReduceMax(global.WspcStop, global.WspcInum)
 	for i := 0; i < global.Nproc; i++ {
 		if global.WspcStop[i] > 0 {
 			if global.Root {
-				utl.Pf("\n")
 				utl.CallerInfo(3)
 				utl.CallerInfo(2)
-				panic(utl.Sf(msg, prm...))
-			} else {
-				panic(utl.Sf(msg, prm...))
+				utl.PfRed("simulation stopped due to errors. see log files\n")
 			}
+			return true
 		}
 	}
+	return false
 }

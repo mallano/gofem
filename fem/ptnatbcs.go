@@ -39,8 +39,11 @@ func (o PtNaturalBcs) AddToRhs(fb []float64, t float64) {
 }
 
 // Set sets new point natural boundary condition data
-func (o *PtNaturalBcs) Set(key string, nod *Node, fcn fun.Func, extra string) {
-	d := nod.GetDofOrPanic(key)
+func (o *PtNaturalBcs) Set(key string, nod *Node, fcn fun.Func, extra string) (setisok bool) {
+	d := nod.GetDof(key)
+	if LogErrCond(d == nil, "cannot find dof named %q", key) {
+		return
+	}
 	if idx, ok := o.Eq2idx[d.Eq]; ok {
 		o.Bcs[idx].Key = "f" + key
 		o.Bcs[idx].Eq = d.Eq
@@ -51,6 +54,7 @@ func (o *PtNaturalBcs) Set(key string, nod *Node, fcn fun.Func, extra string) {
 		o.Eq2idx[d.Eq] = len(o.Bcs)
 		o.Bcs = append(o.Bcs, &PtNaturalBc{"f" + key, d.Eq, nod.vert.C, fcn, extra})
 	}
+	return true
 }
 
 // List returns a simple list logging bcs at time t

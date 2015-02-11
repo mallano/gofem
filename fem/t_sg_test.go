@@ -45,10 +45,17 @@ func Test_sg52a(tst *testing.T) {
 	utl.TTitle("sg52a")
 
 	// domain
-	Start("data/sg52.sim", true, !utl.Tsilent)
+	if !Start("data/sg52.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
 	dom := NewDomain(global.Sim.Regions[0])
-	dom.SetStage(0, global.Sim.Stages[0])
+	if dom == nil {
+		tst.Errorf("test failed\n")
+	}
+	if !dom.SetStage(0, global.Sim.Stages[0]) {
+		tst.Errorf("test failed\n")
+	}
 
 	// nodes and elements
 	utl.IntAssert(len(dom.Nodes), 9)
@@ -112,7 +119,7 @@ func Test_sg52a(tst *testing.T) {
 		case "uy":
 			ct_uy_eqs = append(ct_uy_eqs, eq)
 		default:
-			tst.Fatalf("key %s is incorrect", c.Key)
+			tst.Errorf("key %s is incorrect", c.Key)
 		}
 	}
 	sort.Ints(ct_ux_eqs)
@@ -144,9 +151,13 @@ func Test_sg52b(tst *testing.T) {
 	utl.TTitle("sg52b")
 
 	// run simulation
-	Start("data/sg52.sim", true, !utl.Tsilent)
+	if !Start("data/sg52.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
-	Run()
+	if !Run() {
+		tst.Errorf("test failed\n")
+	}
 
 	// check
 	skipK := false
@@ -171,9 +182,13 @@ func Test_sg57(tst *testing.T) {
 	utl.TTitle("sg57")
 
 	// run simulation
-	Start("data/sg57.sim", true, !utl.Tsilent)
+	if !Start("data/sg57.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
-	Run()
+	if !Run() {
+		tst.Errorf("test failed\n")
+	}
 
 	// check
 	skipK := false
@@ -198,9 +213,13 @@ func Test_sg511(tst *testing.T) {
 	utl.TTitle("sg511")
 
 	// run simulation
-	Start("data/sg511.sim", true, !utl.Tsilent)
+	if !Start("data/sg511.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
-	Run()
+	if !Run() {
+		tst.Errorf("test failed\n")
+	}
 
 	// check
 	skipK := false
@@ -225,9 +244,13 @@ func Test_sg515(tst *testing.T) {
 	utl.TTitle("sg515")
 
 	// run simulation
-	Start("data/sg515.sim", true, !utl.Tsilent)
+	if !Start("data/sg515.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
-	Run()
+	if !Run() {
+		tst.Errorf("test failed\n")
+	}
 
 	// check
 	skipK := false
@@ -252,9 +275,13 @@ func Test_sg517(tst *testing.T) {
 	utl.TTitle("sg517")
 
 	// run simulation
-	Start("data/sg517.sim", true, !utl.Tsilent)
+	if !Start("data/sg517.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
-	Run()
+	if !Run() {
+		tst.Errorf("test failed\n")
+	}
 
 	// check
 	skipK := false

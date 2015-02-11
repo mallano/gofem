@@ -32,29 +32,27 @@ type T_results struct {
 // T_results_set is a set of comparison results
 type T_results_set []*T_results
 
-// testing_load_results_u loads comparison results for tests with u-formulation
-func testing_load_results_u(fn string) T_results_set {
-
-	// read file
-	b, err := utl.ReadFile(fn)
-	PanicOrNot(err != nil, "cannot open file\n%v", err)
-
-	// unmarshal json
-	var r T_results_set
-	err = json.Unmarshal(b, &r)
-	PanicOrNot(err != nil, "cannot unmarshal file\n%v", err)
-	return r
-}
-
 // testing_compare_results_u compares results with u-formulation
 func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tolu, tols float64, skipK, verbose bool) {
 
 	// allocate domain
 	d := NewDomain(global.Sim.Regions[0])
-	d.SetStage(0, global.Sim.Stages[0])
+	if !d.SetStage(0, global.Sim.Stages[0]) {
+		tst.Errorf("SetStage failed\n")
+	}
 
-	// load reference results
-	cmp_set := testing_load_results_u(cmpfname)
+	// read file
+	buf, err := utl.ReadFile(cmpfname)
+	if LogErr(err, "TestingCompareResultsU") {
+		tst.Errorf("ReadFile failed\n")
+	}
+
+	// unmarshal json
+	var cmp_set T_results_set
+	err = json.Unmarshal(buf, &cmp_set)
+	if LogErr(err, "TestingCompareResultsU") {
+		tst.Errorf("Unmarshal failed\n")
+	}
 
 	// run comparisions
 	for idx, cmp := range cmp_set {
@@ -66,8 +64,9 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 		}
 
 		// load gofem results
-		err := d.In(tidx)
-		PanicOrNot(err != nil, "cannot read results files: %v", err)
+		if !d.In(tidx) {
+			tst.Errorf("reading results failed\n")
+		}
 		if verbose {
 			utl.Pfyel("solution.t = %v\n", d.Sol.T)
 		}
@@ -79,7 +78,9 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 			}
 			for eid, Ksg := range cmp.Kmats {
 				if e, ok := d.Elems[eid].(*ElemU); ok {
-					e.AddToKb(d.Kb, d.Sol, true)
+					if !e.AddToKb(d.Kb, d.Sol, true) {
+						tst.Errorf("AddToKb failed\n")
+					}
 					utl.CheckMatrix(tst, utl.Sf("K%d", eid), tolK, e.K, Ksg)
 				}
 			}

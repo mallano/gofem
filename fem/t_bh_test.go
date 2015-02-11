@@ -39,10 +39,17 @@ func Test_bh16a(tst *testing.T) {
 	utl.TTitle("bh16a")
 
 	// domain
-	Start("data/bh16.sim", true, !utl.Tsilent)
+	if !Start("data/bh16.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
 	dom := NewDomain(global.Sim.Regions[0])
-	dom.SetStage(0, global.Sim.Stages[0])
+	if dom == nil {
+		tst.Errorf("test failed\n")
+	}
+	if !dom.SetStage(0, global.Sim.Stages[0]) {
+		tst.Errorf("test failed\n")
+	}
 
 	// nodes and elements
 	utl.IntAssert(len(dom.Nodes), 6)
@@ -102,7 +109,7 @@ func Test_bh16a(tst *testing.T) {
 		case "uy":
 			ct_uy_eqs = append(ct_uy_eqs, eq)
 		default:
-			tst.Fatalf("key %s is incorrect", c.Key)
+			tst.Errorf("key %s is incorrect", c.Key)
 		}
 	}
 	sort.Ints(ct_ux_eqs)
@@ -125,9 +132,13 @@ func Test_bh16b(tst *testing.T) {
 	utl.TTitle("bh16b")
 
 	// run simulation
-	Start("data/bh16.sim", true, !utl.Tsilent)
+	if !Start("data/bh16.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
-	Run()
+	if !Run() {
+		tst.Errorf("test failed\n")
+	}
 
 	// check
 	skipK := false
@@ -153,9 +164,13 @@ func Test_bh14(tst *testing.T) {
 	utl.TTitle("bh14")
 
 	// run simulation
-	Start("data/bh14.sim", true, !utl.Tsilent)
+	if !Start("data/bh14.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+	}
 	defer End()
-	Run()
+	if !Run() {
+		tst.Errorf("test failed\n")
+	}
 
 	// check
 	skipK := true

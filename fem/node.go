@@ -77,17 +77,6 @@ func (o *Node) GetDof(ukey string) *Dof {
 	return nil
 }
 
-// GetDofOrPanic returns the Dof structure for given Dof name (ukey)
-func (o *Node) GetDofOrPanic(ukey string) *Dof {
-	for _, dof := range o.dofs {
-		if dof.Ukey == ukey {
-			return dof
-		}
-	}
-	PanicOrNot(true, "cannot find dof named %q", ukey)
-	return nil
-}
-
 // GetEq returns the equation number for given Dof name (ukey)
 //  Note: returns -1 if not found
 func (o *Node) GetEq(ukey string) (eqNumber int) {

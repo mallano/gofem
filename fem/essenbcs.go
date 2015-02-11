@@ -134,7 +134,7 @@ func GetIsEssenKeyMap() map[string]bool {
 //  extra -- is a keycode-style data. e.g. "!type:incsup2d !alp:30"
 //  Notes: 1) the default for key is single point constraint; e.g. "ux", "uy", ...
 //         2) hydraulic head can be set with key == "H"
-func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string) {
+func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string) (setisok bool) {
 
 	// len(nod) must be greater than 0
 	utl.IntAssertLessThan(0, len(nodes)) // 0 < len(nod)
@@ -147,14 +147,16 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 				o.add(key, []int{a[j].Eq, b.Eq}, []float64{1, -1}, &fun.Zero)
 			}
 		}
-		return
+		return true // success
 	}
 
 	// inclined support
 	if key == "incsup" {
 
 		// check
-		PanicOrNot(o.Ndim != 2, "inclined support works only in 2D for now")
+		if LogErrCond(o.Ndim != 2, "inclined support works only in 2D for now") {
+			return false // problem
+		}
 
 		// get data
 		var α float64
@@ -181,7 +183,7 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 			// set constraint
 			o.add(key, []int{eqx, eqy}, []float64{co, si}, &fun.Zero)
 		}
-		return
+		return true // success
 	}
 
 	// hydraulic head
@@ -192,7 +194,8 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 		if val, found := utl.Keycode(extra, "gamL"); found {
 			γl = utl.Atof(val)
 		} else {
-			PanicOrNot(true, "gamL (unit weight of liquid) must be provided when using H (hydraulic head) as essential boundary condition")
+			LogErrCond(true, "gamL (unit weight of liquid) must be provided when using H (hydraulic head) as essential boundary condition")
+			return false // problem
 		}
 
 		// set for all nodes
@@ -212,18 +215,20 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 			// set constraint
 			o.add_single("pl", d.Eq, &pl)
 		}
-		return
+		return true // success
 	}
 
 	// single-point constraint
 	for _, nod := range nodes {
 		d := nod.GetDof(key)
 		if d == nil {
-			return
+			return true // success
 		}
 		o.add_single(key, d.Eq, fcn)
 	}
-	return
+
+	// success
+	return true
 }
 
 // List returns a simple list logging bcs at time t

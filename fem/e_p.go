@@ -5,8 +5,6 @@
 package fem
 
 import (
-	"log"
-
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/mporous"
 	"github.com/cpmech/gofem/shp"
@@ -64,7 +62,10 @@ type ElemP struct {
 func init() {
 
 	// information allocator
-	iallocators["p"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) (info Info) {
+	iallocators["p"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info {
+
+		// new info
+		var info Info
 
 		// number of nodes in element
 		cell := msh.Cells[cid]
@@ -82,7 +83,7 @@ func init() {
 
 		// t1 and t2 variables
 		info.T1vars = ykeys
-		return
+		return &info
 	}
 
 	// element allocator
@@ -139,34 +140,36 @@ func init() {
 // implementation ///////////////////////////////////////////////////////////////////////////////////
 
 // SetEqs set equations
-func (o *ElemP) SetEqs(eqs [][]int, mixedform_eqs []int) {
+func (o *ElemP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	o.Pmap = make([]int, o.Np)
 	for m := 0; m < o.Cell.Shp.Nverts; m++ {
 		o.Pmap[m] = eqs[m][0]
 	}
+	return true
 }
 
 // SetEleConds set element conditions
-func (o *ElemP) SetEleConds(key string, f fun.Func, extra string) {
+func (o *ElemP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 	if key == "g" { // gravity
 		o.Gfcn = f
 	}
+	return true
 }
 
 // SetSurfLoads set surface loads (natural boundary conditions)
-func (o *ElemP) SetSurfLoads(key string, idxface int, f fun.Func, extra string) {
+func (o *ElemP) SetSurfLoads(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
+	return true
 }
 
 // InterpStarVars interpolates star variables to integration points
-func (o *ElemP) InterpStarVars(sol *Solution) (err error) {
+func (o *ElemP) InterpStarVars(sol *Solution) (ok bool) {
 
 	// for each integration point
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions and gradients
-		err = o.log(o.Cell.Shp.CalcAtIp(o.X, ip, true), "InterpStarVars")
-		if err != nil {
+		if LogErr(o.Cell.Shp.CalcAtIp(o.X, ip, true), "InterpStarVars") {
 			return
 		}
 
@@ -176,13 +179,11 @@ func (o *ElemP) InterpStarVars(sol *Solution) (err error) {
 			o.ψl[idx] += o.Cell.Shp.S[m] * sol.Psi[o.Pmap[m]]
 		}
 	}
-
-	// success
-	return
+	return true
 }
 
 // adds -R to global residual vector fb
-func (o ElemP) AddToRhs(fb []float64, sol *Solution) (err error) {
+func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
 	tpm := mporous.TPM
@@ -190,8 +191,7 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (err error) {
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions, gradients and variables @ ip
-		err = o.ipvars(idx, sol, false)
-		if err != nil {
+		if !o.ipvars(idx, sol, false) {
 			return
 		}
 		coef := o.Cell.Shp.J * ip.W
@@ -209,12 +209,11 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (err error) {
 	}
 
 	// external 'fluxes'
-	err = o.add_fluxloads_to_rhs(fb, sol)
-	return
+	return o.add_fluxloads_to_rhs(fb, sol)
 }
 
 // adds element K to global Jacobian matrix Kb
-func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error) {
+func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// clear matrices
 	la.MatFill(o.dRplDpl, 0)
@@ -226,8 +225,7 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error) 
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions, gradients and variables @ ip
-		err = o.ipvars(idx, sol, true)
-		if err != nil {
+		if !o.ipvars(idx, sol, true) {
 			return
 		}
 		coef := o.Cell.Shp.J * ip.W
@@ -246,56 +244,48 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (err error) 
 			}
 		}
 	}
-
-	// success
-	return
+	return true
 }
 
 // Update perform (tangent) update
-func (o *ElemP) Update(sol *Solution) (err error) {
-	// success
-	return
+func (o *ElemP) Update(sol *Solution) (ok bool) {
+	return true
 }
 
 // internal variables ///////////////////////////////////////////////////////////////////////////////
 
 // InitIvs reset (and fix) internal variables after primary variables have been changed
-func (o *ElemP) InitIvs(sol *Solution) {
+func (o *ElemP) InitIvs(sol *Solution) (ok bool) {
+	return true
 }
 
 // SetIvs set secondary variables; e.g. during initialisation via files
-func (o *ElemP) SetIvs(zvars map[string][]float64) {
+func (o *ElemP) SetIvs(zvars map[string][]float64) (ok bool) {
+	return true
 }
 
 // BackupIvs create copy of internal variables
-func (o *ElemP) BackupIvs() {
+func (o *ElemP) BackupIvs() (ok bool) {
+	return true
 }
 
 // RestoreIvs restore internal variables from copies
-func (o *ElemP) RestoreIvs() {
+func (o *ElemP) RestoreIvs() (ok bool) {
+	return true
 }
 
 // auxiliary ////////////////////////////////////////////////////////////////////////////////////////
 
-// log logs errors
-func (o *ElemP) log(err error, msg string) error {
-	if err != nil {
-		log.Printf("ElemP: eid=%d %s failed with %v\n", o.Cell.Id, msg, err)
-	}
-	return err
-}
-
 // add_fluxloads_to_rhs adds surfaces loads to rhs
-func (o ElemP) add_fluxloads_to_rhs(fb []float64, sol *Solution) (err error) {
-	return // success
+func (o ElemP) add_fluxloads_to_rhs(fb []float64, sol *Solution) (ok bool) {
+	return true
 }
 
 // ipvars computes current values @ integration points. idx == index of integration point
-func (o *ElemP) ipvars(idx int, sol *Solution, tpm_derivs bool) (err error) {
+func (o *ElemP) ipvars(idx int, sol *Solution, tpm_derivs bool) (ok bool) {
 
 	// interpolation functions and gradients
-	err = o.log(o.Cell.Shp.CalcAtIp(o.X, o.IpsElem[idx], true), "ipvars")
-	if err != nil {
+	if LogErr(o.Cell.Shp.CalcAtIp(o.X, o.IpsElem[idx], true), "ipvars") {
 		return
 	}
 
@@ -321,8 +311,7 @@ func (o *ElemP) ipvars(idx int, sol *Solution, tpm_derivs bool) (err error) {
 	}
 
 	// TPM variables
-	err = o.log(mporous.CalcL(o.pl, o.States[idx], o.Model, tpm_derivs), "ipvars")
-	if err != nil {
+	if LogErr(mporous.CalcL(o.pl, o.States[idx], o.Model, tpm_derivs), "ipvars") {
 		return
 	}
 
@@ -337,7 +326,5 @@ func (o *ElemP) ipvars(idx int, sol *Solution, tpm_derivs bool) (err error) {
 			o.ρwl[i] += mporous.TPM.Klr * o.Model.Klsat[i][j] * o.hl[j]
 		}
 	}
-
-	// success
-	return
+	return true
 }
