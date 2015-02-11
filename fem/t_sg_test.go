@@ -321,3 +321,40 @@ func Test_sg517(tst *testing.T) {
 	verb := true
 	TestingCompareResultsU(tst, "data/sg517.sim", "cmp/sg517.cmp", tolK, tolu, tols, skipK, verb)
 }
+
+func Test_sg524(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
+	//utl.Tsilent = false
+	utl.TTitle("sg524")
+
+	// run simulation
+	if !Start("data/sg524.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// make sure to flush log
+	defer End()
+
+	// run simulation
+	if !Run() {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// check
+	skipK := false
+	tolK := 1e-17
+	tolu := 1e-8
+	tols := 1e-7
+	verb := true
+	TestingCompareResultsU(tst, "data/sg524.sim", "cmp/sg524.cmp", tolK, tolu, tols, skipK, verb)
+}

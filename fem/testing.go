@@ -116,11 +116,16 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 							utl.Pfgrey2("ip = %d\n", ip)
 						}
 						σ := e.States[ip].Sig
-						utl.CheckAnaNum(tst, "sx ", tols, σ[0], val[0], verbose)
-						utl.CheckAnaNum(tst, "sy ", tols, σ[1], val[1], verbose)
-						utl.CheckAnaNum(tst, "sxy", tols, σ[3]/SQ2, val[2], verbose)
-						if len(val) > 3 { // sx, sy, sxy, sz
-							utl.CheckAnaNum(tst, "sz ", tols, σ[2], val[3], verbose)
+						if len(val) == 6 {
+							utl.CheckAnaNum(tst, "sx ", tols, σ[0], val[0], verbose)
+							utl.CheckAnaNum(tst, "sy ", tols, σ[1], val[1], verbose)
+						} else {
+							utl.CheckAnaNum(tst, "sx ", tols, σ[0], val[0], verbose)
+							utl.CheckAnaNum(tst, "sy ", tols, σ[1], val[1], verbose)
+							utl.CheckAnaNum(tst, "sxy", tols, σ[3]/SQ2, val[2], verbose)
+							if len(val) > 3 { // sx, sy, sxy, sz
+								utl.CheckAnaNum(tst, "sz ", tols, σ[2], val[3], verbose)
+							}
 						}
 					}
 				}
