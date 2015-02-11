@@ -61,9 +61,14 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	global.WspcInum = make([]int, global.Nproc)
 
 	// simulation and  materials
-	dolog := true
-	global.Sim = inp.ReadSim(simfilepath, erasefiles, dolog)
-	global.Mdb = inp.ReadMat(global.Sim.Data.Matfile, dolog)
+	global.Sim = inp.ReadSim(simfilepath, erasefiles)
+	if LogErrCond(global.Sim == nil, "ReadSim failed\n") {
+		return
+	}
+	global.Mdb = inp.ReadMat(global.Sim.Data.Matfile)
+	if LogErrCond(global.Mdb == nil, "ReadMat failed\n") {
+		return
+	}
 
 	// fix show residual flag
 	if !global.Root {

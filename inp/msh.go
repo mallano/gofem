@@ -81,12 +81,12 @@ func ReadMsh(fn string) *Mesh {
 
 	// read file
 	b, err := utl.ReadFile(fn)
-	if LogErr(err, "msh: ERROR: cannot open mesh file "+fn) {
+	if LogErr(err, "msh: cannot open mesh file "+fn+"\n") {
 		return nil
 	}
 
 	// decode
-	if LogErr(json.Unmarshal(b, &o), "msh: ERROR: cannot unmarshal mesh file "+fn) {
+	if LogErr(json.Unmarshal(b, &o), "msh: cannot unmarshal mesh file "+fn+"\n") {
 		return nil
 	}
 
@@ -96,13 +96,13 @@ func ReadMsh(fn string) *Mesh {
 	for i, v := range o.Verts {
 
 		// check vertex id
-		if LogErrCond(v.Id != i, "msh: ERROR: vertices must be sequentially numbered. %d != %d\n", v.Id, i) {
+		if LogErrCond(v.Id != i, "msh: vertices must be sequentially numbered. %d != %d\n", v.Id, i) {
 			return nil
 		}
 
 		// ndim
 		nd := len(v.C)
-		if LogErrCond(nd < 2 || nd > 4, "msh: ERROR: ndim must be 2 or 3\n") {
+		if LogErrCond(nd < 2 || nd > 4, "msh: ndim must be 2 or 3\n") {
 			return nil
 		}
 		if nd == 3 {
@@ -130,10 +130,10 @@ func ReadMsh(fn string) *Mesh {
 		c.Shp = shp.Get(c.Type)
 
 		// check id and tag
-		if LogErrCond(c.Id != i, "msh: ERROR: cells must be sequentially numbered. %d != %d\n", c.Id, i) {
+		if LogErrCond(c.Id != i, "msh: cells must be sequentially numbered. %d != %d\n", c.Id, i) {
 			return nil
 		}
-		if LogErrCond(c.Tag >= 0, "msh: ERROR: cell tags must be negative\n") {
+		if LogErrCond(c.Tag >= 0, "msh: cell tags must be negative\n") {
 			return nil
 		}
 

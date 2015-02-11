@@ -13,7 +13,7 @@ import (
 
 func LogErr(err error, msg string) (stop bool) {
 	if err != nil {
-		fullmsg := msg + " : " + err.Error()
+		fullmsg := "ERROR: " + msg + " : " + err.Error()
 		log.Printf(fullmsg)
 		global.WspcStop[global.Rank] = 1
 		return true
@@ -23,7 +23,7 @@ func LogErr(err error, msg string) (stop bool) {
 
 func LogErrCond(condition bool, msg string, prm ...interface{}) (stop bool) {
 	if condition {
-		fullmsg := utl.Sf(msg, prm...)
+		fullmsg := "ERROR: " + utl.Sf(msg, prm...)
 		log.Printf(fullmsg)
 		global.WspcStop[global.Rank] = 1
 		return true

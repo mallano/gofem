@@ -156,7 +156,10 @@ func init() {
 
 		// material model name
 		matname := edat.Mat
-		matdata := global.Mdb.GetOrPanic(matname)
+		matdata := global.Mdb.Get(matname)
+		if LogErrCond(matdata == nil, "Mdb.Get failed\n") {
+			return nil
+		}
 		mdlname := matdata.Model
 
 		// model and its specialisations

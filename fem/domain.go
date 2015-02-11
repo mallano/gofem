@@ -92,7 +92,10 @@ type Domain struct {
 func NewDomain(reg *inp.Region) *Domain {
 	var dom Domain
 	dom.Reg = reg
-	dom.Msh = inp.ReadMsh(reg.Mshfile, true)
+	dom.Msh = inp.ReadMsh(reg.Mshfile)
+	if LogErrCond(dom.Msh == nil, "ERROR: ReadMsh failed\n") {
+		return nil
+	}
 	if global.Distr {
 		if LogErrCond(global.Nproc != len(dom.Msh.Part2cells), "number of processors must be equal to the number of partitions defined in mesh file. %d != %d", global.Nproc, len(dom.Msh.Part2cells)) {
 			return nil
@@ -108,8 +111,11 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	// backup state
 	if idxstg > 0 {
 		o.create_stage_copy()
-		o.fix_inact_flags(stg.Activate, false)
-		o.fix_inact_flags(stg.Deactivate, true)
+		if !o.fix_inact_flags(stg.Activate, false) {
+			return
+		}
+		if !o.fix_inact_flags(stg.Deactivate, true) {
+		}
 	}
 
 	// nodes (active) and elements (active AND in this processor)
@@ -237,7 +243,11 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			e := o.Cid2elem[c.Id]
 			if e != nil { // set conditions only for this processor's / active element
 				for j, key := range ec.Keys {
-					e.SetEleConds(key, global.Sim.Functions.GetOrPanic(ec.Funcs[j]), ec.Extra)
+					fcn := global.Sim.Functions.Get(ec.Funcs[j])
+					if LogErrCond(fcn == nil, "Functions.Get failed\n") {
+						return
+					}
+					e.SetEleConds(key, fcn, ec.Extra)
 				}
 			}
 		}
@@ -260,14 +270,18 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 				enodes = append(enodes, o.Vid2node[v])
 			}
 			for j, key := range fc.Keys {
+				fcn := global.Sim.Functions.Get(fc.Funcs[j])
+				if LogErrCond(fcn == nil, "Functions.Get failed\n") {
+					return
+				}
 				if o.YandC[key] {
-					if !o.EssenBcs.Set(key, enodes, global.Sim.Functions.GetOrPanic(fc.Funcs[j]), fc.Extra) {
+					if !o.EssenBcs.Set(key, enodes, fcn, fc.Extra) {
 						return
 					}
 				} else {
 					e := o.Cid2elem[p.C.Id]
 					if e != nil { // set natural BCs only for this processor's / active element
-						if !e.SetSurfLoads(key, p.Fid, global.Sim.Functions.GetOrPanic(fc.Funcs[j]), fc.Extra) {
+						if !e.SetSurfLoads(key, p.Fid, fcn, fc.Extra) {
 							return
 						}
 					}
@@ -286,10 +300,14 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			if o.Vid2node[v.Id] != nil { // set BCs only for active nodes
 				n := o.Vid2node[v.Id]
 				for j, key := range nc.Keys {
+					fcn := global.Sim.Functions.Get(nc.Funcs[j])
+					if LogErrCond(fcn == nil, "Functions.Get failed\n") {
+						return
+					}
 					if o.YandC[key] {
-						o.EssenBcs.Set(key, []*Node{n}, global.Sim.Functions.GetOrPanic(nc.Funcs[j]), nc.Extra)
+						o.EssenBcs.Set(key, []*Node{n}, fcn, nc.Extra)
 					} else {
-						o.PtNatBcs.Set(o.F2Y[key], n, global.Sim.Functions.GetOrPanic(nc.Funcs[j]), nc.Extra)
+						o.PtNatBcs.Set(o.F2Y[key], n, fcn, nc.Extra)
 					}
 				}
 			}
@@ -410,13 +428,17 @@ func (o *Domain) create_stage_copy() {
 }
 
 // set_act_deact_flags sets inactive flags for new active/inactive elements
-func (o *Domain) fix_inact_flags(eids_or_tags []int, deactivate bool) {
+func (o *Domain) fix_inact_flags(eids_or_tags []int, deactivate bool) (ok bool) {
 	for _, tag := range eids_or_tags {
 		if tag >= 0 { // this meahs that tag == cell.Id
 			cell := o.Msh.Cells[tag]
 			tag = cell.Tag
 		}
 		edat := o.Reg.Etag2data(tag)
+		if LogErrCond(edat == nil, "Etag2data failed\n") {
+			return
+		}
 		edat.Inact = deactivate
 	}
+	return true
 }

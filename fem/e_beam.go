@@ -98,7 +98,10 @@ func init() {
 		o.Nu = ndof * o.Ndim
 
 		// parameters
-		mat := global.Mdb.GetOrPanic(edat.Mat)
+		mat := global.Mdb.Get(edat.Mat)
+		if LogErrCond(mat == nil, "Mdb.Get failed\n") {
+			return nil
+		}
 		for _, p := range mat.Prms {
 			switch p.N {
 			case "E":

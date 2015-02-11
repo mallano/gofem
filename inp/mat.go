@@ -39,12 +39,12 @@ func ReadMat(fn string) *MatDb {
 
 	// read file
 	b, err := utl.ReadFile(fn)
-	if LogErr(err, "mat: ERROR: cannot open materials file "+fn) {
+	if LogErr(err, "mat: cannot open materials file "+fn+"\n") {
 		return nil
 	}
 
 	// decode
-	if LogErr(json.Unmarshal(b, &o), "mat: ERROR: cannot unmarshal materials file "+fn) {
+	if LogErr(json.Unmarshal(b, &o), "mat: cannot unmarshal materials file "+fn+"\n") {
 		return nil
 	}
 

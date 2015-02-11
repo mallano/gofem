@@ -111,7 +111,10 @@ func init() {
 
 		// material model
 		matname := edat.Mat
-		matdata := global.Mdb.GetOrPanic(matname)
+		matdata := global.Mdb.Get(matname)
+		if LogErrCond(matdata == nil, "Mdb.Get failed\n") {
+			return nil
+		}
 		o.Model = new(mporous.Model)
 		o.Model.Init(matdata.Prms)
 

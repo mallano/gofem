@@ -310,7 +310,7 @@ func ReadSim(simfilepath string, erasefiles bool) *Simulation {
 			stg.Control.DtFunc = &fun.Cte{C: stg.Control.Dt}
 		} else {
 			stg.Control.DtFunc = o.Functions.Get(stg.Control.DtFcn)
-			if LogErrCond(stg.Control.DtFunc == nil, "sim: ERROR: cannot get Dt function named %s", stg.Control.DtFcn) {
+			if LogErrCond(stg.Control.DtFunc == nil, "sim: cannot get Dt function named %s\n", stg.Control.DtFcn) {
 				return nil
 			}
 			stg.Control.Dt = stg.Control.DtFunc.F(t, nil)
@@ -329,7 +329,7 @@ func ReadSim(simfilepath string, erasefiles bool) *Simulation {
 			}
 		} else {
 			stg.Control.DtoFunc = o.Functions.Get(stg.Control.DtoFcn)
-			if LogErrCond(stg.Control.DtoFunc == nil, "sim: ERROR: cannot get DtOut function named %s", stg.Control.DtoFcn) {
+			if LogErrCond(stg.Control.DtoFunc == nil, "sim: cannot get DtOut function named %s\n", stg.Control.DtoFcn) {
 				return nil
 			}
 			stg.Control.DtOut = stg.Control.DtoFunc.F(t, nil)
