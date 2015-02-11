@@ -255,7 +255,7 @@ func ReadSim(simfilepath string, erasefiles bool) *Simulation {
 	// read file
 	b, err := utl.ReadFile(simfilepath)
 	if err != nil {
-		utl.PfRed("sim: cannot read simulation file %s\n%v", simfilepath, err)
+		utl.PfRed("sim: cannot read simulation file %s\n%v\n", simfilepath, err)
 		return nil
 	}
 
@@ -267,7 +267,7 @@ func ReadSim(simfilepath string, erasefiles bool) *Simulation {
 	// decode
 	err = json.Unmarshal(b, &o)
 	if err != nil {
-		utl.PfRed("sim: cannot unmarshal simulation file %s\n%v", simfilepath, err)
+		utl.PfRed("sim: cannot unmarshal simulation file %s\n%v\n", simfilepath, err)
 		return nil
 	}
 

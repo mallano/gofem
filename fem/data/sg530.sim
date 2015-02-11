@@ -1,0 +1,35 @@
+{
+  "data" : {
+    "desc"    : "Smith-Griffiths Figure 5.30 p202",
+    "matfile" : "data/sg.mat",
+    "steady"  : true
+  },
+  "functions" : [
+    { "name":"fa", "type":"lin", "prms":[{"n":"m", "v":-0.1667}] },
+    { "name":"fb", "type":"lin", "prms":[{"n":"m", "v":-0.3333}] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "ground",
+      "mshfile"   : "data/sg530.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"SG-5.30-M1", "type":"u", "extra":"!nip:1" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply loading",
+      "nodebcs" : [
+        { "tag":-1, "keys":["ux","uy","fz"], "funcs":["zero","zero","fa"  ] },
+        { "tag":-2, "keys":["uy",     "fz"], "funcs":["zero",       "fb"  ] },
+        { "tag":-3, "keys":["ux","uy","uz"], "funcs":["zero","zero","zero"] },
+        { "tag":-4, "keys":["uy",     "uz"], "funcs":["zero",       "zero"] },
+        { "tag":-5, "keys":["ux",     "fz"], "funcs":["zero",       "fb"  ] },
+        { "tag":-6, "keys":[          "fz"], "funcs":["fa"                ] },
+        { "tag":-7, "keys":["ux",     "uz"], "funcs":["zero",       "zero"] },
+        { "tag":-8, "keys":[          "uz"], "funcs":["zero"              ] }
+      ]
+    }
+  ]
+}
