@@ -325,11 +325,22 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 			return
 		}
 
-		// update primary variables (y) and Lagrange multipliers (λ)
-		for i := 0; i < d.Ny; i++ {
-			d.Sol.Y[i] += d.Wb[i]  // y += δy
-			d.Sol.ΔY[i] += d.Wb[i] // ΔY += δy
+		// update primary variables (y)
+		if global.Sim.Data.Steady {
+			for i := 0; i < d.Ny; i++ {
+				d.Sol.Y[i] += d.Wb[i]  // y += δy
+				d.Sol.ΔY[i] += d.Wb[i] // ΔY += δy
+			}
+		} else {
+			for i := 0; i < d.Ny; i++ {
+				d.Sol.Y[i] += d.Wb[i]  // y += δy
+				d.Sol.ΔY[i] += d.Wb[i] // ΔY += δy
+				d.Sol.Dydt[i] = global.DynCoefs.α4*d.Sol.Y[i] - d.Sol.Chi[i]
+				d.Sol.D2ydt2[i] = global.DynCoefs.α1*d.Sol.Y[i] - d.Sol.Zet[i]
+			}
 		}
+
+		// update Lagrange multipliers (λ)
 		for i := 0; i < d.Nlam; i++ {
 			d.Sol.L[i] += d.Wb[d.Ny+i] // λ += δλ
 		}

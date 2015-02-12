@@ -107,9 +107,10 @@
       "desc"  : "Smith-Griffiths Figure 11.4 p475",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":1  },
-        {"n":"nu",   "v":0.3},
-        {"n":"RhoS", "v":1  }
+        {"n":"E",    "v":1    },
+        {"n":"nu",   "v":0.3  },
+        {"n":"RhoS", "v":1    },
+        {"n":"Cdam", "v":0.200}
       ]
     },
     {

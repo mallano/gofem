@@ -1,0 +1,38 @@
+{
+  "data" : {
+    "desc"    : "Smith-Griffiths Figure 11.4 p475",
+    "matfile" : "data/sg.mat"
+  },
+  "functions" : [
+    { "name":"load", "type":"cos", "prms":[{"n":"a","v":1}, {"n":"b","v":0.3}] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "rectangle",
+      "mshfile"   : "data/sg114.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"SG-11.4", "type":"u", "extra":"!nip:9" }
+      ]
+    }
+  ],
+  "solver" : {
+    "raym" : 0.005,
+    "rayk" : 0.272
+  },
+  "stages" : [
+    {
+      "desc"    : "apply loading",
+      "nodebcs" : [
+        { "tag":-100, "keys":["fy"], "funcs":["load"] }
+      ],
+      "facebcs" : [
+        { "tag":-10, "keys":["ux","uy"], "funcs":["zero","zero"] }
+      ],
+      "control" : {
+        "tf"    : 100,
+        "dt"    : 1,
+        "dtout" : 1
+      }
+    }
+  ]
+}

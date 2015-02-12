@@ -26,6 +26,7 @@ type ElemU struct {
 
 	// variables for dynamics
 	Rho  float64  // density of solids
+	Cdam float64  // coefficient for damping
 	Gfcn fun.Func // gravity function
 
 	// optional data
@@ -185,6 +186,16 @@ func init() {
 			o.MdlLarge = m
 		}
 
+		// parameters
+		for _, p := range matdata.Prms {
+			switch p.N {
+			case "Rho", "RhoS":
+				o.Rho = p.V
+			case "Cdam":
+				o.Cdam = p.V
+			}
+		}
+
 		// local starred variables
 		o.ζs = la.MatAlloc(nip, o.Ndim)
 		o.χs = la.MatAlloc(nip, o.Ndim)
@@ -325,7 +336,7 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 			for m := 0; m < nverts; m++ {
 				for i := 0; i < o.Ndim; i++ {
 					r := o.Umap[i+m*o.Ndim]
-					fb[r] -= coef * S[m] * o.Rho * (dc.α1*o.us[i] - o.ζs[idx][i] - o.grav[i]) // -RuBar
+					fb[r] -= coef * S[m] * (o.Rho*(dc.α1*o.us[i]-o.ζs[idx][i]-o.grav[i]) + o.Cdam*(dc.α4*o.us[i]-o.χs[idx][i])) // -RuBar
 				}
 			}
 		}
@@ -389,13 +400,12 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 		// dynamic term
 		if !global.Sim.Data.Steady {
-			coef *= dc.α1 * o.Rho
 			for m := 0; m < nverts; m++ {
 				for i := 0; i < o.Ndim; i++ {
 					r := i + m*o.Ndim
 					for n := 0; n < nverts; n++ {
 						c := i + n*o.Ndim
-						o.K[r][c] += coef * S[m] * S[n]
+						o.K[r][c] += coef * S[m] * S[n] * (o.Rho*dc.α1 + o.Cdam*dc.α4)
 					}
 				}
 			}

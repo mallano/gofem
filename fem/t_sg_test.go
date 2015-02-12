@@ -5,6 +5,7 @@
 package fem
 
 import (
+	"encoding/json"
 	"sort"
 	"testing"
 
@@ -436,34 +437,121 @@ func Test_sg111(tst *testing.T) {
 		return
 	}
 
-	// selected node and dof index
-	nidx := 1
-	didx := 1
+	// plot
+	doplot := true
+	if doplot {
 
-	// for each tidx
-	t := make([]float64, sum.NumTidx)
-	uy := make([]float64, sum.NumTidx)
-	for tidx := 0; tidx < sum.NumTidx; tidx++ {
-		if !d.ReadSol(tidx) {
-			tst.Errorf("test failed:\n")
+		// selected node and dof index
+		nidx := 1
+		didx := 1
+
+		// for each tidx
+		t := make([]float64, sum.NumTidx)
+		uy := make([]float64, sum.NumTidx)
+		for tidx := 0; tidx < sum.NumTidx; tidx++ {
+			if !d.ReadSol(tidx) {
+				tst.Errorf("test failed:\n")
+				return
+			}
+			nod := d.Nodes[nidx]
+			eq := nod.dofs[didx].Eq
+			t[tidx] = d.Sol.T
+			uy[tidx] = d.Sol.Y[eq]
+		}
+		plt.Plot(t, uy, "'ro-', clip_on=0")
+		plt.Gll("$t$", "$u_y$", "")
+		plt.Show()
+	}
+}
+
+func Test_sg114(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
+	utl.Tsilent = false
+	utl.TTitle("Smith & Griffiths (11.4)")
+
+	// run simulation
+	if !Start("data/sg114.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// make sure to flush log
+	defer End()
+
+	// run simulation
+	if !Run() {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// read summary
+	sum := ReadSum()
+	utl.Pfyel("sum = %v\n", sum)
+
+	// allocate domain
+	d := NewDomain(global.Sim.Regions[0])
+	if !d.SetStage(0, global.Sim.Stages[0]) {
+		tst.Errorf("SetStage failed\n")
+		return
+	}
+
+	// plot
+	doplot := false
+	if doplot {
+
+		// selected node and dof index
+		nidx := 17
+		didx := 1
+
+		// new results
+		t := make([]float64, sum.NumTidx)
+		uy := make([]float64, sum.NumTidx)
+		for tidx := 0; tidx < sum.NumTidx; tidx++ {
+			if !d.ReadSol(tidx) {
+				tst.Errorf("test failed:\n")
+				return
+			}
+			nod := d.Nodes[nidx]
+			eq := nod.dofs[didx].Eq
+			t[tidx] = d.Sol.T
+			uy[tidx] = d.Sol.Y[eq]
+		}
+		plt.Plot(t, uy, "'k*-', clip_on=0, label='gofem'")
+
+		// old results
+		b, err := utl.ReadFile("cmp/sg114gofemold.json")
+		if err != nil {
+			tst.Errorf("cannot read comparison file\n")
 			return
 		}
-		nod := d.Nodes[nidx]
-		eq := nod.dofs[didx].Eq
-		t[tidx] = d.Sol.T
-		uy[tidx] = d.Sol.Y[eq]
-	}
-	plt.Plot(t, uy, "'ro-', clip_on=0")
-	plt.Gll("$t$", "$u_y$", "")
-	plt.Show()
+		var gofemold struct {
+			Time, Uy17 []float64
+		}
+		err = json.Unmarshal(b, &gofemold)
+		if err != nil {
+			tst.Errorf("cannot unmarshal comparison file\n")
+			return
+		}
+		plt.Plot(gofemold.Time, gofemold.Uy17, "'ro-', label='gofemOld'")
 
-	if false {
-		// check
-		skipK := true
-		tolK := 1e-17
-		tolu := 1e-17
-		tols := 1e-15
-		verb := true
-		TestingCompareResultsU(tst, "data/sg111.sim", "cmp/sg111.cmp", tolK, tolu, tols, skipK, verb)
+		// mechsys results
+		_, res, err := utl.ReadTable("cmp/sg114mechsysN17.cmp")
+		if err != nil {
+			tst.Errorf("cannot read mechsys comparison file\n")
+			return
+		}
+		plt.Plot(res["Time"], res["uy"], "'b+-', label='mechsys'")
+
+		// show figure
+		plt.Gll("$t$", "$u_y$", "")
+		plt.Show()
 	}
 }
