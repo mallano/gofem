@@ -7,8 +7,6 @@ package mreten
 import (
 	"testing"
 
-	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -25,25 +23,17 @@ func Test_lin01(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("lin01")
 
-	model := GetModel("testsim", "mat1", "lin", false)
-	model.Init(fun.Prms{
-		&fun.Prm{N: "lam", V: 0.5},
-		&fun.Prm{N: "pcae", V: 0.2},
-		&fun.Prm{N: "slres", V: 0.1},
-	})
-	mdl := model.(Direct)
-	utl.Pforan("mdl = %v\n", mdl)
+	mdl := GetModel("testsim", "mat1", "lin", false)
+	mdl.Init(mdl.GetPrms())
+
+	// check derivatives
+	doplot := true
+	tolCc, tolD1, tolD2 := 1e-10, 1e-10, 1e-10
+	Check(tst, mdl, -0.5, 1, 3, 11, tolCc, tolD1, tolD2, true, []float64{0.2}, 1e-7, doplot)
 
 	// plot
 	if false {
-		Pc := utl.LinSpace(-1, 3, 101)
-		Sl := make([]float64, len(Pc))
-		for i, pc := range Pc {
-			Sl[i] = mdl.Sl(pc)
-		}
-		plt.Plot(Pc, Sl, "'b.-', label='lin', clip_on=0")
-		plt.Gll("$p_c$", "$s_{\\ell}$", "")
-		plt.Cross()
-		plt.Show()
+		Plot(mdl, -0.5, 1, 3, 11, "'b.-'", "'r+-'", "lin")
+		PlotEnd(true)
 	}
 }

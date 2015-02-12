@@ -61,18 +61,24 @@ func (o BrooksCorey) Sl(pc float64) float64 {
 }
 
 // Cc compute Cc(pc) := dsl/dpc
-func (o BrooksCorey) Cc(pc float64) float64 {
+func (o BrooksCorey) Cc(pc, sl float64, wet bool) (float64, error) {
 	if pc <= o.pcae {
-		return 0
+		return 0, nil
 	}
-	return -(1 - o.slmin) * o.λ * math.Pow(o.pcae/pc, o.λ) / pc
+	return -(1 - o.slmin) * o.λ * math.Pow(o.pcae/pc, o.λ) / pc, nil
 }
 
 // Derivs compute ∂Cc/∂pc and ∂²Cc/∂pc²
-func (o BrooksCorey) Derivs(d *Derivs, pc float64) error {
-	d.SetZero()
+func (o BrooksCorey) Derivs(pc, sl float64, wet bool) error {
+	D.DCcDpc, D.D2CcDpc2 = 0, 0
 	if pc <= o.pcae {
-		d.DCcDpc = (1.0 - o.slmin) * o.λ * (o.λ + 1.0) * math.Pow(o.pcae/pc, o.λ) / (pc * pc)
+		return nil
 	}
+	cf := (1.0 - o.slmin) * o.λ
+	pc2 := pc * pc
+	pp := math.Pow(o.pcae/pc, o.λ)
+	dppdpc := -o.λ * math.Pow(o.pcae/pc, o.λ) / pc
+	D.DCcDpc = cf * (o.λ + 1.0) * pp / pc2
+	D.D2CcDpc2 = cf * (o.λ + 1.0) * (dppdpc - 2.0*pp/pc) / pc2
 	return nil
 }

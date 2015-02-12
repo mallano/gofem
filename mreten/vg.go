@@ -64,21 +64,24 @@ func (o VanGen) Sl(pc float64) float64 {
 	if pc <= o.pcmin {
 		return 1
 	}
-	return 1 / math.Pow(1+math.Pow(o.α*pc, o.n), o.m)
+	c := math.Pow(o.α*pc, o.n)
+	fac := 1.0 - o.slmin
+	return fac * math.Pow(1+c, -o.m)
 }
 
 // Cc compute Cc(pc) := dsl/dpc
-func (o VanGen) Cc(pc float64) float64 {
+func (o VanGen) Cc(pc, sl float64, wet bool) (float64, error) {
 	if pc <= o.pcmin {
-		return 0
+		return 0, nil
 	}
 	c := math.Pow(o.α*pc, o.n)
-	return -(1.0 - o.slmin) * c * math.Pow(c+1.0, -o.m-1.0) * o.m * o.n / pc
+	fac := 1.0 - o.slmin
+	return -fac * c * math.Pow(c+1.0, -o.m-1.0) * o.m * o.n / pc, nil
 }
 
 // Derivs compute ∂Cc/∂pc and ∂²Cc/∂pc²
-func (o VanGen) Derivs(D *Derivs, pc float64) error {
-	D.SetZero()
+func (o VanGen) Derivs(pc, sl float64, wet bool) error {
+	D.DCcDpc, D.D2CcDpc2 = 0, 0
 	if pc <= o.pcmin {
 		return nil
 	}

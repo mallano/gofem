@@ -67,15 +67,15 @@ func (o Lin) Sl(pc float64) float64 {
 }
 
 // Cc compute Cc(pc) := dsl/dpc
-func (o Lin) Cc(pc float64) float64 {
+func (o Lin) Cc(pc, sl float64, wet bool) (float64, error) {
 	if pc <= o.pcae || pc >= o.pcres {
-		return 0
+		return 0, nil
 	}
-	return -o.λ
+	return -o.λ, nil
 }
 
 // Derivs compute ∂Cc/∂pc and ∂²Cc/∂pc²
-func (o Lin) Derivs(d *Derivs, pc float64) error {
-	d.SetZero()
+func (o Lin) Derivs(pc, sl float64, wet bool) error {
+	D.DCcDpc, D.D2CcDpc2 = 0, 0
 	return nil
 }
