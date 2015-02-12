@@ -116,7 +116,7 @@
     {
       "name"  : "SG-11.4_mises",
       "desc"  : "Smith-Griffiths Figure 11.4 p475",
-      "model" : "von-mises",
+      "model" : "vm",
       "prms"  : [
         {"n":"E",    "v":1  },
         {"n":"nu",   "v":0.3},
@@ -126,9 +126,9 @@
       ]
     },
     {
-      "name"  : "SG-11.19",
-      "desc"  : "Smith-Griffiths Figure 11.19 p500",
-      "model" : "von-mises",
+      "name"  : "SG-11.21",
+      "desc"  : "Smith-Griffiths (5th ed) Figure 11.21 p515",
+      "model" : "vm",
       "prms"  : [
         {"n":"E",    "v":3e+07   },
         {"n":"nu",   "v":0.3     },
