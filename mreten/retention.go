@@ -9,6 +9,7 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
+// Derivs holds all derivatives related to liquid retention models
 type Derivs struct {
 	DCcDpc     float64 // ∂Cc/∂pc
 	DCcDsl     float64 // ∂Cc/∂sl
@@ -17,21 +18,25 @@ type Derivs struct {
 	D2CcDslDpc float64 // ∂²Cc/(∂pc ∂sl)
 }
 
+// SetZero zeroes Derivs
 func (o *Derivs) SetZero() {
 	o.DCcDpc, o.DCcDsl, o.D2CcDpc2, o.D2CcDsl2, o.D2CcDslDpc = 0, 0, 0, 0, 0
 }
 
+// Model implements a liquid retention model (LRM)
 type Model interface {
 	Init(prms fun.Prms) error // initialises retention model
 	GetPrms() fun.Prms        // gets (an example) of parameters
 }
 
+// Direct is a subset of LRM that directly computes saturation from capillary pressure
 type Direct interface {
 	Sl(pc float64) float64              // compute sl directly from pc
 	Cc(pc float64) float64              // compute Cc(pc) := dsl/dpc
 	Derivs(d *Derivs, pc float64) error // compute ∂Cc/∂pc and ∂²Cc/∂pc²
 }
 
+// RateType is a subset of LRM that defines a rate model such as dsl/dpc = Cc(pc,sl)
 type RateType interface {
 	Cc(pc, sl float64, wetting bool) (float64, error)     // compute Cc(pc,sl) := dsl/dpc
 	Derivs(d *Derivs, pc, sl float64, wetting bool) error // derivatives

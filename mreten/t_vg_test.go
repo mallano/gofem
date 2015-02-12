@@ -21,7 +21,7 @@ func Test_vg01(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("vg01")
 
 	model := GetModel("testsim", "mat1", "vg", false)
@@ -30,7 +30,7 @@ func Test_vg01(tst *testing.T) {
 	utl.Pforan("mdl = %v\n", mdl)
 
 	// plot
-	if true {
+	if false {
 		Pc := utl.LinSpace(-1, 3, 101)
 		Sl := make([]float64, len(Pc))
 		for i, pc := range Pc {
