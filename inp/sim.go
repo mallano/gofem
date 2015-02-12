@@ -113,8 +113,6 @@ type SolverData struct {
 	Theta2 float64 `json:"theta2"` // Newmark's method parameter
 	HHT    bool    `json:"hht"`    // use Hilber-Hughes-Taylor method
 	HHTalp float64 `json:"hhtalp"` // HHT α parameter
-	RayM   float64 `json:"raym"`   // Rayleigh damping coefficient
-	RayK   float64 `json:"rayk"`   // Rayleigh damping coefficient
 
 	// derived
 	Itol float64 // iterations tolerance
