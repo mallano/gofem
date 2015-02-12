@@ -137,6 +137,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	o.ElemWriters = make([]ElemWriter, 0)
 	o.ElemIntvars = make([]ElemIntvars, 0)
 
+	// set special features
+	o.set_seepage_verts(stg)
+
 	// allocate nodes and cells (active only) -------------------------------------------------------
 
 	// for each cell
@@ -281,7 +284,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 				} else {
 					e := o.Cid2elem[p.C.Id]
 					if e != nil { // set natural BCs only for this processor's / active element
-						if !e.SetSurfLoads(key, p.Fid, fcn, fc.Extra) {
+						if !e.SetNatBcs(key, p.Fid, fcn, fc.Extra) {
 							return
 						}
 					}
@@ -441,4 +444,23 @@ func (o *Domain) fix_inact_flags(eids_or_tags []int, deactivate bool) (ok bool) 
 		edat.Inact = deactivate
 	}
 	return true
+}
+
+// set_seepage_verts sets the ids of vertices on seepage faces
+func (o *Domain) set_seepage_verts(stg *inp.Stage) {
+	for _, ftag := range stg.SeepFaces {
+		pairs, ok := o.Msh.FaceTag2cells[ftag]
+		if LogErrCond(!ok, "cannot find cells with face tag = %d to assign seepage face condition", ftag) {
+			return
+		}
+		for _, p := range pairs {
+			if p.C.SeepVerts == nil {
+				p.C.SeepVerts = make(map[int]bool)
+			}
+			localverts := p.C.Shp.FaceLocalV[p.Fid]
+			for _, l := range localverts {
+				p.C.SeepVerts[l] = true
+			}
+		}
+	}
 }

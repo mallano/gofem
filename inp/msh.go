@@ -37,6 +37,9 @@ type Cell struct {
 	JlinId int    // joint line id
 	JsldId int    // joint solid id
 
+	// specific problems data
+	SeepVerts map[int]bool // local vertices ids of vertices on seepage faces
+
 	// derived
 	Shp *shp.Shape // shape structure
 }

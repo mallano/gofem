@@ -14,7 +14,8 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-// ElemP represents a solid element with p (e.g. pressure) as primary variable
+// ElemP implements an element for transient seepage analyses [1]
+//  [1] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 http://dx.doi.org/10.1016/j.cma.2014.12.009
 type ElemP struct {
 
 	// basic data
@@ -41,7 +42,15 @@ type ElemP struct {
 	StatesBkp []*mporous.StateLG
 
 	// natural boundary conditions
-	NatBcs []*NaturalBc //natural boundary conditions
+	NatBcs []*NaturalBc // natural boundary conditions
+
+	// seepage face
+	HasSeep    bool    // indicates if this element has seepage faces
+	Vid2seepId []int   // [nverts] maps local vertex id to index in Fmap
+	SeepId2vid []int   // [nseep] maps seepage face variable id to local vertex id
+	Fmap       []int   // [nseep] map of "fl" variables (seepage face)
+	Macaulay   bool    // use discrete ramp function instead of smooth ramp
+	βrmp       float64 // coefficient for Sramp
 
 	// local starred variables
 	ψl []float64 // [nip] ψl* = β1.p + β2.dpdt
@@ -76,6 +85,14 @@ func init() {
 		info.Dofs = make([][]string, nverts)
 		for m := 0; m < nverts; m++ {
 			info.Dofs[m] = ykeys
+		}
+
+		// vertices on seepage faces
+		if len(cell.SeepVerts) > 0 {
+			ykeys = append(ykeys, "fl")
+		}
+		for m, _ := range cell.SeepVerts {
+			info.Dofs[m] = append(info.Dofs[m], "fl")
 		}
 
 		// maps
@@ -142,6 +159,29 @@ func init() {
 		o.ρwl = make([]float64, o.Ndim)
 		o.dRplDpl = la.MatAlloc(o.Np, o.Np)
 
+		// seepage face
+		nseep := len(o.Cell.SeepVerts)
+		if nseep > 0 {
+			o.HasSeep = true
+			o.SeepId2vid = utl.IntBoolMapSort(o.Cell.SeepVerts)
+			o.Vid2seepId = utl.IntVals(o.Cell.Shp.Nverts, -1)
+			o.Fmap = make([]int, nseep)
+			for i, m := range o.SeepId2vid {
+				o.Vid2seepId[m] = i
+			}
+
+			// use macaulay function ?
+			if s_mac, found := utl.Keycode(edat.Extra, "mac"); found {
+				o.Macaulay = utl.Atob(s_mac)
+			}
+
+			// coefficient for smooth ramp function
+			o.βrmp = 70.0
+			if s_bet, found := utl.Keycode(edat.Extra, "bet"); found {
+				o.βrmp = utl.Atof(s_bet)
+			}
+		}
+
 		// return new element
 		return &o
 	}
@@ -155,6 +195,11 @@ func (o *ElemP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	for m := 0; m < o.Cell.Shp.Nverts; m++ {
 		o.Pmap[m] = eqs[m][0]
 	}
+	if o.HasSeep {
+		for i, m := range o.SeepId2vid {
+			o.Fmap[i] = eqs[m][1]
+		}
+	}
 	return true
 }
 
@@ -167,7 +212,7 @@ func (o *ElemP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 }
 
 // SetSurfLoads set surface loads (natural boundary conditions)
-func (o *ElemP) SetSurfLoads(key string, idxface int, f fun.Func, extra string) (ok bool) {
+func (o *ElemP) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
 	return true
 }
@@ -254,6 +299,13 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 			}
 		}
 	}
+
+	// add to sparse matrix Kb
+	for i, I := range o.Pmap {
+		for j, J := range o.Pmap {
+			Kb.Put(I, J, o.dRplDpl[i][j])
+		}
+	}
 	return true
 }
 
@@ -285,11 +337,6 @@ func (o *ElemP) RestoreIvs() (ok bool) {
 }
 
 // auxiliary ////////////////////////////////////////////////////////////////////////////////////////
-
-// add_fluxloads_to_rhs adds surfaces loads to rhs
-func (o ElemP) add_fluxloads_to_rhs(fb []float64, sol *Solution) (ok bool) {
-	return true
-}
 
 // ipvars computes current values @ integration points. idx == index of integration point
 func (o *ElemP) ipvars(idx int, sol *Solution, tpm_derivs bool) (ok bool) {
@@ -337,4 +384,25 @@ func (o *ElemP) ipvars(idx int, sol *Solution, tpm_derivs bool) (ok bool) {
 		}
 	}
 	return true
+}
+
+// add_fluxloads_to_rhs adds surfaces loads to rhs
+func (o ElemP) add_fluxloads_to_rhs(fb []float64, sol *Solution) (ok bool) {
+	return true
+}
+
+// ramp implements the ramp function
+func (o *ElemP) ramp(x float64) float64 {
+	if o.Macaulay {
+		return utl.Ramp(x)
+	}
+	return utl.Sramp(x, o.βrmp)
+}
+
+// rampderiv returns the ramp function first derivative
+func (o *ElemP) rampderiv(x float64) float64 {
+	if o.Macaulay {
+		return utl.Heav(x)
+	}
+	return utl.SrampD1(x, o.βrmp)
 }

@@ -18,8 +18,8 @@ type Elem interface {
 	SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) // set equations
 
 	// conditions (natural BCs and element's)
-	SetEleConds(key string, f fun.Func, extra string) (ok bool)               // set element conditions
-	SetSurfLoads(key string, idxface int, f fun.Func, extra string) (ok bool) // set surface loads (natural boundary conditions)
+	SetEleConds(key string, f fun.Func, extra string) (ok bool)            // set element conditions
+	SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) // set natural boundary conditions
 
 	// called for each time step
 	InterpStarVars(sol *Solution) (ok bool) // interpolate star variables to integration points

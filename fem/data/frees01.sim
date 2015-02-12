@@ -1,0 +1,42 @@
+{
+  "data" : {
+    "matfile" : "data/frees.mat"
+  },
+  "functions" : [
+    { "name":"Hl", "type":"cte", "prms":[{"n":"c", "v":10}] },
+    { "name":"Hr", "type":"rmp", "prms":[
+      { "n":"ca", "v":10  },
+      { "n":"cb", "v":2   },
+      { "n":"ta", "v":0   },
+      { "n":"tb", "v":1e3 }]
+    },
+    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] }
+  ],
+  "regions" : [
+    {
+      "mshfile"   : "data/frees01.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"soil1", "type":"p" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc" : "decrease water level @ right face",
+      "hydrostatic" : true,
+      "seepfaces" : [-11],
+      "facebcs" : [
+        { "tag":-13, "keys":["H"],     "funcs":["Hl"], "extra":"!gamL:10" },
+        { "tag":-11, "keys":["seepH"], "funcs":["Hr"], "extra":"!gamL:10" }
+      ],
+      "eleconds" : [
+        { "tag":-1, "keys":["g"], "funcs":["grav"] }
+      ],
+      "control" : {
+        "tf"    : 1e3,
+        "dt"    : 10,
+        "dtout" : 1000
+      }
+    }
+  ]
+}

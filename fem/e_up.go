@@ -138,15 +138,15 @@ func (o *ElemUP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 }
 
 // SetSurfLoads set surface loads (natural boundary conditions)
-func (o *ElemUP) SetSurfLoads(key string, idxface int, f fun.Func, extra string) (ok bool) {
+func (o *ElemUP) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	u_surfkeys := o.u.surfloads_keys()
 	if u_surfkeys[key] {
-		if !o.u.SetSurfLoads(key, idxface, f, extra) {
+		if !o.u.SetNatBcs(key, idxface, f, extra) {
 			return
 		}
 		return true
 	}
-	return o.p.SetSurfLoads(key, idxface, f, extra)
+	return o.p.SetNatBcs(key, idxface, f, extra)
 }
 
 // InterpStarVars interpolates star variables to integration points

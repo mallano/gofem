@@ -220,6 +220,10 @@ type Stage struct {
 	Save       bool   `json:"save"`       // save stage data to binary file
 	Load       string `json:"load"`       // load stage data (filename) from binary file
 
+	// specific problems data
+	HydroStatic bool  `json:"hydrostatic"` // start with hydrostatic condition
+	SeepFaces   []int `json:"seepfaces"`   // face tags corresponding to seepage faces
+
 	// conditions
 	EleConds []*EleCond `json:"eleconds"` // element conditions. ex: gravity or beam distributed loads
 	FaceBcs  []*FaceBc  `json:"facebcs"`  // face boundary conditions

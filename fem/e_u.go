@@ -253,7 +253,7 @@ func (o *ElemU) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 }
 
 // SetSurfLoads set surface loads (natural boundary conditions)
-func (o *ElemU) SetSurfLoads(key string, idxface int, f fun.Func, extra string) (ok bool) {
+func (o *ElemU) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
 	return true
 }

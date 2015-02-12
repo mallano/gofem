@@ -47,17 +47,26 @@ func Test_sg52a(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("sg52a")
 
-	// domain
+	// start simulation
 	if !Start("data/sg52.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// make sure to flush log
 	defer End()
+
+	// domain
 	dom := NewDomain(global.Sim.Regions[0])
 	if dom == nil {
 		tst.Errorf("test failed\n")
+		return
 	}
+
+	// set stage
 	if !dom.SetStage(0, global.Sim.Stages[0]) {
 		tst.Errorf("test failed\n")
+		return
 	}
 
 	// nodes and elements

@@ -280,7 +280,7 @@ func (o *Rod) Update(sol *Solution) (ok bool) {
 }
 
 // SetSurfLoads set surface loads (natural boundary conditions)
-func (o *Rod) SetSurfLoads(key string, idxface int, f fun.Func, extra string) (ok bool) {
+func (o *Rod) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	return true
 }
 
