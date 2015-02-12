@@ -57,7 +57,7 @@ func (o *DruckerPrager) Init(ndim int, pstress bool, prms fun.Prms) (err error) 
 }
 
 // GetPrms gets (an example) of parameters
-func (o *DruckerPrager) GetPrms() fun.Prms {
+func (o DruckerPrager) GetPrms() fun.Prms {
 	return []*fun.Prm{
 		&fun.Prm{N: "M", V: 1},
 		&fun.Prm{N: "Mb", V: 1},
@@ -67,7 +67,7 @@ func (o *DruckerPrager) GetPrms() fun.Prms {
 }
 
 // InitIntVars initialises internal (secondary) variables
-func (o *DruckerPrager) InitIntVars() (s *State, err error) {
+func (o DruckerPrager) InitIntVars() (s *State, err error) {
 	s = NewState(o.Nsig, 1, 0, false)
 	return
 }

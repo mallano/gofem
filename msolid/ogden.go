@@ -72,12 +72,12 @@ func (o *Ogden) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 }
 
 // GetPrms gets (an example) of parameters
-func (o *Ogden) GetPrms() fun.Prms {
+func (o Ogden) GetPrms() fun.Prms {
 	return []*fun.Prm{}
 }
 
 // InitIntVars initialises internal (secondary) variables
-func (o *Ogden) InitIntVars() (s *State, err error) {
+func (o Ogden) InitIntVars() (s *State, err error) {
 	s = NewState(o.Nsig, 0, 0, true)
 	return
 }

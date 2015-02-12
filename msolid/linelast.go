@@ -22,27 +22,27 @@ func (o *LinElast) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 }
 
 // GetPrms gets (an example) of parameters
-func (o *LinElast) GetPrms() fun.Prms {
+func (o LinElast) GetPrms() fun.Prms {
 	return o.SmallElasticity.GetPrms()
 }
 
 // InitIntVars initialises internal (secondary) variables
-func (o *LinElast) InitIntVars() (s *State, err error) {
+func (o LinElast) InitIntVars() (s *State, err error) {
 	s = NewState(o.Nsig, 0, 0, false)
 	return
 }
 
 // Update updates stresses for given strains
-func (o *LinElast) Update(s *State, ε, Δε []float64) (err error) {
+func (o LinElast) Update(s *State, ε, Δε []float64) (err error) {
 	return o.SmallElasticity.Update(s, ε)
 }
 
 // CalcD computes D = dσ_new/dε_new consistent with StressUpdate
-func (o *LinElast) CalcD(D [][]float64, s *State, firstIt bool) (err error) {
+func (o LinElast) CalcD(D [][]float64, s *State, firstIt bool) (err error) {
 	return o.SmallElasticity.CalcD(D, s)
 }
 
 // ContD computes D = dσ_new/dε_new continuous
-func (o *LinElast) ContD(D [][]float64, s *State) (err error) {
+func (o LinElast) ContD(D [][]float64, s *State) (err error) {
 	return o.SmallElasticity.CalcD(D, s)
 }

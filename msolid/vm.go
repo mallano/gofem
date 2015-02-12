@@ -49,7 +49,7 @@ func (o *VonMises) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 }
 
 // GetPrms gets (an example) of parameters
-func (o *VonMises) GetPrms() fun.Prms {
+func (o VonMises) GetPrms() fun.Prms {
 	return []*fun.Prm{
 		&fun.Prm{N: "qy0", V: 0.5},
 		&fun.Prm{N: "H", V: 0},
@@ -57,7 +57,7 @@ func (o *VonMises) GetPrms() fun.Prms {
 }
 
 // InitIntVars initialises internal (secondary) variables
-func (o *VonMises) InitIntVars() (s *State, err error) {
+func (o VonMises) InitIntVars() (s *State, err error) {
 	s = NewState(o.Nsig, 1, 0, false)
 	return
 }

@@ -94,7 +94,7 @@ func (o *SmallElasticity) Init(ndim int, pstress bool, prms fun.Prms) (err error
 }
 
 // GetPrms gets (an example) of parameters
-func (o *SmallElasticity) GetPrms() fun.Prms {
+func (o SmallElasticity) GetPrms() fun.Prms {
 	return []*fun.Prm{
 		&fun.Prm{N: "E", V: o.E},
 		&fun.Prm{N: "nu", V: o.Nu},
@@ -102,7 +102,7 @@ func (o *SmallElasticity) GetPrms() fun.Prms {
 }
 
 // Update computes new stresses for new strains ε
-func (o *SmallElasticity) Update(s *State, ε []float64) (err error) {
+func (o SmallElasticity) Update(s *State, ε []float64) (err error) {
 	σ := s.Sig
 	if o.Pse {
 		c := o.E / (1.0 - o.Nu*o.Nu)
@@ -120,7 +120,7 @@ func (o *SmallElasticity) Update(s *State, ε []float64) (err error) {
 }
 
 // CalcD computes D = dσ_new/dε_new (consistent)
-func (o *SmallElasticity) CalcD(D [][]float64, s *State) (err error) {
+func (o SmallElasticity) CalcD(D [][]float64, s *State) (err error) {
 	if o.Pse {
 		if o.Nsig != 4 {
 			return utl.Err("for plane-stress analyses, D must be 4x4. nsig = %d is incorrect.\n", o.Nsig)
