@@ -110,7 +110,7 @@ func init() {
 				o.A = p.V
 			case "Izz":
 				o.Izz = p.V
-			case "rho":
+			case "Rho":
 				o.Rho = p.V
 			}
 		}
@@ -271,11 +271,9 @@ func (o Beam) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		o.ue[i] = sol.Y[I]
 	}
 
-	// steady
+	// steady/dynamics
 	if global.Sim.Data.Steady {
 		la.MatVecMul(o.fi, 1, o.K, o.ue)
-
-		// dynamics
 	} else {
 		dc := global.DynCoefs
 		for i := 0; i < o.Nu; i++ {
@@ -312,11 +310,18 @@ func (o Beam) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 // adds element K to global Jacobian matrix Kb
 func (o Beam) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
-
-	// add K to sparse matrix Kb
-	for i, I := range o.Umap {
-		for j, J := range o.Umap {
-			Kb.Put(I, J, o.K[i][j])
+	if global.Sim.Data.Steady {
+		for i, I := range o.Umap {
+			for j, J := range o.Umap {
+				Kb.Put(I, J, o.K[i][j])
+			}
+		}
+	} else {
+		dc := global.DynCoefs
+		for i, I := range o.Umap {
+			for j, J := range o.Umap {
+				Kb.Put(I, J, o.M[i][j]*dc.α1+o.K[i][j])
+			}
 		}
 	}
 	return true

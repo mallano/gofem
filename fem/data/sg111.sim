@@ -2,8 +2,7 @@
   "data" : {
     "desc"    : "Smith-Griffiths (5th ed) Figure 11.1 p487",
     "matfile" : "data/sg.mat",
-    "showR"   : true,
-    "encoder" : "json"
+    "showR"   : false
   },
   "functions" : [
     { "name":"load", "type":"exc2", "prms":[ 

@@ -6,6 +6,7 @@ package fem
 
 import (
 	"encoding/json"
+	"math"
 	"sort"
 	"testing"
 
@@ -408,7 +409,7 @@ func Test_sg111(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("sg111")
 
 	// run simulation
@@ -426,26 +427,26 @@ func Test_sg111(tst *testing.T) {
 		return
 	}
 
-	// read summary
-	sum := ReadSum()
-	utl.Pfyel("sum = %v\n", sum)
-
-	// allocate domain
-	d := NewDomain(global.Sim.Regions[0])
-	if !d.SetStage(0, global.Sim.Stages[0]) {
-		tst.Errorf("SetStage failed\n")
-		return
-	}
-
 	// plot
-	doplot := true
+	doplot := false
 	if doplot {
+
+		// read summary
+		sum := ReadSum()
+		utl.Pfyel("sum = %v\n", sum)
+
+		// allocate domain
+		d := NewDomain(global.Sim.Regions[0])
+		if !d.SetStage(0, global.Sim.Stages[0]) {
+			tst.Errorf("SetStage failed\n")
+			return
+		}
 
 		// selected node and dof index
 		nidx := 1
 		didx := 1
 
-		// for each tidx
+		// gofem
 		t := make([]float64, sum.NumTidx)
 		uy := make([]float64, sum.NumTidx)
 		for tidx := 0; tidx < sum.NumTidx; tidx++ {
@@ -458,7 +459,23 @@ func Test_sg111(tst *testing.T) {
 			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
 		}
-		plt.Plot(t, uy, "'ro-', clip_on=0")
+		plt.Plot(t, uy, "'ro-', clip_on=0, label='gofem'")
+
+		// analytical solution
+		ta := 1.0
+		calc_uy := func(t float64) float64 {
+			if t < ta {
+				return 0.441*math.Sin(math.Pi*t/ta) - 0.216*math.Sin(2.0*math.Pi*t/ta)
+			}
+			return -0.432 * math.Sin(2*math.Pi*(t-ta))
+		}
+		tAna := utl.LinSpace(0, 5, 101)
+		uyAna := make([]float64, len(tAna))
+		for i, t := range tAna {
+			uyAna[i] = calc_uy(t)
+		}
+		plt.Plot(tAna, uyAna, "'g-', clip_on=0, label='analytical'")
+
 		plt.Gll("$t$", "$u_y$", "")
 		plt.Show()
 	}
