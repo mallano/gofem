@@ -6,6 +6,8 @@ package mporous
 
 // StateLG holds state variables for porous media with liquid and gas
 type StateLG struct {
+	Pl   float64 // pl: liquid pressure
+	Pg   float64 // pg: gas pressure
 	Sl   float64 // sl: liquid saturation
 	RhoL float64 // ρL: real (intrinsic) density of liquid
 	RhoG float64 // ρG: real (intrinsic) density of gas

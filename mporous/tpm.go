@@ -88,12 +88,12 @@ var TPM struct {
 }
 
 // CalcLGS calculates TPM variables for models with liquid, gas and solid
-func CalcLGS(pl, pg, divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
+func CalcLGS(divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 
 	// other porous media data
 	TPM.Sg = 1.0 - sta.Sl
-	TPM.Pc = pg - pl
-	TPM.P = sta.Sl*pl + TPM.Sg*pg
+	TPM.Pc = sta.Pg - sta.Pl
+	TPM.P = sta.Sl*sta.Pl + TPM.Sg*sta.Pg
 
 	// n variables
 	TPM.Ns = (1.0 - divus) * sta.Ns0
@@ -108,8 +108,8 @@ func CalcLGS(pl, pg, divus float64, sta *StateLG, mdl *Model, derivs bool) (err 
 	TPM.Rho = TPM.Rhol + TPM.Rhog + TPM.Rhos
 
 	// conductivity and retention models variables
-	TPM.Klr = mdl.Klr(sta.Sl)
-	TPM.Kgr = mdl.Kgr(TPM.Sg)
+	TPM.Klr = mdl.Cnd.Klr(sta.Sl)
+	TPM.Kgr = mdl.Cnd.Kgr(TPM.Sg)
 	TPM.Cc = mdl.Cc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
 	TPM.Cl = mdl.Cl
 	TPM.Cg = mdl.Cg
@@ -135,12 +135,12 @@ func CalcLGS(pl, pg, divus float64, sta *StateLG, mdl *Model, derivs bool) (err 
 		Cc := TPM.Cc
 
 		// liquid conductivity
-		TPM.DklrDpl = -mdl.DklrDsl(sl) * Cc
-		TPM.DklrDpg = +mdl.DklrDsl(sl) * Cc
+		TPM.DklrDpl = -mdl.Cnd.DklrDsl(sl) * Cc
+		TPM.DklrDpg = +mdl.Cnd.DklrDsl(sl) * Cc
 
 		// gas conductivity
-		TPM.DkgrDpl = +mdl.DkgrDsg(sg) * Cc
-		TPM.DkgrDpg = -mdl.DkgrDsg(sg) * Cc
+		TPM.DkgrDpl = +mdl.Cnd.DkgrDsg(sg) * Cc
+		TPM.DkgrDpg = -mdl.Cnd.DkgrDsg(sg) * Cc
 
 		// liquid retention model
 		Ccd := mdl.DCcDpc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
@@ -183,11 +183,11 @@ func CalcLGS(pl, pg, divus float64, sta *StateLG, mdl *Model, derivs bool) (err 
 
 // CalcLS calculates TPM variables for models with liquid and solid
 //  With: pg = sg = ρG = 0
-func CalcLS(pl, divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
+func CalcLS(divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 
 	// other porous media data
-	TPM.Pc = -pl
-	TPM.P = sta.Sl * pl
+	TPM.Pc = -sta.Pl
+	TPM.P = sta.Sl * sta.Pl
 
 	// n variables
 	TPM.Ns = (1.0 - divus) * sta.Ns0
@@ -200,7 +200,7 @@ func CalcLS(pl, divus float64, sta *StateLG, mdl *Model, derivs bool) (err error
 	TPM.Rho = TPM.Rhol + TPM.Rhos
 
 	// conductivity and retention models variables
-	TPM.Klr = mdl.Klr(sta.Sl)
+	TPM.Klr = mdl.Cnd.Klr(sta.Sl)
 	TPM.Cc = mdl.Cc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
 	TPM.Cl = mdl.Cl
 
@@ -219,8 +219,8 @@ func CalcLS(pl, divus float64, sta *StateLG, mdl *Model, derivs bool) (err error
 		Cc := TPM.Cc
 
 		// liquid conductivity
-		TPM.DklrDpl = -mdl.DklrDsl(sl) * Cc
-		TPM.DklrDpg = +mdl.DklrDsl(sl) * Cc
+		TPM.DklrDpl = -mdl.Cnd.DklrDsl(sl) * Cc
+		TPM.DklrDpg = +mdl.Cnd.DklrDsl(sl) * Cc
 
 		// liquid retention model
 		Ccd := mdl.DCcDpc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
@@ -245,11 +245,11 @@ func CalcLS(pl, divus float64, sta *StateLG, mdl *Model, derivs bool) (err error
 
 // CalcL calculates TPM variables for models with liquid only
 //  With: pg = sg = ρG = 0 and divus = 0
-func CalcL(pl float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
+func CalcL(sta *StateLG, mdl *Model, derivs bool) (err error) {
 
 	// other porous media data
-	TPM.Pc = -pl
-	TPM.P = sta.Sl * pl
+	TPM.Pc = -sta.Pl
+	TPM.P = sta.Sl * sta.Pl
 
 	// n variables
 	TPM.Ns = sta.Ns0
@@ -262,7 +262,7 @@ func CalcL(pl float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 	TPM.Rho = TPM.Rhol + TPM.Rhos
 
 	// conductivity and retention models variables
-	TPM.Klr = mdl.Klr(sta.Sl)
+	TPM.Klr = mdl.Cnd.Klr(sta.Sl)
 	TPM.Cc = mdl.Cc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
 	TPM.Cl = mdl.Cl
 
@@ -280,7 +280,7 @@ func CalcL(pl float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 		Cc := TPM.Cc
 
 		// liquid conductivity
-		TPM.DklrDpl = -mdl.DklrDsl(sl) * Cc
+		TPM.DklrDpl = -mdl.Cnd.DklrDsl(sl) * Cc
 
 		// liquid retention model
 		Ccd := mdl.DCcDpc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
