@@ -128,7 +128,7 @@ func (o *RefM1) Cc(pc, sl float64, wet bool) (Ccval float64, err error) {
 
 // derivatives
 func (o *RefM1) Derivs(pc, sl float64, wet bool) (err error) {
-	D.DCcDpc, D.DCcDsl, D.D2CcDpc2, D.D2CcDsl2, D.D2CcDslDpc = 0, 0, 0, 0, 0
+	D.DCcDpc, D.DCcDsl, D.D2CcDpc2, D.D2CcDsl2, D.D2CcDpcDsl = 0, 0, 0, 0, 0
 	if pc <= 0 {
 		return
 	}
@@ -166,7 +166,7 @@ func (o *RefM1) Derivs(pc, sl float64, wet bool) (err error) {
 	D.DCcDsl = -DλbDy / den
 	D.D2CcDpc2 = ((DλbDx-D2λbDx2)/den2 - 2.0*D.DCcDpc) / den
 	D.D2CcDsl2 = -D2λbDy2 / den
-	D.D2CcDslDpc = -(D2λbDyDx/den + D.DCcDsl) / den
+	D.D2CcDpcDsl = -(D2λbDyDx/den + D.DCcDsl) / den
 	return
 }
 

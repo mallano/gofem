@@ -7,6 +7,7 @@ package mreten
 import (
 	"testing"
 
+	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -20,20 +21,31 @@ func Test_vg01(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("vg01")
 
 	mdl := GetModel("testsim", "mat1", "vg", false)
 	mdl.Init(mdl.GetPrms())
 
-	// check derivatives
-	doplot := true
-	tolCc, tolD1, tolD2 := 1e-10, 1e-10, 1e-10
-	Check(tst, mdl, -1, 1, 3, 11, tolCc, tolD1, tolD2, true, []float64{}, 1e-7, doplot)
+	pc0 := -1.0
+	sl0 := 1.0
+	pcf := 3.0
+	nptsA := 21
+	nptsB := 11
 
-	// plot
-	if true {
-		Plot(mdl, -1, 1, 3, 101, "'b.-'", "'r+-'", "vg")
+	//doplot := true
+	doplot := false
+	if doplot {
+		plt.Reset()
+		Plot(mdl, pc0, sl0, pcf, nptsA, "'b.-'", "'r+-'", "bc")
+	}
+
+	tolCc := 1e-10
+	tolD1a, tolD1b := 1e-10, 1e-17
+	tolD2a, tolD2b := 1e-10, 1e-17
+	Check(tst, mdl, pc0, sl0, pcf, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, true, []float64{}, 1e-7, doplot)
+
+	if doplot {
 		PlotEnd(true)
 	}
 }

@@ -5,6 +5,7 @@
 package mreten
 
 import (
+	"math"
 	"strings"
 
 	"github.com/cpmech/gosl/fun"
@@ -42,7 +43,12 @@ func (o *Lin) Init(prms fun.Prms) (err error) {
 			return utl.Err("lin: parameter named %q is incorrect\n", p.N)
 		}
 	}
-	o.pcres = o.pcae + (1-o.slmin)/o.λ
+	if o.λ < 1e-15 {
+		o.λ = 0
+		o.pcres = math.MaxFloat64
+	} else {
+		o.pcres = o.pcae + (1-o.slmin)/o.λ
+	}
 	return
 }
 

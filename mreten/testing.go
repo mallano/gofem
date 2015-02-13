@@ -14,7 +14,7 @@ import (
 )
 
 // Check checks derivatives
-func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, tolD1, tolD2 float64, verbose bool, pcSkip []float64, tolSkip float64, doplot bool) {
+func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, tolD1a, tolD1b, tolD2a, tolD2b float64, verbose bool, pcSkip []float64, tolSkip float64, doplot bool) {
 
 	// nonrate model
 	nr_mdl, is_nonrate := mdl.(Nonrate)
@@ -28,11 +28,6 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 	var err error
 	for i := 1; i < npts; i++ {
 
-		// skip point
-		if doskip(Pc[i], pcSkip, tolSkip) {
-			continue
-		}
-
 		// update and plot
 		Sl[i], err = Update(mdl, Pc[i-1], Sl[i-1], Pc[i]-Pc[i-1])
 		if err != nil {
@@ -43,11 +38,16 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 			plt.PlotOne(Pc[i], Sl[i], "'ko'")
 		}
 
+		// skip point on checking of derivatives
+		if doskip(Pc[i], pcSkip, tolSkip) {
+			continue
+		}
+
 		// wetting flag
 		wet := Pc[i]-Pc[i-1] < 0
 
 		// check Cc = dsl/dpc
-		utl.Pf("\n")
+		utl.Pforan("\npc=%g, sl=%g, wetting=%v\n", Pc[i], Sl[i], wet)
 		if is_nonrate {
 
 			// analytical Cc
@@ -61,9 +61,7 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 			Cc_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 				return nr_mdl.Sl(x)
 			}, Pc[i], 1e-3)
-
-			// comparison
-			utl.CheckAnaNum(tst, utl.Sf("Cc        @ %+.3f", Pc[i]), tolCc, Cc_ana, Cc_num, verbose)
+			utl.CheckAnaNum(tst, "Cc            ", tolCc, Cc_ana, Cc_num, verbose)
 		}
 
 		// compute all derivatives
@@ -76,18 +74,14 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 			Ccval, _ := mdl.Cc(x, Sl[i], wet)
 			return Ccval
 		}, Pc[i], 1e-3)
-
-		// comparison
-		utl.CheckAnaNum(tst, utl.Sf("∂Cc/∂pc   @ %+.3f", Pc[i]), tolD1, DCcDpc_ana, DCcDpc_num, verbose)
+		utl.CheckAnaNum(tst, "∂Cc/∂pc       ", tolD1a, DCcDpc_ana, DCcDpc_num, verbose)
 
 		// numerical D2CcDpc2 := ∂²Cc/∂pc²
 		D2CcDpc2_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 			mdl.Derivs(x, Sl[i], wet)
 			return D.DCcDpc
 		}, Pc[i], 1e-3)
-
-		// comparison
-		utl.CheckAnaNum(tst, utl.Sf("∂²Cc/∂pc² @ %+.3f", Pc[i]), tolD2, D2CcDpc2_ana, D2CcDpc2_num, verbose)
+		utl.CheckAnaNum(tst, "∂²Cc/∂pc²     ", tolD2a, D2CcDpc2_ana, D2CcDpc2_num, verbose)
 
 		// if is nonrate, skip additional derivatives checks
 		if is_nonrate {
@@ -96,15 +90,29 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 
 		// analytical derivatives
 		DCcDsl_ana := D.DCcDsl
+		D2CcDsl2_ana := D.D2CcDsl2
+		D2CcDpcDsl_ana := D.D2CcDpcDsl
 
 		// numerical DCcDsl := ∂Cc/∂sl
 		DCcDsl_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
-			mdl.Derivs(x, Sl[i], wet)
-			return D.DCcDsl
-		}, Pc[i], 1e-3)
+			Ccval, _ := mdl.Cc(Pc[i], x, wet)
+			return Ccval
+		}, Sl[i], 1e-3)
+		utl.CheckAnaNum(tst, "∂Cc/∂sl       ", tolD1b, DCcDsl_ana, DCcDsl_num, verbose)
 
-		// comparison
-		utl.CheckAnaNum(tst, utl.Sf("∂Cc/∂sl   @ %+.3f", Pc[i]), tolD2, DCcDsl_ana, DCcDsl_num, verbose)
+		// numerical D2CcDsl2 := ∂²Cc/∂sl²
+		D2CcDsl2_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
+			mdl.Derivs(Pc[i], x, wet)
+			return D.DCcDsl
+		}, Sl[i], 1e-3)
+		utl.CheckAnaNum(tst, "∂²Cc/∂sl²     ", tolD2b, D2CcDsl2_ana, D2CcDsl2_num, verbose)
+
+		// numerical D2CcDpcDsl := ∂²Cc/(∂pc ∂sl)
+		D2CcDpcDsl_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
+			mdl.Derivs(Pc[i], x, wet)
+			return D.DCcDpc
+		}, Sl[i], 1e-3)
+		utl.CheckAnaNum(tst, "∂²Cc/(∂pc ∂sl)", tolD2b, D2CcDpcDsl_ana, D2CcDpcDsl_num, verbose)
 	}
 }
 

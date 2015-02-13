@@ -17,7 +17,7 @@ var D struct {
 	DCcDsl     float64 // ∂Cc/∂sl
 	D2CcDpc2   float64 // ∂²Cc/∂pc²
 	D2CcDsl2   float64 // ∂²Cc/∂sl²
-	D2CcDslDpc float64 // ∂²Cc/(∂pc ∂sl)
+	D2CcDpcDsl float64 // ∂²Cc/(∂pc ∂sl)
 }
 
 // Model implements a liquid retention model (LRM)

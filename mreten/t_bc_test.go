@@ -21,20 +21,29 @@ func Test_bc01(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("bc01")
 
 	mdl := GetModel("testsim", "mat1", "bc", false)
 	mdl.Init(mdl.GetPrms())
 
-	doplot := true
+	pc0 := -1.0
+	sl0 := 1.0
+	pcf := 3.0
+	nptsA := 11
+	nptsB := 11
+
+	//doplot := true
+	doplot := false
 	if doplot {
 		plt.Reset()
-		Plot(mdl, -1, 1, 3, 11, "'b.-'", "'r+-'", "bc")
+		Plot(mdl, pc0, sl0, pcf, nptsA, "'b.-'", "'r+-'", "bc")
 	}
 
-	tolCc, tolD1, tolD2 := 1e-10, 1e-10, 1e-10
-	Check(tst, mdl, -1, 1, 3, 11, tolCc, tolD1, tolD2, true, []float64{0.2}, 1e-7, doplot)
+	tolCc := 1e-11
+	tolD1a, tolD1b := 1e-10, 1e-17
+	tolD2a, tolD2b := 1e-10, 1e-17
+	Check(tst, mdl, pc0, sl0, pcf, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, true, []float64{0.2}, 1e-7, doplot)
 
 	if doplot {
 		PlotEnd(true)
