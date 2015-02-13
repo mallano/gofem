@@ -7,10 +7,34 @@ package mporous
 import (
 	"testing"
 
+	"github.com/cpmech/gofem/mconduct"
 	"github.com/cpmech/gofem/mreten"
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
+
+func get_model() *Model {
+	var mdl Model
+	var cnd mconduct.M1
+	var lrm mreten.RefM1
+	mdl_prms := mdl.GetPrms()
+	cnd_prms := cnd.GetPrms()
+	lrm_prms := lrm.GetPrms()
+	var prms fun.Prms
+	for _, p := range mdl_prms {
+		prms = append(prms, p)
+	}
+	for _, p := range cnd_prms {
+		prms = append(prms, p)
+	}
+	for _, p := range lrm_prms {
+		prms = append(prms, p)
+	}
+	utl.Pfcyan("prms = [\n%v\n", prms)
+	mdl.Init(prms, &cnd, &lrm)
+	return &mdl
+}
 
 func Test_mdl01(tst *testing.T) {
 
@@ -25,23 +49,30 @@ func Test_mdl01(tst *testing.T) {
 	utl.Tsilent = false
 	utl.TTitle("mdl01")
 
-	var lrm mreten.RefM1
-	lrm_prms := lrm.GetPrms()
-	cnd_prms := GetLGcndPrms()
-	mdl_prms := GetModelPrms()
-	utl.Pforan("cnd_prms = [\n%v\n", cnd_prms)
-	utl.Pforan("lrm_prms = [\n%v\n", lrm_prms)
-	utl.Pforan("mdl_prms = [\n%v\n", mdl_prms)
+	mdl := get_model()
+	utl.Pforan("mdl = %v\n", mdl)
 
-	var prms fun.Prms
-	for _, p := range mdl_prms {
-		prms = append(prms, p)
+	var sta StateLG
+	sta.Sl = 1.0
+	Δpl := -20.0
+	err := mdl.Update(&sta, Δpl, 0)
+	if err != nil {
+		tst.Errorf("Updated failed: %v\n", err)
+		return
 	}
-	for _, p := range cnd_prms {
-		prms = append(prms, p)
+	utl.Pforan("sl = %v\n", sta.Sl)
+
+	pc0 := -5.0
+	sl0 := 1.0
+	pcf := 20.0
+	nptsA := 41
+
+	doplot := true
+	if doplot {
+		plt.Reset()
 	}
-	for _, p := range lrm_prms {
-		prms = append(prms, p)
+	mreten.Plot(mdl.Lrm, pc0, sl0, pcf, nptsA, "'b.-'", "'r+-'", "ref-m1_drying")
+	if doplot {
+		mreten.PlotEnd(true)
 	}
-	utl.Pfcyan("prms = [\n%v\n", prms)
 }

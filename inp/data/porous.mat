@@ -1,0 +1,81 @@
+{
+  "functions" : [],
+  "materials" : [
+    {
+      "name"  : "pm1",
+      "model" : "porous",
+      "prms"  : [
+        {"n":"nf",    "v":0.3    },
+        {"n":"RhoL",  "v":1      },
+        {"n":"RhoG",  "v":0.01   },
+        {"n":"RhoS",  "v":2.7    },
+        {"n":"BulkL", "v":2.2e+06},
+        {"n":"RTg",   "v":0.02   },
+        {"n":"gref",  "v":10     },
+        {"n":"kl",    "v":0.001  },
+        {"n":"kg",    "v":0.01   }
+      ]
+    },
+    {
+      "name"  : "cnd1",
+      "model" : "cnd-m1",
+      "prms"  : [
+        {"n":"lam0L", "v":0.001},
+        {"n":"lam1L", "v":1.2  },
+        {"n":"alpL",  "v":0.01 },
+        {"n":"betL",  "v":10   },
+        {"n":"lam0G", "v":2    },
+        {"n":"lam1G", "v":0.001},
+        {"n":"alpG",  "v":0.01 },
+        {"n":"betG",  "v":10   }
+      ]
+    },
+    {
+      "name"  : "lrm1",
+      "model" : "ref-m1",
+      "prms"  : [
+        {"n":"lamd",  "v":3    },
+        {"n":"lamw",  "v":3    },
+        {"n":"xrd",   "v":2    },
+        {"n":"xrw",   "v":2    },
+        {"n":"yr",    "v":0.005},
+        {"n":"betd",  "v":2    },
+        {"n":"betw",  "v":2    },
+        {"n":"bet1",  "v":2    },
+        {"n":"bet2",  "v":2    },
+        {"n":"alp",   "v":0.5  },
+        {"n":"nowet", "v":0    , "inact":true}
+      ]
+    },
+    {
+      "name" : "lrm2",
+      "model" : "vg",
+      "prms" : [
+        {"n":"alp",   "v":0.5 },
+        {"n":"m",     "v":2   },
+        {"n":"n",     "v":4   },
+        {"n":"slmin", "v":0.01},
+        {"n":"pcmin", "v":1e-3}
+      ]
+    },
+    {
+      "name"  : "sld1",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",    "v":10000},
+        {"n":"nu",   "v":0.2  },
+        {"n":"rhoS", "v":1    }
+      ]
+    },
+    {
+      "name"  : "porous1",
+      "model" : "group",
+      "extra" : "!l:lrm1 !c:cnd1 !p:pm1 !s:sld1"
+    },
+    {
+      "name"  : "porous2",
+      "model" : "group",
+      "extra" : "!l:lrm2 !c:cnd1 !p:pm1 !s:sld1"
+    }
+  ]
+}

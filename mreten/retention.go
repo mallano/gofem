@@ -5,6 +5,8 @@
 package mreten
 
 import (
+	"log"
+
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/ode"
@@ -80,7 +82,7 @@ func Update(mdl Model, pc0, sl0, Δpc float64) (slNew float64, err error) {
 //  Note: returns nil on errors
 func GetModel(simfnk, matname, modelname string, getnew bool) Model {
 
-	// get new model, regardless wheter it exists in database or not
+	// get new model, regardless whether it exists in database or not
 	if getnew {
 		allocator, ok := allocators[modelname]
 		if !ok {
@@ -105,7 +107,19 @@ func GetModel(simfnk, matname, modelname string, getnew bool) Model {
 	return model
 }
 
-// allocators holds all available solid models; modelname => allocator
+// LogModels prints to log information on existent and allocated Models
+func LogModels() {
+	log.Printf("mporous: available models:")
+	for name, _ := range allocators {
+		log.Printf(" " + name)
+	}
+	log.Printf("\nmporous: allocated models:")
+	for key, _ := range _models {
+		log.Printf(" " + key)
+	}
+}
+
+// allocators holds all available models
 var allocators = map[string]func() Model{}
 
 // _models holds pre-allocated models

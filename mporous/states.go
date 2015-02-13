@@ -8,10 +8,10 @@ package mporous
 type StateLG struct {
 	Pl   float64 // pl: liquid pressure
 	Pg   float64 // pg: gas pressure
-	Sl   float64 // sl: liquid saturation
 	RhoL float64 // ρL: real (intrinsic) density of liquid
 	RhoG float64 // ρG: real (intrinsic) density of gas
-	Ns0  float64 // ns0: initial partial fraction of solids
-	Wet  bool    // wetting flag
 	Dpc  float64 // Δpc: step increment of capillary pressure
+	Wet  bool    // wetting flag
+	Sl   float64 // sl: liquid saturation
+	Ns0  float64 // ns0: initial partial fraction of solids
 }
