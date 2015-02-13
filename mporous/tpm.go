@@ -110,7 +110,7 @@ func CalcLGS(pl, pg, divus float64, sta *StateLG, mdl *Model, derivs bool) (err 
 	// conductivity and retention models variables
 	TPM.Klr = mdl.Klr(sta.Sl)
 	TPM.Kgr = mdl.Kgr(TPM.Sg)
-	TPM.Cc = mdl.Cc(TPM.Pc, sta.Sl, sta.Wet, sta.Delpc)
+	TPM.Cc = mdl.Cc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
 	TPM.Cl = mdl.Cl
 	TPM.Cg = mdl.Cg
 
@@ -143,7 +143,7 @@ func CalcLGS(pl, pg, divus float64, sta *StateLG, mdl *Model, derivs bool) (err 
 		TPM.DkgrDpg = -mdl.DkgrDsg(sg) * Cc
 
 		// liquid retention model
-		Ccd := mdl.DCcDpc(TPM.Pc, sta.Sl, sta.Wet, sta.Delpc)
+		Ccd := mdl.DCcDpc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
 		TPM.DCcDpc = Ccd
 
 		// mixture density
@@ -201,7 +201,7 @@ func CalcLS(pl, divus float64, sta *StateLG, mdl *Model, derivs bool) (err error
 
 	// conductivity and retention models variables
 	TPM.Klr = mdl.Klr(sta.Sl)
-	TPM.Cc = mdl.Cc(TPM.Pc, sta.Sl, sta.Wet, sta.Delpc)
+	TPM.Cc = mdl.Cc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
 	TPM.Cl = mdl.Cl
 
 	// liquid balance related coefficients
@@ -223,7 +223,7 @@ func CalcLS(pl, divus float64, sta *StateLG, mdl *Model, derivs bool) (err error
 		TPM.DklrDpg = +mdl.DklrDsl(sl) * Cc
 
 		// liquid retention model
-		Ccd := mdl.DCcDpc(TPM.Pc, sta.Sl, sta.Wet, sta.Delpc)
+		Ccd := mdl.DCcDpc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
 		TPM.DCcDpc = Ccd
 
 		// mixture density
@@ -263,7 +263,7 @@ func CalcL(pl float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 
 	// conductivity and retention models variables
 	TPM.Klr = mdl.Klr(sta.Sl)
-	TPM.Cc = mdl.Cc(TPM.Pc, sta.Sl, sta.Wet, sta.Delpc)
+	TPM.Cc = mdl.Cc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
 	TPM.Cl = mdl.Cl
 
 	// liquid balance related coefficients
@@ -283,7 +283,7 @@ func CalcL(pl float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 		TPM.DklrDpl = -mdl.DklrDsl(sl) * Cc
 
 		// liquid retention model
-		Ccd := mdl.DCcDpc(TPM.Pc, sta.Sl, sta.Wet, sta.Delpc)
+		Ccd := mdl.DCcDpc(TPM.Pc, sta.Sl, sta.Wet, sta.Dpc)
 		TPM.DCcDpc = Ccd
 
 		// mixture density
