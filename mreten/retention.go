@@ -25,7 +25,7 @@ var D struct {
 // Model implements a liquid retention model (LRM)
 type Model interface {
 	Init(prms fun.Prms) error                         // initialises retention model
-	GetPrms() fun.Prms                                // gets (an example) of parameters
+	GetPrms(example bool) fun.Prms                    // gets (an example) of parameters
 	Cc(pc, sl float64, wetting bool) (float64, error) // compute Cc(pc,sl) := dsl/dpc
 	Derivs(pc, sl float64, wetting bool) error        // derivatives
 }

@@ -92,7 +92,7 @@ func (o *RefM1) Init(prms fun.Prms) (err error) {
 }
 
 // GetPrms gets (an example) of parameters
-func (o RefM1) GetPrms() fun.Prms {
+func (o RefM1) GetPrms(example bool) fun.Prms {
 	return []*fun.Prm{
 		&fun.Prm{N: "lamd", V: 3},
 		&fun.Prm{N: "lamw", V: 3},

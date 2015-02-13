@@ -104,7 +104,7 @@ func CalcLGS(divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 	// ρ (partial) variables
 	TPM.Rhol = TPM.Nl * sta.RhoL
 	TPM.Rhog = TPM.Ng * sta.RhoG
-	TPM.Rhos = TPM.Ns * mdl.RhoS
+	TPM.Rhos = TPM.Ns * mdl.RhoS0
 	TPM.Rho = TPM.Rhol + TPM.Rhog + TPM.Rhos
 
 	// conductivity and retention models variables
@@ -196,7 +196,7 @@ func CalcLS(divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 
 	// ρ (partial) variables
 	TPM.Rhol = TPM.Nl * sta.RhoL
-	TPM.Rhos = TPM.Ns * mdl.RhoS
+	TPM.Rhos = TPM.Ns * mdl.RhoS0
 	TPM.Rho = TPM.Rhol + TPM.Rhos
 
 	// conductivity and retention models variables
@@ -258,7 +258,7 @@ func CalcL(sta *StateLG, mdl *Model, derivs bool) (err error) {
 
 	// ρ (partial) variables
 	TPM.Rhol = TPM.Nl * sta.RhoL
-	TPM.Rhos = TPM.Ns * mdl.RhoS
+	TPM.Rhos = TPM.Ns * mdl.RhoS0
 	TPM.Rho = TPM.Rhol + TPM.Rhos
 
 	// conductivity and retention models variables

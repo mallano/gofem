@@ -25,7 +25,7 @@ func Test_refm1a(tst *testing.T) {
 	utl.TTitle("refm1a")
 
 	mdl := GetModel("testsim", "mat1", "ref-m1", false)
-	mdl.Init(mdl.GetPrms())
+	mdl.Init(mdl.GetPrms(true))
 
 	pc0 := -5.0
 	sl0 := 1.0

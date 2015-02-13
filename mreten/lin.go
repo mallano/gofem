@@ -53,7 +53,7 @@ func (o *Lin) Init(prms fun.Prms) (err error) {
 }
 
 // GetPrms gets (an example) of parameters
-func (o Lin) GetPrms() fun.Prms {
+func (o Lin) GetPrms(example bool) fun.Prms {
 	return []*fun.Prm{
 		&fun.Prm{N: "lam", V: 0.5},
 		&fun.Prm{N: "pcae", V: 0.2},

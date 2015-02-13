@@ -35,7 +35,7 @@ func init() {
 }
 
 // GetPrms gets (an example) of parameters
-func (o M1) GetPrms() fun.Prms {
+func (o M1) GetPrms(example bool) fun.Prms {
 	return fun.Prms{
 		&fun.Prm{N: "lam0L", V: 0.001},
 		&fun.Prm{N: "lam1L", V: 1.2},

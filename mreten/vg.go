@@ -49,7 +49,7 @@ func (o *VanGen) Init(prms fun.Prms) (err error) {
 }
 
 // GetPrms gets (an example) of parameters
-func (o VanGen) GetPrms() fun.Prms {
+func (o VanGen) GetPrms(example bool) fun.Prms {
 	return []*fun.Prm{
 		&fun.Prm{N: "alp", V: 0.5},
 		&fun.Prm{N: "m", V: 2},

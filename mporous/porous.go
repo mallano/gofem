@@ -26,10 +26,12 @@ type Model struct {
 	Nf0   float64 // nf0: initial volume fraction of all fluids ~ porosity
 	RhoL0 float64 // ρL0: initial liquid real density
 	RhoG0 float64 // ρG0: initial gas real density
-	RhoS  float64 // real (intrinsic) density of solids
+	RhoS0 float64 // real (intrinsic) density of solids
 	BulkL float64 // liquid bulk moduli at temperature θini
 	RTg   float64 // R*Θ*g: initial gas constant
 	Gref  float64 // reference gravity, at time of measuring ksat, kgas
+	Pkl   float64 // isotrpic liquid saturated conductivity
+	Pkg   float64 // isotrpic gas saturated conductivity
 
 	// derived
 	Cl    float64     // liquid compresssibility
@@ -45,6 +47,13 @@ type Model struct {
 // Init initialises this structure
 func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err error) {
 
+	// conductivity and retention models
+	if cnd == nil || lrm == nil {
+		return utl.Err("mporous.Init: conductivity and liquid retention models must be non nil. cnd=%v, lrm=%v\n", cnd, lrm)
+	}
+	o.Cnd = cnd
+	o.Lrm = lrm
+
 	// constants
 	o.NmaxIt = 20
 	o.Itol = 1e-8
@@ -55,6 +64,7 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 	var kgx, kgy, kgz float64
 
 	// read paramaters in
+	o.RTg = 1.0
 	for _, p := range prms {
 		switch p.N {
 		case "NmaxIt":
@@ -63,14 +73,14 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 			o.Itol = p.V
 		case "MEtrial":
 			o.MEtrial = p.V > 0
-		case "nf":
+		case "nf0":
 			o.Nf0 = p.V
-		case "RhoL":
+		case "RhoL0":
 			o.RhoL0 = p.V
-		case "RhoG":
+		case "RhoG0":
 			o.RhoG0 = p.V
-		case "RhoS":
-			o.RhoS = p.V
+		case "RhoS0":
+			o.RhoS0 = p.V
 		case "BulkL":
 			o.BulkL = p.V
 		case "RTg":
@@ -78,8 +88,10 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 		case "gref":
 			o.Gref = p.V
 		case "kl":
+			o.Pkl = p.V
 			klx, kly, klz = p.V, p.V, p.V
 		case "kg":
+			o.Pkg = p.V
 			kgx, kgy, kgz = p.V, p.V, p.V
 		default:
 			return utl.Err("mporous.Model: parameter named %q is incorrect\n", p.N)
@@ -99,25 +111,34 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 		{0, kgy / o.Gref, 0},
 		{0, 0, kgz / o.Gref},
 	}
-
-	// conductivity and retention models
-	o.Cnd = cnd
-	o.Lrm = lrm
 	return
 }
 
 // GetPrms gets (an example) of parameters
-func (o Model) GetPrms() fun.Prms {
+func (o Model) GetPrms(example bool) fun.Prms {
+	if example {
+		return fun.Prms{
+			&fun.Prm{N: "nf0", V: 0.3},
+			&fun.Prm{N: "RhoL0", V: 1},
+			&fun.Prm{N: "RhoG0", V: 0.01},
+			&fun.Prm{N: "RhoS0", V: 2.7},
+			&fun.Prm{N: "BulkL", V: 2.2e6},
+			&fun.Prm{N: "RTg", V: 0.02},
+			&fun.Prm{N: "gref", V: 10},
+			&fun.Prm{N: "kl", V: 1e-3},
+			&fun.Prm{N: "kg", V: 1e-2},
+		}
+	}
 	return fun.Prms{
-		&fun.Prm{N: "nf", V: 0.3},
-		&fun.Prm{N: "RhoL", V: 1},
-		&fun.Prm{N: "RhoG", V: 0.01},
-		&fun.Prm{N: "RhoS", V: 2.7},
-		&fun.Prm{N: "BulkL", V: 2.2e6},
-		&fun.Prm{N: "RTg", V: 0.02},
-		&fun.Prm{N: "gref", V: 10},
-		&fun.Prm{N: "kl", V: 1e-3},
-		&fun.Prm{N: "kg", V: 1e-2},
+		&fun.Prm{N: "nf0", V: o.Nf0},
+		&fun.Prm{N: "RhoL0", V: o.RhoL0},
+		&fun.Prm{N: "RhoG0", V: o.RhoG0},
+		&fun.Prm{N: "RhoS0", V: o.RhoS0},
+		&fun.Prm{N: "BulkL", V: o.BulkL},
+		&fun.Prm{N: "RTg", V: o.RTg},
+		&fun.Prm{N: "gref", V: o.Gref},
+		&fun.Prm{N: "kl", V: o.Pkl},
+		&fun.Prm{N: "kg", V: o.Pkg},
 	}
 }
 
@@ -174,50 +195,34 @@ func (o Model) DCcDpc(pc, sl float64, wet bool, Δpc float64) float64 {
 // GetModel returns (existent or new) model for porous media
 //  simfnk    -- unique simulation filename key
 //  matname   -- name of material
-//  modelname -- model name
 //  getnew    -- force a new allocation; i.e. do not use any model found in database
 //  Note: returns nil on errors
-func GetModel(simfnk, matname, modelname string, getnew bool) *Model {
+func GetModel(simfnk, matname string, getnew bool) *Model {
 
 	// get new model, regardless whether it exists in database or not
 	if getnew {
-		allocator, ok := allocators[modelname]
-		if !ok {
-			return nil
-		}
-		return allocator()
+		return new(Model)
 	}
 
 	// search database
-	key := utl.Sf("%s_%s_%s", simfnk, matname, modelname)
+	key := utl.Sf("%s_%s", simfnk, matname)
 	if model, ok := _models[key]; ok {
 		return model
 	}
 
 	// if not found, get new
-	allocator, ok := allocators[modelname]
-	if !ok {
-		return nil
-	}
-	model := allocator()
+	model := new(Model)
 	_models[key] = model
 	return model
 }
 
 // LogModels prints to log information on existent and allocated Models
 func LogModels() {
-	log.Printf("mporous: available models:")
-	for name, _ := range allocators {
-		log.Printf(" " + name)
-	}
 	log.Printf("\nmporous: allocated models:")
 	for key, _ := range _models {
 		log.Printf(" " + key)
 	}
 }
-
-// allocators holds all available models
-var allocators = map[string]func() *Model{}
 
 // _models holds pre-allocated models
 var _models = map[string]*Model{}

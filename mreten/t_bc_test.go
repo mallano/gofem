@@ -25,7 +25,7 @@ func Test_bc01(tst *testing.T) {
 	utl.TTitle("bc01")
 
 	mdl := GetModel("testsim", "mat1", "bc", false)
-	mdl.Init(mdl.GetPrms())
+	mdl.Init(mdl.GetPrms(true))
 
 	pc0 := -1.0
 	sl0 := 1.0

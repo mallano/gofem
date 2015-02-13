@@ -14,28 +14,6 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-func get_model() *Model {
-	var mdl Model
-	var cnd mconduct.M1
-	var lrm mreten.RefM1
-	mdl_prms := mdl.GetPrms()
-	cnd_prms := cnd.GetPrms()
-	lrm_prms := lrm.GetPrms()
-	var prms fun.Prms
-	for _, p := range mdl_prms {
-		prms = append(prms, p)
-	}
-	for _, p := range cnd_prms {
-		prms = append(prms, p)
-	}
-	for _, p := range lrm_prms {
-		prms = append(prms, p)
-	}
-	utl.Pfcyan("prms = [\n%v\n", prms)
-	mdl.Init(prms, &cnd, &lrm)
-	return &mdl
-}
-
 func Test_mdl01(tst *testing.T) {
 
 	prevTs := utl.Tsilent
@@ -49,7 +27,25 @@ func Test_mdl01(tst *testing.T) {
 	utl.Tsilent = false
 	utl.TTitle("mdl01")
 
-	mdl := get_model()
+	var mdl Model
+	var cnd mconduct.M1
+	var lrm mreten.RefM1
+	mdl_prms := mdl.GetPrms(true)
+	cnd_prms := cnd.GetPrms(true)
+	lrm_prms := lrm.GetPrms(true)
+	var prms fun.Prms
+	for _, p := range mdl_prms {
+		prms = append(prms, p)
+	}
+	for _, p := range cnd_prms {
+		prms = append(prms, p)
+	}
+	for _, p := range lrm_prms {
+		prms = append(prms, p)
+	}
+	utl.Pfcyan("prms = [\n%v\n", prms)
+
+	mdl.Init(prms, &cnd, &lrm)
 	utl.Pforan("mdl = %v\n", mdl)
 
 	var sta StateLG

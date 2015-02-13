@@ -44,7 +44,7 @@ func (o *BrooksCorey) Init(prms fun.Prms) (err error) {
 }
 
 // GetPrms gets (an example) of parameters
-func (o BrooksCorey) GetPrms() fun.Prms {
+func (o BrooksCorey) GetPrms(example bool) fun.Prms {
 	return []*fun.Prm{
 		&fun.Prm{N: "lam", V: 0.5},
 		&fun.Prm{N: "pcae", V: 0.2},

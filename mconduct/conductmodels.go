@@ -14,12 +14,12 @@ import (
 
 // Model defines liquid-gas conductivity models
 type Model interface {
-	Init(prms fun.Prms) error   // Init initialises this structure
-	GetPrms() fun.Prms          // gets (an example) of parameters
-	Klr(sl float64) float64     // Klr returns klr
-	Kgr(sg float64) float64     // Kgr returns kgr
-	DklrDsl(sl float64) float64 // DklrDsl returns ∂klr/∂sl
-	DkgrDsg(sg float64) float64 // DkgrDsl returns ∂kgr/∂sl
+	Init(prms fun.Prms) error      // Init initialises this structure
+	GetPrms(example bool) fun.Prms // gets (an example) of parameters
+	Klr(sl float64) float64        // Klr returns klr
+	Kgr(sg float64) float64        // Kgr returns kgr
+	DklrDsl(sl float64) float64    // DklrDsl returns ∂klr/∂sl
+	DkgrDsg(sg float64) float64    // DkgrDsl returns ∂kgr/∂sl
 }
 
 // GetModel returns (existent or new) conductivity model
