@@ -108,5 +108,5 @@ func GetModel(simfnk, matname, modelname string, getnew bool) Model {
 // allocators holds all available solid models; modelname => allocator
 var allocators = map[string]func() Model{}
 
-// _models holds pre-allocated solid models (internal); key => Solid
+// _models holds pre-allocated models
 var _models = map[string]Model{}
