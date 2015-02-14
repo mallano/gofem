@@ -32,10 +32,9 @@ type Path struct {
 	UseME bool      // use MultE
 
 	// derived
-	ndim   int      // space dimension
-	ncp    int      // number of stress components = 2 * ndim
-	size   int      // number of path components
-	states []*State // stress-strain states corresponding to path
+	ndim int // space dimension
+	ncp  int // number of stress components = 2 * ndim
+	size int // number of path components
 }
 
 // Size returns the number of path components
