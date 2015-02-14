@@ -142,6 +142,23 @@ func (o Model) GetPrms(example bool) fun.Prms {
 	}
 }
 
+// InitState initialises state
+func (o Model) InitState(s *StateLG, pl, pg float64) (err error) {
+	s.Pl = pl
+	s.Pg = pg
+	s.Sl = 1
+	s.Ns0 = 1 - o.Nf0
+	s.RhoL = o.RhoL0
+	s.RhoG = o.RhoG0
+	s.Dpc = 0
+	s.Wet = false
+	pc := pg - pl
+	if pc > 0 {
+		s.Sl, err = mreten.Update(o.Lrm, 0, 1, pc)
+	}
+	return
+}
+
 // Update updates state
 func (o Model) Update(s *StateLG, Δpl, Δpg float64) error {
 

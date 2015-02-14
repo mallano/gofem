@@ -1,4 +1,4 @@
-// Copyright 2012 Dorival Pedroso & Raul Durand. All rights reserved.
+// Copyright 2015 Dorival Pedroso & Raul Durand. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,7 +9,6 @@ import (
 
 	"github.com/cpmech/gofem/mconduct"
 	"github.com/cpmech/gofem/mreten"
-	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
@@ -27,48 +26,71 @@ func Test_mdl01(tst *testing.T) {
 	utl.Tsilent = false
 	utl.TTitle("mdl01")
 
-	var mdl Model
-	var cnd mconduct.M1
-	var lrm mreten.RefM1
-	mdl_prms := mdl.GetPrms(true)
-	cnd_prms := cnd.GetPrms(true)
-	lrm_prms := lrm.GetPrms(true)
-	var prms fun.Prms
-	for _, p := range mdl_prms {
-		prms = append(prms, p)
-	}
-	for _, p := range cnd_prms {
-		prms = append(prms, p)
-	}
-	for _, p := range lrm_prms {
-		prms = append(prms, p)
-	}
-	utl.Pfcyan("prms = [\n%v\n", prms)
+	// info
+	simfnk := "mdl01"
+	matname := "mat1"
+	getnew := false
+	example := true
 
-	mdl.Init(prms, &cnd, &lrm)
-	utl.Pforan("mdl = %v\n", mdl)
-
-	var sta StateLG
-	sta.Sl = 1.0
-	Δpl := -20.0
-	err := mdl.Update(&sta, Δpl, 0)
+	// conductivity model
+	cnd := mconduct.GetModel(simfnk, matname, "m1", getnew)
+	err := cnd.Init(cnd.GetPrms(example))
 	if err != nil {
-		tst.Errorf("Updated failed: %v\n", err)
+		tst.Errorf("mconduct.Init failed: %v\n", err)
 		return
 	}
-	utl.Pforan("sl = %v\n", sta.Sl)
 
+	// liquid retention model
+	lrm := mreten.GetModel(simfnk, matname, "ref-m1", getnew)
+	err = lrm.Init(lrm.GetPrms(example))
+	if err != nil {
+		tst.Errorf("mreten.Init failed: %v\n", err)
+		return
+	}
+
+	// porous model
+	mdl := GetModel(simfnk, matname, getnew)
+	err = mdl.Init(mdl.GetPrms(example), cnd, lrm)
+	if err != nil {
+		tst.Errorf("mporous.Init failed: %v\n", err)
+		return
+	}
+
+	// initial and final values
 	pc0 := -5.0
 	sl0 := 1.0
 	pcf := 20.0
-	nptsA := 41
 
+	// plot lrm
 	doplot := true
 	if doplot {
+		npts := 41
 		plt.Reset()
+		mreten.Plot(mdl.Lrm, pc0, sl0, pcf, npts, "'b.-'", "'r+-'", "ref-m1_drying")
 	}
-	mreten.Plot(mdl.Lrm, pc0, sl0, pcf, nptsA, "'b.-'", "'r+-'", "ref-m1_drying")
+
+	// state A
+	var A StateLG
+	pl0 := -5.0
+	err = mdl.InitState(&A, pl0, 0)
+	if err != nil {
+		tst.Errorf("mporous.InitState failed: %v\n", err)
+		return
+	}
+
+	// state B
+	var B StateLG
+	pl0 = -10.0
+	err = mdl.InitState(&B, pl0, 0)
+	if err != nil {
+		tst.Errorf("mporous.InitState failed: %v\n", err)
+		return
+	}
+
+	// show graph
 	if doplot {
+		plt.PlotOne(A.Pg-A.Pl, A.Sl, "'ro', label='A'")
+		plt.PlotOne(B.Pg-B.Pl, B.Sl, "'go', label='B'")
 		mreten.PlotEnd(true)
 	}
 }
