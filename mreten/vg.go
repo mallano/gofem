@@ -84,6 +84,17 @@ func (o VanGen) Cc(pc, sl float64, wet bool) (float64, error) {
 	return -fac * c * math.Pow(c+1.0, -o.m-1.0) * o.m * o.n / pc, nil
 }
 
+// L computes L = ∂Cc/∂pc
+func (o VanGen) L(pc, sl float64, wet bool) (float64, error) {
+	if pc <= o.pcmin {
+		return 0, nil
+	}
+	c := math.Pow(o.α*pc, o.n)
+	mn := o.m * o.n
+	fac := 1.0 - o.slmin
+	return fac * c * math.Pow(c+1.0, -o.m-2.0) * mn * (c*mn - o.n + c + 1.0) / (pc * pc), nil
+}
+
 // J computes J = ∂Cc/∂sl
 func (o VanGen) J(pc, sl float64, wet bool) (float64, error) {
 	return 0, nil

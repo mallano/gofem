@@ -85,6 +85,11 @@ func (o Lin) Cc(pc, sl float64, wet bool) (float64, error) {
 	return -o.λ, nil
 }
 
+// L computes L = ∂Cc/∂pc
+func (o Lin) L(pc, sl float64, wet bool) (float64, error) {
+	return 0, nil
+}
+
 // J computes J = ∂Cc/∂sl
 func (o Lin) J(pc, sl float64, wet bool) (float64, error) {
 	return 0, nil

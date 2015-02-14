@@ -69,7 +69,12 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 			tst.Errorf("Derivs failed: %v\n", err)
 			return
 		}
-		L_ana := L
+		L_ana_A := L
+		L_ana_B, err := mdl.L(Pc[i], Sl[i], wet)
+		if err != nil {
+			tst.Errorf("L failed: %v\n", err)
+			return
+		}
 		Lx_ana := Lx
 		Jx_ana := Jx
 		Jy_ana := Jy
@@ -85,7 +90,7 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 			Cctmp, _ := mdl.Cc(x, Sl[i], wet)
 			return Cctmp
 		}, Pc[i], 1e-3)
-		utl.CheckAnaNum(tst, "L  = ∂Cc/∂pc    ", tolD1a, L_ana, L_num, verbose)
+		utl.CheckAnaNum(tst, "L  = ∂Cc/∂pc    ", tolD1a, L_ana_A, L_num, verbose)
 
 		// numerical Lx := ∂²Cc/∂pc²
 		Lx_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
@@ -116,6 +121,7 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 		utl.CheckAnaNum(tst, "Jy = ∂²Cc/∂sl²  ", tolD2b, Jy_ana, Jy_num, verbose)
 
 		// check A and B derivatives
+		utl.CheckScalar(tst, "L_A == L_B", 1e-17, L_ana_A, L_ana_B)
 		utl.CheckScalar(tst, "J_A == J_B", 1e-17, J_ana_A, J_ana_B)
 	}
 }

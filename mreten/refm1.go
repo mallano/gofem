@@ -131,6 +131,30 @@ func (o *RefM1) Cc(pc, sl float64, wet bool) (Ccval float64, err error) {
 	return
 }
 
+// L computes L = ∂Cc/∂pc
+func (o RefM1) L(pc, sl float64, wet bool) (float64, error) {
+	if pc <= 0 {
+		return 0, nil
+	}
+	if sl < o.yr {
+		sl = o.yr
+	}
+	x := math.Log(1.0 + pc)
+	var DλbDx float64
+	if wet && !o.nowet {
+		o.wetting(x, sl)
+		DywDx := -o.λw - o.c1w*o.c2w*math.Exp(o.c1w*x)/(o.βw*(o.c3w+o.c2w*math.Exp(o.c1w*x)))
+		DλbDx = o.β1 * o.λb * DywDx
+	} else {
+		o.drying(x, sl)
+		DydDx := -o.λd + o.c1d*o.c2d*math.Exp(o.c1d*x)/(o.βd*(o.c3d+o.c2d*math.Exp(o.c1d*x)))
+		DλbDx = -o.β2b * o.λb * DydDx
+	}
+	den := 1.0 + pc
+	den2 := den * den
+	return (o.λb - DλbDx) / den2, nil
+}
+
 // J computes J = ∂Cc/∂sl
 func (o RefM1) J(pc, sl float64, wet bool) (float64, error) {
 	if pc <= 0 {

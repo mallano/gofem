@@ -26,6 +26,7 @@ type Model interface {
 	GetPrms(example bool) fun.Prms                                         // gets (an example) of parameters
 	SlMin() float64                                                        // returns sl_min
 	Cc(pc, sl float64, wet bool) (float64, error)                          // computes Cc = f = ∂sl/∂pc
+	L(pc, sl float64, wet bool) (float64, error)                           // computes L = ∂Cc/∂pc
 	J(pc, sl float64, wet bool) (float64, error)                           // computes J = ∂Cc/∂sl
 	Derivs(pc, sl float64, wet bool) (L, Lx, J, Jx, Jy float64, err error) // computes all derivatives
 }
