@@ -131,10 +131,10 @@ func (o *RefM1) Cc(pc, sl float64, wet bool) (Ccval float64, err error) {
 	return
 }
 
-// DCcDsl computes DCcDsl only
-func (o RefM1) DCcDsl(pc, sl float64, wet bool) (dCcDsl float64, err error) {
+// J computes J = ∂Cc/∂sl
+func (o RefM1) J(pc, sl float64, wet bool) (float64, error) {
 	if pc <= 0 {
-		return
+		return 0, nil
 	}
 	if sl < o.yr {
 		sl = o.yr
@@ -149,13 +149,11 @@ func (o RefM1) DCcDsl(pc, sl float64, wet bool) (dCcDsl float64, err error) {
 		Dβ2bDy := o.α * o.β2 * math.Pow(max(sl, 0.0), o.α-1.0)
 		DλbDy = (o.βd*(o.λd-o.λdb) + o.λdb*(o.β2b-Dβ2bDy*o.D)) * math.Exp(-o.β2b*o.D)
 	}
-	dCcDsl = -DλbDy / (1.0 + pc)
-	return
+	return -DλbDy / (1.0 + pc), nil
 }
 
 // derivatives
-func (o *RefM1) Derivs(pc, sl float64, wet bool) (err error) {
-	D.DCcDpc, D.DCcDsl, D.D2CcDpc2, D.D2CcDsl2, D.D2CcDpcDsl = 0, 0, 0, 0, 0
+func (o *RefM1) Derivs(pc, sl float64, wet bool) (L, Lx, J, Jx, Jy float64, err error) {
 	if pc <= 0 {
 		return
 	}
@@ -189,11 +187,11 @@ func (o *RefM1) Derivs(pc, sl float64, wet bool) (err error) {
 	}
 	den := 1.0 + pc
 	den2 := den * den
-	D.DCcDpc = (o.λb - DλbDx) / den2
-	D.DCcDsl = -DλbDy / den
-	D.D2CcDpc2 = ((DλbDx-D2λbDx2)/den2 - 2.0*D.DCcDpc) / den
-	D.D2CcDsl2 = -D2λbDy2 / den
-	D.D2CcDpcDsl = -(D2λbDyDx/den + D.DCcDsl) / den
+	L = (o.λb - DλbDx) / den2
+	Lx = ((DλbDx-D2λbDx2)/den2 - 2.0*L) / den
+	J = -DλbDy / den
+	Jx = -(D2λbDyDx/den + J) / den
+	Jy = -D2λbDy2 / den
 	return
 }
 

@@ -51,8 +51,8 @@ func (o *VanGen) Init(prms fun.Prms) (err error) {
 // GetPrms gets (an example) of parameters
 func (o VanGen) GetPrms(example bool) fun.Prms {
 	return []*fun.Prm{
-		&fun.Prm{N: "alp", V: 0.5},
-		&fun.Prm{N: "m", V: 2},
+		&fun.Prm{N: "alp", V: 0.08},
+		&fun.Prm{N: "m", V: 4},
 		&fun.Prm{N: "n", V: 4},
 		&fun.Prm{N: "slmin", V: 0.01},
 		&fun.Prm{N: "pcmin", V: 1e-3},
@@ -84,16 +84,15 @@ func (o VanGen) Cc(pc, sl float64, wet bool) (float64, error) {
 	return -fac * c * math.Pow(c+1.0, -o.m-1.0) * o.m * o.n / pc, nil
 }
 
-// DCcDsl computes DCcDsl only
-func (o VanGen) DCcDsl(pc, sl float64, wet bool) (float64, error) {
+// J computes J = ∂Cc/∂sl
+func (o VanGen) J(pc, sl float64, wet bool) (float64, error) {
 	return 0, nil
 }
 
 // Derivs compute ∂Cc/∂pc and ∂²Cc/∂pc²
-func (o VanGen) Derivs(pc, sl float64, wet bool) error {
-	D.DCcDpc, D.D2CcDpc2 = 0, 0
+func (o VanGen) Derivs(pc, sl float64, wet bool) (L, Lx, J, Jx, Jy float64, err error) {
 	if pc <= o.pcmin {
-		return nil
+		return
 	}
 	c := math.Pow(o.α*pc, o.n)
 	d := math.Pow(o.α*pc, o.n*2.0)
@@ -102,7 +101,7 @@ func (o VanGen) Derivs(pc, sl float64, wet bool) error {
 	mn := o.m * o.n
 	ppp := pc * pc * pc
 	fac := 1.0 - o.slmin
-	D.DCcDpc = fac * c * math.Pow(c+1.0, -o.m-2.0) * mn * (c*mn - o.n + c + 1.0) / (pc * pc)
-	D.D2CcDpc2 = -fac * c * math.Pow(c+1.0, -o.m-3.0) * mn * (d*mm*nn - 3.0*c*o.m*nn - c*nn + nn + 3.0*d*mn + 3.0*c*mn - 3.0*c*o.n - 3.0*o.n + 2.0*d + 4.0*c + 2.0) / ppp
-	return nil
+	L = fac * c * math.Pow(c+1.0, -o.m-2.0) * mn * (c*mn - o.n + c + 1.0) / (pc * pc)
+	Lx = -fac * c * math.Pow(c+1.0, -o.m-3.0) * mn * (d*mm*nn - 3.0*c*o.m*nn - c*nn + nn + 3.0*d*mn + 3.0*c*mn - 3.0*c*o.n - 3.0*o.n + 2.0*d + 4.0*c + 2.0) / ppp
+	return
 }

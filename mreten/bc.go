@@ -73,22 +73,21 @@ func (o BrooksCorey) Cc(pc, sl float64, wet bool) (float64, error) {
 	return -(1 - o.slmin) * o.λ * math.Pow(o.pcae/pc, o.λ) / pc, nil
 }
 
-// DCcDsl computes DCcDsl only
-func (o BrooksCorey) DCcDsl(pc, sl float64, wet bool) (float64, error) {
+// J computes J = ∂Cc/∂sl
+func (o BrooksCorey) J(pc, sl float64, wet bool) (float64, error) {
 	return 0, nil
 }
 
-// Derivs compute ∂Cc/∂pc and ∂²Cc/∂pc²
-func (o BrooksCorey) Derivs(pc, sl float64, wet bool) error {
-	D.DCcDpc, D.D2CcDpc2 = 0, 0
+// Derivs computes all derivatives
+func (o BrooksCorey) Derivs(pc, sl float64, wet bool) (L, Lx, J, Jx, Jy float64, err error) {
 	if pc <= o.pcae {
-		return nil
+		return
 	}
 	cf := (1.0 - o.slmin) * o.λ
 	pc2 := pc * pc
 	pp := math.Pow(o.pcae/pc, o.λ)
 	dppdpc := -o.λ * math.Pow(o.pcae/pc, o.λ) / pc
-	D.DCcDpc = cf * (o.λ + 1.0) * pp / pc2
-	D.D2CcDpc2 = cf * (o.λ + 1.0) * (dppdpc - 2.0*pp/pc) / pc2
-	return nil
+	L = cf * (o.λ + 1.0) * pp / pc2
+	Lx = cf * (o.λ + 1.0) * (dppdpc - 2.0*pp/pc) / pc2
+	return
 }

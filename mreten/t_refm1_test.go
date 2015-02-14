@@ -21,6 +21,8 @@ func Test_refm1a(tst *testing.T) {
 		}
 	}()
 
+	doplot := false
+	//doplot := true
 	//utl.Tsilent = false
 	utl.TTitle("refm1a")
 
@@ -33,8 +35,6 @@ func Test_refm1a(tst *testing.T) {
 	nptsA := 41
 	nptsB := 11
 
-	//doplot := true
-	doplot := false
 	if doplot {
 		plt.Reset()
 		Plot(mdl, pc0, sl0, pcf, nptsA, "'b.-'", "'r+-'", "ref-m1_drying")

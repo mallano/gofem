@@ -21,22 +21,34 @@ func Test_vg01(tst *testing.T) {
 		}
 	}()
 
+	doplot := false
+	//doplot := true
 	//utl.Tsilent = false
 	utl.TTitle("vg01")
 
 	mdl := GetModel("testsim", "mat1", "vg", false)
-	mdl.Init(mdl.GetPrms(true))
+	err := mdl.Init(mdl.GetPrms(true))
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+		return
+	}
 
-	pc0 := -1.0
+	ref := GetModel("testsim", "mat1", "ref-m1", false)
+	err = ref.Init(ref.GetPrms(true))
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+		return
+	}
+
+	pc0 := -5.0
 	sl0 := 1.0
-	pcf := 3.0
-	nptsA := 21
+	pcf := 20.0
+	nptsA := 41
 	nptsB := 11
 
-	//doplot := true
-	doplot := false
 	if doplot {
 		plt.Reset()
+		Plot(ref, pc0, sl0, pcf, nptsA, "'k--'", "'k--'", "ref-m1")
 		Plot(mdl, pc0, sl0, pcf, nptsA, "'b.-'", "'r+-'", "bc")
 	}
 

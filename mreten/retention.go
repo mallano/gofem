@@ -13,23 +13,21 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-// D holds all derivatives related to liquid retention models
-var D struct {
-	DCcDpc     float64 // ∂Cc/∂pc
-	DCcDsl     float64 // ∂Cc/∂sl
-	D2CcDpc2   float64 // ∂²Cc/∂pc²
-	D2CcDsl2   float64 // ∂²Cc/∂sl²
-	D2CcDpcDsl float64 // ∂²Cc/(∂pc ∂sl)
-}
-
 // Model implements a liquid retention model (LRM)
+//  Derivs computes (see [1] page 618):
+//    L  = ∂Cc/∂pc
+//    Lx = ∂²Cc/∂pc²
+//    J  = ∂Cc/∂sl
+//    Jx == ∂²Cc/(∂pc ∂sl)
+//    Jy == ∂²Cc/∂sl²
+//  [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 http://dx.doi.org/10.1002/nme.4808
 type Model interface {
-	Init(prms fun.Prms) error                         // initialises retention model
-	GetPrms(example bool) fun.Prms                    // gets (an example) of parameters
-	SlMin() float64                                   // returns sl_min
-	Cc(pc, sl float64, wet bool) (float64, error)     // compute Cc(pc,sl) := dsl/dpc
-	DCcDsl(pc, sl float64, wet bool) (float64, error) // computes DCcDsl only
-	Derivs(pc, sl float64, wet bool) error            // derivatives
+	Init(prms fun.Prms) error                                              // initialises retention model
+	GetPrms(example bool) fun.Prms                                         // gets (an example) of parameters
+	SlMin() float64                                                        // returns sl_min
+	Cc(pc, sl float64, wet bool) (float64, error)                          // computes Cc = f = ∂sl/∂pc
+	J(pc, sl float64, wet bool) (float64, error)                           // computes J = ∂Cc/∂sl
+	Derivs(pc, sl float64, wet bool) (L, Lx, J, Jx, Jy float64, err error) // computes all derivatives
 }
 
 // Nonrate is a subset of LRM that directly computes saturation from capillary pressure
@@ -58,9 +56,9 @@ func Update(mdl Model, pc0, sl0, Δpc float64) (slNew float64, err error) {
 		if dfdy.Max() == 0 {
 			dfdy.Init(1, 1, 1)
 		}
-		e = mdl.Derivs(pc0+x*Δpc, y[0], wet)
+		J, e := mdl.J(pc0+x*Δpc, y[0], wet)
 		dfdy.Start()
-		dfdy.Put(0, 0, D.DCcDsl)
+		dfdy.Put(0, 0, J)
 		return
 	}
 

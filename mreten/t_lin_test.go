@@ -21,6 +21,8 @@ func Test_lin01(tst *testing.T) {
 		}
 	}()
 
+	doplot := false
+	//doplot := true
 	//utl.Tsilent = false
 	utl.TTitle("lin01")
 
@@ -33,8 +35,6 @@ func Test_lin01(tst *testing.T) {
 	nptsA := 11
 	nptsB := 11
 
-	//doplot := true
-	doplot := false
 	if doplot {
 		plt.Reset()
 		Plot(mdl, pc0, sl0, pcf, nptsA, "'b.-'", "'r+-'", "lin")
