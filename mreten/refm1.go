@@ -108,6 +108,11 @@ func (o RefM1) GetPrms(example bool) fun.Prms {
 	}
 }
 
+// SlMin returns sl_min
+func (o RefM1) SlMin() float64 {
+	return o.yr
+}
+
 // compute Cc(pc,sl) := dsl/dpc
 func (o *RefM1) Cc(pc, sl float64, wet bool) (Ccval float64, err error) {
 	if pc <= 0 {

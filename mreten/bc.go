@@ -52,6 +52,11 @@ func (o BrooksCorey) GetPrms(example bool) fun.Prms {
 	}
 }
 
+// SlMin returns sl_min
+func (o BrooksCorey) SlMin() float64 {
+	return o.slmin
+}
+
 // Sl compute sl directly from pc
 func (o BrooksCorey) Sl(pc float64) float64 {
 	if pc <= o.pcae {

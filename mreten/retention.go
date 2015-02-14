@@ -26,6 +26,7 @@ var D struct {
 type Model interface {
 	Init(prms fun.Prms) error                         // initialises retention model
 	GetPrms(example bool) fun.Prms                    // gets (an example) of parameters
+	SlMin() float64                                   // returns sl_min
 	Cc(pc, sl float64, wetting bool) (float64, error) // compute Cc(pc,sl) := dsl/dpc
 	Derivs(pc, sl float64, wetting bool) error        // derivatives
 }

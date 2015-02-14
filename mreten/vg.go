@@ -59,6 +59,11 @@ func (o VanGen) GetPrms(example bool) fun.Prms {
 	}
 }
 
+// SlMin returns sl_min
+func (o VanGen) SlMin() float64 {
+	return o.slmin
+}
+
 // Sl compute sl directly from pc
 func (o VanGen) Sl(pc float64) float64 {
 	if pc <= o.pcmin {
