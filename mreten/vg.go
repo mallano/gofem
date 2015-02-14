@@ -84,6 +84,11 @@ func (o VanGen) Cc(pc, sl float64, wet bool) (float64, error) {
 	return -fac * c * math.Pow(c+1.0, -o.m-1.0) * o.m * o.n / pc, nil
 }
 
+// DCcDsl computes DCcDsl only
+func (o VanGen) DCcDsl(pc, sl float64, wet bool) (float64, error) {
+	return 0, nil
+}
+
 // Derivs compute ∂Cc/∂pc and ∂²Cc/∂pc²
 func (o VanGen) Derivs(pc, sl float64, wet bool) error {
 	D.DCcDpc, D.D2CcDpc2 = 0, 0

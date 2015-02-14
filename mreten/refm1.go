@@ -131,6 +131,28 @@ func (o *RefM1) Cc(pc, sl float64, wet bool) (Ccval float64, err error) {
 	return
 }
 
+// DCcDsl computes DCcDsl only
+func (o RefM1) DCcDsl(pc, sl float64, wet bool) (dCcDsl float64, err error) {
+	if pc <= 0 {
+		return
+	}
+	if sl < o.yr {
+		sl = o.yr
+	}
+	x := math.Log(1.0 + pc)
+	var DλbDy float64
+	if wet && !o.nowet {
+		o.wetting(x, sl)
+		DλbDy = (o.βw*(o.λwb-o.λw) - o.λwb*o.β1) * math.Exp(-o.β1*o.D)
+	} else {
+		o.drying(x, sl)
+		Dβ2bDy := o.α * o.β2 * math.Pow(max(sl, 0.0), o.α-1.0)
+		DλbDy = (o.βd*(o.λd-o.λdb) + o.λdb*(o.β2b-Dβ2bDy*o.D)) * math.Exp(-o.β2b*o.D)
+	}
+	dCcDsl = -DλbDy / (1.0 + pc)
+	return
+}
+
 // derivatives
 func (o *RefM1) Derivs(pc, sl float64, wet bool) (err error) {
 	D.DCcDpc, D.DCcDsl, D.D2CcDpc2, D.D2CcDsl2, D.D2CcDpcDsl = 0, 0, 0, 0, 0
@@ -140,8 +162,8 @@ func (o *RefM1) Derivs(pc, sl float64, wet bool) (err error) {
 	if sl < o.yr {
 		sl = o.yr
 	}
-	var DλbDx, DλbDy, D2λbDx2, D2λbDyDx, D2λbDy2 float64
 	x := math.Log(1.0 + pc)
+	var DλbDx, DλbDy, D2λbDx2, D2λbDyDx, D2λbDy2 float64
 	if wet && !o.nowet {
 		o.wetting(x, sl)
 		DywDx := -o.λw - o.c1w*o.c2w*math.Exp(o.c1w*x)/(o.βw*(o.c3w+o.c2w*math.Exp(o.c1w*x)))

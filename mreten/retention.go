@@ -27,8 +27,9 @@ type Model interface {
 	Init(prms fun.Prms) error                         // initialises retention model
 	GetPrms(example bool) fun.Prms                    // gets (an example) of parameters
 	SlMin() float64                                   // returns sl_min
-	Cc(pc, sl float64, wetting bool) (float64, error) // compute Cc(pc,sl) := dsl/dpc
-	Derivs(pc, sl float64, wetting bool) error        // derivatives
+	Cc(pc, sl float64, wet bool) (float64, error)     // compute Cc(pc,sl) := dsl/dpc
+	DCcDsl(pc, sl float64, wet bool) (float64, error) // computes DCcDsl only
+	Derivs(pc, sl float64, wet bool) error            // derivatives
 }
 
 // Nonrate is a subset of LRM that directly computes saturation from capillary pressure

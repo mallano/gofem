@@ -73,6 +73,11 @@ func (o BrooksCorey) Cc(pc, sl float64, wet bool) (float64, error) {
 	return -(1 - o.slmin) * o.λ * math.Pow(o.pcae/pc, o.λ) / pc, nil
 }
 
+// DCcDsl computes DCcDsl only
+func (o BrooksCorey) DCcDsl(pc, sl float64, wet bool) (float64, error) {
+	return 0, nil
+}
+
 // Derivs compute ∂Cc/∂pc and ∂²Cc/∂pc²
 func (o BrooksCorey) Derivs(pc, sl float64, wet bool) error {
 	D.DCcDpc, D.D2CcDpc2 = 0, 0

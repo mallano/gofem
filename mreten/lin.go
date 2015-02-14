@@ -85,6 +85,11 @@ func (o Lin) Cc(pc, sl float64, wet bool) (float64, error) {
 	return -o.λ, nil
 }
 
+// DCcDsl computes DCcDsl only
+func (o Lin) DCcDsl(pc, sl float64, wet bool) (float64, error) {
+	return 0, nil
+}
+
 // Derivs compute ∂Cc/∂pc and ∂²Cc/∂pc²
 func (o Lin) Derivs(pc, sl float64, wet bool) error {
 	D.DCcDpc, D.D2CcDpc2 = 0, 0

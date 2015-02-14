@@ -65,9 +65,24 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 		}
 
 		// compute all derivatives
-		mdl.Derivs(Pc[i], Sl[i], wet)
+		err = mdl.Derivs(Pc[i], Sl[i], wet)
+		if err != nil {
+			tst.Errorf("Derivs failed: %v\n", err)
+			return
+		}
 		DCcDpc_ana := D.DCcDpc
 		D2CcDpc2_ana := D.D2CcDpc2
+		D2CcDsl2_ana := D.D2CcDsl2
+		D2CcDpcDsl_ana := D.D2CcDpcDsl
+		A_DCcDsl_ana := D.DCcDsl
+		B_DCcDsl_ana, err := mdl.DCcDsl(Pc[i], Sl[i], wet)
+		if err != nil {
+			tst.Errorf("DCcDsl failed: %v\n", err)
+			return
+		}
+
+		// check A and B derivatives
+		utl.CheckScalar(tst, "DCcDsl A==B", 1e-17, A_DCcDsl_ana, B_DCcDsl_ana)
 
 		// numerical DCcDpc = ∂Cc/∂pc
 		DCcDpc_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
@@ -83,22 +98,19 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 		}, Pc[i], 1e-3)
 		utl.CheckAnaNum(tst, "∂²Cc/∂pc²     ", tolD2a, D2CcDpc2_ana, D2CcDpc2_num, verbose)
 
-		// if is nonrate, skip additional derivatives checks
-		if is_nonrate {
-			continue
-		}
-
-		// analytical derivatives
-		DCcDsl_ana := D.DCcDsl
-		D2CcDsl2_ana := D.D2CcDsl2
-		D2CcDpcDsl_ana := D.D2CcDpcDsl
-
 		// numerical DCcDsl := ∂Cc/∂sl
-		DCcDsl_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
+		A_DCcDsl_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 			Ccval, _ := mdl.Cc(Pc[i], x, wet)
 			return Ccval
 		}, Sl[i], 1e-3)
-		utl.CheckAnaNum(tst, "∂Cc/∂sl       ", tolD1b, DCcDsl_ana, DCcDsl_num, verbose)
+		utl.CheckAnaNum(tst, "∂Cc/∂sl (A)   ", tolD1b, A_DCcDsl_ana, A_DCcDsl_num, verbose)
+
+		// numerical DCcDsl := ∂Cc/∂sl (version B)
+		B_DCcDsl_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
+			Ccval, _ := mdl.Cc(Pc[i], x, wet)
+			return Ccval
+		}, Sl[i], 1e-3)
+		utl.CheckAnaNum(tst, "∂Cc/∂sl (B)   ", tolD1b, B_DCcDsl_ana, B_DCcDsl_num, verbose)
 
 		// numerical D2CcDsl2 := ∂²Cc/∂sl²
 		D2CcDsl2_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {

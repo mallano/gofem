@@ -41,8 +41,8 @@ func Test_refm1a(tst *testing.T) {
 	}
 
 	tolCc := 1e-17
-	tolD1a, tolD1b := 1e-11, 1e-5
-	tolD2a, tolD2b := 1e-12, 1e-4
+	tolD1a, tolD1b := 1e-11, 1e-11
+	tolD2a, tolD2b := 1e-12, 1e-10
 	Check(tst, mdl, pc0, sl0, pcf, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, true, []float64{0}, 1e-7, doplot)
 
 	slf, err := Update(mdl, pc0, sl0, pcf-pc0)
@@ -56,7 +56,7 @@ func Test_refm1a(tst *testing.T) {
 	}
 
 	tolD1b = 1e-4
-	tolD2a, tolD2b = 1e-11, 1e-4
+	tolD2a, tolD2b = 1e-11, 1e-10
 	Check(tst, mdl, pcf, slf, pc0, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, true, []float64{0}, 1e-7, doplot)
 
 	if doplot {
