@@ -90,7 +90,7 @@ var D struct {
 }
 
 // CalcLGS calculates TPM variables for models with liquid, gas and solid
-func CalcLGS(divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
+func CalcLGS(divus float64, sta *State, mdl *Model, derivs bool) (err error) {
 
 	// other porous media data
 	TPM.Sg = 1.0 - sta.Sl

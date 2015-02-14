@@ -164,7 +164,7 @@ func (o Model) GetPrms(example bool) fun.Prms {
 }
 
 // InitState initialises state
-func (o Model) InitState(s *StateLG, pl, pg, divus float64) (err error) {
+func (o Model) InitState(s *State, pl, pg, divus float64) (err error) {
 	s.Pl = pl
 	s.Pg = pg
 	s.Divus = divus
@@ -182,7 +182,7 @@ func (o Model) InitState(s *StateLG, pl, pg, divus float64) (err error) {
 }
 
 // Update updates state
-func (o Model) Update(s *StateLG, Δpl, Δpg, divusNew float64) (err error) {
+func (o Model) Update(s *State, Δpl, Δpg, divusNew float64) (err error) {
 
 	// auxiliary variables
 	pc0 := s.Pg - s.Pl
@@ -292,7 +292,7 @@ func (o Model) Update(s *StateLG, Δpl, Δpg, divusNew float64) (err error) {
 
 // Ccb (Cc-bar) returns dsl/dpc consistent with the update method
 //  See Eq. (54) on page 618 of [1]
-func (o Model) Ccb(s *StateLG) (dsldpc float64, err error) {
+func (o Model) Ccb(s *State) (dsldpc float64, err error) {
 	pc := s.Pg - s.Pl
 	f, err := o.Lrm.Cc(pc, s.Sl, s.Wet) // @ n+1
 	if err != nil {
@@ -316,7 +316,7 @@ func (o Model) Ccb(s *StateLG) (dsldpc float64, err error) {
 
 // Ccd (Cc-dash) returns dCc/dpc consistent with the update method
 //  See Eqs. (55) and (56) on page 618 of [1]
-func (o Model) Ccd(s *StateLG) (dCcdpc float64, err error) {
+func (o Model) Ccd(s *State) (dCcdpc float64, err error) {
 	pc := s.Pg - s.Pl
 	if o.Ncns || o.Ncns2 { // non consistent
 		dCcdpc, err = o.Lrm.L(pc, s.Sl, s.Wet) // @ n+1

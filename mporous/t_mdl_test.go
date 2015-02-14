@@ -75,7 +75,7 @@ func Test_mdl01(tst *testing.T) {
 	}
 
 	// state A
-	var A StateLG
+	var A State
 	pl0 := -5.0
 	pg, divus := 0.0, 0.0
 	err = mdl.InitState(&A, pl0, pg, divus)
@@ -85,7 +85,7 @@ func Test_mdl01(tst *testing.T) {
 	}
 
 	// state B
-	var B StateLG
+	var B State
 	pl0 = -10.0
 	err = mdl.InitState(&B, pl0, pg, divus)
 	if err != nil {

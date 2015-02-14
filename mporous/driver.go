@@ -24,7 +24,7 @@ type Driver struct {
 	VerD    bool    // verbose check of D
 
 	// results
-	Res []*StateLG // results
+	Res []*State // results
 }
 
 // Init initialises driver
@@ -42,8 +42,8 @@ func (o *Driver) Run(Pc []float64) (err error) {
 
 	// allocate results arrays
 	np := len(Pc)
-	o.Res = make([]*StateLG, np)
-	o.Res[0] = new(StateLG)
+	o.Res = make([]*State, np)
+	o.Res[0] = new(State)
 
 	// initialise first state
 	pg, divus := 0.0, 0.0
@@ -60,7 +60,7 @@ func (o *Driver) Run(Pc []float64) (err error) {
 
 	// update states
 	var pcOld, pcNew, Δpc, tmp, Ccb, Ccbtmp, Ccd float64
-	var stmp StateLG
+	var stmp State
 	for i := 1; i < np; i++ {
 
 		// increment

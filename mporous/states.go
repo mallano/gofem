@@ -4,8 +4,8 @@
 
 package mporous
 
-// StateLG holds state variables for porous media with liquid and gas
-type StateLG struct {
+// State holds state variables for porous media with liquid and gas
+type State struct {
 	Pl    float64 // pl: liquid pressure
 	Pg    float64 // pg: gas pressure
 	Divus float64 // div(us): divergence of solids displacement
@@ -17,9 +17,9 @@ type StateLG struct {
 	Wet   bool    // wetting flag
 }
 
-// GetCopy returns a copy of StateLG
-func (o StateLG) GetCopy() *StateLG {
-	return &StateLG{
+// GetCopy returns a copy of State
+func (o State) GetCopy() *State {
+	return &State{
 		o.Pl,
 		o.Pg,
 		o.Divus,
@@ -32,8 +32,8 @@ func (o StateLG) GetCopy() *StateLG {
 	}
 }
 
-// Set sets this StateLG with another StateLG
-func (o *StateLG) Set(another *StateLG) {
+// Set sets this State with another State
+func (o *State) Set(another *State) {
 	o.Pl = another.Pl
 	o.Pg = another.Pg
 	o.Divus = another.Divus
