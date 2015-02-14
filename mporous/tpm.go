@@ -27,7 +27,7 @@ var TPM struct {
 	// conductivity and retention models variables
 	Klr float64 // relative liquid conductivity
 	Kgr float64 // relative gas conductivity
-	Cc  float64 // liquid retention model = ∂sl/∂pc
+	Ccb float64 // liquid retention model = dsl/dpc
 	Cl  float64 // liquid compresssibility
 	Cg  float64 // gas compressibility
 
@@ -41,50 +41,52 @@ var TPM struct {
 	Dpg float64 // Dpg coefficient
 	Dvs float64 // Dvs coefficient
 
-	// --- derivatives -------------------------------------
+	// liquid retention model derivative
+	Ccd float64 // dCc/dpc
+}
+
+// Derivatives
+var D struct {
 
 	// liquid conductivity
-	DklrDpl float64 // ∂klr/∂pl
-	DklrDpg float64 // ∂klr/∂pg
+	klr_pl float64 // ∂klr/∂pl
+	klr_pg float64 // ∂klr/∂pg
 
 	// gas conductivity
-	DkgrDpl float64 // ∂kgr/∂pl
-	DkgrDpg float64 // ∂kgr/∂pg
-
-	// liquid retention model
-	DCcDpc float64 // ∂Cc/∂pc
+	kgr_pl float64 // ∂kgr/∂pl
+	kgr_pg float64 // ∂kgr/∂pg
 
 	// mixture density
-	DrhoDpl float64 // ∂ρ/∂pl
-	DrhoDpg float64 // ∂ρ/∂pg
+	rho_pl float64 // ∂ρ/∂pl
+	rho_pg float64 // ∂ρ/∂pg
 
 	// 1 liquid balance related coefficients
-	DCplDpl  float64 // ∂Cpl/∂pl
-	DCplDpg  float64 // ∂Cpl/∂pg
-	DCplDusM float64 // ∂Cpl/∂us multiplier
+	Cpl_pl  float64 // ∂Cpl/∂pl
+	Cpl_pg  float64 // ∂Cpl/∂pg
+	Cpl_usM float64 // ∂Cpl/∂us multiplier
 
 	// 2 liquid balance related coefficients
-	DCpgDpl  float64 // ∂Cpg/∂pl
-	DCpgDpg  float64 // ∂Cpg/∂pg
-	DCpgDusM float64 // ∂Cpg/∂us multiplier
+	Cpg_pl  float64 // ∂Cpg/∂pl
+	Cpg_pg  float64 // ∂Cpg/∂pg
+	Cpg_usM float64 // ∂Cpg/∂us multiplier
 
 	// 3 liquid balance related coefficients
-	DCvsDpl float64 // ∂Cvs/∂pl
-	DCvsDpg float64 // ∂Cvs/∂pg
+	Cvs_pl float64 // ∂Cvs/∂pl
+	Cvs_pg float64 // ∂Cvs/∂pg
 
 	// 1 gas balance related coefficients
-	DDplDpl  float64 // ∂Dpl/∂pl
-	DDplDpg  float64 // ∂Dpl/∂pg
-	DDplDusM float64 // ∂Dpl/∂us multiplier
+	Dpl_pl  float64 // ∂Dpl/∂pl
+	Dpl_pg  float64 // ∂Dpl/∂pg
+	Dpl_usM float64 // ∂Dpl/∂us multiplier
 
 	// 2 gas balance related coefficients
-	DDpgDpl  float64 // ∂Dpg/∂pl
-	DDpgDpg  float64 // ∂Dpg/∂pg
-	DDpgDusM float64 // ∂Dpg/∂us multiplier
+	Dpg_pl  float64 // ∂Dpg/∂pl
+	Dpg_pg  float64 // ∂Dpg/∂pg
+	Dpg_usM float64 // ∂Dpg/∂us multiplier
 
 	// 3 gas balance related coefficients
-	DDvsDpl float64 // ∂Dvs/∂pl
-	DDvsDpg float64 // ∂Dvs/∂pg
+	Dvs_pl float64 // ∂Dvs/∂pl
+	Dvs_pg float64 // ∂Dvs/∂pg
 }
 
 // CalcLGS calculates TPM variables for models with liquid, gas and solid
@@ -110,7 +112,7 @@ func CalcLGS(divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 	// conductivity and retention models variables
 	TPM.Klr = mdl.Cnd.Klr(sta.Sl)
 	TPM.Kgr = mdl.Cnd.Kgr(TPM.Sg)
-	TPM.Cc, err = mdl.Ccb(sta)
+	TPM.Ccb, err = mdl.Ccb(sta)
 	if err != nil {
 		return
 	}
@@ -118,13 +120,13 @@ func CalcLGS(divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 	TPM.Cg = mdl.Cg
 
 	// liquid balance related coefficients
-	TPM.Cpl = TPM.Nf * (sta.Sl*TPM.Cl - sta.RhoL*TPM.Cc)
-	TPM.Cpg = TPM.Nf * sta.RhoL * TPM.Cc
+	TPM.Cpl = TPM.Nf * (sta.Sl*TPM.Cl - sta.RhoL*TPM.Ccb)
+	TPM.Cpg = TPM.Nf * sta.RhoL * TPM.Ccb
 	TPM.Cvs = sta.Sl * sta.RhoL
 
 	// gas balance related coefficients
-	TPM.Dpl = TPM.Nf * sta.RhoG * TPM.Cc
-	TPM.Dpg = TPM.Nf * (TPM.Sg*TPM.Cg - sta.RhoG*TPM.Cc)
+	TPM.Dpl = TPM.Nf * sta.RhoG * TPM.Ccb
+	TPM.Dpg = TPM.Nf * (TPM.Sg*TPM.Cg - sta.RhoG*TPM.Ccb)
 	TPM.Dvs = TPM.Sg * sta.RhoG
 
 	// derivatives
@@ -135,55 +137,53 @@ func CalcLGS(divus float64, sta *StateLG, mdl *Model, derivs bool) (err error) {
 		sl, sg := sta.Sl, TPM.Sg
 		ρL, ρG := sta.RhoL, sta.RhoG
 		Cl, Cg := mdl.Cl, mdl.Cg
-		Cc := TPM.Cc
+		Ccb, Ccd := TPM.Ccb, TPM.Ccd
 
 		// liquid conductivity
-		TPM.DklrDpl = -mdl.Cnd.DklrDsl(sl) * Cc
-		TPM.DklrDpg = +mdl.Cnd.DklrDsl(sl) * Cc
+		D.klr_pl = -mdl.Cnd.DklrDsl(sl) * Ccb
+		D.klr_pg = +mdl.Cnd.DklrDsl(sl) * Ccb
 
 		// gas conductivity
-		TPM.DkgrDpl = +mdl.Cnd.DkgrDsg(sg) * Cc
-		TPM.DkgrDpg = -mdl.Cnd.DkgrDsg(sg) * Cc
+		D.kgr_pl = +mdl.Cnd.DkgrDsg(sg) * Ccb
+		D.kgr_pg = -mdl.Cnd.DkgrDsg(sg) * Ccb
 
 		// liquid retention model
-		var Ccd float64
-		Ccd, err = mdl.Ccd(sta)
+		TPM.Ccd, err = mdl.Ccd(sta)
 		if err != nil {
 			return
 		}
-		TPM.DCcDpc = Ccd
 
 		// mixture density
-		TPM.DrhoDpl = nf * (sl*Cl - ρL*Cc + ρG*Cc)
-		TPM.DrhoDpg = nf * (sg*Cg - ρG*Cc + ρL*Cc)
+		D.rho_pl = nf * (sl*Cl - ρL*Ccb + ρG*Ccb)
+		D.rho_pg = nf * (sg*Cg - ρG*Ccb + ρL*Ccb)
 
 		// 1 liquid balance related coefficients
-		TPM.DCplDpl = nf * (ρL*Ccd - 2.0*Cc*Cl)
-		TPM.DCplDpg = nf * (Cc*Cl - ρL*Ccd)
-		TPM.DCplDusM = (sl*Cl - ρL*Cc) * ns0
+		D.Cpl_pl = nf * (ρL*Ccd - 2.0*Ccb*Cl)
+		D.Cpl_pg = nf * (Ccb*Cl - ρL*Ccd)
+		D.Cpl_usM = (sl*Cl - ρL*Ccb) * ns0
 
 		// 2 liquid balance related coefficients
-		TPM.DCpgDpl = nf * (Cl*Cc - ρL*Ccd)
-		TPM.DCpgDpg = nf * ρL * Ccd
-		TPM.DCpgDusM = ρL * Cc * ns0
+		D.Cpg_pl = nf * (Cl*Ccb - ρL*Ccd)
+		D.Cpg_pg = nf * ρL * Ccd
+		D.Cpg_usM = ρL * Ccb * ns0
 
 		// 3 liquid balance related coefficients
-		TPM.DCvsDpl = sl*Cl - Cc*ρL
-		TPM.DCvsDpg = Cc * ρL
+		D.Cvs_pl = sl*Cl - Ccb*ρL
+		D.Cvs_pg = Ccb * ρL
 
 		// 1 gas balance related coefficients
-		TPM.DDplDpl = -nf * ρG * Ccd
-		TPM.DDplDpg = nf * (ρG*Ccd + Cg*Cc)
-		TPM.DDplDusM = ρG * Cc * ns0
+		D.Dpl_pl = -nf * ρG * Ccd
+		D.Dpl_pg = nf * (ρG*Ccd + Cg*Ccb)
+		D.Dpl_usM = ρG * Ccb * ns0
 
 		// 2 gas balance related coefficients
-		TPM.DDpgDpl = nf * (Cc*Cg + ρG*Ccd)
-		TPM.DDpgDpg = -nf * (ρG*Ccd + 2.0*Cg*Cc)
-		TPM.DDpgDusM = (sg*Cg - ρG*Cc) * ns0
+		D.Dpg_pl = nf * (Ccb*Cg + ρG*Ccd)
+		D.Dpg_pg = -nf * (ρG*Ccd + 2.0*Cg*Ccb)
+		D.Dpg_usM = (sg*Cg - ρG*Ccb) * ns0
 
 		// 3 gas balance related coefficients
-		TPM.DDvsDpl = Cc * ρG
-		TPM.DDvsDpg = sg*Cg - Cc*ρG
+		D.Dvs_pl = Ccb * ρG
+		D.Dvs_pg = sg*Cg - Ccb*ρG
 	}
 	return
 }
