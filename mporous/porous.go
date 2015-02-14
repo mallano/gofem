@@ -164,9 +164,10 @@ func (o Model) GetPrms(example bool) fun.Prms {
 }
 
 // InitState initialises state
-func (o Model) InitState(s *StateLG, pl, pg float64) (err error) {
+func (o Model) InitState(s *StateLG, pl, pg, divus float64) (err error) {
 	s.Pl = pl
 	s.Pg = pg
+	s.Divus = divus
 	s.Sl = 1
 	s.Ns0 = 1 - o.Nf0
 	s.RhoL = o.RhoL0
@@ -181,7 +182,7 @@ func (o Model) InitState(s *StateLG, pl, pg float64) (err error) {
 }
 
 // Update updates state
-func (o Model) Update(s *StateLG, Δpl, Δpg float64) (err error) {
+func (o Model) Update(s *StateLG, Δpl, Δpg, divusNew float64) (err error) {
 
 	// auxiliary variables
 	pc0 := s.Pg - s.Pl
@@ -203,6 +204,7 @@ func (o Model) Update(s *StateLG, Δpl, Δpg float64) (err error) {
 	// set State with new pressure, densities and flags
 	s.Pl += Δpl
 	s.Pg += Δpg
+	s.Divus = divusNew
 	s.RhoL += o.Cl * Δpl
 	s.RhoG += o.Cg * Δpg
 	s.Dpc = Δpc

@@ -46,7 +46,8 @@ func (o *Driver) Run(Pc []float64) (err error) {
 	o.Res[0] = new(StateLG)
 
 	// initialise first state
-	err = o.Mdl.InitState(o.Res[0], -Pc[0], 0)
+	pg, divus := 0.0, 0.0
+	err = o.Mdl.InitState(o.Res[0], -Pc[0], pg, divus)
 	if err != nil {
 		return
 	}
@@ -69,7 +70,7 @@ func (o *Driver) Run(Pc []float64) (err error) {
 
 		// update
 		o.Res[i] = o.Res[i-1].GetCopy()
-		err = o.Mdl.Update(o.Res[i], -Δpc, 0)
+		err = o.Mdl.Update(o.Res[i], -Δpc, pg, divus)
 		if err != nil {
 			return
 		}
@@ -86,7 +87,7 @@ func (o *Driver) Run(Pc []float64) (err error) {
 				tmp, pcNew = pcNew, x
 				Δpc = pcNew - pcOld
 				stmp.Set(o.Res[i-1])
-				o.Mdl.Update(&stmp, -Δpc, 0)
+				o.Mdl.Update(&stmp, -Δpc, pg, divus)
 				res, pcNew = stmp.Sl, tmp
 				return
 			}, pcNew)
@@ -101,7 +102,7 @@ func (o *Driver) Run(Pc []float64) (err error) {
 				tmp, pcNew = pcNew, x
 				Δpc = pcNew - pcOld
 				stmp.Set(o.Res[i-1])
-				o.Mdl.Update(&stmp, -Δpc, 0)
+				o.Mdl.Update(&stmp, -Δpc, pg, divus)
 				Ccbtmp, _ = o.Mdl.Ccb(&stmp)
 				res, pcNew = Ccbtmp, tmp
 				return

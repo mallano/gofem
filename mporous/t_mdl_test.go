@@ -77,7 +77,8 @@ func Test_mdl01(tst *testing.T) {
 	// state A
 	var A StateLG
 	pl0 := -5.0
-	err = mdl.InitState(&A, pl0, 0)
+	pg, divus := 0.0, 0.0
+	err = mdl.InitState(&A, pl0, pg, divus)
 	if err != nil {
 		tst.Errorf("mporous.InitState failed: %v\n", err)
 		return
@@ -86,7 +87,7 @@ func Test_mdl01(tst *testing.T) {
 	// state B
 	var B StateLG
 	pl0 = -10.0
-	err = mdl.InitState(&B, pl0, 0)
+	err = mdl.InitState(&B, pl0, pg, divus)
 	if err != nil {
 		tst.Errorf("mporous.InitState failed: %v\n", err)
 		return
@@ -114,7 +115,7 @@ func Test_mdl01(tst *testing.T) {
 			Δpl = -Δpl
 			iwet = n
 		}
-		err = mdl.Update(&A, Δpl, 0)
+		err = mdl.Update(&A, Δpl, pg, divus)
 		if err != nil {
 			tst.Errorf("test failed: %v\n", err)
 			return
