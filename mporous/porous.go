@@ -16,6 +16,8 @@ import (
 )
 
 // Model holds material parameters for porous media
+//  References:
+//   [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 http://dx.doi.org/10.1002/nme.4808
 type Model struct {
 
 	// constants
@@ -24,6 +26,8 @@ type Model struct {
 	MEtrial bool    // perform Modified-Euler trial to start update process
 	ShowR   bool    // show residual values in Update
 	AllBE   bool    // use BE for all models, including those that directly implements sl=f(pc)
+	Ncns    bool    // use non-consistent method for all derivatives (see [1])
+	Ncns2   bool    // use non-consistent method only for second order derivatives (see [1])
 
 	// parameters
 	Nf0   float64 // nf0: initial volume fraction of all fluids ~ porosity
@@ -86,6 +90,10 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 			o.ShowR = p.V > 0
 		case "AllBE":
 			o.AllBE = p.V > 0
+		case "Ncns":
+			o.Ncns = p.V > 0
+		case "Ncns2":
+			o.Ncns2 = p.V > 0
 		case "nf0":
 			o.Nf0 = p.V
 		case "RhoL0":
@@ -280,14 +288,53 @@ func (o Model) Update(s *StateLG, Δpl, Δpg float64) (err error) {
 	return
 }
 
-// Cc returns dsl/dpc consistent with the update method
-func (o Model) Cc(pc, sl float64, wet bool, Δpc float64) float64 {
-	return 0
+// Ccb (Cc-bar) returns dsl/dpc consistent with the update method
+//  See Eq. (54) on page 618 of [1]
+func (o Model) Ccb(s *StateLG) (dsldpc float64, err error) {
+	pc := s.Pg - s.Pl
+	f, err := o.Lrm.Cc(pc, s.Sl, s.Wet) // @ n+1
+	if err != nil {
+		return
+	}
+	if o.Ncns { // non consistent
+		dsldpc = f
+		return
+	}
+	L, err := o.Lrm.L(pc, s.Sl, s.Wet) // @ n+1
+	if err != nil {
+		return
+	}
+	J, err := o.Lrm.J(pc, s.Sl, s.Wet) // @ n+1
+	if err != nil {
+		return
+	}
+	dsldpc = (f + s.Dpc*L) / (1.0 - s.Dpc*J)
+	return
 }
 
-// DCcDpc returns dCc/dpc consistent with the update method
-func (o Model) DCcDpc(pc, sl float64, wet bool, Δpc float64) float64 {
-	return 0
+// Ccd (Cc-dash) returns dCc/dpc consistent with the update method
+//  See Eqs. (55) and (56) on page 618 of [1]
+func (o Model) Ccd(s *StateLG) (dCcdpc float64, err error) {
+	pc := s.Pg - s.Pl
+	if o.Ncns || o.Ncns2 { // non consistent
+		dCcdpc, err = o.Lrm.L(pc, s.Sl, s.Wet) // @ n+1
+		return
+	}
+	f, err := o.Lrm.Cc(pc, s.Sl, s.Wet) // @ n+1
+	if err != nil {
+		return
+	}
+	L, Lx, J, Jx, Jy, err := o.Lrm.Derivs(pc, s.Sl, s.Wet)
+	if err != nil {
+		return
+	}
+	Δpc := s.Dpc
+	Ly := Jx
+	Ccb := (f + Δpc*L) / (1.0 - Δpc*J)
+	LL := Lx + Ly*Ccb
+	JJ := Jx + Jy*Ccb
+	dCcdpc = (2.0*L + Δpc*LL + (2.0*J+Δpc*JJ)*Ccb) / (1.0 - Δpc*J)
+	return
 }
 
 // GetModel returns (existent or new) model for porous media
