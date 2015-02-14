@@ -57,7 +57,7 @@ func (o BrooksCorey) SlMin() float64 {
 	return o.slmin
 }
 
-// Sl compute sl directly from pc
+// Sl computes sl directly from pc
 func (o BrooksCorey) Sl(pc float64) float64 {
 	if pc <= o.pcae {
 		return 1
@@ -65,7 +65,7 @@ func (o BrooksCorey) Sl(pc float64) float64 {
 	return o.slmin + (1-o.slmin)*math.Pow(o.pcae/pc, o.λ)
 }
 
-// Cc compute Cc(pc) := dsl/dpc
+// Cc computes Cc(pc) := dsl/dpc
 func (o BrooksCorey) Cc(pc, sl float64, wet bool) (float64, error) {
 	if pc <= o.pcae {
 		return 0, nil

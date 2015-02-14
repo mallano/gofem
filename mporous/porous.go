@@ -7,6 +7,7 @@ package mporous
 
 import (
 	"log"
+	"math"
 
 	"github.com/cpmech/gofem/mconduct"
 	"github.com/cpmech/gofem/mreten"
@@ -21,6 +22,8 @@ type Model struct {
 	NmaxIt  int     // max number iterations in Update
 	Itol    float64 // iterations tolerance in Update
 	MEtrial bool    // perform Modified-Euler trial to start update process
+	ShowR   bool    // show residual values in Update
+	AllBE   bool    // use BE for all models, including those that directly implements sl=f(pc)
 
 	// parameters
 	Nf0   float64 // nf0: initial volume fraction of all fluids ~ porosity
@@ -42,6 +45,9 @@ type Model struct {
 	// conductivity and retention models
 	Cnd mconduct.Model // liquid-gas conductivity models
 	Lrm mreten.Model   // retention model
+
+	// auxiliary
+	nonrateLrm mreten.Nonrate // LRM is of non-rate type
 }
 
 // Init initialises this structure
@@ -53,6 +59,9 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 	}
 	o.Cnd = cnd
 	o.Lrm = lrm
+	if m, ok := o.Lrm.(mreten.Nonrate); ok {
+		o.nonrateLrm = m
+	}
 
 	// constants
 	o.NmaxIt = 20
@@ -73,6 +82,10 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 			o.Itol = p.V
 		case "MEtrial":
 			o.MEtrial = p.V > 0
+		case "ShowR":
+			o.ShowR = p.V > 0
+		case "AllBE":
+			o.AllBE = p.V > 0
 		case "nf0":
 			o.Nf0 = p.V
 		case "RhoL0":
@@ -160,12 +173,24 @@ func (o Model) InitState(s *StateLG, pl, pg float64) (err error) {
 }
 
 // Update updates state
-func (o Model) Update(s *StateLG, Δpl, Δpg float64) error {
+func (o Model) Update(s *StateLG, Δpl, Δpg float64) (err error) {
 
-	// initial state and increment
+	// auxiliary variables
 	pc0 := s.Pg - s.Pl
 	sl0 := s.Sl
-	Δpc := Δpl - Δpg
+	Δpc := Δpg - Δpl
+	pc := pc0 + Δpc
+	slmin := o.Lrm.SlMin()
+
+	// check results upon exist
+	defer func() {
+		if pc < 0 && s.Sl < 1 {
+			err = utl.Err("inconsistent results: saturation must be equal to one when the capillary pressure is ineffective. pc = %g < 0 and sl = %g < 1 is incorrect", pc, s.Sl)
+		}
+		if s.Sl < slmin {
+			err = utl.Err("inconsistent results: saturation must be greater than minimum saturation. sl = %g < %g is incorrect", s.Sl, slmin)
+		}
+	}()
 
 	// set State with new pressure, densities and flags
 	s.Pl += Δpl
@@ -175,9 +200,16 @@ func (o Model) Update(s *StateLG, Δpl, Δpg float64) error {
 	s.Dpc = Δpc
 	s.Wet = Δpc < 0
 
-	// skip if liquid-retention model is nil
-	if o.Lrm == nil {
-		return nil
+	// exit with full liquid saturation if capillary pressure is ineffective
+	if pc <= 0.0 {
+		s.Sl = 1
+		return
+	}
+
+	// handle simple retention models
+	if o.nonrateLrm != nil && !o.AllBE {
+		s.Sl = o.nonrateLrm.Sl(pc)
+		return
 	}
 
 	// trial liquid saturation update
@@ -185,7 +217,6 @@ func (o Model) Update(s *StateLG, Δpl, Δpg float64) error {
 	if err != nil {
 		return err
 	}
-	pc := pc0 + Δpc
 	if o.MEtrial {
 		slFE := sl0 + Δpc*fA
 		fB, err := o.Lrm.Cc(pc, slFE, s.Wet)
@@ -196,7 +227,57 @@ func (o Model) Update(s *StateLG, Δpl, Δpg float64) error {
 	} else {
 		s.Sl += Δpc * fA
 	}
-	return nil
+
+	// fix trial sl out-of-range values
+	if s.Sl < slmin {
+		s.Sl = slmin
+	}
+	if s.Sl > 1 {
+		s.Sl = 1
+	}
+
+	// message
+	if o.ShowR {
+		utl.PfYel("%6s%18s%18s%18s%18s%8s\n", "it", "Cc", "sl", "δsl", "r", "ex(r)")
+	}
+
+	// backward-Euler update
+	var f, r, J, δsl float64
+	var it int
+	for it = 0; it < o.NmaxIt; it++ {
+		f, err = o.Lrm.Cc(pc, s.Sl, s.Wet)
+		if err != nil {
+			return
+		}
+		r = s.Sl - sl0 - Δpc*f
+		if o.ShowR {
+			utl.Pfyel("%6d%18.14f%18.14f%18.14f%18.10e%8d\n", it, f, s.Sl, δsl, r, utl.Expon(r))
+		}
+		if math.Abs(r) < o.Itol {
+			break
+		}
+		J, err = o.Lrm.J(pc, s.Sl, s.Wet)
+		if err != nil {
+			return
+		}
+		δsl = -r / (1.0 - Δpc*J)
+		s.Sl += δsl
+		if math.IsNaN(s.Sl) {
+			return utl.Err("NaN found: Δpc=%v f=%v r=%v J=%v sl=%v\n", Δpc, f, r, J, s.Sl)
+		}
+	}
+
+	// message
+	if o.ShowR {
+		utl.Pfgrey("  pc0=%.6f  sl0=%.6f  Δpl=%.6f  Δpg=%.6f  Δpc=%.6f\n", pc0, sl0, Δpl, Δpg, Δpc)
+		utl.Pfgrey("  converged with %d iterations\n", it)
+	}
+
+	// check convergence
+	if it == o.NmaxIt {
+		return utl.Err("saturation updated failed after %d iterations\n", it)
+	}
+	return
 }
 
 // Cc returns dsl/dpc consistent with the update method

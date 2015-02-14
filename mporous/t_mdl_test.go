@@ -23,7 +23,9 @@ func Test_mdl01(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	doplot := false
+	//doplot := true
+	//utl.Tsilent = false
 	utl.TTitle("mdl01")
 
 	// info
@@ -41,7 +43,9 @@ func Test_mdl01(tst *testing.T) {
 	}
 
 	// liquid retention model
-	lrm := mreten.GetModel(simfnk, matname, "ref-m1", getnew)
+	lrm_name := "ref-m1"
+	//lrm_name := "vg"
+	lrm := mreten.GetModel(simfnk, matname, lrm_name, getnew)
 	err = lrm.Init(lrm.GetPrms(example))
 	if err != nil {
 		tst.Errorf("mreten.Init failed: %v\n", err)
@@ -55,6 +59,8 @@ func Test_mdl01(tst *testing.T) {
 		tst.Errorf("mporous.Init failed: %v\n", err)
 		return
 	}
+	//mdl.MEtrial = false
+	mdl.ShowR = true
 
 	// initial and final values
 	pc0 := -5.0
@@ -62,11 +68,10 @@ func Test_mdl01(tst *testing.T) {
 	pcf := 20.0
 
 	// plot lrm
-	doplot := true
 	if doplot {
 		npts := 41
 		plt.Reset()
-		mreten.Plot(mdl.Lrm, pc0, sl0, pcf, npts, "'b.-'", "'r+-'", "ref-m1_drying")
+		mreten.Plot(mdl.Lrm, pc0, sl0, pcf, npts, "'b.-'", "'r+-'", lrm_name)
 	}
 
 	// state A
@@ -87,10 +92,40 @@ func Test_mdl01(tst *testing.T) {
 		return
 	}
 
+	// plot A and B points
+	if doplot {
+		pcA := A.Pg - A.Pl
+		pcB := B.Pg - B.Pl
+		plt.PlotOne(pcA, A.Sl, "'gs', clip_on=0, label='A', ms=10")
+		plt.PlotOne(pcB, B.Sl, "'ks', clip_on=0, label='B'")
+	}
+
+	// incremental update
+	//Δpl := -20.0 // << problems with this one and VG
+	Δpl := -5.0
+	n := 23
+	iwet := 10
+	Pc := make([]float64, n)
+	Sl := make([]float64, n)
+	Pc[0] = A.Pg - A.Pl
+	Sl[0] = A.Sl
+	for i := 1; i < n; i++ {
+		if i > iwet {
+			Δpl = -Δpl
+			iwet = n
+		}
+		err = mdl.Update(&A, Δpl, 0)
+		if err != nil {
+			tst.Errorf("test failed: %v\n", err)
+			return
+		}
+		Pc[i] = A.Pg - A.Pl
+		Sl[i] = A.Sl
+	}
+
 	// show graph
 	if doplot {
-		plt.PlotOne(A.Pg-A.Pl, A.Sl, "'ro', label='A'")
-		plt.PlotOne(B.Pg-B.Pl, B.Sl, "'go', label='B'")
+		plt.Plot(Pc, Sl, "'ro-', clip_on=0, label='update'")
 		mreten.PlotEnd(true)
 	}
 }

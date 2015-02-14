@@ -64,7 +64,7 @@ func (o VanGen) SlMin() float64 {
 	return o.slmin
 }
 
-// Sl compute sl directly from pc
+// Sl computes sl directly from pc
 func (o VanGen) Sl(pc float64) float64 {
 	if pc <= o.pcmin {
 		return 1
@@ -74,7 +74,7 @@ func (o VanGen) Sl(pc float64) float64 {
 	return fac * math.Pow(1+c, -o.m)
 }
 
-// Cc compute Cc(pc) := dsl/dpc
+// Cc computes Cc(pc) := dsl/dpc
 func (o VanGen) Cc(pc, sl float64, wet bool) (float64, error) {
 	if pc <= o.pcmin {
 		return 0, nil

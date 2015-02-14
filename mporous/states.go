@@ -15,3 +15,17 @@ type StateLG struct {
 	Dpc  float64 // Δpc: step increment of capillary pressure
 	Wet  bool    // wetting flag
 }
+
+// GetCopy returns a copy of StateLG
+func (o StateLG) GetCopy() *StateLG {
+	return &StateLG{
+		o.Pl,
+		o.Pg,
+		o.Sl,
+		o.Ns0,
+		o.RhoL,
+		o.RhoG,
+		o.Dpc,
+		o.Wet,
+	}
+}

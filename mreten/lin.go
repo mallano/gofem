@@ -66,7 +66,7 @@ func (o Lin) SlMin() float64 {
 	return o.slmin
 }
 
-// Sl compute sl directly from pc
+// Sl computes sl directly from pc
 func (o Lin) Sl(pc float64) float64 {
 	if pc <= o.pcae {
 		return 1
@@ -77,7 +77,7 @@ func (o Lin) Sl(pc float64) float64 {
 	return 1 - o.λ*(pc-o.pcae)
 }
 
-// Cc compute Cc(pc) := dsl/dpc
+// Cc computes Cc(pc) := dsl/dpc
 func (o Lin) Cc(pc, sl float64, wet bool) (float64, error) {
 	if pc <= o.pcae || pc >= o.pcres {
 		return 0, nil
