@@ -137,7 +137,7 @@ func init() {
 		// materials
 		matname := edat.Mat
 		cndmat, lrmmat, pormat, err := global.Mdb.GroupGet3(matname, "c", "l", "p")
-		if LogErr(err, "Mdb.GroupGet3 failed\n") {
+		if LogErr(err, "Mdb.GroupGet3 failed") {
 			return nil
 		}
 
@@ -145,24 +145,24 @@ func init() {
 		simfnk := global.Sim.Data.FnameKey
 		getnew := false
 		cnd := mconduct.GetModel(simfnk, cndmat.Name, cndmat.Model, getnew)
-		if LogErrCond(cnd == nil, "cannot allocate conductivity models") {
+		if LogErrCond(cnd == nil, "cannot allocate conductivity models with name=%q", cndmat.Model) {
 			return nil
 		}
 		lrm := mreten.GetModel(simfnk, lrmmat.Name, lrmmat.Model, getnew)
-		if LogErrCond(lrm == nil, "cannot allocate liquid retention model") {
+		if LogErrCond(lrm == nil, "cannot allocate liquid retention model with name=%q", lrmmat.Model) {
 			return nil
 		}
 		o.Mdl = mporous.GetModel(simfnk, pormat.Name, getnew)
-		if LogErrCond(o.Mdl == nil, "cannot allocate model for porous medium") {
+		if LogErrCond(o.Mdl == nil, "cannot allocate model for porous medium with name=%q", pormat.Name) {
 			return nil
 		}
-		if LogErr(cnd.Init(cndmat.Prms), "cannot initialise cnd model") {
+		if LogErr(cnd.Init(cndmat.Prms), "cannot initialise conductivity model") {
 			return nil
 		}
-		if LogErr(lrm.Init(lrmmat.Prms), "cannot initialise lrm model") {
+		if LogErr(lrm.Init(lrmmat.Prms), "cannot initialise liquid retention model") {
 			return nil
 		}
-		if LogErr(o.Mdl.Init(pormat.Prms, cnd, lrm), "cannot initialise por model") {
+		if LogErr(o.Mdl.Init(pormat.Prms, cnd, lrm), "cannot initialise porous model") {
 			return nil
 		}
 
