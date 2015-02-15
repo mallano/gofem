@@ -65,6 +65,18 @@ func Get(geoType string) *Shape {
 	return s
 }
 
+// IpRealCoords returns the real coordinates (y) of an integration point
+func (o *Shape) IpRealCoords(x [][]float64, ip *Ipoint) (y []float64) {
+	y = make([]float64, o.Gndim)
+	o.Func(o.S, o.dSdR, ip.R, ip.S, ip.T, false)
+	for i := 0; i < o.Gndim; i++ {
+		for m := 0; m < o.Nverts; m++ {
+			y[i] += o.S[m] * x[i][m]
+		}
+	}
+	return
+}
+
 // CalcAtIp calculates volume data such as S and G at natural coordinate r
 //  Input:
 //   x[ndim][nverts+?] -- coordinates matrix of solid element

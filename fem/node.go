@@ -12,13 +12,13 @@ import (
 
 // Dof holds information about a degree-of-freedom == solution variable
 type Dof struct {
-	Ukey string // primary variable key. e.g. "ux"
-	Eq   int    // equation number
+	Key string // primary variable key. e.g. "ux"
+	Eq  int    // equation number
 }
 
 // String returns the string representation of this Dof
 func (o *Dof) String() string {
-	l := utl.Sf("{ \"Ukey\" : %s  \"Eq\" : %d } ", o.Ukey, o.Eq)
+	l := utl.Sf("{ \"Key\" : %s  \"Eq\" : %d } ", o.Key, o.Eq)
 	return l
 }
 
@@ -51,7 +51,7 @@ func (o *Node) AddDofAndEq(ukey string, eqnum int) (nexteq int) {
 
 	// check if ukey exists already
 	for _, dof := range o.dofs {
-		if ukey == dof.Ukey {
+		if ukey == dof.Key {
 			return eqnum
 		}
 	}
@@ -70,7 +70,7 @@ func (o *Node) SetEq(ukey string, eqNumber int) {
 //  Note: returns nil if not found
 func (o *Node) GetDof(ukey string) *Dof {
 	for _, dof := range o.dofs {
-		if dof.Ukey == ukey {
+		if dof.Key == ukey {
 			return dof
 		}
 	}
@@ -81,7 +81,7 @@ func (o *Node) GetDof(ukey string) *Dof {
 //  Note: returns -1 if not found
 func (o *Node) GetEq(ukey string) (eqNumber int) {
 	for _, dof := range o.dofs {
-		if dof.Ukey == ukey {
+		if dof.Key == ukey {
 			return dof.Eq
 		}
 	}

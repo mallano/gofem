@@ -327,7 +327,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	o.T2eqs = make([]int, 0)
 	for _, nod := range o.Nodes {
 		for _, dof := range nod.dofs {
-			switch o.Dof2Tnum[dof.Ukey] {
+			switch o.Dof2Tnum[dof.Key] {
 			case 1:
 				o.T1eqs = append(o.T1eqs, dof.Eq)
 			case 2:
@@ -363,6 +363,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		o.Sol.Zet = make([]float64, o.Ny)
 		o.Sol.Chi = make([]float64, o.Ny)
 	}
+
+	// set initial values
+	o.SetHydroSt(stg)
 
 	// initialise internal variables
 	for _, e := range o.ElemIntvars {
