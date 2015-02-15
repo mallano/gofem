@@ -6,7 +6,6 @@ package fem
 
 import (
 	"github.com/cpmech/gofem/inp"
-	"github.com/cpmech/gofem/mporous"
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
@@ -251,26 +250,6 @@ func (o *ElemUP) ipvars(idx int, sol *Solution, tpm_derivs bool) (ok bool) {
 			r := o.u.Umap[i+m*o.Ndim]
 			o.u.us[i] += o.u.Cell.Shp.S[m] * sol.Y[r]
 			divus += o.u.Cell.Shp.G[m][i] * sol.Y[r]
-		}
-	}
-
-	// TPM variables
-	if LogErr(mporous.CalcLS(o.p.pl, divus, o.p.States[idx], o.p.Model, tpm_derivs), "ipvars") {
-		return
-	}
-
-	// local variables
-	dc := global.DynCoefs
-	o.p.dpldt = dc.β1*o.p.pl - o.p.ψl[idx]
-	o.divvs = dc.α4*divus - o.u.divχs[idx]
-
-	// auxiliary vectors
-	for i := 0; i < o.Ndim; i++ {
-		o.bs[i] = dc.α1*o.u.us[i] - o.u.ζs[idx][i] - o.u.grav[i]
-		o.p.hl[i] = -o.p.States[idx].RhoL*o.bs[i] - o.p.gpl[i]
-		o.p.ρwl[i] = 0
-		for j := 0; j < o.Ndim; j++ {
-			o.p.ρwl[i] += mporous.TPM.Klr * o.p.Model.Klsat[i][j] * o.p.hl[j]
 		}
 	}
 	return true

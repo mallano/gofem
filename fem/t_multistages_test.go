@@ -12,8 +12,8 @@ import (
 
 func get_nids_eqs(dom *Domain) (nids, eqs []int) {
 	for _, nod := range dom.Nodes {
-		nids = append(nids, nod.vert.Id)
-		for _, dof := range nod.dofs {
+		nids = append(nids, nod.Vert.Id)
+		for _, dof := range nod.Dofs {
 			eqs = append(eqs, dof.Eq)
 		}
 	}
@@ -37,14 +37,14 @@ func Test_fourlayers01(tst *testing.T) {
 		tst.Errorf("test failed\n")
 	}
 	defer End()
-	dom := NewDomain(global.Sim.Regions[0])
+	dom := NewDomain(Global.Sim.Regions[0])
 	if dom == nil {
 		tst.Errorf("test failed\n")
 		return
 	}
 
 	utl.Pforan("stage # 0\n")
-	if !dom.SetStage(0, global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -53,7 +53,7 @@ func Test_fourlayers01(tst *testing.T) {
 	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 12, 2, 3, 4, 5, 6, 7, 13, 8, 9, 10, 11})
 
 	utl.Pforan("stage # 1\n")
-	if !dom.SetStage(1, global.Sim.Stages[1]) {
+	if !dom.SetStage(1, Global.Sim.Stages[1]) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -62,7 +62,7 @@ func Test_fourlayers01(tst *testing.T) {
 	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 2, 3, 19, 4, 5, 20, 6, 7, 8, 9, 18, 10, 11, 12, 13, 14, 15, 16, 17})
 
 	utl.Pforan("stage # 2\n")
-	if !dom.SetStage(2, global.Sim.Stages[2]) {
+	if !dom.SetStage(2, Global.Sim.Stages[2]) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -71,7 +71,7 @@ func Test_fourlayers01(tst *testing.T) {
 	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 2, 3, 25, 4, 5, 26, 6, 7, 8, 9, 24, 10, 11, 12, 13, 14, 15, 16, 17, 27, 18, 19, 20, 21, 22, 23})
 
 	utl.Pforan("stage # 3\n")
-	if !dom.SetStage(3, global.Sim.Stages[3]) {
+	if !dom.SetStage(3, Global.Sim.Stages[3]) {
 		tst.Errorf("test failed\n")
 		return
 	}

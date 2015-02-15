@@ -21,11 +21,13 @@ func Test_refm1a(tst *testing.T) {
 		}
 	}()
 
+	doplot := false
+	//doplot := true
 	//utl.Tsilent = false
 	utl.TTitle("refm1a")
 
 	mdl := GetModel("testsim", "mat1", "ref-m1", false)
-	mdl.Init(mdl.GetPrms())
+	mdl.Init(mdl.GetPrms(true))
 
 	pc0 := -5.0
 	sl0 := 1.0
@@ -33,16 +35,14 @@ func Test_refm1a(tst *testing.T) {
 	nptsA := 41
 	nptsB := 11
 
-	//doplot := true
-	doplot := false
 	if doplot {
 		plt.Reset()
 		Plot(mdl, pc0, sl0, pcf, nptsA, "'b.-'", "'r+-'", "ref-m1_drying")
 	}
 
 	tolCc := 1e-17
-	tolD1a, tolD1b := 1e-11, 1e-5
-	tolD2a, tolD2b := 1e-12, 1e-4
+	tolD1a, tolD1b := 1e-11, 1e-11
+	tolD2a, tolD2b := 1e-12, 1e-10
 	Check(tst, mdl, pc0, sl0, pcf, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, true, []float64{0}, 1e-7, doplot)
 
 	slf, err := Update(mdl, pc0, sl0, pcf-pc0)
@@ -56,7 +56,7 @@ func Test_refm1a(tst *testing.T) {
 	}
 
 	tolD1b = 1e-4
-	tolD2a, tolD2b = 1e-11, 1e-4
+	tolD2a, tolD2b = 1e-11, 1e-10
 	Check(tst, mdl, pcf, slf, pc0, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, true, []float64{0}, 1e-7, doplot)
 
 	if doplot {

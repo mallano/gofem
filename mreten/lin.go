@@ -53,7 +53,7 @@ func (o *Lin) Init(prms fun.Prms) (err error) {
 }
 
 // GetPrms gets (an example) of parameters
-func (o Lin) GetPrms() fun.Prms {
+func (o Lin) GetPrms(example bool) fun.Prms {
 	return []*fun.Prm{
 		&fun.Prm{N: "lam", V: 0.5},
 		&fun.Prm{N: "pcae", V: 0.2},
@@ -61,7 +61,12 @@ func (o Lin) GetPrms() fun.Prms {
 	}
 }
 
-// Sl compute sl directly from pc
+// SlMin returns sl_min
+func (o Lin) SlMin() float64 {
+	return o.slmin
+}
+
+// Sl computes sl directly from pc
 func (o Lin) Sl(pc float64) float64 {
 	if pc <= o.pcae {
 		return 1
@@ -72,7 +77,7 @@ func (o Lin) Sl(pc float64) float64 {
 	return 1 - o.λ*(pc-o.pcae)
 }
 
-// Cc compute Cc(pc) := dsl/dpc
+// Cc computes Cc(pc) := dsl/dpc
 func (o Lin) Cc(pc, sl float64, wet bool) (float64, error) {
 	if pc <= o.pcae || pc >= o.pcres {
 		return 0, nil
@@ -80,8 +85,17 @@ func (o Lin) Cc(pc, sl float64, wet bool) (float64, error) {
 	return -o.λ, nil
 }
 
+// L computes L = ∂Cc/∂pc
+func (o Lin) L(pc, sl float64, wet bool) (float64, error) {
+	return 0, nil
+}
+
+// J computes J = ∂Cc/∂sl
+func (o Lin) J(pc, sl float64, wet bool) (float64, error) {
+	return 0, nil
+}
+
 // Derivs compute ∂Cc/∂pc and ∂²Cc/∂pc²
-func (o Lin) Derivs(pc, sl float64, wet bool) error {
-	D.DCcDpc, D.D2CcDpc2 = 0, 0
-	return nil
+func (o Lin) Derivs(pc, sl float64, wet bool) (L, Lx, J, Jx, Jy float64, err error) {
+	return
 }

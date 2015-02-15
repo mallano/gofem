@@ -18,7 +18,6 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 
 	// nonrate model
 	nr_mdl, is_nonrate := mdl.(Nonrate)
-	utl.Pforan("is_nonrate = %v\n", nr_mdl)
 	utl.Pforan("is_nonrate = %v\n", is_nonrate)
 
 	// for all pc stations
@@ -61,58 +60,69 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 			Cc_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 				return nr_mdl.Sl(x)
 			}, Pc[i], 1e-3)
-			utl.CheckAnaNum(tst, "Cc            ", tolCc, Cc_ana, Cc_num, verbose)
+			utl.CheckAnaNum(tst, "Cc = ∂sl/∂pc    ", tolCc, Cc_ana, Cc_num, verbose)
 		}
 
 		// compute all derivatives
-		mdl.Derivs(Pc[i], Sl[i], wet)
-		DCcDpc_ana := D.DCcDpc
-		D2CcDpc2_ana := D.D2CcDpc2
-
-		// numerical DCcDpc = ∂Cc/∂pc
-		DCcDpc_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
-			Ccval, _ := mdl.Cc(x, Sl[i], wet)
-			return Ccval
-		}, Pc[i], 1e-3)
-		utl.CheckAnaNum(tst, "∂Cc/∂pc       ", tolD1a, DCcDpc_ana, DCcDpc_num, verbose)
-
-		// numerical D2CcDpc2 := ∂²Cc/∂pc²
-		D2CcDpc2_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
-			mdl.Derivs(x, Sl[i], wet)
-			return D.DCcDpc
-		}, Pc[i], 1e-3)
-		utl.CheckAnaNum(tst, "∂²Cc/∂pc²     ", tolD2a, D2CcDpc2_ana, D2CcDpc2_num, verbose)
-
-		// if is nonrate, skip additional derivatives checks
-		if is_nonrate {
-			continue
+		L, Lx, J, Jx, Jy, err := mdl.Derivs(Pc[i], Sl[i], wet)
+		if err != nil {
+			tst.Errorf("Derivs failed: %v\n", err)
+			return
+		}
+		L_ana_A := L
+		L_ana_B, err := mdl.L(Pc[i], Sl[i], wet)
+		if err != nil {
+			tst.Errorf("L failed: %v\n", err)
+			return
+		}
+		Lx_ana := Lx
+		Jx_ana := Jx
+		Jy_ana := Jy
+		J_ana_A := J
+		J_ana_B, err := mdl.J(Pc[i], Sl[i], wet)
+		if err != nil {
+			tst.Errorf("J failed: %v\n", err)
+			return
 		}
 
-		// analytical derivatives
-		DCcDsl_ana := D.DCcDsl
-		D2CcDsl2_ana := D.D2CcDsl2
-		D2CcDpcDsl_ana := D.D2CcDpcDsl
+		// numerical L = ∂Cc/∂pc
+		L_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
+			Cctmp, _ := mdl.Cc(x, Sl[i], wet)
+			return Cctmp
+		}, Pc[i], 1e-3)
+		utl.CheckAnaNum(tst, "L  = ∂Cc/∂pc    ", tolD1a, L_ana_A, L_num, verbose)
 
-		// numerical DCcDsl := ∂Cc/∂sl
-		DCcDsl_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
+		// numerical Lx := ∂²Cc/∂pc²
+		Lx_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
+			Ltmp, _, _, _, _, _ := mdl.Derivs(x, Sl[i], wet)
+			return Ltmp
+		}, Pc[i], 1e-3)
+		utl.CheckAnaNum(tst, "Lx = ∂²Cc/∂pc²  ", tolD2a, Lx_ana, Lx_num, verbose)
+
+		// numerical J := ∂Cc/∂sl (version A)
+		J_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 			Ccval, _ := mdl.Cc(Pc[i], x, wet)
 			return Ccval
 		}, Sl[i], 1e-3)
-		utl.CheckAnaNum(tst, "∂Cc/∂sl       ", tolD1b, DCcDsl_ana, DCcDsl_num, verbose)
+		utl.CheckAnaNum(tst, "J  = ∂Cc/∂sl    ", tolD1b, J_ana_A, J_num, verbose)
 
-		// numerical D2CcDsl2 := ∂²Cc/∂sl²
-		D2CcDsl2_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
-			mdl.Derivs(Pc[i], x, wet)
-			return D.DCcDsl
+		// numerical Jx := ∂²Cc/(∂pc ∂sl)
+		Jx_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
+			Ltmp, _, _, _, _, _ := mdl.Derivs(Pc[i], x, wet)
+			return Ltmp
 		}, Sl[i], 1e-3)
-		utl.CheckAnaNum(tst, "∂²Cc/∂sl²     ", tolD2b, D2CcDsl2_ana, D2CcDsl2_num, verbose)
+		utl.CheckAnaNum(tst, "Jx = ∂²Cc/∂pc∂sl", tolD2b, Jx_ana, Jx_num, verbose)
 
-		// numerical D2CcDpcDsl := ∂²Cc/(∂pc ∂sl)
-		D2CcDpcDsl_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
-			mdl.Derivs(Pc[i], x, wet)
-			return D.DCcDpc
+		// numerical Jy := ∂²Cc/∂sl²
+		Jy_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
+			Jtmp, _ := mdl.J(Pc[i], x, wet)
+			return Jtmp
 		}, Sl[i], 1e-3)
-		utl.CheckAnaNum(tst, "∂²Cc/(∂pc ∂sl)", tolD2b, D2CcDpcDsl_ana, D2CcDpcDsl_num, verbose)
+		utl.CheckAnaNum(tst, "Jy = ∂²Cc/∂sl²  ", tolD2b, Jy_ana, Jy_num, verbose)
+
+		// check A and B derivatives
+		utl.CheckScalar(tst, "L_A == L_B", 1e-17, L_ana_A, L_ana_B)
+		utl.CheckScalar(tst, "J_A == J_B", 1e-17, J_ana_A, J_ana_B)
 	}
 }
 

@@ -89,8 +89,8 @@ func (o LGcondM1) Klr(sl float64) float64 {
 }
 
 // Kgr returns kgr
-func (o LGcondM1) Kgr(sl float64) float64 {
-	return o.kgr.F(1-sl, nil)
+func (o LGcondM1) Kgr(sg float64) float64 {
+	return o.kgr.F(sg, nil)
 }
 
 // DklrDsl returns ∂klr/∂sl
@@ -98,7 +98,7 @@ func (o LGcondM1) DklrDsl(sl float64) float64 {
 	return o.klr.G(sl, nil)
 }
 
-// DkgrDsl returns ∂kgr/∂sl
-func (o LGcondM1) DkgrDsl(sl float64) float64 {
-	return -o.kgr.G(1-sl, nil)
+// DkgrDsl returns ∂kgr/∂sg
+func (o LGcondM1) DkgrDsg(sg float64) float64 {
+	return o.kgr.G(sg, nil)
 }

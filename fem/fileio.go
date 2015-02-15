@@ -27,7 +27,7 @@ type Decoder interface {
 
 // GetEncoder returns a new encoder
 func GetEncoder(w io.Writer) Encoder {
-	if global.Sim.Data.Encoder == "gob" {
+	if Global.Sim.Data.Encoder == "gob" {
 		return gob.NewEncoder(w)
 	}
 	return json.NewEncoder(w)
@@ -35,7 +35,7 @@ func GetEncoder(w io.Writer) Encoder {
 
 // GetDecoder returns a new decoder
 func GetDecoder(r io.Reader) Decoder {
-	if global.Sim.Data.Encoder == "gob" {
+	if Global.Sim.Data.Encoder == "gob" {
 		return gob.NewDecoder(r)
 	}
 	return json.NewDecoder(r)
@@ -59,7 +59,7 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 	}
 
 	// transient simulations
-	if !global.Sim.Data.Steady {
+	if !Global.Sim.Data.Steady {
 
 		// encode Dydt
 		if LogErr(enc.Encode(o.Sol.Dydt), "SaveSol") {
@@ -106,7 +106,7 @@ func (o *Domain) ReadSol(tidx int) (ok bool) {
 	}
 
 	// transient simulations
-	if !global.Sim.Data.Steady {
+	if !Global.Sim.Data.Steady {
 
 		// decode Dydt
 		if LogErr(dec.Decode(&o.Sol.Dydt), "ReadSol") {
@@ -232,13 +232,13 @@ func ReadSum() *Summary {
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
 
 func out_nod_path(tidx int) string {
-	return path.Join(global.Sim.Data.DirOut, utl.Sf("%s_nod_%010d.%s", global.Sim.Data.FnameKey, tidx, global.Sim.Data.Encoder))
+	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_nod_%010d.%s", Global.Sim.Data.FnameKey, tidx, Global.Sim.Data.Encoder))
 }
 
 func out_ele_path(tidx int) string {
-	return path.Join(global.Sim.Data.DirOut, utl.Sf("%s_ele_%010d_p%d.%s", global.Sim.Data.FnameKey, tidx, global.Rank, global.Sim.Data.Encoder))
+	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_ele_%010d_p%d.%s", Global.Sim.Data.FnameKey, tidx, Global.Rank, Global.Sim.Data.Encoder))
 }
 
 func out_sum_path() string {
-	return path.Join(global.Sim.Data.DirOut, utl.Sf("%s_sum_p%d.%s", global.Sim.Data.FnameKey, global.Rank, global.Sim.Data.Encoder))
+	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_sum_p%d.%s", Global.Sim.Data.FnameKey, Global.Rank, Global.Sim.Data.Encoder))
 }

@@ -29,11 +29,11 @@ func Test_beam01(tst *testing.T) {
 		tst.Errorf("test failed\n")
 	}
 	defer End()
-	dom := NewDomain(global.Sim.Regions[0])
+	dom := NewDomain(Global.Sim.Regions[0])
 	if dom == nil {
 		tst.Errorf("test failed\n")
 	}
-	if !dom.SetStage(0, global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("test failed\n")
 	}
 
@@ -43,7 +43,7 @@ func Test_beam01(tst *testing.T) {
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.dofs), 3)
+		utl.IntAssert(len(nod.Dofs), 3)
 	}
 
 	// check equations

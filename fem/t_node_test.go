@@ -44,7 +44,7 @@ func Test_node01(tst *testing.T) {
 	utl.Pforan("dof1= %v\n", dof1)
 	utl.Pforan("dof2= %v\n", dof2)
 
-	utl.CompareStrs(tst, "Dof Ukey", []string{dof0.Ukey, dof1.Ukey, dof2.Ukey}, []string{"ux", "uy", "uz"})
+	utl.CompareStrs(tst, "Dof Ukey", []string{dof0.Key, dof1.Key, dof2.Key}, []string{"ux", "uy", "uz"})
 
 	// getting Eq number by key
 	eq0 := node0.GetEq("ux")

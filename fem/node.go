@@ -12,20 +12,20 @@ import (
 
 // Dof holds information about a degree-of-freedom == solution variable
 type Dof struct {
-	Ukey string // primary variable key. e.g. "ux"
-	Eq   int    // equation number
+	Key string // primary variable key. e.g. "ux"
+	Eq  int    // equation number
 }
 
 // String returns the string representation of this Dof
 func (o *Dof) String() string {
-	l := utl.Sf("{ \"Ukey\" : %s  \"Eq\" : %d } ", o.Ukey, o.Eq)
+	l := utl.Sf("{ \"Key\" : %s  \"Eq\" : %d } ", o.Key, o.Eq)
 	return l
 }
 
 // Node holds node dofs information
 type Node struct {
-	dofs []*Dof    // degrees-of-freedom == solution variables
-	vert *inp.Vert // pointer to Vertex
+	Dofs []*Dof    // degrees-of-freedom == solution variables
+	Vert *inp.Vert // pointer to Vertex
 }
 
 // NewNode allocates a new Node
@@ -36,8 +36,8 @@ func NewNode(v *inp.Vert) *Node {
 // String returns the string representation of this node
 func (o *Node) String() string {
 	l := "{ "
-	l += utl.Sf(" \"Id\" :  %d ", o.vert.Id)
-	for _, dof := range o.dofs {
+	l += utl.Sf(" \"Id\" :  %d ", o.Vert.Id)
+	for _, dof := range o.Dofs {
 		l += dof.String()
 	}
 	l += " } "
@@ -50,14 +50,14 @@ func (o *Node) String() string {
 func (o *Node) AddDofAndEq(ukey string, eqnum int) (nexteq int) {
 
 	// check if ukey exists already
-	for _, dof := range o.dofs {
-		if ukey == dof.Ukey {
+	for _, dof := range o.Dofs {
+		if ukey == dof.Key {
 			return eqnum
 		}
 	}
 
 	// add new Dof
-	o.dofs = append(o.dofs, &Dof{ukey, eqnum})
+	o.Dofs = append(o.Dofs, &Dof{ukey, eqnum})
 	return eqnum + 1
 }
 
@@ -69,8 +69,8 @@ func (o *Node) SetEq(ukey string, eqNumber int) {
 // GetDof returns the Dof structure for given Dof name (ukey)
 //  Note: returns nil if not found
 func (o *Node) GetDof(ukey string) *Dof {
-	for _, dof := range o.dofs {
-		if dof.Ukey == ukey {
+	for _, dof := range o.Dofs {
+		if dof.Key == ukey {
 			return dof
 		}
 	}
@@ -80,8 +80,8 @@ func (o *Node) GetDof(ukey string) *Dof {
 // GetEq returns the equation number for given Dof name (ukey)
 //  Note: returns -1 if not found
 func (o *Node) GetEq(ukey string) (eqNumber int) {
-	for _, dof := range o.dofs {
-		if dof.Ukey == ukey {
+	for _, dof := range o.Dofs {
+		if dof.Key == ukey {
 			return dof.Eq
 		}
 	}

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/cpmech/gosl/num"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -36,8 +37,8 @@ type T_results_set []*T_results
 func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tolu, tols float64, skipK, verbose bool) {
 
 	// allocate domain
-	d := NewDomain(global.Sim.Regions[0])
-	if !d.SetStage(0, global.Sim.Stages[0]) {
+	d := NewDomain(Global.Sim.Regions[0])
+	if !d.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("SetStage failed\n")
 	}
 
@@ -91,12 +92,12 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 			utl.Pfgreen(". . . checking displacements . . .\n")
 		}
 		for nid, usg := range cmp.Disp {
-			ix := d.Vid2node[nid].dofs[0].Eq
-			iy := d.Vid2node[nid].dofs[1].Eq
+			ix := d.Vid2node[nid].Dofs[0].Eq
+			iy := d.Vid2node[nid].Dofs[1].Eq
 			utl.CheckAnaNum(tst, "ux", tolu, d.Sol.Y[ix], usg[0], verbose)
 			utl.CheckAnaNum(tst, "uy", tolu, d.Sol.Y[iy], usg[1], verbose)
 			if len(usg) == 3 {
-				iz := d.Vid2node[nid].dofs[2].Eq
+				iz := d.Vid2node[nid].Dofs[2].Eq
 				utl.CheckAnaNum(tst, "uz", tolu, d.Sol.Y[iz], usg[2], verbose)
 			}
 		}
@@ -129,6 +130,24 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 						}
 					}
 				}
+			}
+		}
+	}
+}
+
+func TestConsistentTangentK(tst *testing.T, d *Domain, ele Elem, tol float64, verb bool) {
+	derivfcn := num.DerivCen
+	if e, ok := ele.(*ElemP); ok {
+		if !e.AddToKb(d.Kb, d.Sol, false) {
+			tst.Errorf("K computation failed\n")
+			return
+		}
+		for i, I := range e.Pmap {
+			for j, J := range e.Pmap {
+				dnum := derivfcn(func(x float64, args ...interface{}) (res float64) {
+					return d.Fb[I]
+				}, d.Sol.Y[J])
+				utl.AnaNum(utl.Sf("K%d%d", i, j), tol, e.K[i][j], dnum, verb)
 			}
 		}
 	}

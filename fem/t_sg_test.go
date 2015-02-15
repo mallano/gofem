@@ -57,14 +57,14 @@ func Test_sg52a(tst *testing.T) {
 	defer End()
 
 	// domain
-	dom := NewDomain(global.Sim.Regions[0])
+	dom := NewDomain(Global.Sim.Regions[0])
 	if dom == nil {
 		tst.Errorf("test failed\n")
 		return
 	}
 
 	// set stage
-	if !dom.SetStage(0, global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -75,7 +75,7 @@ func Test_sg52a(tst *testing.T) {
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.dofs), 2)
+		utl.IntAssert(len(nod.Dofs), 2)
 	}
 
 	// check equations
@@ -445,8 +445,8 @@ func Test_sg111(tst *testing.T) {
 		utl.Pfyel("sum = %v\n", sum)
 
 		// allocate domain
-		d := NewDomain(global.Sim.Regions[0])
-		if !d.SetStage(0, global.Sim.Stages[0]) {
+		d := NewDomain(Global.Sim.Regions[0])
+		if !d.SetStage(0, Global.Sim.Stages[0]) {
 			tst.Errorf("SetStage failed\n")
 			return
 		}
@@ -464,7 +464,7 @@ func Test_sg111(tst *testing.T) {
 				return
 			}
 			nod := d.Nodes[nidx]
-			eq := nod.dofs[didx].Eq
+			eq := nod.Dofs[didx].Eq
 			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
 		}
@@ -527,8 +527,8 @@ func Test_sg114(tst *testing.T) {
 		utl.Pfyel("sum = %v\n", sum)
 
 		// allocate domain
-		d := NewDomain(global.Sim.Regions[0])
-		if !d.SetStage(0, global.Sim.Stages[0]) {
+		d := NewDomain(Global.Sim.Regions[0])
+		if !d.SetStage(0, Global.Sim.Stages[0]) {
 			tst.Errorf("SetStage failed\n")
 			return
 		}
@@ -546,7 +546,7 @@ func Test_sg114(tst *testing.T) {
 				return
 			}
 			nod := d.Nodes[nidx]
-			eq := nod.dofs[didx].Eq
+			eq := nod.Dofs[didx].Eq
 			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
 		}
@@ -618,8 +618,8 @@ func Test_sg1121(tst *testing.T) {
 		sum := ReadSum()
 
 		// allocate domain
-		d := NewDomain(global.Sim.Regions[0])
-		if !d.SetStage(0, global.Sim.Stages[0]) {
+		d := NewDomain(Global.Sim.Regions[0])
+		if !d.SetStage(0, Global.Sim.Stages[0]) {
 			tst.Errorf("SetStage failed\n")
 			return
 		}
@@ -637,7 +637,7 @@ func Test_sg1121(tst *testing.T) {
 				return
 			}
 			nod := d.Nodes[nidx]
-			eq := nod.dofs[didx].Eq
+			eq := nod.Dofs[didx].Eq
 			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
 		}

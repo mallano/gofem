@@ -210,6 +210,13 @@ type TimeControl struct {
 	DtoFunc fun.Func // output time step function
 }
 
+// HydroStData holds data to set hydrostatic initial state
+type HydroStData struct {
+	GamW   float64 `json:"gamw"`   // unit weight of water to use in HydroSt
+	Zwater float64 `json:"zwater"` // water elevation to set ponding or unsaturated condition
+	Unsat  bool    `json:"unsat"`  // consider unsaturated state with zwater < zmax
+}
+
 // Stage holds stage data
 type Stage struct {
 
@@ -221,8 +228,8 @@ type Stage struct {
 	Load       string `json:"load"`       // load stage data (filename) from binary file
 
 	// specific problems data
-	HydroStatic bool  `json:"hydrostatic"` // start with hydrostatic condition
-	SeepFaces   []int `json:"seepfaces"`   // face tags corresponding to seepage faces
+	HydroSt   *HydroStData `json:"hydrost"`   // hydrostatic data
+	SeepFaces []int        `json:"seepfaces"` // face tags corresponding to seepage faces
 
 	// conditions
 	EleConds []*EleCond `json:"eleconds"` // element conditions. ex: gravity or beam distributed loads
@@ -340,7 +347,7 @@ func ReadSim(simfilepath string, erasefiles bool) *Simulation {
 	}
 
 	// log
-	log.Printf("sim: fn=%s desc=%s nfunctions=%d nregions=%d nstages=%d linsol=%s itol=%g\n", simfilepath, o.Data.Desc, len(o.Functions), len(o.Regions), len(o.Stages), o.LinSol.Name, o.Solver.Itol)
+	log.Printf("sim: fn=%s desc=%q nfunctions=%d nregions=%d nstages=%d linsol=%s itol=%g\n", simfilepath, o.Data.Desc, len(o.Functions), len(o.Regions), len(o.Stages), o.LinSol.Name, o.Solver.Itol)
 	return &o
 }
 

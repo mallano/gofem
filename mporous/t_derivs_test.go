@@ -13,7 +13,7 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-func Test_mdl01(tst *testing.T) {
+func Test_derivs01(tst *testing.T) {
 
 	prevTs := utl.Tsilent
 	defer func() {
@@ -26,10 +26,10 @@ func Test_mdl01(tst *testing.T) {
 	doplot := false
 	//doplot := true
 	//utl.Tsilent = false
-	utl.TTitle("mdl01")
+	utl.TTitle("derivs01")
 
 	// info
-	simfnk := "mdl01"
+	simfnk := "derivs01"
 	matname := "mat1"
 	getnew := false
 	example := true
@@ -59,72 +59,44 @@ func Test_mdl01(tst *testing.T) {
 		tst.Errorf("mporous.Init failed: %v\n", err)
 		return
 	}
-	//mdl.MEtrial = false
-	mdl.ShowR = true
+	//mdl.Ncns = true
+	//mdl.Ncns2 = true
 
-	// initial and final values
-	pc0 := -5.0
-	sl0 := 1.0
+	// path
+	pc0 := 0.0
 	pcf := 20.0
+	np := 5
+	//P := []float64{10, 5, 20, 0}
+	P := []float64{5}
+	pth := GetPathCycle(pc0, P, np)
+	utl.Pforan("pth = %v\n", pth)
 
-	// plot lrm
+	// driver
+	var drv Driver
+	err = drv.Init(mdl)
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+		return
+	}
+	err = drv.Run(pth)
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+		return
+	}
+
+	// plot
 	if doplot {
 		npts := 41
 		plt.Reset()
-		mreten.Plot(mdl.Lrm, pc0, sl0, pcf, npts, "'b.-'", "'r+-'", lrm_name)
-	}
-
-	// state A
-	pl0 := -5.0
-	pg, divus := 0.0, 0.0
-	A, err := mdl.NewState(pl0, pg, divus)
-	if err != nil {
-		tst.Errorf("mporous.NewState failed: %v\n", err)
-		return
-	}
-
-	// state B
-	pl0 = -10.0
-	B, err := mdl.NewState(pl0, pg, divus)
-	if err != nil {
-		tst.Errorf("mporous.NewState failed: %v\n", err)
-		return
-	}
-
-	// plot A and B points
-	if doplot {
-		pcA := A.Pg - A.Pl
-		pcB := B.Pg - B.Pl
-		plt.PlotOne(pcA, A.Sl, "'gs', clip_on=0, label='A', ms=10")
-		plt.PlotOne(pcB, B.Sl, "'ks', clip_on=0, label='B'")
-	}
-
-	// incremental update
-	//Δpl := -20.0 // << problems with this one and VG
-	Δpl := -5.0
-	n := 23
-	iwet := 10
-	Pc := make([]float64, n)
-	Sl := make([]float64, n)
-	Pc[0] = A.Pg - A.Pl
-	Sl[0] = A.Sl
-	for i := 1; i < n; i++ {
-		if i > iwet {
-			Δpl = -Δpl
-			iwet = n
+		mreten.Plot(mdl.Lrm, pc0, 1.0, pcf, npts, "'b.-'", "'r+-'", lrm_name)
+		n := len(drv.Res)
+		Pc := make([]float64, n)
+		Sl := make([]float64, n)
+		for i, s := range drv.Res {
+			Pc[i] = s.Pg - s.Pl
+			Sl[i] = s.Sl
 		}
-		err = mdl.Update(A, Δpl, pg, divus)
-		if err != nil {
-			tst.Errorf("test failed: %v\n", err)
-			return
-		}
-		Pc[i] = A.Pg - A.Pl
-		Sl[i] = A.Sl
-	}
-
-	// show graph
-	if doplot {
-		plt.Plot(Pc, Sl, "'ro-', clip_on=0, label='update'")
+		plt.Plot(Pc, Sl, "'ko--', clip_on=0")
 		mreten.PlotEnd(true)
 	}
 }

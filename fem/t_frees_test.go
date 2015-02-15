@@ -34,14 +34,14 @@ func Test_frees01(tst *testing.T) {
 	defer End()
 
 	// domain
-	dom := NewDomain(global.Sim.Regions[0])
+	dom := NewDomain(Global.Sim.Regions[0])
 	if dom == nil {
 		tst.Errorf("test failed\n")
 		return
 	}
 
 	// set stage
-	if !dom.SetStage(0, global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -56,11 +56,11 @@ func Test_frees01(tst *testing.T) {
 	// check dofs
 	var seepeqs []int
 	for _, nod := range dom.Nodes {
-		if seepverts[nod.vert.Id] {
-			utl.IntAssert(len(nod.dofs), 2)
-			seepeqs = append(seepeqs, nod.dofs[1].Eq)
+		if seepverts[nod.Vert.Id] {
+			utl.IntAssert(len(nod.Dofs), 2)
+			seepeqs = append(seepeqs, nod.Dofs[1].Eq)
 		} else {
-			utl.IntAssert(len(nod.dofs), 1)
+			utl.IntAssert(len(nod.Dofs), 1)
 		}
 	}
 	sort.Ints(seepeqs)

@@ -91,7 +91,7 @@ func init() {
 		o.Nu = o.Ndim * o.Cell.Shp.Nverts
 
 		// parameters
-		mat := global.Mdb.Get(edat.Mat)
+		mat := Global.Mdb.Get(edat.Mat)
 		if LogErrCond(mat == nil, "Mdb.Get failed\n") {
 			return nil
 		}
@@ -153,7 +153,7 @@ func (o *Rod) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 func (o *Rod) InterpStarVars(sol *Solution) (ok bool) {
 
 	// skip steady cases
-	if global.Sim.Data.Steady {
+	if Global.Sim.Data.Steady {
 		return true
 	}
 
@@ -295,7 +295,7 @@ func (o *Rod) ipvars(idx int, sol *Solution) (ok bool) {
 	}
 
 	// skip if steady (this must be after CalcAtIp, because callers will need S and G)
-	if global.Sim.Data.Steady {
+	if Global.Sim.Data.Steady {
 		return true
 	}
 

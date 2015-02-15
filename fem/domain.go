@@ -96,12 +96,12 @@ func NewDomain(reg *inp.Region) *Domain {
 	if LogErrCond(dom.Msh == nil, "ERROR: ReadMsh failed\n") {
 		return nil
 	}
-	if global.Distr {
-		if LogErrCond(global.Nproc != len(dom.Msh.Part2cells), "number of processors must be equal to the number of partitions defined in mesh file. %d != %d", global.Nproc, len(dom.Msh.Part2cells)) {
+	if Global.Distr {
+		if LogErrCond(Global.Nproc != len(dom.Msh.Part2cells), "number of processors must be equal to the number of partitions defined in mesh file. %d != %d", Global.Nproc, len(dom.Msh.Part2cells)) {
 			return nil
 		}
 	}
-	dom.LinSol = la.GetSolver(global.Sim.LinSol.Name)
+	dom.LinSol = la.GetSolver(Global.Sim.LinSol.Name)
 	return &dom
 }
 
@@ -149,6 +149,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 
 		// get element data and information structure
 		edat := o.Reg.Etag2data(c.Tag)
+		if LogErrCond(edat == nil, "cannot get element's data with etag=%d", c.Tag) {
+			return
+		}
 		if edat.Inact {
 			continue
 		}
@@ -195,8 +198,8 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		}
 
 		// allocate element
-		mycell := c.Part == global.Rank // cell belongs to this processor
-		if !global.Distr {
+		mycell := c.Part == Global.Rank // cell belongs to this processor
+		if !Global.Distr {
 			mycell = true // not distributed simulation => this processor has all cells
 		}
 		if mycell {
@@ -212,7 +215,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			// give equation numbers to new element
 			eqs := make([][]int, len(c.Verts))
 			for j, v := range c.Verts {
-				for _, dof := range o.Vid2node[v].dofs {
+				for _, dof := range o.Vid2node[v].Dofs {
 					eqs[j] = append(eqs[j], dof.Eq)
 				}
 			}
@@ -246,7 +249,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			e := o.Cid2elem[c.Id]
 			if e != nil { // set conditions only for this processor's / active element
 				for j, key := range ec.Keys {
-					fcn := global.Sim.Functions.Get(ec.Funcs[j])
+					fcn := Global.Sim.Functions.Get(ec.Funcs[j])
 					if LogErrCond(fcn == nil, "Functions.Get failed\n") {
 						return
 					}
@@ -273,7 +276,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 				enodes = append(enodes, o.Vid2node[v])
 			}
 			for j, key := range fc.Keys {
-				fcn := global.Sim.Functions.Get(fc.Funcs[j])
+				fcn := Global.Sim.Functions.Get(fc.Funcs[j])
 				if LogErrCond(fcn == nil, "Functions.Get failed\n") {
 					return
 				}
@@ -303,7 +306,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			if o.Vid2node[v.Id] != nil { // set BCs only for active nodes
 				n := o.Vid2node[v.Id]
 				for j, key := range nc.Keys {
-					fcn := global.Sim.Functions.Get(nc.Funcs[j])
+					fcn := Global.Sim.Functions.Get(nc.Funcs[j])
 					if LogErrCond(fcn == nil, "Functions.Get failed\n") {
 						return
 					}
@@ -323,8 +326,8 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	o.T1eqs = make([]int, 0)
 	o.T2eqs = make([]int, 0)
 	for _, nod := range o.Nodes {
-		for _, dof := range nod.dofs {
-			switch o.Dof2Tnum[dof.Ukey] {
+		for _, dof := range nod.Dofs {
+			switch o.Dof2Tnum[dof.Key] {
 			case 1:
 				o.T1eqs = append(o.T1eqs, dof.Eq)
 			case 2:
@@ -353,13 +356,16 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	o.Sol.Y = make([]float64, o.Ny)
 	o.Sol.ΔY = make([]float64, o.Ny)
 	o.Sol.L = make([]float64, o.Nlam)
-	if !global.Sim.Data.Steady {
+	if !Global.Sim.Data.Steady {
 		o.Sol.Dydt = make([]float64, o.Ny)
 		o.Sol.D2ydt2 = make([]float64, o.Ny)
 		o.Sol.Psi = make([]float64, o.Ny)
 		o.Sol.Zet = make([]float64, o.Ny)
 		o.Sol.Chi = make([]float64, o.Ny)
 	}
+
+	// set initial values
+	o.SetHydroSt(stg)
 
 	// initialise internal variables
 	for _, e := range o.ElemIntvars {
@@ -399,12 +405,12 @@ func (o *Domain) add_element_to_subsets(ele Elem) {
 func (o *Domain) star_vars(Δt float64) (err error) {
 
 	// skip if steady simulation
-	if global.Sim.Data.Steady {
+	if Global.Sim.Data.Steady {
 		return
 	}
 
 	// recompute coefficients
-	dc := global.DynCoefs
+	dc := Global.DynCoefs
 	err = dc.CalcBoth(Δt)
 	if err != nil {
 		return
@@ -438,7 +444,7 @@ func (o *Domain) fix_inact_flags(eids_or_tags []int, deactivate bool) (ok bool) 
 			tag = cell.Tag
 		}
 		edat := o.Reg.Etag2data(tag)
-		if LogErrCond(edat == nil, "Etag2data failed\n") {
+		if LogErrCond(edat == nil, "cannot get element's data with etag=%d", tag) {
 			return
 		}
 		edat.Inact = deactivate

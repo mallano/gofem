@@ -30,11 +30,11 @@ func Test_fileio01(tst *testing.T) {
 	defer End()
 
 	// domain A
-	domA := NewDomain(global.Sim.Regions[0])
+	domA := NewDomain(Global.Sim.Regions[0])
 	if domA == nil {
 		tst.Errorf("test failed\n")
 	}
-	if !domA.SetStage(0, global.Sim.Stages[0]) {
+	if !domA.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("test failed\n")
 	}
 	for i, _ := range domA.Sol.Y {
@@ -51,11 +51,11 @@ func Test_fileio01(tst *testing.T) {
 	utl.Pfblue2("file %v written\n", out_nod_path(tidx))
 
 	// domain B
-	domB := NewDomain(global.Sim.Regions[0])
+	domB := NewDomain(Global.Sim.Regions[0])
 	if domB == nil {
 		tst.Errorf("test failed\n")
 	}
-	if !domB.SetStage(0, global.Sim.Stages[0]) {
+	if !domB.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("test failed")
 	}
 	utl.Pfpink("domB.Sol.Y (before) = %v\n", domB.Sol.Y)

@@ -124,7 +124,7 @@ func init() {
 			o.UseB = utl.Atob(s_useB)
 		}
 
-		if global.Sim.Data.Axisym {
+		if Global.Sim.Data.Axisym {
 			o.UseB = true
 		}
 
@@ -132,7 +132,7 @@ func init() {
 		o.Thickness = 1.0
 		if s_thick, found := utl.Keycode(edat.Extra, "thick"); found {
 			o.Thickness = utl.Atof(s_thick)
-			if LogErrCond(!global.Sim.Data.Pstress, "cannot specify 'thick' in element if Pstress=false in Global Data") {
+			if LogErrCond(!Global.Sim.Data.Pstress, "cannot specify 'thick' in element if Pstress=false in Global Data") {
 				return nil
 			}
 		}
@@ -164,18 +164,18 @@ func init() {
 
 		// material model name
 		matname := edat.Mat
-		matdata := global.Mdb.Get(matname)
+		matdata := Global.Mdb.Get(matname)
 		if LogErrCond(matdata == nil, "Mdb.Get failed\n") {
 			return nil
 		}
 		mdlname := matdata.Model
 
 		// model and its specialisations
-		o.Model = msolid.GetModel(global.Sim.Data.FnameKey, matname, mdlname, false)
+		o.Model = msolid.GetModel(Global.Sim.Data.FnameKey, matname, mdlname, false)
 		if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
 			return nil
 		}
-		err = o.Model.Init(o.Ndim, global.Sim.Data.Pstress, matdata.Prms)
+		err = o.Model.Init(o.Ndim, Global.Sim.Data.Pstress, matdata.Prms)
 		if LogErr(err, "Model.Init failed") {
 			return nil
 		}
@@ -262,7 +262,7 @@ func (o *ElemU) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok
 func (o *ElemU) InterpStarVars(sol *Solution) (ok bool) {
 
 	// skip steady cases
-	if global.Sim.Data.Steady {
+	if Global.Sim.Data.Steady {
 		return true
 	}
 
@@ -299,7 +299,7 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	}
 
 	// for each integration point
-	dc := global.DynCoefs
+	dc := Global.DynCoefs
 	nverts := o.Cell.Shp.Nverts
 	for idx, ip := range o.IpsElem {
 
@@ -314,11 +314,11 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		// add internal forces to fb
 		if o.UseB {
 			radius := 1.0
-			if global.Sim.Data.Axisym {
+			if Global.Sim.Data.Axisym {
 				radius = o.Cell.Shp.AxisymGetRadius(o.X)
 				coef *= radius
 			}
-			IpBmatrix(o.B, o.Ndim, nverts, G, global.Sim.Data.Axisym, radius, S)
+			IpBmatrix(o.B, o.Ndim, nverts, G, Global.Sim.Data.Axisym, radius, S)
 			la.MatTrVecMulAdd(o.fi, coef, o.B, o.States[idx].Sig) // fi += coef * tr(B) * σ
 		} else {
 			for m := 0; m < nverts; m++ {
@@ -332,7 +332,7 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		}
 
 		// dynamic term
-		if !global.Sim.Data.Steady {
+		if !Global.Sim.Data.Steady {
 			for m := 0; m < nverts; m++ {
 				for i := 0; i < o.Ndim; i++ {
 					r := o.Umap[i+m*o.Ndim]
@@ -360,7 +360,7 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 	la.MatFill(o.K, 0)
 
 	// for each integration point
-	dc := global.DynCoefs
+	dc := Global.DynCoefs
 	nverts := o.Cell.Shp.Nverts
 	for idx, ip := range o.IpsElem {
 
@@ -388,18 +388,18 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 		// add contribution to consistent tangent matrix
 		if o.UseB {
 			radius := 1.0
-			if global.Sim.Data.Axisym {
+			if Global.Sim.Data.Axisym {
 				radius = o.Cell.Shp.AxisymGetRadius(o.X)
 				coef *= radius
 			}
-			IpBmatrix(o.B, o.Ndim, nverts, G, global.Sim.Data.Axisym, radius, S)
+			IpBmatrix(o.B, o.Ndim, nverts, G, Global.Sim.Data.Axisym, radius, S)
 			la.MatTrMulAdd3(o.K, coef, o.B, o.D, o.B) // K += coef * tr(B) * D * B
 		} else {
 			IpAddToKt(o.K, nverts, o.Ndim, coef, G, o.D)
 		}
 
 		// dynamic term
-		if !global.Sim.Data.Steady {
+		if !Global.Sim.Data.Steady {
 			for m := 0; m < nverts; m++ {
 				for i := 0; i < o.Ndim; i++ {
 					r := i + m*o.Ndim
@@ -438,10 +438,10 @@ func (o *ElemU) Update(sol *Solution) (ok bool) {
 		// compute strains
 		if o.UseB {
 			radius := 1.0
-			if global.Sim.Data.Axisym {
+			if Global.Sim.Data.Axisym {
 				radius = o.Cell.Shp.AxisymGetRadius(o.X)
 			}
-			IpBmatrix(o.B, o.Ndim, nverts, G, global.Sim.Data.Axisym, radius, S)
+			IpBmatrix(o.B, o.Ndim, nverts, G, Global.Sim.Data.Axisym, radius, S)
 			IpStrainsAndIncB(o.ε, o.Δε, 2*o.Ndim, o.Nu, o.B, sol.Y, sol.ΔY, o.Umap)
 		} else {
 			IpStrainsAndInc(o.ε, o.Δε, nverts, o.Ndim, sol.Y, sol.ΔY, o.Umap, G)
@@ -513,7 +513,7 @@ func (o *ElemU) ipvars(idx int, sol *Solution) (ok bool) {
 	}
 
 	// skip if steady (this must be after CalcAtIp, because callers will need S and G)
-	if global.Sim.Data.Steady {
+	if Global.Sim.Data.Steady {
 		return true
 	}
 
@@ -560,7 +560,7 @@ func (o *ElemU) add_surfloads_to_rhs(fb []float64, sol *Solution) (ok bool) {
 				coef := ip.W * load.Fcn.F(sol.T, nil) * o.Thickness
 				nvec := o.Cell.Shp.Fnvec
 				Sf := o.Cell.Shp.Sf
-				if global.Sim.Data.Axisym && load.Key == "aqn" {
+				if Global.Sim.Data.Axisym && load.Key == "aqn" {
 					coef *= o.Cell.Shp.AxisymGetRadiusF(o.X, load.IdxFace)
 				}
 				for j, m := range o.Cell.Shp.FaceLocalV[load.IdxFace] {
