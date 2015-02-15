@@ -64,7 +64,10 @@ type Mesh struct {
 	Cells []*Cell // cells
 
 	// derived
-	Ndim int // space dimension
+	Ndim       int     // space dimension
+	Xmin, Xmax float64 // min and max x-coordinate
+	Ymin, Ymax float64 // min and max x-coordinate
+	Zmin, Zmax float64 // min and max x-coordinate
 
 	// derived: maps
 	VertTag2verts map[int][]*Vert      // vertex tag => set of vertices
@@ -93,8 +96,24 @@ func ReadMsh(fn string) *Mesh {
 		return nil
 	}
 
+	// check
+	if LogErrCond(len(o.Verts) < 2, "msh: mesh must have at least 2 vertices and 1 cell") {
+		return nil
+	}
+	if LogErrCond(len(o.Cells) < 1, "msh: mesh must have at least 2 vertices and 1 cell") {
+		return nil
+	}
+
 	// vertex related derived data
 	o.Ndim = 2
+	o.Xmin = o.Verts[0].C[0]
+	o.Ymin = o.Verts[0].C[1]
+	if len(o.Verts[0].C) > 2 {
+		o.Zmin = o.Verts[0].C[2]
+	}
+	o.Xmax = o.Xmin
+	o.Ymax = o.Ymin
+	o.Zmax = o.Zmin
 	o.VertTag2verts = make(map[int][]*Vert)
 	for i, v := range o.Verts {
 
@@ -118,6 +137,16 @@ func ReadMsh(fn string) *Mesh {
 		if v.Tag < 0 {
 			verts := o.VertTag2verts[v.Tag]
 			o.VertTag2verts[v.Tag] = append(verts, v)
+		}
+
+		// limits
+		o.Xmin = min(o.Xmin, v.C[0])
+		o.Xmax = max(o.Xmax, v.C[0])
+		o.Ymin = min(o.Ymin, v.C[1])
+		o.Ymax = max(o.Ymax, v.C[1])
+		if nd > 2 {
+			o.Zmin = min(o.Zmin, v.C[2])
+			o.Zmax = max(o.Zmax, v.C[2])
 		}
 	}
 

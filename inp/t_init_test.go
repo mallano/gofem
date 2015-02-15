@@ -37,6 +37,11 @@ func Test_msh01(tst *testing.T) {
 		return
 	}
 	utl.Pforan("%v\n", msh)
+	utl.Pfcyan("lims = [%g, %g, %g, %g, %g, %g]\n", msh.Xmin, msh.Xmax, msh.Ymin, msh.Ymax, msh.Zmin, msh.Zmax)
+	utl.CheckScalar(tst, "xmin", 1e-17, msh.Xmin, 10)
+	utl.CheckScalar(tst, "xmax", 1e-17, msh.Xmax, 14)
+	utl.CheckScalar(tst, "ymin", 1e-17, msh.Ymin, -1)
+	utl.CheckScalar(tst, "ymax", 1e-17, msh.Ymax, 1)
 }
 
 func Test_sim01(tst *testing.T) {
