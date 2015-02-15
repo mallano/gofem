@@ -56,11 +56,11 @@ func Test_frees01(tst *testing.T) {
 	// check dofs
 	var seepeqs []int
 	for _, nod := range dom.Nodes {
-		if seepverts[nod.vert.Id] {
-			utl.IntAssert(len(nod.dofs), 2)
-			seepeqs = append(seepeqs, nod.dofs[1].Eq)
+		if seepverts[nod.Vert.Id] {
+			utl.IntAssert(len(nod.Dofs), 2)
+			seepeqs = append(seepeqs, nod.Dofs[1].Eq)
 		} else {
-			utl.IntAssert(len(nod.dofs), 1)
+			utl.IntAssert(len(nod.Dofs), 1)
 		}
 	}
 	sort.Ints(seepeqs)

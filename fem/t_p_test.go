@@ -86,8 +86,8 @@ func Test_p01a(tst *testing.T) {
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.dofs), 1)
-		utl.StrAssert(nod.dofs[0].Key, "pl")
+		utl.IntAssert(len(nod.Dofs), 1)
+		utl.StrAssert(nod.Dofs[0].Key, "pl")
 	}
 
 	// check equations
@@ -133,8 +133,8 @@ func Test_p01a(tst *testing.T) {
 	// initial values @ nodes
 	utl.Pforan("initial values @ nodes\n")
 	for _, nod := range dom.Nodes {
-		z := nod.vert.C[1]
-		eq := nod.dofs[0].Eq
+		z := nod.Vert.C[1]
+		eq := nod.Dofs[0].Eq
 		utl.CheckScalar(tst, utl.Sf("pl @ %g", z), 1e-17, dom.Sol.Y[eq], 100-10*z)
 	}
 

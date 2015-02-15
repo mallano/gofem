@@ -92,12 +92,12 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 			utl.Pfgreen(". . . checking displacements . . .\n")
 		}
 		for nid, usg := range cmp.Disp {
-			ix := d.Vid2node[nid].dofs[0].Eq
-			iy := d.Vid2node[nid].dofs[1].Eq
+			ix := d.Vid2node[nid].Dofs[0].Eq
+			iy := d.Vid2node[nid].Dofs[1].Eq
 			utl.CheckAnaNum(tst, "ux", tolu, d.Sol.Y[ix], usg[0], verbose)
 			utl.CheckAnaNum(tst, "uy", tolu, d.Sol.Y[iy], usg[1], verbose)
 			if len(usg) == 3 {
-				iz := d.Vid2node[nid].dofs[2].Eq
+				iz := d.Vid2node[nid].Dofs[2].Eq
 				utl.CheckAnaNum(tst, "uz", tolu, d.Sol.Y[iz], usg[2], verbose)
 			}
 		}

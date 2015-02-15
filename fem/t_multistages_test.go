@@ -12,8 +12,8 @@ import (
 
 func get_nids_eqs(dom *Domain) (nids, eqs []int) {
 	for _, nod := range dom.Nodes {
-		nids = append(nids, nod.vert.Id)
-		for _, dof := range nod.dofs {
+		nids = append(nids, nod.Vert.Id)
+		for _, dof := range nod.Dofs {
 			eqs = append(eqs, dof.Eq)
 		}
 	}

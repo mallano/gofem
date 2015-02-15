@@ -74,7 +74,7 @@ func Test_spo751a(tst *testing.T) {
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.dofs), 2)
+		utl.IntAssert(len(nod.Dofs), 2)
 	}
 
 	// check equations

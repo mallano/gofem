@@ -24,8 +24,8 @@ func (o *Dof) String() string {
 
 // Node holds node dofs information
 type Node struct {
-	dofs []*Dof    // degrees-of-freedom == solution variables
-	vert *inp.Vert // pointer to Vertex
+	Dofs []*Dof    // degrees-of-freedom == solution variables
+	Vert *inp.Vert // pointer to Vertex
 }
 
 // NewNode allocates a new Node
@@ -36,8 +36,8 @@ func NewNode(v *inp.Vert) *Node {
 // String returns the string representation of this node
 func (o *Node) String() string {
 	l := "{ "
-	l += utl.Sf(" \"Id\" :  %d ", o.vert.Id)
-	for _, dof := range o.dofs {
+	l += utl.Sf(" \"Id\" :  %d ", o.Vert.Id)
+	for _, dof := range o.Dofs {
 		l += dof.String()
 	}
 	l += " } "
@@ -50,14 +50,14 @@ func (o *Node) String() string {
 func (o *Node) AddDofAndEq(ukey string, eqnum int) (nexteq int) {
 
 	// check if ukey exists already
-	for _, dof := range o.dofs {
+	for _, dof := range o.Dofs {
 		if ukey == dof.Key {
 			return eqnum
 		}
 	}
 
 	// add new Dof
-	o.dofs = append(o.dofs, &Dof{ukey, eqnum})
+	o.Dofs = append(o.Dofs, &Dof{ukey, eqnum})
 	return eqnum + 1
 }
 
@@ -69,7 +69,7 @@ func (o *Node) SetEq(ukey string, eqNumber int) {
 // GetDof returns the Dof structure for given Dof name (ukey)
 //  Note: returns nil if not found
 func (o *Node) GetDof(ukey string) *Dof {
-	for _, dof := range o.dofs {
+	for _, dof := range o.Dofs {
 		if dof.Key == ukey {
 			return dof
 		}
@@ -80,7 +80,7 @@ func (o *Node) GetDof(ukey string) *Dof {
 // GetEq returns the equation number for given Dof name (ukey)
 //  Note: returns -1 if not found
 func (o *Node) GetEq(ukey string) (eqNumber int) {
-	for _, dof := range o.dofs {
+	for _, dof := range o.Dofs {
 		if dof.Key == ukey {
 			return dof.Eq
 		}

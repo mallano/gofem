@@ -43,7 +43,7 @@ func Test_beam01(tst *testing.T) {
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.dofs), 3)
+		utl.IntAssert(len(nod.Dofs), 3)
 	}
 
 	// check equations

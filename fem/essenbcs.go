@@ -141,9 +141,9 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 
 	// rigid element
 	if key == "rigid" {
-		a := nodes[0].dofs
+		a := nodes[0].Dofs
 		for i := 1; i < len(nodes); i++ {
-			for j, b := range nodes[i].dofs {
+			for j, b := range nodes[i].Dofs {
 				o.add(key, []int{a[j].Eq, b.Eq}, []float64{1, -1}, &fun.Zero)
 			}
 		}
@@ -169,8 +169,8 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 		for _, nod := range nodes {
 
 			// find existent constraints and deactivate them
-			eqx := nod.dofs[0].Eq
-			eqy := nod.dofs[1].Eq
+			eqx := nod.Dofs[0].Eq
+			eqy := nod.Dofs[1].Eq
 			for _, eq := range []int{eqx, eqy} {
 				for _, idx := range o.Eq2idx[eq] {
 					c := o.BcsTmp[idx]
@@ -206,9 +206,9 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 			if d == nil {
 				continue // node doesn't have key. ex: pl in qua8/qua4 elements
 			}
-			z := nod.vert.C[1] // 2D
+			z := nod.Vert.C[1] // 2D
 			if o.Ndim == 3 {
-				z = nod.vert.C[2] // 3D
+				z = nod.Vert.C[2] // 3D
 			}
 			pl := fun.Add{A: γl, Fa: fcn, B: -γl, Fb: &fun.Cte{C: z}}
 

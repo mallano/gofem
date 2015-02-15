@@ -215,7 +215,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			// give equation numbers to new element
 			eqs := make([][]int, len(c.Verts))
 			for j, v := range c.Verts {
-				for _, dof := range o.Vid2node[v].dofs {
+				for _, dof := range o.Vid2node[v].Dofs {
 					eqs[j] = append(eqs[j], dof.Eq)
 				}
 			}
@@ -326,7 +326,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	o.T1eqs = make([]int, 0)
 	o.T2eqs = make([]int, 0)
 	for _, nod := range o.Nodes {
-		for _, dof := range nod.dofs {
+		for _, dof := range nod.Dofs {
 			switch o.Dof2Tnum[dof.Key] {
 			case 1:
 				o.T1eqs = append(o.T1eqs, dof.Eq)

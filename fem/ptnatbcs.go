@@ -47,12 +47,12 @@ func (o *PtNaturalBcs) Set(key string, nod *Node, fcn fun.Func, extra string) (s
 	if idx, ok := o.Eq2idx[d.Eq]; ok {
 		o.Bcs[idx].Key = "f" + key
 		o.Bcs[idx].Eq = d.Eq
-		o.Bcs[idx].X = nod.vert.C
+		o.Bcs[idx].X = nod.Vert.C
 		o.Bcs[idx].Fcn = fcn
 		o.Bcs[idx].Extra = extra
 	} else {
 		o.Eq2idx[d.Eq] = len(o.Bcs)
-		o.Bcs = append(o.Bcs, &PtNaturalBc{"f" + key, d.Eq, nod.vert.C, fcn, extra})
+		o.Bcs = append(o.Bcs, &PtNaturalBc{"f" + key, d.Eq, nod.Vert.C, fcn, extra})
 	}
 	return true
 }

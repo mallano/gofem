@@ -75,7 +75,7 @@ func Test_sg52a(tst *testing.T) {
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.dofs), 2)
+		utl.IntAssert(len(nod.Dofs), 2)
 	}
 
 	// check equations
@@ -464,7 +464,7 @@ func Test_sg111(tst *testing.T) {
 				return
 			}
 			nod := d.Nodes[nidx]
-			eq := nod.dofs[didx].Eq
+			eq := nod.Dofs[didx].Eq
 			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
 		}
@@ -546,7 +546,7 @@ func Test_sg114(tst *testing.T) {
 				return
 			}
 			nod := d.Nodes[nidx]
-			eq := nod.dofs[didx].Eq
+			eq := nod.Dofs[didx].Eq
 			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
 		}
@@ -637,7 +637,7 @@ func Test_sg1121(tst *testing.T) {
 				return
 			}
 			nod := d.Nodes[nidx]
-			eq := nod.dofs[didx].Eq
+			eq := nod.Dofs[didx].Eq
 			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
 		}

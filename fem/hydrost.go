@@ -31,7 +31,7 @@ func (o *Domain) SetHydroSt(stg *inp.Stage) {
 
 	// set Sol
 	for _, n := range o.Nodes {
-		z := n.vert.C[ndim-1]
+		z := n.Vert.C[ndim-1]
 		dof := n.GetDof("pl")
 		if dof != nil {
 			pl := (zwater - z) * hst.GamW
