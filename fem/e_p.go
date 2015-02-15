@@ -136,13 +136,13 @@ func init() {
 
 		// materials
 		matname := edat.Mat
-		cndmat, lrmmat, pormat, err := global.Mdb.GroupGet3(matname, "c", "l", "p")
+		cndmat, lrmmat, pormat, err := Global.Mdb.GroupGet3(matname, "c", "l", "p")
 		if LogErr(err, "Mdb.GroupGet3 failed") {
 			return nil
 		}
 
 		// models
-		simfnk := global.Sim.Data.FnameKey
+		simfnk := Global.Sim.Data.FnameKey
 		getnew := false
 		cnd := mconduct.GetModel(simfnk, cndmat.Name, cndmat.Model, getnew)
 		if LogErrCond(cnd == nil, "cannot allocate conductivity models with name=%q", cndmat.Model) {
@@ -258,7 +258,7 @@ func (o *ElemP) InterpStarVars(sol *Solution) (ok bool) {
 func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
-	β1 := global.DynCoefs.β1
+	β1 := Global.DynCoefs.β1
 	nverts := o.Cell.Shp.Nverts
 	var coef, plt, klr, RhoL, Cpl float64
 	var err error
@@ -311,7 +311,7 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// for each integration point
 	Cl := o.Mdl.Cl
-	β1 := global.DynCoefs.β1
+	β1 := Global.DynCoefs.β1
 	nverts := o.Cell.Shp.Nverts
 	var coef, plt, klr, RhoL, Cpl, dCpldpl, dklrdpl float64
 	var err error

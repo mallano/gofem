@@ -15,7 +15,7 @@ func LogErr(err error, msg string) (stop bool) {
 	if err != nil {
 		fullmsg := "ERROR: " + msg + " : " + err.Error()
 		log.Printf(fullmsg)
-		global.WspcStop[global.Rank] = 1
+		Global.WspcStop[Global.Rank] = 1
 		return true
 	}
 	return
@@ -25,15 +25,15 @@ func LogErrCond(condition bool, msg string, prm ...interface{}) (stop bool) {
 	if condition {
 		fullmsg := "ERROR: " + utl.Sf(msg, prm...)
 		log.Printf(fullmsg)
-		global.WspcStop[global.Rank] = 1
+		Global.WspcStop[Global.Rank] = 1
 		return true
 	}
 	return
 }
 
 func Stop() bool {
-	if !global.Distr {
-		if global.WspcStop[global.Rank] > 0 {
+	if !Global.Distr {
+		if Global.WspcStop[Global.Rank] > 0 {
 			utl.CallerInfo(3)
 			utl.CallerInfo(2)
 			utl.PfRed("simulation stopped due to errors. see log files\n")
@@ -41,10 +41,10 @@ func Stop() bool {
 		}
 		return false
 	}
-	mpi.IntAllReduceMax(global.WspcStop, global.WspcInum)
-	for i := 0; i < global.Nproc; i++ {
-		if global.WspcStop[i] > 0 {
-			if global.Root {
+	mpi.IntAllReduceMax(Global.WspcStop, Global.WspcInum)
+	for i := 0; i < Global.Nproc; i++ {
+		if Global.WspcStop[i] > 0 {
+			if Global.Root {
 				utl.CallerInfo(3)
 				utl.CallerInfo(2)
 				utl.PfRed("simulation stopped due to errors. see log files\n")

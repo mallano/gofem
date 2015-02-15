@@ -34,14 +34,14 @@ func Test_frees01(tst *testing.T) {
 	defer End()
 
 	// domain
-	dom := NewDomain(global.Sim.Regions[0])
+	dom := NewDomain(Global.Sim.Regions[0])
 	if dom == nil {
 		tst.Errorf("test failed\n")
 		return
 	}
 
 	// set stage
-	if !dom.SetStage(0, global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("test failed\n")
 		return
 	}

@@ -98,7 +98,7 @@ func init() {
 		o.Nu = ndof * o.Ndim
 
 		// parameters
-		mat := global.Mdb.Get(edat.Mat)
+		mat := Global.Mdb.Get(edat.Mat)
 		if LogErrCond(mat == nil, "Mdb.Get failed\n") {
 			return nil
 		}
@@ -252,7 +252,7 @@ func (o *Beam) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok 
 func (o *Beam) InterpStarVars(sol *Solution) (ok bool) {
 
 	// steady
-	if global.Sim.Data.Steady {
+	if Global.Sim.Data.Steady {
 		return true
 	}
 
@@ -272,10 +272,10 @@ func (o Beam) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	}
 
 	// steady/dynamics
-	if global.Sim.Data.Steady {
+	if Global.Sim.Data.Steady {
 		la.MatVecMul(o.fi, 1, o.K, o.ue)
 	} else {
-		dc := global.DynCoefs
+		dc := Global.DynCoefs
 		for i := 0; i < o.Nu; i++ {
 			o.fi[i] = 0
 			for j := 0; j < o.Nu; j++ {
@@ -310,14 +310,14 @@ func (o Beam) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 // adds element K to global Jacobian matrix Kb
 func (o Beam) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
-	if global.Sim.Data.Steady {
+	if Global.Sim.Data.Steady {
 		for i, I := range o.Umap {
 			for j, J := range o.Umap {
 				Kb.Put(I, J, o.K[i][j])
 			}
 		}
 	} else {
-		dc := global.DynCoefs
+		dc := Global.DynCoefs
 		for i, I := range o.Umap {
 			for j, J := range o.Umap {
 				Kb.Put(I, J, o.M[i][j]*dc.α1+o.K[i][j])

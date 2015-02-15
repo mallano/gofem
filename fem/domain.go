@@ -96,12 +96,12 @@ func NewDomain(reg *inp.Region) *Domain {
 	if LogErrCond(dom.Msh == nil, "ERROR: ReadMsh failed\n") {
 		return nil
 	}
-	if global.Distr {
-		if LogErrCond(global.Nproc != len(dom.Msh.Part2cells), "number of processors must be equal to the number of partitions defined in mesh file. %d != %d", global.Nproc, len(dom.Msh.Part2cells)) {
+	if Global.Distr {
+		if LogErrCond(Global.Nproc != len(dom.Msh.Part2cells), "number of processors must be equal to the number of partitions defined in mesh file. %d != %d", Global.Nproc, len(dom.Msh.Part2cells)) {
 			return nil
 		}
 	}
-	dom.LinSol = la.GetSolver(global.Sim.LinSol.Name)
+	dom.LinSol = la.GetSolver(Global.Sim.LinSol.Name)
 	return &dom
 }
 
@@ -198,8 +198,8 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		}
 
 		// allocate element
-		mycell := c.Part == global.Rank // cell belongs to this processor
-		if !global.Distr {
+		mycell := c.Part == Global.Rank // cell belongs to this processor
+		if !Global.Distr {
 			mycell = true // not distributed simulation => this processor has all cells
 		}
 		if mycell {
@@ -249,7 +249,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			e := o.Cid2elem[c.Id]
 			if e != nil { // set conditions only for this processor's / active element
 				for j, key := range ec.Keys {
-					fcn := global.Sim.Functions.Get(ec.Funcs[j])
+					fcn := Global.Sim.Functions.Get(ec.Funcs[j])
 					if LogErrCond(fcn == nil, "Functions.Get failed\n") {
 						return
 					}
@@ -276,7 +276,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 				enodes = append(enodes, o.Vid2node[v])
 			}
 			for j, key := range fc.Keys {
-				fcn := global.Sim.Functions.Get(fc.Funcs[j])
+				fcn := Global.Sim.Functions.Get(fc.Funcs[j])
 				if LogErrCond(fcn == nil, "Functions.Get failed\n") {
 					return
 				}
@@ -306,7 +306,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			if o.Vid2node[v.Id] != nil { // set BCs only for active nodes
 				n := o.Vid2node[v.Id]
 				for j, key := range nc.Keys {
-					fcn := global.Sim.Functions.Get(nc.Funcs[j])
+					fcn := Global.Sim.Functions.Get(nc.Funcs[j])
 					if LogErrCond(fcn == nil, "Functions.Get failed\n") {
 						return
 					}
@@ -356,7 +356,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	o.Sol.Y = make([]float64, o.Ny)
 	o.Sol.ΔY = make([]float64, o.Ny)
 	o.Sol.L = make([]float64, o.Nlam)
-	if !global.Sim.Data.Steady {
+	if !Global.Sim.Data.Steady {
 		o.Sol.Dydt = make([]float64, o.Ny)
 		o.Sol.D2ydt2 = make([]float64, o.Ny)
 		o.Sol.Psi = make([]float64, o.Ny)
@@ -405,12 +405,12 @@ func (o *Domain) add_element_to_subsets(ele Elem) {
 func (o *Domain) star_vars(Δt float64) (err error) {
 
 	// skip if steady simulation
-	if global.Sim.Data.Steady {
+	if Global.Sim.Data.Steady {
 		return
 	}
 
 	// recompute coefficients
-	dc := global.DynCoefs
+	dc := Global.DynCoefs
 	err = dc.CalcBoth(Δt)
 	if err != nil {
 		return

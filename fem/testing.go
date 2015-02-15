@@ -37,8 +37,8 @@ type T_results_set []*T_results
 func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tolu, tols float64, skipK, verbose bool) {
 
 	// allocate domain
-	d := NewDomain(global.Sim.Regions[0])
-	if !d.SetStage(0, global.Sim.Stages[0]) {
+	d := NewDomain(Global.Sim.Regions[0])
+	if !d.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("SetStage failed\n")
 	}
 

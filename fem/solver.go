@@ -14,8 +14,8 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-// global data
-var global struct {
+// Global holds global data
+var Global struct {
 
 	// multiprocessing data
 	Rank     int   // my rank in distributed cluster
@@ -43,41 +43,41 @@ func End() {
 func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 
 	// multiprocessing data
-	global.Rank = 0
-	global.Nproc = 1
-	global.Root = true
-	global.Distr = false
+	Global.Rank = 0
+	Global.Nproc = 1
+	Global.Root = true
+	Global.Distr = false
 	if mpi.IsOn() {
-		global.Rank = mpi.Rank()
-		global.Nproc = mpi.Size()
-		global.Root = global.Rank == 0
-		global.Distr = global.Nproc > 1
+		Global.Rank = mpi.Rank()
+		Global.Nproc = mpi.Size()
+		Global.Root = Global.Rank == 0
+		Global.Distr = Global.Nproc > 1
 	}
-	global.Verbose = verbose
-	if !global.Root {
-		global.Verbose = false
+	Global.Verbose = verbose
+	if !Global.Root {
+		Global.Verbose = false
 	}
-	global.WspcStop = make([]int, global.Nproc)
-	global.WspcInum = make([]int, global.Nproc)
+	Global.WspcStop = make([]int, Global.Nproc)
+	Global.WspcInum = make([]int, Global.Nproc)
 
 	// simulation and  materials
-	global.Sim = inp.ReadSim(simfilepath, erasefiles)
-	if LogErrCond(global.Sim == nil, "ReadSim failed\n") {
+	Global.Sim = inp.ReadSim(simfilepath, erasefiles)
+	if LogErrCond(Global.Sim == nil, "ReadSim failed\n") {
 		return
 	}
-	global.Mdb = inp.ReadMat(global.Sim.Data.Matfile)
-	if LogErrCond(global.Mdb == nil, "ReadMat failed\n") {
+	Global.Mdb = inp.ReadMat(Global.Sim.Data.Matfile)
+	if LogErrCond(Global.Mdb == nil, "ReadMat failed\n") {
 		return
 	}
 
 	// fix show residual flag
-	if !global.Root {
-		global.Sim.Data.ShowR = false
+	if !Global.Root {
+		Global.Sim.Data.ShowR = false
 	}
 
 	// auxiliar structures
-	global.DynCoefs = new(DynCoefs)
-	if !global.DynCoefs.Init(&global.Sim.Solver) {
+	Global.DynCoefs = new(DynCoefs)
+	if !Global.DynCoefs.Init(&Global.Sim.Solver) {
 		return
 	}
 
@@ -90,7 +90,7 @@ func Run() (runisok bool) {
 
 	// alloc domains
 	var domains []*Domain
-	for _, reg := range global.Sim.Regions {
+	for _, reg := range Global.Sim.Regions {
 		dom := NewDomain(reg)
 		if dom == nil {
 			break
@@ -114,7 +114,7 @@ func Run() (runisok bool) {
 	tidx := 0
 
 	// message
-	if global.Verbose {
+	if Global.Verbose {
 		cpu_time := time.Now()
 		defer func() {
 			utl.Pfblue2("cpu time = %v\n", time.Now().Sub(cpu_time))
@@ -125,7 +125,7 @@ func Run() (runisok bool) {
 	}
 
 	// summary
-	nstg := len(global.Sim.Stages)
+	nstg := len(Global.Sim.Stages)
 	var sum Summary
 	sum.TidxIni = make([]int, nstg)
 	defer func() {
@@ -134,7 +134,7 @@ func Run() (runisok bool) {
 	}()
 
 	// loop over stages
-	for stgidx, stg := range global.Sim.Stages {
+	for stgidx, stg := range Global.Sim.Stages {
 
 		// summary
 		sum.TidxIni[stgidx] = tidx
@@ -147,7 +147,7 @@ func Run() (runisok bool) {
 
 		// set stage
 		for _, d := range domains {
-			if !d.SetStage(stgidx, global.Sim.Stages[stgidx]) {
+			if !d.SetStage(stgidx, Global.Sim.Stages[stgidx]) {
 				break
 			}
 			d.Sol.T = t
@@ -171,12 +171,12 @@ func Run() (runisok bool) {
 				Δt = tf - t
 				lasttimestep = true
 			}
-			if Δt < global.Sim.Solver.DtMin {
+			if Δt < Global.Sim.Solver.DtMin {
 				return true
 			}
 
 			// dynamic coefficients
-			global.DynCoefs.CalcBoth(Δt)
+			Global.DynCoefs.CalcBoth(Δt)
 
 			// time update
 			t += Δt
@@ -187,9 +187,9 @@ func Run() (runisok bool) {
 			//utl.PfYel(">>>  t=%g  Δt=%g  t+Δt=%g  tf=%g  Δtout=%g\n", t, Δt, t+Δt, tf, Δtout)
 
 			// message
-			if global.Verbose {
+			if Global.Verbose {
 				//time.Sleep(10000000)
-				if !global.Sim.Data.ShowR {
+				if !Global.Sim.Data.ShowR {
 					utl.PrintTimeLong(t)
 				}
 			}
@@ -235,17 +235,17 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 	var largFb, largFb0, Lδu float64
 
 	// message
-	if global.Sim.Data.ShowR {
+	if Global.Sim.Data.ShowR {
 		utl.Pfyel("\n%13s%4s%23s%23s\n", "t", "it", "largFb", "Lδu")
 	}
 	defer func() {
-		if global.Sim.Data.ShowR {
+		if Global.Sim.Data.ShowR {
 			utl.Pf("%13.6e%4d%23.15e%23.15e\n", t, it, largFb, Lδu)
 		}
 	}()
 
 	// iterations
-	for it = 0; it < global.Sim.Solver.NmaxIt; it++ {
+	for it = 0; it < Global.Sim.Solver.NmaxIt; it++ {
 
 		// assemble right-hand side vector (fb) with negative of residuals
 		la.VecFill(d.Fb, 0)
@@ -259,7 +259,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		}
 
 		// join all fb
-		if global.Distr {
+		if Global.Distr {
 			mpi.AllReduceSum(d.Fb, d.Wb) // this must be done here because there might be nodes sharing boundary conditions
 		}
 
@@ -276,18 +276,18 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 			largFb0 = largFb
 		} else {
 			// check convergence on Lf0
-			if largFb < global.Sim.Solver.FbTol*largFb0 { // converged on fb
+			if largFb < Global.Sim.Solver.FbTol*largFb0 { // converged on fb
 				break
 			}
 		}
 
 		// check convergence on fb_min
-		if largFb < global.Sim.Solver.FbMin { // converged with smallest value of fb
+		if largFb < Global.Sim.Solver.FbMin { // converged with smallest value of fb
 			break
 		}
 
 		// assemble Jacobian matrix
-		do_asm_fact := (it == 0 || !global.Sim.Data.CteTg)
+		do_asm_fact := (it == 0 || !Global.Sim.Data.CteTg)
 		if do_asm_fact {
 
 			// assemble element matrices
@@ -302,13 +302,13 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 			}
 
 			// join A and tr(A) matrices into Kb
-			if global.Root {
+			if Global.Root {
 				d.Kb.PutMatAndMatT(&d.EssenBcs.A)
 			}
 
 			// initialise linear solver
 			if d.InitLSol {
-				d.LinSol.InitR(d.Kb, global.Sim.LinSol.Symmetric, global.Sim.LinSol.Verbose, global.Sim.LinSol.Timing)
+				d.LinSol.InitR(d.Kb, Global.Sim.LinSol.Symmetric, Global.Sim.LinSol.Verbose, Global.Sim.LinSol.Timing)
 				d.InitLSol = false
 			}
 
@@ -326,7 +326,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		}
 
 		// update primary variables (y)
-		if global.Sim.Data.Steady {
+		if Global.Sim.Data.Steady {
 			for i := 0; i < d.Ny; i++ {
 				d.Sol.Y[i] += d.Wb[i]  // y += δy
 				d.Sol.ΔY[i] += d.Wb[i] // ΔY += δy
@@ -335,8 +335,8 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 			for i := 0; i < d.Ny; i++ {
 				d.Sol.Y[i] += d.Wb[i]  // y += δy
 				d.Sol.ΔY[i] += d.Wb[i] // ΔY += δy
-				d.Sol.Dydt[i] = global.DynCoefs.α4*d.Sol.Y[i] - d.Sol.Chi[i]
-				d.Sol.D2ydt2[i] = global.DynCoefs.α1*d.Sol.Y[i] - d.Sol.Zet[i]
+				d.Sol.Dydt[i] = Global.DynCoefs.α4*d.Sol.Y[i] - d.Sol.Chi[i]
+				d.Sol.D2ydt2[i] = Global.DynCoefs.α1*d.Sol.Y[i] - d.Sol.Zet[i]
 			}
 		}
 
@@ -369,21 +369,21 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		}
 
 		// compute RMS norm of δu and check convegence on δu
-		Lδu = la.VecRmsErr(d.Wb[:d.Ny], global.Sim.Solver.Atol, global.Sim.Solver.Rtol, d.Sol.Y[:d.Ny])
+		Lδu = la.VecRmsErr(d.Wb[:d.Ny], Global.Sim.Solver.Atol, Global.Sim.Solver.Rtol, d.Sol.Y[:d.Ny])
 
 		// message
-		if global.Sim.Data.ShowR {
+		if Global.Sim.Data.ShowR {
 			utl.Pf("%13.6e%4d%23.15e%23.15e\n", t, it, largFb, Lδu)
 		}
 
 		// stop if converged on δu
-		if Lδu < global.Sim.Solver.Itol {
+		if Lδu < Global.Sim.Solver.Itol {
 			break
 		}
 	}
 
 	// check if iterations diverged
-	if it == global.Sim.Solver.NmaxIt {
+	if it == Global.Sim.Solver.NmaxIt {
 		utl.PfMag("max number of iterations reached: it = %d\n", it)
 		return
 	}
