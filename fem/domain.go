@@ -149,6 +149,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 
 		// get element data and information structure
 		edat := o.Reg.Etag2data(c.Tag)
+		if LogErrCond(edat == nil, "cannot get element's data with etag=%d", c.Tag) {
+			return
+		}
 		if edat.Inact {
 			continue
 		}
@@ -438,7 +441,7 @@ func (o *Domain) fix_inact_flags(eids_or_tags []int, deactivate bool) (ok bool) 
 			tag = cell.Tag
 		}
 		edat := o.Reg.Etag2data(tag)
-		if LogErrCond(edat == nil, "Etag2data failed\n") {
+		if LogErrCond(edat == nil, "cannot get element's data with etag=%d", tag) {
 			return
 		}
 		edat.Inact = deactivate

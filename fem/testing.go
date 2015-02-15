@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/cpmech/gosl/num"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -129,6 +130,24 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 						}
 					}
 				}
+			}
+		}
+	}
+}
+
+func TestConsistentTangentK(tst *testing.T, d *Domain, ele Elem, tol float64, verb bool) {
+	derivfcn := num.DerivCen
+	if e, ok := ele.(*ElemP); ok {
+		if !e.AddToKb(d.Kb, d.Sol, false) {
+			tst.Errorf("K computation failed\n")
+			return
+		}
+		for i, I := range e.Pmap {
+			for j, J := range e.Pmap {
+				dnum := derivfcn(func(x float64, args ...interface{}) (res float64) {
+					return d.Fb[I]
+				}, d.Sol.Y[J])
+				utl.AnaNum(utl.Sf("K%d%d", i, j), tol, e.K[i][j], dnum, verb)
 			}
 		}
 	}
