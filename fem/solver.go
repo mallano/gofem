@@ -385,7 +385,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 	// check if iterations diverged
 	if it == global.Sim.Solver.NmaxIt {
 		utl.PfMag("max number of iterations reached: it = %d\n", it)
-		return true // stop
+		return
 	}
 
 	// success

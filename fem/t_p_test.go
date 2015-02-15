@@ -55,7 +55,7 @@ func Test_p01a(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("p01a")
 
 	// start simulation
@@ -161,7 +161,7 @@ func Test_p01b(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("p01b")
 
 	// run simulation

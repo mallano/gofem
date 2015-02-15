@@ -1,12 +1,13 @@
 {
   "data" : {
     "desc"    : "flow along column",
-    "matfile" : "data/porous.mat"
+    "matfile" : "data/porous.mat",
+    "showr"   : false
   },
   "functions" : [
     { "name":"pbot", "type":"rmp", "prms":[
-      { "n":"ca", "v":10  },
-      { "n":"cb", "v":0   },
+      { "n":"ca", "v":100 },
+      { "n":"cb", "v":100 },
       { "n":"ta", "v":0   },
       { "n":"tb", "v":1e3 }]
     },
@@ -31,7 +32,7 @@
         { "tag":-1, "keys":["g"], "funcs":["grav"] }
       ],
       "control" : {
-        "tf"    : 1e3,
+        "tf"    : 1000,
         "dt"    : 10,
         "dtout" : 10
       }
