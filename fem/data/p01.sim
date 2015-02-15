@@ -1,0 +1,40 @@
+{
+  "data" : {
+    "desc"    : "flow along column",
+    "matfile" : "data/porous.mat"
+  },
+  "functions" : [
+    { "name":"pbot", "type":"rmp", "prms":[
+      { "n":"ca", "v":10  },
+      { "n":"cb", "v":0   },
+      { "n":"ta", "v":0   },
+      { "n":"tb", "v":1e3 }]
+    },
+    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] }
+  ],
+  "regions" : [
+    {
+      "mshfile" : "data/column10m4e.msh",
+      "elemsdata" : [
+        { "tag":-1, "matname":"porous1", "type":"p" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "decrease pressure @ bottom",
+      "hydrost" : true,
+      "facebcs" : [
+        { "tag":-10, "keys":["pl"], "funcs":["pbot"] }
+      ],
+      "eleconds" : [
+        { "tag":-1, "keys":["g"], "funcs":["grav"] }
+      ],
+      "control" : {
+        "tf"    : 1e3,
+        "dt"    : 10,
+        "dtout" : 10
+      }
+    }
+  ]
+}

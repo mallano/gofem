@@ -12,7 +12,11 @@ import (
 
 func Test_p01(tst *testing.T) {
 
-	/*     8 o----o----o 9 (-5)
+	/* this tests simulates seepage flow along a column
+	 * by reducing the initial hydrostatic pressure at
+	 * at the bottom of the column
+	 *
+	 *       8 o----o----o 9 (-5)
 	 *       |   14    |
 	 *       |         |
 	 *    21 o    o    o 22 (-6)

@@ -22,5 +22,8 @@ sg57: debug
 sg114: debug
 	gdb --args /tmp/test_gofem_fem -test.run=sg114
 
+p01: debug
+	gdb --args /tmp/test_gofem_fem -test.run=p01
+
 bench:
 	go test -run=XXX -bench=. -benchtime=5s
