@@ -167,8 +167,10 @@ func (o Model) GetPrms(example bool) fun.Prms {
 	}
 }
 
-// InitState initialises state
-func (o Model) InitState(s *State, pl, pg, divus float64) (err error) {
+// NewState creates and initialises a new state structure
+//  Note: returns nil on errors
+func (o Model) NewState(pl, pg, divus float64) (s *State, err error) {
+	s = new(State)
 	s.Pl = pl
 	s.Pg = pg
 	s.Divus = divus

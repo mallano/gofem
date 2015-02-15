@@ -43,11 +43,10 @@ func (o *Driver) Run(Pc []float64) (err error) {
 	// allocate results arrays
 	np := len(Pc)
 	o.Res = make([]*State, np)
-	o.Res[0] = new(State)
 
 	// initialise first state
 	pg, divus := 0.0, 0.0
-	err = o.Mdl.InitState(o.Res[0], -Pc[0], pg, divus)
+	o.Res[0], err = o.Mdl.NewState(-Pc[0], pg, divus)
 	if err != nil {
 		return
 	}
