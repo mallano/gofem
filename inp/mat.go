@@ -55,13 +55,57 @@ func ReadMat(fn string) *MatDb {
 
 // Get returns a material
 //  Note: returns nil if not found
-func (o *MatDb) Get(name string) *Material {
+func (o MatDb) Get(name string) *Material {
 	for _, mat := range o.Materials {
 		if mat.Name == name {
 			return mat
 		}
 	}
 	return nil
+}
+
+// GroupGet parses group data
+//  Note: returns nil on failure
+func (o MatDb) GroupGet(matname, key string) *Material {
+	mat := o.Get(matname)
+	if mat == nil {
+		return nil
+	}
+	if submatname, found := utl.Keycode(mat.Extra, key); found {
+		return o.Get(submatname)
+	}
+	return nil
+}
+
+// GroupGet3 parses group data
+func (o MatDb) GroupGet3(matname, key1, key2, key3 string) (m1, m2, m3 *Material, err error) {
+	mat := o.Get(matname)
+	if mat == nil {
+		err = utl.Err("cannot find material named %q", matname)
+		return
+	}
+	if submat1, found := utl.Keycode(mat.Extra, key1); found {
+		m1 = o.Get(submat1)
+	} else {
+		err = utl.Err("cannot find key %q in grouped material data %q", key1, mat.Extra)
+		return
+	}
+	if submat2, found := utl.Keycode(mat.Extra, key2); found {
+		m2 = o.Get(submat2)
+	} else {
+		err = utl.Err("cannot find key %q in grouped material data %q", key2, mat.Extra)
+		return
+	}
+	if submat3, found := utl.Keycode(mat.Extra, key3); found {
+		m3 = o.Get(submat3)
+	} else {
+		err = utl.Err("cannot find key %q in grouped material data %q", key3, mat.Extra)
+		return
+	}
+	if m1 == nil || m2 == nil || m3 == nil {
+		err = utl.Err("material data in grouped materials cannot be parsed")
+	}
+	return
 }
 
 // String prints one function
