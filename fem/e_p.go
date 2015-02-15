@@ -166,14 +166,6 @@ func init() {
 			return nil
 		}
 
-		// allocate states
-		o.States = make([]*mporous.State, nip)
-		o.StatesBkp = make([]*mporous.State, nip)
-		for i := 0; i < nip; i++ {
-			o.States[i] = new(mporous.State)
-			o.StatesBkp[i] = new(mporous.State)
-		}
-
 		// local starred variables
 		o.ψl = make([]float64, nip)
 
@@ -214,7 +206,7 @@ func init() {
 
 // implementation ///////////////////////////////////////////////////////////////////////////////////
 
-// SetEqs set equations
+// SetEqs sets equations
 func (o *ElemP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	o.Pmap = make([]int, o.Np)
 	for m := 0; m < o.Cell.Shp.Nverts; m++ {
@@ -228,7 +220,7 @@ func (o *ElemP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	return true
 }
 
-// SetEleConds set element conditions
+// SetEleConds sets element conditions
 func (o *ElemP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 	if key == "g" { // gravity
 		o.Gfcn = f
@@ -236,7 +228,7 @@ func (o *ElemP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 	return true
 }
 
-// SetSurfLoads set surface loads (natural boundary conditions)
+// SetSurfLoads sets surface loads (natural boundary conditions)
 func (o *ElemP) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
 	return true
@@ -262,7 +254,7 @@ func (o *ElemP) InterpStarVars(sol *Solution) (ok bool) {
 	return true
 }
 
-// adds -R to global residual vector fb
+// AddToRhs adds -R to global residual vector fb
 func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
@@ -311,7 +303,7 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	return o.add_fluxloads_to_rhs(fb, sol)
 }
 
-// adds element K to global Jacobian matrix Kb
+// AddToKb adds element K to global Jacobian matrix Kb
 func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// clear matrices
@@ -366,30 +358,87 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 	return true
 }
 
-// Update perform (tangent) update
+// Update performs (tangent) update
 func (o *ElemP) Update(sol *Solution) (ok bool) {
+
+	// for each integration point
+	var Δpl float64
+	for idx, _ := range o.IpsElem {
+
+		// interpolation functions and gradients
+		if LogErr(o.Cell.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "Update") {
+			return
+		}
+
+		// compute Δpl @ ip by means of interpolating from nodes
+		Δpl = 0
+		for m := 0; m < o.Cell.Shp.Nverts; m++ {
+			r := o.Pmap[m]
+			Δpl += o.Cell.Shp.S[m] * sol.ΔY[r]
+		}
+
+		// update state
+		if LogErr(o.Mdl.Update(o.States[idx], Δpl, 0, 0), "update failed") {
+			return
+		}
+	}
 	return true
 }
 
 // internal variables ///////////////////////////////////////////////////////////////////////////////
 
-// InitIvs reset (and fix) internal variables after primary variables have been changed
+// InitIvs resets (and fix) internal variables after primary variables have been changed
 func (o *ElemP) InitIvs(sol *Solution) (ok bool) {
+
+	// for each integration point
+	nip := len(o.IpsElem)
+	o.States = make([]*mporous.State, nip)
+	o.StatesBkp = make([]*mporous.State, nip)
+	var err error
+	for idx, _ := range o.IpsElem {
+
+		// interpolation functions and gradients
+		if LogErr(o.Cell.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "InitIvs") {
+			return
+		}
+
+		// compute pl @ ip by means of interpolating from nodes
+		o.pl = 0
+		for m := 0; m < o.Cell.Shp.Nverts; m++ {
+			r := o.Pmap[m]
+			o.pl += o.Cell.Shp.S[m] * sol.Y[r]
+		}
+
+		// state initialisation
+		o.States[idx], err = o.Mdl.NewState(o.pl, 0, 0)
+		if LogErr(err, "state initialisation failed") {
+			return
+		}
+
+		// backup copy
+		o.StatesBkp[idx] = o.States[idx].GetCopy()
+	}
 	return true
 }
 
-// SetIvs set secondary variables; e.g. during initialisation via files
+// SetIvs sets secondary variables; e.g. during initialisation via files
 func (o *ElemP) SetIvs(zvars map[string][]float64) (ok bool) {
 	return true
 }
 
-// BackupIvs create copy of internal variables
+// BackupIvs creates copy of internal variables
 func (o *ElemP) BackupIvs() (ok bool) {
+	for i, s := range o.StatesBkp {
+		s.Set(o.States[i])
+	}
 	return true
 }
 
-// RestoreIvs restore internal variables from copies
+// RestoreIvs restores internal variables from copies
 func (o *ElemP) RestoreIvs() (ok bool) {
+	for i, s := range o.States {
+		s.Set(o.StatesBkp[i])
+	}
 	return true
 }
 
