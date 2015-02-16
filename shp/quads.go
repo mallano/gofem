@@ -47,7 +47,7 @@ func init() {
 	}
 	qua8.init_scratchpad()
 	factory["qua8"] = &qua8
-	ipsfactory["qua8_0"] = ips_qua_4
+	ipsfactory["qua8_0"] = ips_qua_9
 	ipsfactory["qua8_4"] = ips_qua_4
 	ipsfactory["qua8_9"] = ips_qua_9
 
@@ -68,7 +68,7 @@ func init() {
 	}
 	qua9.init_scratchpad()
 	factory["qua9"] = &qua9
-	ipsfactory["qua9_0"] = ips_qua_4
+	ipsfactory["qua9_0"] = ips_qua_9
 	ipsfactory["qua9_4"] = ips_qua_4
 	ipsfactory["qua9_9"] = ips_qua_9
 
