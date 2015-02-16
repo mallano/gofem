@@ -35,6 +35,9 @@ func TplotStart() (R [][][]float64) {
 	R = make([][][]float64, nkeys)
 	for i, dat := range TplotData {
 		R[i] = make([][]float64, len(dat.Qts))
+		for j, _ := range dat.Qts {
+			R[i][j] = make([]float64, Sum.NumTidx)
+		}
 		sort.Sort(dat.Qts)
 	}
 	return

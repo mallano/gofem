@@ -141,6 +141,7 @@ func Save(dirout, filename string) {
 }
 
 // read_results reads all results
+//  Note: R[nkeys][nqts...?][ntimes]
 func read_results() (T []float64, R [][][]float64, err error) {
 	R = TplotStart()
 	T = make([]float64, Sum.NumTidx)
@@ -151,7 +152,7 @@ func read_results() (T []float64, R [][][]float64, err error) {
 		T[tidx] = Dom.Sol.T
 		for i, dat := range TplotData {
 			for j, q := range dat.Qts {
-				R[i][j] = append(R[i][j], *q.Value)
+				R[i][j][tidx] = *q.Value
 			}
 		}
 	}
