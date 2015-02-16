@@ -80,13 +80,75 @@ func (o *Shape) IpRealCoords(x [][]float64, ip *Ipoint) (y []float64) {
 // CalcAtIp calculates volume data such as S and G at natural coordinate r
 //  Input:
 //   x[ndim][nverts+?] -- coordinates matrix of solid element
-//   ip                -- local/natural coordinates
+//   ip                -- integration point
 //  Output:
 //   S, DSdR, DxdR, DRdx, G, and J
 func (o *Shape) CalcAtIp(x [][]float64, ip *Ipoint, derivs bool) (err error) {
 
 	// S and dSdR
 	o.Func(o.S, o.dSdR, ip.R, ip.S, ip.T, derivs)
+	if !derivs {
+		return
+	}
+
+	if o.Gndim == 1 {
+		// calculate Jvec3d == dxdR
+		for i := 0; i < len(x); i++ {
+			o.Jvec3d[i] = 0.0
+			for m := 0; m < o.Nverts; m++ {
+				o.Jvec3d[i] += x[i][m] * o.dSdR[m][0] // dxdR := x * dSdR
+			}
+		}
+
+		// calculate J = norm of Jvec3d
+		o.J = la.VecNorm(o.Jvec3d)
+
+		// calculate G
+		for m := 0; m < o.Nverts; m++ {
+			o.Gvec[m] = o.dSdR[m][0] / o.J
+		}
+
+		return
+	}
+
+	// dxdR := sum_n x * dSdR   =>  dx_i/dR_j := sum_n x^n_i * dS^n/dR_j
+	for i := 0; i < len(x); i++ {
+		for j := 0; j < o.Gndim; j++ {
+			o.dxdR[i][j] = 0.0
+			for n := 0; n < o.Nverts; n++ {
+				o.dxdR[i][j] += x[i][n] * o.dSdR[n][j]
+			}
+		}
+	}
+
+	// dRdx := inv(dxdR)
+	o.J, err = la.MatInv(o.dRdx, o.dxdR, MINDET)
+	if err != nil {
+		return
+	}
+
+	// G == dSdx := dSdR * dRdx  =>  dS^m/dR_i := sum_i dS^m/dR_i * dR_i/dx_j
+	la.MatMul(o.G, 1, o.dSdR, o.dRdx)
+	return
+}
+
+// CalcAtR calculates volume data such as S and G at natural coordinate r
+//  Input:
+//   x[ndim][nverts+?] -- coordinates matrix of solid element
+//   R                 -- local/natural coordinates
+//  Output:
+//   S, DSdR, DxdR, DRdx, G, and J
+func (o *Shape) CalcAtR(x [][]float64, R []float64, derivs bool) (err error) {
+
+	r := R[0]
+	s := R[1]
+	t := 0.0
+	if len(R) == 3 {
+		t = R[2]
+	}
+
+	// S and dSdR
+	o.Func(o.S, o.dSdR, r, s, t, derivs)
 	if !derivs {
 		return
 	}
