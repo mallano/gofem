@@ -2,6 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// package out implements FE simulation output handling and plotting
+//  The main structures containing results are:
+//   T -- slice of time values; e.g. T = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0}
+//   R -- all results for keys, quantities (aka points), and times.
+//        R[nkeys][npts..?][ntimes]. Example:
+//        R = [][][]float64{
+//          {
+//            {100, 99, 98}, // pl @ point A (bottom of column) for 3 time outputs
+//            {  0,  0,  0}, // pl @ point B (top of column) for 3 time outputs
+//          },
+//          {
+//            {0,      0,      0}, // uy @ point A for 3 time outputs
+//            {0, -0.001, -0.002}, // uy @ point B for 3 time outputs
+//          },
+//        }
+//   Spd -- contains subplot data for further configurations. Example:
+//          spd := {"pl" : []int{1, 1, 2}} == "pl" => nrow,ncol,idx
 package out
 
 import (
@@ -21,10 +38,6 @@ type IpDat struct {
 	U   *msolid.State  // state @ u-element's ip
 }
 
-// SubpDat maps keys to subplot configuration parameters
-//  Example: "pl" => 1,1,2 == row,col,idx
-type SubpDat map[string][]int
-
 // Global variables
 var (
 
@@ -40,6 +53,11 @@ var (
 	Ipoints []*IpDat     // all integration points
 	NodBins gm.Bins      // bins for nodes
 	IpsBins gm.Bins      // bins for integration points
+
+	// results
+	T   []float64        // [ntimes] time series
+	R   [][][]float64    // [nkeys][nqts..?][ntimes] all time-series results
+	Spd map[string][]int // [nkeys] subplot data
 )
 
 // End must be called and the end to flush log file
@@ -53,6 +71,8 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 	// constants
 	TolC = 1e-8
 	Ndiv = 20
+	SubpNrow = 0
+	SubpNcol = 0
 
 	// start FE global structure
 	erasefiles := false
@@ -73,6 +93,13 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 		return
 	}
 
+	// clear previous plot data
+	TplotClear()
+	Ipoints = make([]*IpDat, 0)
+	T = make([]float64, 0)
+	R = make([][][]float64, 0)
+	Spd = make(map[string][]int)
+
 	// bins
 	m := Dom.Msh
 	xi := []float64{m.Xmin, m.Ymin}
@@ -85,8 +112,8 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 	IpsBins.Init(xi, xf, Ndiv)
 
 	// add nodes to bins
-	for activeId, n := range Dom.Nodes {
-		err := NodBins.Append(n.Vert.C, activeId)
+	for activeId, nod := range Dom.Nodes {
+		err := NodBins.Append(nod.Vert.C, activeId)
 		if err != nil {
 			return
 		}
@@ -109,47 +136,13 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 	return true
 }
 
-func Splot(key string, loc LineLocator, times []float64, styles []*plt.LineData) {
-}
-
-func Plot(keyx, keyy string, loc PointLocator, styles []*plt.LineData) {
-}
-
-// Show shows plot
-//  extra -- is a function to carry out extra configurations
-func Show(extra func(spd SubpDat)) (err error) {
-	spd, err := plot_all()
-	if err != nil {
-		return
-	}
-	if extra != nil {
-		extra(spd)
-	}
-	plt.Show()
-	return
-}
-
-// Save saves plot
-func Save(dirout, filename string, extra func(spd SubpDat)) (err error) {
-	spd, err := plot_all()
-	if err != nil {
-		return
-	}
-	if extra != nil {
-		extra(spd)
-	}
-	plt.SaveD(dirout, filename)
-	return
-}
-
-// read_results reads all results
-//  Note: R[nkeys][nqts...?][ntimes]
-func read_results() (T []float64, R [][][]float64, err error) {
-	R = TplotStart()
+// Apply applies commands to generate T and R.
+func Apply() (err error) {
+	TplotStart()
 	T = make([]float64, Sum.NumTidx)
 	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
 		if !Dom.ReadSol(tidx) {
-			return nil, nil, utl.Err("ReadSol failed. See log files\n")
+			return utl.Err("ReadSol failed. See log files\n")
 		}
 		T[tidx] = Dom.Sol.T
 		for i, dat := range TplotData {
@@ -161,13 +154,29 @@ func read_results() (T []float64, R [][][]float64, err error) {
 	return
 }
 
-// plot_all plots all results. It returns a map of keys and subplot indices. Ex:
-//  spd: "pl" => 1,1,2 == row,col,idx
-func plot_all() (spd SubpDat, err error) {
-	T, R, err := read_results()
-	if err != nil {
-		return
+// Show shows plot
+//  extra -- is a function to carry out extra configurations
+func Show(extra func()) {
+	plot_all()
+	if extra != nil {
+		extra()
 	}
+	plt.Show()
+	return
+}
+
+// Save saves plot
+func Save(dirout, filename string, extra func()) (err error) {
+	plot_all()
+	if extra != nil {
+		extra()
+	}
+	plt.SaveD(dirout, filename)
+	return
+}
+
+// plot_all plots all results
+func plot_all() {
 	nplots := len(R)
 	nrow, ncol := utl.BestSquare(nplots)
 	if SubpNrow > 0 {
@@ -176,10 +185,10 @@ func plot_all() (spd SubpDat, err error) {
 	if SubpNcol > 0 {
 		ncol = SubpNcol
 	}
-	spd = make(map[string][]int)
+	Spd = make(map[string][]int)
 	for i := 0; i < nplots; i++ {
 		key := TplotKeys[i]
-		spd[key] = []int{nrow, ncol, i + 1}
+		Spd[key] = []int{nrow, ncol, i + 1}
 		plt.Subplot(nrow, ncol, i+1)
 		for j, Y := range R[i] {
 			sty := TplotData[i].Sty[j]

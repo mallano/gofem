@@ -7,9 +7,35 @@ package out
 import (
 	"testing"
 
+	"github.com/cpmech/gofem/fem"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
+
+func onequa_solution(tst *testing.T, t float64, dom *fem.Domain, tolu, tolσ float64) {
+
+	// analytical solution
+	qnV, qnH := -100.0, -50.0
+	E, ν := 1000.0, 0.25
+	lx, ly := 1.0, 1.0
+	σx, σy := qnH*t, qnV*t
+	σz := ν * (σx + σy)
+	εx := (σx - ν*(σy+σz)) / E
+	εy := (σy - ν*(σz+σx)) / E
+
+	// check displacements
+	ux := lx * εx
+	uy := ly * εy
+	Ycor := []float64{0, 0, ux, 0, ux, uy, 0, uy}
+	utl.CheckVector(tst, "Y", tolu, dom.Sol.Y, Ycor)
+
+	// check stresses
+	e := dom.Elems[0].(*fem.ElemU)
+	σcor := []float64{σx, σy, σz, 0}
+	for idx, _ := range e.IpsElem {
+		utl.CheckVector(tst, "σ", tolσ, e.States[idx].Sig, σcor)
+	}
+}
 
 func Test_out01(tst *testing.T) {
 
@@ -24,11 +50,44 @@ func Test_out01(tst *testing.T) {
 	utl.Tsilent = false
 	utl.TTitle("out01")
 
-	stageIdx := 0
-	regionIdx := 0
-	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
+	// run FE simulation
+	if !fem.Start("data/onequa4.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+		return
+	}
+	defer fem.End()
+	if !fem.Run() {
+		tst.Errorf("test failed\n")
+		return
+	}
 
-	if !Start(datadir+"p01.sim", stageIdx, regionIdx) {
+	// check FE simulation results
+	//onequa_solution(tst, 1, Dom, 1e-15, 1e-14)
+
+	// load results
+	if !Start("data/onequa4.sim", 0, 0) {
+		tst.Errorf("Start failed\n")
+		return
+	}
+	defer End()
+}
+
+// this test needs 'fem' package to be tested first
+func Test_out02(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
+	utl.Tsilent = false
+	utl.TTitle("out02")
+
+	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
+	if !Start(datadir+"p01.sim", 0, 0) {
 		tst.Errorf("Start failed\n")
 		return
 	}
@@ -38,7 +97,7 @@ func Test_out01(tst *testing.T) {
 	xip := Ipoints[0].X
 	utl.Pfcyan("xip = %v\n", xip)
 
-	// configure time-plots
+	// commands for time-plots
 	Tplot("pl", &At{2.5, 0}, nil)
 	Tplot("pl", &At{2.5, 10}, nil)
 	Tplot("sl", &At{xip[0], xip[1]}, nil)
@@ -66,17 +125,10 @@ func Test_out01(tst *testing.T) {
 			utl.IntAssert(len(dat.Sty), 1)
 		}
 	}
-
-	// show figure
-	if !utl.Tsilent {
-		err := Show(nil)
-		if err != nil {
-			tst.Errorf("test failed: %v\n", err)
-		}
-	}
 }
 
-func Test_out02(tst *testing.T) {
+// this test needs 'fem' package to be tested first
+func Test_out03(tst *testing.T) {
 
 	prevTs := utl.Tsilent
 	defer func() {
@@ -87,33 +139,31 @@ func Test_out02(tst *testing.T) {
 	}()
 
 	utl.Tsilent = false
-	utl.TTitle("out02")
+	utl.TTitle("out03")
 
-	stageIdx := 0
-	regionIdx := 0
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
-
-	if !Start(datadir+"p01.sim", stageIdx, regionIdx) {
+	if !Start(datadir+"p01.sim", 0, 0) {
 		tst.Errorf("Start failed\n")
 		return
 	}
 	defer End()
 
-	// configure time-plots
+	// commands for time-plots
 	Tplot("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
 	Tplot("pl", &At{2.5, 10}, Styles{{Label: "B"}})
 
+	// apply commands
+	err := Apply()
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+	}
+
 	// show figure
 	if !utl.Tsilent {
-		err := Show(func(spd SubpDat) {
-
-			// configuration
-			plt.SubplotI(spd["pl"])
+		Show(func() {
+			plt.SubplotI(Spd["pl"])
 			plt.AxisYrange(-10, 110)
 			plt.Gll("$t$", "$p_{\\ell}$", "")
 		})
-		if err != nil {
-			tst.Errorf("test failed: %v\n", err)
-		}
 	}
 }
