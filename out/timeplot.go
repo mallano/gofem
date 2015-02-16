@@ -30,7 +30,7 @@ func TplotClear() {
 
 // TplotStart initialise structures for Time Plots
 //  Returns results: R[nkeys][nqts...?][ntimes]
-func TplotStart() (R [][][]float64) {
+func TplotStart() {
 	nkeys := len(TplotKeys)
 	R = make([][][]float64, nkeys)
 	for i, dat := range TplotData {
