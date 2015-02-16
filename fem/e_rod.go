@@ -24,7 +24,6 @@ type Rod struct {
 	Nu   int         // total number of unknowns == 2 * nsn
 
 	// parameters
-	//E float64 // Young's modulus
 	A float64 // cross-sectional area
 
 	// variables for dynamics
@@ -112,8 +111,6 @@ func init() {
 		// parameters
 		for _, p := range matdata.Prms {
 			switch p.N {
-			//case "E":
-			//o.E = p.V
 			case "A":
 				o.A = p.V
 			}
@@ -129,8 +126,6 @@ func init() {
 			return nil
 		}
 		nip = len(o.IpsElem)
-
-		// state
 
 		// scratchpad. computed @ each ip
 		o.K = la.MatAlloc(o.Nu, o.Nu)
