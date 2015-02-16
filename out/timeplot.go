@@ -7,15 +7,8 @@ package out
 import (
 	"sort"
 
-	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
-
-type Styles []*plt.LineData
-
-func GetDefaultStyles(n int) Styles {
-	return make([]*plt.LineData, n)
-}
 
 // TplotDat holds information of one key to be ploted along time; e.g. "pl"
 type TplotDat struct {
@@ -23,17 +16,20 @@ type TplotDat struct {
 	Sty Styles     // [npoints] styles => one item can have many points
 }
 
+// Global variables
 var (
 	TplotKeys []string    // [nkeys] all keys
 	TplotData []*TplotDat // [nkeys] all items
 )
 
+// TplotClear clears Tplot data
 func TplotClear() {
 	TplotKeys = make([]string, 0)
 	TplotData = make([]*TplotDat, 0)
 }
 
-// R[nkeys][nqts...?][ntimes]
+// TplotStart initialise structures for Time Plots
+//  Returns results: R[nkeys][nqts...?][ntimes]
 func TplotStart() (R [][][]float64) {
 	nkeys := len(TplotKeys)
 	R = make([][][]float64, nkeys)
@@ -63,27 +59,3 @@ func Tplot(key string, loc PointLocator, sty Styles) {
 	TplotData[idx].Qts = append(TplotData[idx].Qts, qts...)
 	TplotData[idx].Sty = append(TplotData[idx].Sty, sty...)
 }
-
-/*
-func get_tplot_quantities() (T []float64, V map[string][]float64, err error) {
-	utl.Pforan("Sum = %v\n", Sum)
-	T = make([]float64, Sum.NumTidx)
-	V = make(map[string][]float64)
-	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
-		if !Dom.ReadSol(tidx) {
-			return nil, nil, utl.Err("ReadSol failed. See log files\n")
-		}
-		utl.Pforan("tidx = %v\n", tidx)
-		T[tidx] = Dom.Sol.T
-		for _, key := range TplotKeys {
-			for _, item := range TplotData[key] {
-				Q := item.Loc.AtPoint(key)
-				for _, q := range Q {
-					utl.StrDblsMapAppend(&V, key, q.Value)
-				}
-			}
-		}
-	}
-	return
-}
-*/
