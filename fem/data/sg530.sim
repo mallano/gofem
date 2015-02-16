@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "Smith-Griffiths Figure 5.30 p202",
-    "matfile" : "data/sg.mat",
+    "matfile" : "sg.mat",
     "steady"  : true
   },
   "functions" : [
@@ -11,7 +11,7 @@
   "regions" : [
     {
       "desc"      : "ground",
-      "mshfile"   : "data/sg530.msh",
+      "mshfile"   : "sg530.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"SG-5.30-M1", "type":"u", "extra":"!nip:1" }
       ]

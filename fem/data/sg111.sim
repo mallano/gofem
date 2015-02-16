@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "Smith-Griffiths (5th ed) Figure 11.1 p487",
-    "matfile" : "data/sg.mat",
+    "matfile" : "sg.mat",
     "showR"   : false
   },
   "functions" : [
@@ -14,7 +14,7 @@
   "regions" : [
     {
       "desc"      : "beam",
-      "mshfile"   : "data/sg111.msh",
+      "mshfile"   : "sg111.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"SG-11.1", "type":"beam" }
       ]

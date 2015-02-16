@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "flow along column",
-    "matfile" : "data/porous.mat",
+    "matfile" : "porous.mat",
     "showr"   : false
   },
   "functions" : [
@@ -15,7 +15,7 @@
   ],
   "regions" : [
     {
-      "mshfile" : "data/column10m4e.msh",
+      "mshfile" : "column10m4e.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"porous1", "type":"p", "extra":"!nip:4" }
       ]

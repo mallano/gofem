@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "Smith-Griffiths (5th ed) Figure 5.2 p173",
-    "matfile" : "data/sg.mat",
+    "matfile" : "sg.mat",
     "steady"  : true
   },
   "functions" : [
@@ -11,7 +11,7 @@
   "regions" : [
     {
       "desc"      : "plane-strain section",
-      "mshfile"   : "data/sg52.msh",
+      "mshfile"   : "sg52.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"SG-5.2-M1", "type":"u", "extra":"!nip:1" }
       ]

@@ -1,6 +1,6 @@
 {
   "data" : {
-    "matfile" : "data/frees.mat"
+    "matfile" : "frees.mat"
   },
   "functions" : [
     { "name":"Hl", "type":"cte", "prms":[{"n":"c", "v":10}] },
@@ -14,7 +14,7 @@
   ],
   "regions" : [
     {
-      "mshfile"   : "data/frees01.msh",
+      "mshfile"   : "frees01.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"soil1", "type":"p" }
       ]

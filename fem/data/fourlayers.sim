@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "four layers",
-    "matfile" : "data/layers.mat",
+    "matfile" : "layers.mat",
     "steady"  : true,
     "showR"   : true
   },
@@ -12,7 +12,7 @@
   "regions" : [
     {
       "desc"      : "square",
-      "mshfile"   : "data/fourlayers.msh",
+      "mshfile"   : "fourlayers.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"elast01", "type":"u",    "inact":false },
         { "tag":-2, "mat":"elast01", "type":"u",    "inact":true  },

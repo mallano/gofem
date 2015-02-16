@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "Smith-Griffiths Figure 11.4 p475",
-    "matfile" : "data/sg.mat"
+    "matfile" : "sg.mat"
   },
   "functions" : [
     { "name":"load", "type":"cos", "prms":[{"n":"a","v":1}, {"n":"b","v":0.3}] }
@@ -9,7 +9,7 @@
   "regions" : [
     {
       "desc"      : "rectangle",
-      "mshfile"   : "data/sg114.msh",
+      "mshfile"   : "sg114.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"SG-11.4", "type":"u", "extra":"!nip:9" }
       ]

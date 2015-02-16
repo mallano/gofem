@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "Smith-Griffiths (5th ed) Figure 11.21 p515",
-    "matfile" : "data/sg.mat"
+    "matfile" : "sg.mat"
   },
   "functions" : [
     { "name":"load", "type":"cte", "prms":[{"n":"c","v":-180}] }
@@ -9,7 +9,7 @@
   "regions" : [
     {
       "desc"      : "quarter of solid beam",
-      "mshfile"   : "data/sg1121.msh",
+      "mshfile"   : "sg1121.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"SG-11.21", "type":"u", "extra":"!nip:9" }
       ]

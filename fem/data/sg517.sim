@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"   : "Smith-Griffiths (5th ed.) Figure 5.17 p187",
-    "matfile": "data/sg.mat",
+    "matfile": "sg.mat",
     "axisym" : true,
     "steady" : true
   },
@@ -11,7 +11,7 @@
   "regions" : [
     {
       "desc"      : "flexible footing (axisymmetric)",
-      "mshfile"  : "data/sg517.msh",
+      "mshfile"  : "sg517.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"SG-5.17-M1", "type":"u", "extra":"!nip:9" },
         { "tag":-2, "mat":"SG-5.17-M2", "type":"u", "extra":"!nip:9" }
