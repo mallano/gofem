@@ -11,6 +11,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"path/filepath"
 
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/mpi"
@@ -38,6 +39,7 @@ type Data struct {
 	CteTg bool `json:"ctetg"` // use constant tangent (modified Newton) during iterations
 
 	// derived
+	FnameDir string // directory where .sim filename is locatd
 	FnameKey string // simulation filename key; e.g. mysim01.sim => mysim01
 }
 
@@ -46,8 +48,9 @@ func (o *Data) SetDefault() {
 }
 
 // PostProcess performs a post-processing of the just read json file
-func (o *Data) PostProcess(simfilepath string, erasefiles bool) {
-	o.FnameKey = utl.FnKey(simfilepath)
+func (o *Data) PostProcess(dir, fn string, erasefiles bool) {
+	o.FnameDir = os.ExpandEnv(dir)
+	o.FnameKey = utl.FnKey(fn)
 	if o.DirOut == "" {
 		o.DirOut = "/tmp/gofem/" + o.FnameKey
 	}
@@ -254,15 +257,15 @@ type Simulation struct {
 // ReadSim reads all simulation data from a .sim JSON file
 //  Notes:  1) this function initialises log file
 //          2) returns nil on errors
-func ReadSim(simfilepath string, erasefiles bool) *Simulation {
+func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 
 	// new sim
 	var o Simulation
 
 	// read file
-	b, err := utl.ReadFile(simfilepath)
+	b, err := utl.ReadFile(filepath.Join(dir, fn))
 	if err != nil {
-		utl.PfRed("sim: cannot read simulation file %s\n%v\n", simfilepath, err)
+		utl.PfRed("sim: cannot read simulation file %s/%s\n%v\n", dir, fn, err)
 		return nil
 	}
 
@@ -274,12 +277,12 @@ func ReadSim(simfilepath string, erasefiles bool) *Simulation {
 	// decode
 	err = json.Unmarshal(b, &o)
 	if err != nil {
-		utl.PfRed("sim: cannot unmarshal simulation file %s\n%v\n", simfilepath, err)
+		utl.PfRed("sim: cannot unmarshal simulation file %s/%s\n%v\n", dir, fn, err)
 		return nil
 	}
 
 	// derived data
-	o.Data.PostProcess(simfilepath, erasefiles)
+	o.Data.PostProcess(dir, fn, erasefiles)
 	o.LinSol.PostProcess()
 	o.Solver.PostProcess()
 
@@ -347,7 +350,7 @@ func ReadSim(simfilepath string, erasefiles bool) *Simulation {
 	}
 
 	// log
-	log.Printf("sim: fn=%s desc=%q nfunctions=%d nregions=%d nstages=%d linsol=%s itol=%g\n", simfilepath, o.Data.Desc, len(o.Functions), len(o.Regions), len(o.Stages), o.LinSol.Name, o.Solver.Itol)
+	log.Printf("sim: file=%s/%s desc=%q nfunctions=%d nregions=%d nstages=%d linsol=%s itol=%g\n", dir, fn, o.Data.Desc, len(o.Functions), len(o.Regions), len(o.Stages), o.LinSol.Name, o.Solver.Itol)
 	return &o
 }
 

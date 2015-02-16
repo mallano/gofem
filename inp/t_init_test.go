@@ -31,7 +31,7 @@ func Test_msh01(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("msh01")
 
-	msh := ReadMsh("data/bh16.msh")
+	msh := ReadMsh("data", "bh16.msh")
 	if msh == nil {
 		tst.Errorf("test failed\n")
 		return
@@ -57,7 +57,7 @@ func Test_sim01(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("sim01")
 
-	sim := ReadSim("data/bh16.sim", true)
+	sim := ReadSim("data", "bh16.sim", true)
 	if sim == nil {
 		tst.Errorf("test failed\n")
 		return
@@ -81,7 +81,7 @@ func Test_mat01(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("mat01")
 
-	mdb1 := ReadMat("data/bh.mat")
+	mdb1 := ReadMat("data", "bh.mat")
 	if mdb1 == nil {
 		tst.Errorf("test failed\n")
 		return
@@ -91,7 +91,7 @@ func Test_mat01(tst *testing.T) {
 	fn := "test_bh.mat"
 	utl.WriteFileSD("/tmp/gofem/inp", fn, mdb1.String())
 
-	mdb2 := ReadMat("/tmp/gofem/inp/" + fn)
+	mdb2 := ReadMat("/tmp/gofem/inp/", fn)
 	if mdb2 == nil {
 		tst.Errorf("test failed\n")
 		return
@@ -115,7 +115,7 @@ func Test_mat02(tst *testing.T) {
 	convertsymbols := true
 	MatfileOld2New("/tmp/gofem/inp", "new_layers.mat", "data/old_layers.mat", convertsymbols)
 
-	mdb := ReadMat("/tmp/gofem/inp/new_layers.mat")
+	mdb := ReadMat("/tmp/gofem/inp/", "new_layers.mat")
 	if mdb == nil {
 		tst.Errorf("test failed\n")
 		return

@@ -17,7 +17,7 @@
     {
       "mshfile" : "data/column10m4e.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"porous1", "type":"p" }
+        { "tag":-1, "mat":"porous1", "type":"p", "extra":"!nip:4" }
       ]
     }
   ],

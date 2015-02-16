@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "Beam example",
-    "matfile" : "data/beams.mat"
+    "matfile" : "beams.mat"
   },
   "functions" : [
     { "name":"qnL", "type":"cte", "prms":["c"], "vals":[-1.0] },
@@ -12,7 +12,7 @@
   "regions" : [
     {
       "desc"      : "beam",
-      "mshfile"   : "data/beam.msh",
+      "mshfile"   : "beam.msh",
       "elemsdata" : [
         { "tag":-1, "matname":"beam01", "type":"u" }
       ]

@@ -5,6 +5,7 @@
 package fem
 
 import (
+	"path/filepath"
 	"time"
 
 	"github.com/cpmech/gofem/inp"
@@ -61,11 +62,13 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	Global.WspcInum = make([]int, Global.Nproc)
 
 	// simulation and  materials
-	Global.Sim = inp.ReadSim(simfilepath, erasefiles)
+	dir := filepath.Dir(simfilepath)
+	fn := filepath.Base(simfilepath)
+	Global.Sim = inp.ReadSim(dir, fn, erasefiles)
 	if LogErrCond(Global.Sim == nil, "ReadSim failed\n") {
 		return
 	}
-	Global.Mdb = inp.ReadMat(Global.Sim.Data.Matfile)
+	Global.Mdb = inp.ReadMat(Global.Sim.Data.FnameDir, Global.Sim.Data.Matfile)
 	if LogErrCond(Global.Mdb == nil, "ReadMat failed\n") {
 		return
 	}

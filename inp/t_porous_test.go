@@ -23,7 +23,7 @@ func Test_porous01(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("porous01")
 
-	mdb := ReadMat("data/porous.mat")
+	mdb := ReadMat("data", "porous.mat")
 	if mdb == nil {
 		tst.Errorf("test failed\n")
 		return
@@ -79,7 +79,7 @@ func Test_porous02(tst *testing.T) {
 	//utl.Tsilent = false
 	utl.TTitle("porous02")
 
-	mdb := ReadMat("data/porous.mat")
+	mdb := ReadMat("data", "porous.mat")
 	if mdb == nil {
 		tst.Errorf("test failed\n")
 		return

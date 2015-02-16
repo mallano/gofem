@@ -4,82 +4,86 @@
 
 package out
 
-import (
-	"github.com/cpmech/gofem/fem"
-	"github.com/cpmech/gosl/gm"
-)
-
-// Quantity holds node or ip quantity
-type Quantity struct {
-	Name  string
-	Value float64
+// PointLocator defines interface for locating space positions
+type PointLocator interface {
+	AtPoint(key string) Quantities // returns value @ X, Y, Z or Id (returs nil if not found)
 }
 
-// Locator defines interface for locating space positions
-type Locator interface {
-	Get(key string) []*Quantity // returns value @ X, Y, Z or Id (returs nil if not found)
+// LineLocator defines interface for locating space positions
+type LineLocator interface {
+	AlongLine(key string) Quantities
 }
 
-// At implements locator at point
-type At struct {
-	X, Y, Z float64
-}
+// At implements locator at point => PointLocator
+type At []float64
 
-// Along implements locator along line
+// IdsOrTags implements locator a specific nodes => PointLocator
+type IdsOrTags []int
+
+// Along implements locator along line => LineLocator
 type Along struct {
 	A []float64 // first point on line
 	B []float64 // second point on line
 }
 
-// IdsOrTags implements locator a specific nodes
-type IdsOrTags []int
+// AlongX implements LineLocator
+type AlongX []float64
 
-func (o At) Get(key string) []*Quantity {
+// AlongY implements LineLocator
+type AlongY []float64
 
-	// coordinates
-	c := []float64{o.X, o.Y, o.Z}
+// AlongZ implements LineLocator
+type AlongZ []float64
+
+// AtPoint returns quantity at point
+func (o At) AtPoint(key string) Quantities {
 
 	// node quantity
-	entry := NodBins.Find(c)
+	entry := NodBins.Find(o)
 	if entry != nil {
-		q := get_nod_quantity(key, entry)
+		q := get_nod_quantity(key, entry.Id, 0)
 		if q != nil {
-			return []*Quantity{q}
+			return Quantities{q}
 		}
 	}
 
 	// integration point quantity
-	entry = IpsBins.Find(c)
+	entry = IpsBins.Find(o)
 	if entry != nil {
-		q := get_ip_quantity(key, entry)
+		q := get_ip_quantity(key, entry.Id, 0)
 		if q != nil {
-			return []*Quantity{q}
+			return Quantities{q}
 		}
 	}
 	return nil
 }
 
-func (o Along) Get(key string) []*Quantity {
-	return nil
-}
-func (o IdsOrTags) Get(key string) []*Quantity {
-	return nil
-}
-
-func (o IdsOrTags) GetNodes() (nodes []*fem.Node) {
+// AtPoint returns quantity at point
+func (o IdsOrTags) AtPoint(key string) (res Quantities) {
 	for _, idortag := range o {
 		if idortag < 0 {
 			tag := idortag
 			verts := Dom.Msh.VertTag2verts[tag]
 			for _, v := range verts {
-				nodes = append(nodes, Dom.Nodes[v.Id])
+				q := get_nod_quantity(key, v.Id, 0)
+				if q != nil {
+					res = append(res, q)
+				}
 			}
 		} else {
 			id := idortag
-			nodes = append(nodes, Dom.Nodes[id])
+			q := get_nod_quantity(key, id, 0)
+			if q != nil {
+				res = append(res, q)
+			}
 		}
 	}
 	return
+}
+
+// Along returns quantity along line
+func (o Along) AlongLine(key string) Quantities {
+	return nil
 }
 
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
@@ -104,45 +108,41 @@ func parse_key(key string) (string, int) {
 	return key, 0
 }
 
-func get_nod_quantity(key string, entry *gm.BinEntry) *Quantity {
-	if entry != nil {
-		key, ntderiv := parse_key(key)
-		nod := Dom.Nodes[entry.Id]
-		dof := nod.GetDof(key)
-		if dof != nil {
-			switch ntderiv {
-			case 0:
-				return &Quantity{key, Dom.Sol.Y[dof.Eq]}
-			case 1:
-				return &Quantity{key, Dom.Sol.Dydt[dof.Eq]}
-			case 2:
-				return &Quantity{key, Dom.Sol.D2ydt2[dof.Eq]}
-			}
+func get_nod_quantity(key string, nid int, dist float64) *Quantity {
+	key, ntderiv := parse_key(key)
+	nod := Dom.Nodes[nid]
+	dof := nod.GetDof(key)
+	if dof != nil {
+		switch ntderiv {
+		case 0:
+			return &Quantity{Dom.Sol.Y[dof.Eq], dist}
+		case 1:
+			return &Quantity{Dom.Sol.Dydt[dof.Eq], dist}
+		case 2:
+			return &Quantity{Dom.Sol.D2ydt2[dof.Eq], dist}
 		}
 	}
 	return nil
 }
 
-func get_ip_quantity(key string, entry *gm.BinEntry) *Quantity {
-	if entry != nil {
-		o := Ipoints[entry.Id]
-		if o.P != nil {
-			switch key {
-			case "pl":
-				return &Quantity{key, o.P.Pl}
-			case "sl":
-				return &Quantity{key, o.P.Sl}
-			}
+func get_ip_quantity(key string, ipid int, dist float64) *Quantity {
+	o := Ipoints[ipid]
+	if o.P != nil {
+		switch key {
+		case "pl":
+			return &Quantity{o.P.Pl, dist}
+		case "sl":
+			return &Quantity{o.P.Sl, dist}
 		}
-		if o.U != nil {
-			switch key {
-			case "sx":
-				return &Quantity{key, o.U.Sig[0]}
-			case "sy":
-				return &Quantity{key, o.U.Sig[1]}
-			case "sz":
-				return &Quantity{key, o.U.Sig[2]}
-			}
+	}
+	if o.U != nil {
+		switch key {
+		case "sx":
+			return &Quantity{o.U.Sig[0], dist}
+		case "sy":
+			return &Quantity{o.U.Sig[1], dist}
+		case "sz":
+			return &Quantity{o.U.Sig[2], dist}
 		}
 	}
 	return nil

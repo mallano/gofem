@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"log"
 	"math"
+	"path/filepath"
 
 	"github.com/cpmech/gofem/shp"
 
@@ -80,14 +81,14 @@ type Mesh struct {
 
 // ReadMsh reads a mesh for FE analyses
 //  Note: returns nil on errors
-func ReadMsh(fn string) *Mesh {
+func ReadMsh(dir, fn string) *Mesh {
 
 	// new mesh
 	var o Mesh
 
 	// read file
-	b, err := utl.ReadFile(fn)
-	if LogErr(err, "msh: cannot open mesh file "+fn+"\n") {
+	b, err := utl.ReadFile(filepath.Join(dir, fn))
+	if LogErr(err, "msh: cannot open mesh file "+dir+"/"+fn+"\n") {
 		return nil
 	}
 

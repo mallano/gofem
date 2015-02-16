@@ -92,7 +92,7 @@ type Domain struct {
 func NewDomain(reg *inp.Region) *Domain {
 	var dom Domain
 	dom.Reg = reg
-	dom.Msh = inp.ReadMsh(reg.Mshfile)
+	dom.Msh = inp.ReadMsh(Global.Sim.Data.FnameDir, reg.Mshfile)
 	if LogErrCond(dom.Msh == nil, "ERROR: ReadMsh failed\n") {
 		return nil
 	}

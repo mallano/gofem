@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "Bhatti Example 1.6 p32",
-    "matfile" : "data/bh.mat",
+    "matfile" : "bh.mat",
     "steady"  : true,
     "pstress" : true
   },
@@ -14,7 +14,7 @@
   "regions" : [
     {
       "desc"      : "bracket",
-      "mshfile"   : "data/bh16.msh",
+      "mshfile"   : "bh16.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"B-1.6-M1", "type":"u", "extra":"!thick:0.25" }
       ]

@@ -12,7 +12,7 @@
   "regions" : [
     {
       "desc"      : "bracket",
-      "mshfile"   : "data/bh16.msh",
+      "mshfile"   : "bh16.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"B-1.6-M1", "type":"u", "extra":"!thick:0.25 !outsig:1" }
       ]

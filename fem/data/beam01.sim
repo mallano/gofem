@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "simple beam",
-    "matfile" : "data/beams.mat",
+    "matfile" : "beams.mat",
     "steady"  : true
   },
   "functions" : [
@@ -10,7 +10,7 @@
   "regions" : [
     {
       "desc"      : "beam",
-      "mshfile"   : "data/beam01.msh",
+      "mshfile"   : "beam01.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"beam01", "type":"beam" }
       ]

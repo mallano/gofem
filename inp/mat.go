@@ -7,6 +7,7 @@ package inp
 import (
 	"encoding/json"
 	"log"
+	"path/filepath"
 
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/utl"
@@ -32,14 +33,14 @@ type MatDb struct {
 
 // ReadMat reads all materials data from a .mat JSON file
 //  Note: returns nil on errors
-func ReadMat(fn string) *MatDb {
+func ReadMat(dir, fn string) *MatDb {
 
 	// new mat
 	var o MatDb
 
 	// read file
-	b, err := utl.ReadFile(fn)
-	if LogErr(err, "mat: cannot open materials file "+fn+"\n") {
+	b, err := utl.ReadFile(filepath.Join(dir, fn))
+	if LogErr(err, "mat: cannot open materials file "+dir+"/"+fn+"\n") {
 		return nil
 	}
 
