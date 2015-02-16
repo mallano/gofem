@@ -37,7 +37,7 @@ func (o *VonMises) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 			o.qy0 = p.V
 		case "H":
 			o.H = p.V
-		case "E", "nu", "l", "G", "K", "RhoS":
+		case "E", "nu", "l", "G", "K", "rho":
 		default:
 			return utl.Err("vm: parameter named %q is incorrect\n", p.N)
 		}
