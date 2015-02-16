@@ -165,6 +165,7 @@ func Test_bh16b(tst *testing.T) {
 }
 
 func Test_bh14(tst *testing.T) {
+	// Rod test
 
 	prevTs := utl.Tsilent
 	defer func() {

@@ -17,7 +17,7 @@
     {
       "name"  : "B-1.4-M1",
       "desc"  : "Bhatti Ex 1.4 p25: Five bar truss",
-      "model" : "rod-elast",
+      "model" : "oned-elast",
       "prms"  : [
         {"n":"E",   "v":200000},
         {"n":"A",   "v":4000  }
@@ -26,7 +26,7 @@
     {
       "name"  : "B-1.4-M2",
       "desc"  : "Bhatti Ex 1.4 p25: Five bar truss",
-      "model" : "rod-elast",
+      "model" : "oned-elast",
       "prms"  : [
         {"n":"E",   "v":200000},
         {"n":"A",   "v":3000  }
@@ -35,7 +35,7 @@
     {
       "name"  : "B-1.4-M3",
       "desc"  : "Bhatti Ex 1.4 p25: Five bar truss",
-      "model" : "rod-elast",
+      "model" : "oned-elast",
       "prms"  : [
         {"n":"E",   "v":70000},
         {"n":"A",   "v":2000 }

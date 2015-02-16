@@ -6,6 +6,7 @@ package fem
 
 import (
 	"github.com/cpmech/gofem/inp"
+	"github.com/cpmech/gofem/msolid"
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
@@ -23,7 +24,7 @@ type Rod struct {
 	Nu   int         // total number of unknowns == 2 * nsn
 
 	// parameters
-	E float64 // Young's modulus
+	//E float64 // Young's modulus
 	A float64 // cross-sectional area
 
 	// variables for dynamics
@@ -41,10 +42,10 @@ type Rod struct {
 	// problem variables
 	Umap []int // assembly map (location array/element equations)
 
-	// internal variables
-	Sig []float64
-	//States    []*msolid.State
-	//StatesBkp []*msolid.State
+	// material model and internal variables
+	Model     msolid.RodModel
+	States    []*msolid.State
+	StatesBkp []*msolid.State
 
 	// scratchpad. computed @ each ip
 	grav []float64 // [ndim] gravity vector
@@ -90,15 +91,29 @@ func init() {
 		o.Ndim = msh.Ndim
 		o.Nu = o.Ndim * o.Cell.Shp.Nverts
 
-		// parameters
-		mat := Global.Mdb.Get(edat.Mat)
-		if LogErrCond(mat == nil, "Mdb.Get failed\n") {
+		var err error
+
+		// material model name
+		matname := edat.Mat
+		matdata := Global.Mdb.Get(matname)
+		if LogErrCond(matdata == nil, "Mdb.Get failed\n") {
 			return nil
 		}
-		for _, p := range mat.Prms {
+		mdlname := matdata.Model
+		o.Model = msolid.GetRodModel(Global.Sim.Data.FnameKey, matname, mdlname, false)
+		if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
+			return nil
+		}
+		err = o.Model.Init(o.Ndim, matdata.Prms)
+		if LogErr(err, "Model.Init failed") {
+			return nil
+		}
+
+		// parameters
+		for _, p := range matdata.Prms {
 			switch p.N {
-			case "E":
-				o.E = p.V
+			//case "E":
+			//o.E = p.V
 			case "A":
 				o.A = p.V
 			}
@@ -109,7 +124,6 @@ func init() {
 		if s_nip, found := utl.Keycode(edat.Extra, "nip"); found {
 			nip = utl.Atoi(s_nip)
 		}
-		var err error
 		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)
 		if LogErr(err, "GetIps failed") {
 			return nil
@@ -117,7 +131,6 @@ func init() {
 		nip = len(o.IpsElem)
 
 		// state
-		o.Sig = make([]float64, nip)
 
 		// scratchpad. computed @ each ip
 		o.K = la.MatAlloc(o.Nu, o.Nu)
@@ -185,11 +198,11 @@ func (o Rod) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		G := o.Cell.Shp.Gvec
 		Jvec := o.Cell.Shp.Jvec3d
 
-		//σ := o.States[ix].Sig[0]
 		for m := 0; m < nverts; m++ {
 			for i := 0; i < ndim; i++ {
 				r := o.Umap[i+m*ndim]
-				fb[r] -= coef * o.A * o.Sig[idx] * G[m] * Jvec[i] // +fi
+				sig := o.States[idx].Sig[0]
+				fb[r] -= coef * o.A * sig * G[m] * Jvec[i] // +fi
 			}
 			//if o.hasg {
 			//o.Rus[o.nd-1 + m*o.nd] -= o.coef * gcmp * o.gu.S[m] // -fx
@@ -228,7 +241,8 @@ func (o Rod) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 					for j := 0; j < ndim; j++ {
 						r := i + m*ndim
 						c := j + n*ndim
-						o.K[r][c] += coef * o.A * o.E * G[m] * G[n] * Jvec[i] * Jvec[j] / J
+						E := o.Model.CalcD(o.States[idx], firstIt)
+						o.K[r][c] += coef * o.A * E * G[m] * G[n] * Jvec[i] * Jvec[j] / J
 						//if !steady {
 						//o.M[r][c] += o.ipe[idx][3] * o.ρ * o.A * o.gu.S[m] * o.gu.S[n] * o.gu.Jvec[i] * o.gu.Jvec[j] / o.gu.J
 						//}
@@ -274,7 +288,9 @@ func (o *Rod) Update(sol *Solution) (ok bool) {
 		}
 
 		// call model update => update stresses
-		o.Sig[idx] = Δε * o.E
+		if LogErr(o.Model.Update(o.States[idx], 0.0, Δε), "Update") {
+			return
+		}
 	}
 	return true
 }
@@ -282,6 +298,53 @@ func (o *Rod) Update(sol *Solution) (ok bool) {
 // SetSurfLoads set surface loads (natural boundary conditions)
 func (o *Rod) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	return true
+}
+
+// internal variables ///////////////////////////////////////////////////////////////////////////////
+
+// InitIvs reset (and fix) internal variables after primary variables have been changed
+func (o *Rod) InitIvs(sol *Solution) (ok bool) {
+	nip := len(o.IpsElem)
+	o.States = make([]*msolid.State, nip)
+	o.StatesBkp = make([]*msolid.State, nip)
+	for i := 0; i < nip; i++ {
+		o.States[i], _ = o.Model.InitIntVars()
+		o.StatesBkp[i] = o.States[i].GetCopy()
+	}
+	return true
+}
+
+// SetIvs set secondary variables; e.g. during initialisation via files
+func (o *Rod) SetIvs(zvars map[string][]float64) (ok bool) {
+	return true
+}
+
+// BackupIvs create copy of internal variables
+func (o *Rod) BackupIvs() (ok bool) {
+	for i, s := range o.StatesBkp {
+		s.Set(o.States[i])
+	}
+	return true
+}
+
+// RestoreIvs restore internal variables from copies
+func (o *Rod) RestoreIvs() (ok bool) {
+	for i, s := range o.States {
+		s.Set(o.StatesBkp[i])
+	}
+	return true
+}
+
+// writer ///////////////////////////////////////////////////////////////////////////////////////////
+
+// Encode encodes internal variables
+func (o Rod) Encode(enc Encoder) (ok bool) {
+	return !LogErr(enc.Encode(o.States), "Encode")
+}
+
+// Decode decodes internal variables
+func (o Rod) Decode(dec Decoder) (ok bool) {
+	return !LogErr(dec.Decode(&o.States), "Decode")
 }
 
 // auxiliary ////////////////////////////////////////////////////////////////////////////////////////
