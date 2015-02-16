@@ -21,17 +21,6 @@ type IpDat struct {
 	U   *msolid.State  // state @ u-element's ip
 }
 
-// TplotItem holds information of one item to be ploted along time
-type TplotItem struct {
-	Loc PointLocator
-	Sty []*plt.LineData
-}
-
-// TplotData contains selected nodes or ips to have variables plotted along time
-// It maps key to items
-var TplotData map[string][]*TplotItem
-var TplotKeys []string
-
 // Global variables
 var (
 	// constants
@@ -48,7 +37,7 @@ var (
 
 // With starts handling and plotting of results given a simulation input file
 // It returs a callback function that must be called in order to release resources and flush files
-func With(simfnpath string, stageIdx, regionIdx int) func() {
+func With(simfnpath string, stageIdx, regionIdx int) (err error) {
 
 	// constants
 	TolC = 1e-8
@@ -58,16 +47,19 @@ func With(simfnpath string, stageIdx, regionIdx int) func() {
 	erasefiles := false
 	verbose := false
 	if !fem.Start(simfnpath, erasefiles, verbose) {
-		return errFunc(utl.Err("cannot load sim file %q\n", simfnpath))
+		return utl.Err("cannot load sim file %q\n", simfnpath)
 	}
 
 	// read summary
 	Sum = fem.ReadSum()
+	if Sum == nil {
+		return utl.Err("cannot load summary file %q\n", simfnpath)
+	}
 
 	// allocate domain
 	Dom = fem.NewDomain(fem.Global.Sim.Regions[regionIdx])
 	if !Dom.SetStage(stageIdx, fem.Global.Sim.Stages[stageIdx]) {
-		return errFunc(utl.Err("SetStage failed\n"))
+		return utl.Err("SetStage failed\n")
 	}
 
 	// bins
@@ -83,9 +75,9 @@ func With(simfnpath string, stageIdx, regionIdx int) func() {
 
 	// add nodes to bins
 	for activeId, n := range Dom.Nodes {
-		err := NodBins.Append(n.Vert.C, activeId)
+		err = NodBins.Append(n.Vert.C, activeId)
 		if err != nil {
-			return errFunc(err)
+			return
 		}
 	}
 
@@ -101,10 +93,19 @@ func With(simfnpath string, stageIdx, regionIdx int) func() {
 			}
 		}
 	}
-
-	// return callback function
-	return fem.End
+	return
 }
+
+// TplotItem holds information of one item to be ploted along time
+type TplotItem struct {
+	Loc PointLocator
+	Sty []*plt.LineData
+}
+
+// TplotData contains selected nodes or ips to have variables plotted along time
+// It maps key to items
+var TplotData map[string][]*TplotItem
+var TplotKeys []string
 
 func Tplot(key string, loc PointLocator, styles []*plt.LineData) {
 	if TplotData == nil {
@@ -127,29 +128,12 @@ func Plot(keyx, keyy string, loc PointLocator, styles []*plt.LineData) {
 }
 
 func Show() (err error) {
-
-	T := make([]float64, Sum.NumTidx)
-	Q := make(map[string]Quantities)
-	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
-		if !Dom.ReadSol(tidx) {
-			return utl.Err("ReadSol failed. See log files\n")
-		}
-		T[tidx] = Dom.Sol.T
-		for _, key := range TplotKeys {
-			for _, item := range TplotData[key] {
-				qtys := item.Loc.AtPoint(key)
-				slice, ok := Q[key]
-				if ok {
-					Q[key] = append(slice, qtys...)
-				} else {
-					//Q[key] = new one
-				}
-			}
-
-		}
+	T, V, err := get_tplot_quantities()
+	if err != nil {
+		return
 	}
-
-	nplots := len(TplotData)
+	return
+	nplots := len(V)
 	nrow, ncol := utl.BestSquare(nplots)
 	k := 0
 	for i := 0; i < nrow; i++ {
@@ -157,6 +141,7 @@ func Show() (err error) {
 			key := TplotKeys[k]
 			plt.Subplot(i, j, k)
 			utl.Pforan("key = %v\n", key)
+			plt.Plot(T, V[key], "")
 			k += 1
 		}
 	}
@@ -166,4 +151,26 @@ func Show() (err error) {
 }
 
 func Save(eps bool) {
+}
+
+func get_tplot_quantities() (T []float64, V map[string][]float64, err error) {
+	utl.Pforan("Sum = %v\n", Sum)
+	T = make([]float64, Sum.NumTidx)
+	V = make(map[string][]float64)
+	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
+		if !Dom.ReadSol(tidx) {
+			return nil, nil, utl.Err("ReadSol failed. See log files\n")
+		}
+		utl.Pforan("tidx = %v\n", tidx)
+		T[tidx] = Dom.Sol.T
+		for _, key := range TplotKeys {
+			for _, item := range TplotData[key] {
+				Q := item.Loc.AtPoint(key)
+				for _, q := range Q {
+					utl.StrDblsMapAppend(&V, key, q.Value)
+				}
+			}
+		}
+	}
+	return
 }
