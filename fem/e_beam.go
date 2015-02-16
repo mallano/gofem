@@ -110,7 +110,7 @@ func init() {
 				o.A = p.V
 			case "Izz":
 				o.Izz = p.V
-			case "Rho":
+			case "rho":
 				o.Rho = p.V
 			}
 		}

@@ -6,9 +6,9 @@
       "desc"  : "Smith-Griffiths Figure 5.2 p173",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":1e+06},
-        {"n":"nu",   "v":0.3  },
-        {"n":"RhoS", "v":1    }
+        {"n":"E",   "v":1e+06},
+        {"n":"nu",  "v":0.3  },
+        {"n":"rho", "v":1    }
       ]
     },
     {
@@ -16,9 +16,9 @@
       "desc"  : "Smith-Griffiths Figure 5.7 p178",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":100000},
-        {"n":"nu",   "v":0.3   },
-        {"n":"RhoS", "v":1     }
+        {"n":"E",   "v":100000},
+        {"n":"nu",  "v":0.3   },
+        {"n":"rho", "v":1     }
       ]
     },
     {
@@ -26,9 +26,9 @@
       "desc"  : "Smith-Griffiths Figure 5.11 p178",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":1e+06},
-        {"n":"nu",   "v":0.3  },
-        {"n":"RhoS", "v":1    }
+        {"n":"E",   "v":1e+06},
+        {"n":"nu",  "v":0.3  },
+        {"n":"rho", "v":1    }
       ]
     },
     {
@@ -36,9 +36,9 @@
       "desc"  : "Smith-Griffiths Figure 5.15 p181",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":1e+06},
-        {"n":"nu",   "v":0.3  },
-        {"n":"RhoS", "v":1    }
+        {"n":"E",   "v":1e+06},
+        {"n":"nu",  "v":0.3  },
+        {"n":"rho", "v":1    }
       ]
     },
     {
@@ -46,9 +46,9 @@
       "desc"  : "Smith-Griffiths Figure 5.17 p187",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":100},
-        {"n":"nu",   "v":0.3},
-        {"n":"RhoS", "v":1  }
+        {"n":"E",   "v":100},
+        {"n":"nu",  "v":0.3},
+        {"n":"rho", "v":1  }
       ]
     },
     {
@@ -56,9 +56,9 @@
       "desc"  : "Smith-Griffiths Figure 5.17 p187",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":1000},
-        {"n":"nu",   "v":0.45},
-        {"n":"RhoS", "v":1   }
+        {"n":"E",   "v":1000},
+        {"n":"nu",  "v":0.45},
+        {"n":"rho", "v":1   }
       ]
     },
     {
@@ -66,9 +66,9 @@
       "desc"  : "Smith-Griffiths Figure 5.24 p193",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":100},
-        {"n":"nu",   "v":0.3},
-        {"n":"RhoS", "v":1  }
+        {"n":"E",   "v":100},
+        {"n":"nu",  "v":0.3},
+        {"n":"rho", "v":1  }
       ]
     },
     {
@@ -76,9 +76,9 @@
       "desc"  : "Smith-Griffiths Figure 5.24 p193",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":50 },
-        {"n":"nu",   "v":0.3},
-        {"n":"RhoS", "v":1  }
+        {"n":"E",   "v":50 },
+        {"n":"nu",  "v":0.3},
+        {"n":"rho", "v":1  }
       ]
     },
     {
@@ -86,9 +86,9 @@
       "desc"  : "Smith-Griffiths Figure 5.30 p202",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E",    "v":100},
-        {"n":"nu",   "v":0.3},
-        {"n":"RhoS", "v":1  }
+        {"n":"E",   "v":100},
+        {"n":"nu",  "v":0.3},
+        {"n":"rho", "v":1  }
       ]
     },
     {
@@ -99,7 +99,7 @@
         {"n":"E",   "v":3.194},
         {"n":"A",   "v":1    },
         {"n":"Izz", "v":1    },
-        {"n":"Rho", "v":1    }
+        {"n":"rho", "v":1    }
       ]
     },
     {
@@ -109,7 +109,7 @@
       "prms"  : [
         {"n":"E",    "v":1    },
         {"n":"nu",   "v":0.3  },
-        {"n":"RhoS", "v":1    },
+        {"n":"rho",  "v":1    },
         {"n":"Cdam", "v":0.200}
       ]
     },
@@ -118,11 +118,11 @@
       "desc"  : "Smith-Griffiths Figure 11.4 p475",
       "model" : "vm",
       "prms"  : [
-        {"n":"E",    "v":1  },
-        {"n":"nu",   "v":0.3},
-        {"n":"qy0",  "v":5  },
-        {"n":"H",    "v":0  },
-        {"n":"RhoS", "v":1  }
+        {"n":"E",   "v":1  },
+        {"n":"nu",  "v":0.3},
+        {"n":"qy0", "v":5  },
+        {"n":"H",   "v":0  },
+        {"n":"rho", "v":1  }
       ]
     },
     {
@@ -130,11 +130,11 @@
       "desc"  : "Smith-Griffiths (5th ed) Figure 11.21 p515",
       "model" : "vm",
       "prms"  : [
-        {"n":"E",    "v":3e+07   },
-        {"n":"nu",   "v":0.3     },
-        {"n":"qy0",  "v":50000   },
-        {"n":"H",    "v":0       },
-        {"n":"RhoS", "v":0.000733}
+        {"n":"E",   "v":3e+07   },
+        {"n":"nu",  "v":0.3     },
+        {"n":"qy0", "v":50000   },
+        {"n":"H",   "v":0       },
+        {"n":"rho", "v":0.000733}
       ]
     }
   ]

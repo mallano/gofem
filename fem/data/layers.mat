@@ -6,9 +6,9 @@
       "desc"  : "Linear elastic for Hostun Sand",
       "model" : "lin-elast",
       "prms"  : [
-        {"n":"E"   , "v":3000 , "u":"kPa"},
-        {"n":"nu"  , "v":0.2  , "u":"-"},
-        {"n":"RhoS", "v":2.7  , "u":"Mg/m3"}
+        {"n":"E"  , "v":3000 , "u":"kPa"},
+        {"n":"nu" , "v":0.2  , "u":"-"},
+        {"n":"rho", "v":2.7  , "u":"Mg/m3"}
       ]
     },
     {
@@ -16,13 +16,13 @@
       "desc"  : "Drucker-Prager for Hostun Sand",
       "model" : "dp",
       "prms"  : [
-        {"n":"E"   , "v":3000 , "u":"kPa"},
-        {"n":"nu"  , "v":0.2  , "u":"-"},
-        {"n":"c"   , "v":10   , "u":"kPa"},
-        {"n":"phi" , "v":20   , "u":"°"},
-        {"n":"typ" , "v":3    , "u":"-"},
-        {"n":"H"   , "v":0    , "u":"kPa"},
-        {"n":"RhoS", "v":2.7  , "u":"Mg/m3"}
+        {"n":"E"  , "v":3000 , "u":"kPa"},
+        {"n":"nu" , "v":0.2  , "u":"-"},
+        {"n":"c"  , "v":10   , "u":"kPa"},
+        {"n":"phi", "v":20   , "u":"°"},
+        {"n":"typ", "v":3    , "u":"-"},
+        {"n":"H"  , "v":0    , "u":"kPa"},
+        {"n":"rho", "v":2.7  , "u":"Mg/m3"}
       ]
     },
     {

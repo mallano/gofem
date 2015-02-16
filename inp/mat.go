@@ -222,6 +222,7 @@ var conversiontable = map[string]string{
 	"λ1l": "lam1L",
 	"λ0g": "lam0G",
 	"λ1g": "lam1G",
+	"ρ":   "Rho",
 	"ρL":  "RhoL",
 	"ρG":  "RhoG",
 	"ρS":  "RhoS",

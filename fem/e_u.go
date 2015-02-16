@@ -189,7 +189,7 @@ func init() {
 		// parameters
 		for _, p := range matdata.Prms {
 			switch p.N {
-			case "Rho", "RhoS":
+			case "rho":
 				o.Rho = p.V
 			case "Cdam":
 				o.Cdam = p.V
