@@ -35,17 +35,33 @@ func Test_out01(tst *testing.T) {
 	}
 	defer fem.End()
 
+	xip := Ipoints[0].X
+	utl.Pfcyan("xip = %v\n", xip)
+
 	Tplot("pl", &At{2.5, 0}, nil)
 	Tplot("pl", &At{2.5, 10}, nil)
-	Tplot("sl", &At{2.5, 10}, nil)
+	Tplot("sl", &At{xip[0], xip[1]}, nil)
 
 	nnod := 27
 	nele := 4
 	nip := 4
 	utl.IntAssert(len(Dom.Nodes), nnod)
 	utl.IntAssert(len(Ipoints), nele*nip)
+	utl.IntAssert(len(TplotKeys), 2)
 	utl.IntAssert(len(TplotData), 2)
 	utl.CompareStrs(tst, "TplotKeys", TplotKeys, []string{"pl", "sl"})
+	for i, dat := range TplotData {
+		key := TplotKeys[i]
+		utl.Pforan("key=%v => dat=%v\n", key, dat)
+		if key == "pl" {
+			utl.IntAssert(len(dat.Qts), 2)
+			utl.IntAssert(len(dat.Sty), 2)
+		}
+		if key == "sl" {
+			utl.IntAssert(len(dat.Qts), 1)
+			utl.IntAssert(len(dat.Sty), 1)
+		}
+	}
 
 	err = Show()
 	if err != nil {

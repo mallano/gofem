@@ -33,6 +33,9 @@ var (
 	Ipoints []*IpDat     // all integration points
 	NodBins gm.Bins      // bins for nodes
 	IpsBins gm.Bins      // bins for integration points
+
+	// for time-plots
+
 )
 
 // With starts handling and plotting of results given a simulation input file
@@ -96,31 +99,6 @@ func With(simfnpath string, stageIdx, regionIdx int) (err error) {
 	return
 }
 
-// TplotItem holds information of one item to be ploted along time
-type TplotItem struct {
-	Loc PointLocator
-	Sty []*plt.LineData
-}
-
-// TplotData contains selected nodes or ips to have variables plotted along time
-// It maps key to items
-var TplotData map[string][]*TplotItem
-var TplotKeys []string
-
-func Tplot(key string, loc PointLocator, styles []*plt.LineData) {
-	if TplotData == nil {
-		TplotData = make(map[string][]*TplotItem)
-	}
-	newitem := &TplotItem{loc, styles}
-	slice, ok := TplotData[key]
-	if ok {
-		TplotData[key] = append(slice, newitem)
-		return
-	}
-	TplotData[key] = []*TplotItem{newitem}
-	TplotKeys = append(TplotKeys, key)
-}
-
 func Splot(key string, loc LineLocator, times []float64, styles []*plt.LineData) {
 }
 
@@ -128,49 +106,38 @@ func Plot(keyx, keyy string, loc PointLocator, styles []*plt.LineData) {
 }
 
 func Show() (err error) {
-	T, V, err := get_tplot_quantities()
-	if err != nil {
-		return
+
+	// read results
+	R := TplotStart()
+	T := make([]float64, Sum.NumTidx)
+	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
+		if !Dom.ReadSol(tidx) {
+			return utl.Err("ReadSol failed. See log files\n")
+		}
+		T[tidx] = Dom.Sol.T
+		for i, dat := range TplotData {
+			for j, q := range dat.Qts {
+				R[i][j] = append(R[i][j], *q.Value)
+			}
+		}
 	}
-	return
-	nplots := len(V)
+
+	// plot
+	nplots := len(R)
 	nrow, ncol := utl.BestSquare(nplots)
-	k := 0
-	for i := 0; i < nrow; i++ {
-		for j := 0; j < ncol; j++ {
-			key := TplotKeys[k]
-			plt.Subplot(i, j, k)
-			utl.Pforan("key = %v\n", key)
-			plt.Plot(T, V[key], "")
-			k += 1
+	utl.Pforan("nplots = %v\n", nplots)
+	for k := 0; k < nplots; k++ {
+		key := TplotKeys[k]
+		plt.Subplot(nrow, ncol, k+1)
+		utl.Pforan("key = %v\n", key)
+		for _, Y := range R[k] {
+			plt.Plot(T, Y, "clip_on=0")
 		}
 	}
 	utl.Pforan("nrow,ncol = %v, %v\n", nrow, ncol)
-	//plt.Show()
+	plt.Show()
 	return
 }
 
 func Save(eps bool) {
-}
-
-func get_tplot_quantities() (T []float64, V map[string][]float64, err error) {
-	utl.Pforan("Sum = %v\n", Sum)
-	T = make([]float64, Sum.NumTidx)
-	V = make(map[string][]float64)
-	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
-		if !Dom.ReadSol(tidx) {
-			return nil, nil, utl.Err("ReadSol failed. See log files\n")
-		}
-		utl.Pforan("tidx = %v\n", tidx)
-		T[tidx] = Dom.Sol.T
-		for _, key := range TplotKeys {
-			for _, item := range TplotData[key] {
-				Q := item.Loc.AtPoint(key)
-				for _, q := range Q {
-					utl.StrDblsMapAppend(&V, key, q.Value)
-				}
-			}
-		}
-	}
-	return
 }
