@@ -21,12 +21,18 @@ type IpDat struct {
 	U   *msolid.State  // state @ u-element's ip
 }
 
+// SubpDat maps keys to subplot configuration parameters
+//  Example: "pl" => 1,1,2 == row,col,idx
+type SubpDat map[string][]int
+
 // Global variables
 var (
 
 	// constants
-	TolC float64 // tolerance to compare x-y-z coordinates
-	Ndiv int     // bins n-division
+	TolC     float64 // tolerance to compare x-y-z coordinates
+	Ndiv     int     // bins n-division
+	SubpNrow int     // override subplot configuration parameters
+	SubpNcol int     // override subplot configuration parameters
 
 	// data
 	Sum     *fem.Summary // summary of results
@@ -36,9 +42,13 @@ var (
 	IpsBins gm.Bins      // bins for integration points
 )
 
-// With starts handling and plotting of results given a simulation input file
-// It returns a callback function that must be called in order to release resources and flush files
-func With(simfnpath string, stageIdx, regionIdx int, commands func()) (ok bool) {
+// End must be called and the end to flush log file
+func End() {
+	fem.End()
+}
+
+// Start starts handling and plotting of results given a simulation input file
+func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 
 	// constants
 	TolC = 1e-8
@@ -50,7 +60,6 @@ func With(simfnpath string, stageIdx, regionIdx int, commands func()) (ok bool) 
 	if !fem.Start(simfnpath, erasefiles, verbose) {
 		return
 	}
-	defer fem.End()
 
 	// read summary
 	Sum = fem.ReadSum()
@@ -96,8 +105,7 @@ func With(simfnpath string, stageIdx, regionIdx int, commands func()) (ok bool) 
 		}
 	}
 
-	// do plot
-	commands()
+	// success
 	return true
 }
 
@@ -107,37 +115,31 @@ func Splot(key string, loc LineLocator, times []float64, styles []*plt.LineData)
 func Plot(keyx, keyy string, loc PointLocator, styles []*plt.LineData) {
 }
 
-// Plotall plots all results. It returns a map of keys and subplot indices. Ex:
-//  splots: "pl" => 1,1,2 == row,col,idx
-func PlotAll() (splots map[string][]int, err error) {
-	T, R, err := read_results()
+// Show shows plot
+//  extra -- is a function to carry out extra configurations
+func Show(extra func(spd SubpDat)) (err error) {
+	spd, err := plot_all()
 	if err != nil {
 		return
 	}
-	nplots := len(R)
-	nrow, ncol := utl.BestSquare(nplots)
-	splots = make(map[string][]int)
-	for i := 0; i < nplots; i++ {
-		key := TplotKeys[i]
-		splots[key] = []int{nrow, ncol, i + 1}
-		plt.Subplot(nrow, ncol, i+1)
-		for j, Y := range R[i] {
-			sty := TplotData[i].Sty[j]
-			args := sty.GetArgs("clip_on=0")
-			plt.Plot(T, Y, args)
-		}
+	if extra != nil {
+		extra(spd)
 	}
+	plt.Show()
 	return
 }
 
-// Show shows plot
-func Show() {
-	plt.Show()
-}
-
 // Save saves plot
-func Save(dirout, filename string) {
+func Save(dirout, filename string, extra func(spd SubpDat)) (err error) {
+	spd, err := plot_all()
+	if err != nil {
+		return
+	}
+	if extra != nil {
+		extra(spd)
+	}
 	plt.SaveD(dirout, filename)
+	return
 }
 
 // read_results reads all results
@@ -154,6 +156,35 @@ func read_results() (T []float64, R [][][]float64, err error) {
 			for j, q := range dat.Qts {
 				R[i][j][tidx] = *q.Value
 			}
+		}
+	}
+	return
+}
+
+// plot_all plots all results. It returns a map of keys and subplot indices. Ex:
+//  spd: "pl" => 1,1,2 == row,col,idx
+func plot_all() (spd SubpDat, err error) {
+	T, R, err := read_results()
+	if err != nil {
+		return
+	}
+	nplots := len(R)
+	nrow, ncol := utl.BestSquare(nplots)
+	if SubpNrow > 0 {
+		nrow = SubpNrow
+	}
+	if SubpNcol > 0 {
+		ncol = SubpNcol
+	}
+	spd = make(map[string][]int)
+	for i := 0; i < nplots; i++ {
+		key := TplotKeys[i]
+		spd[key] = []int{nrow, ncol, i + 1}
+		plt.Subplot(nrow, ncol, i+1)
+		for j, Y := range R[i] {
+			sty := TplotData[i].Sty[j]
+			args := sty.GetArgs("clip_on=0")
+			plt.Plot(T, Y, args)
 		}
 	}
 	return
