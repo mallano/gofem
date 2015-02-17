@@ -4,10 +4,10 @@
 
 // package out implements FE simulation output handling for analyses and plotting
 //  The main structures containing results are:
-//   T -- slice of time values; e.g. T = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0}
-//   R -- all results for keys, quantities (aka points), and times.
-//        R[nkeys][npts..?][ntimes]. Example:
-//        R = [][][]float64{
+//   TseriesT -- slice of time values; e.g. T = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0}
+//   TseriesR -- all results for keys, quantities (aka points), and times.
+//        TseriesR[nkeys][npts..?][ntimes]. Example:
+//        TseriesR = [][][]float64{
 //          {
 //            {100, 99, 98}, // pl @ point A (bottom of column) for 3 time outputs
 //            {  0,  0,  0}, // pl @ point B (top of column) for 3 time outputs
@@ -54,9 +54,7 @@ var (
 	NodBins gm.Bins      // bins for nodes
 	IpsBins gm.Bins      // bins for integration points
 
-	// results
-	T   []float64        // [ntimes] time series
-	R   [][][]float64    // [nkeys][nqts..?][ntimes] all time-series results
+	// suplot data
 	Spd map[string][]int // [nkeys] subplot data
 )
 
@@ -96,8 +94,8 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 	// clear previous data
 	TseriesClear()
 	Ipoints = make([]*IpDat, 0)
-	T = make([]float64, 0)
-	R = make([][][]float64, 0)
+	TseriesT = make([]float64, 0)
+	TseriesR = make([][][]float64, 0)
 	Spd = make(map[string][]int)
 
 	// bins
@@ -139,15 +137,15 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 // Apply applies commands to generate T and R.
 func Apply() (err error) {
 	TseriesStart()
-	T = make([]float64, Sum.NumTidx)
+	TseriesT = make([]float64, Sum.NumTidx)
 	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
 		if !Dom.ReadSol(tidx) {
 			return utl.Err("ReadSol failed. See log files\n")
 		}
-		T[tidx] = Dom.Sol.T
+		TseriesT[tidx] = Dom.Sol.T
 		for i, dat := range TseriesData {
 			for j, q := range dat.Qts {
-				R[i][j][tidx] = *q.Value
+				TseriesR[i][j][tidx] = *q.Value
 			}
 		}
 	}
@@ -177,7 +175,7 @@ func Save(dirout, filename string, extra func()) (err error) {
 
 // plot_all plots all results
 func plot_all() {
-	nplots := len(R)
+	nplots := len(TseriesR)
 	nrow, ncol := utl.BestSquare(nplots)
 	if SubpNrow > 0 {
 		nrow = SubpNrow
@@ -190,10 +188,10 @@ func plot_all() {
 		key := TseriesKeys[i]
 		Spd[key] = []int{nrow, ncol, i + 1}
 		plt.Subplot(nrow, ncol, i+1)
-		for j, Y := range R[i] {
+		for j, Y := range TseriesR[i] {
 			sty := TseriesData[i].Sty[j]
 			args := sty.GetArgs("clip_on=0")
-			plt.Plot(T, Y, args)
+			plt.Plot(TseriesT, Y, args)
 		}
 	}
 	return

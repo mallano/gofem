@@ -1,0 +1,355 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Gofem &ndash; package mconduct</title>
+<link type="text/css" rel="stylesheet" href="static/style.css">
+<script type="text/javascript" src="static/godocs.js"></script>
+<style type="text/css"></style>
+</head>
+<body>
+<div id="page"><h1>Gofem &ndash; <b>mconduct</b> &ndash; models for liquid/gas conductivity in porous media</h1>
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script type='text/javascript'>
+	document.ANALYSIS_DATA = ;
+	document.CALLGRAPH = ;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/cpmech/gofem/mconduct"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+package mconduct implements models for liquid and gas conductivity in porous media
+</p>
+
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+			
+				
+				<dd><a href="#LogModels">func LogModels()</a></dd>
+			
+			
+				
+				<dd><a href="#M1">type M1</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#M1.DkgrDsg">func (o M1) DkgrDsg(sg float64) float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#M1.DklrDsl">func (o M1) DklrDsl(sl float64) float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#M1.GetPrms">func (o M1) GetPrms(example bool) fun.Prms</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#M1.Init">func (o *M1) Init(prms fun.Prms) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#M1.Kgr">func (o M1) Kgr(sg float64) float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#M1.Klr">func (o M1) Klr(sl float64) float64</a></dd>
+				
+			
+				
+				<dd><a href="#Model">type Model</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#GetModel">func GetModel(simfnk, matname, modelname string, getnew bool) Model</a></dd>
+				
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/cpmech/gofem/mconduct/conductmodels.go">conductmodels.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/mconduct/m1.go">m1.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		<div id="pkg-callgraph" class="toggle" style="display: none">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Internal Call Graph section">Internal call graph ▹</h2>
+		</div> <!-- .expanded -->
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Internal Call Graph section">Internal call graph ▾</h2>
+			<p>
+			  In the call graph viewer below, each node
+			  is a function belonging to this package
+			  and its children are the functions it
+			  calls&mdash;perhaps dynamically.
+			</p>
+			<p>
+			  The root nodes are the entry points of the
+			  package: functions that may be called from
+			  outside the package.
+			  There may be non-exported or anonymous
+			  functions among them if they are called
+			  dynamically from another package.
+			</p>
+			<p>
+			  Click a node to visit that function's source code.
+			  From there you can visit its callers by
+			  clicking its declaring <code>func</code>
+			  token.
+			</p>
+			<p>
+			  Functions may be omitted if they were
+			  determined to be unreachable in the
+			  particular programs or tests that were
+			  analyzed.
+			</p>
+			<!-- Zero means show all package entry points. -->
+			<ul style="margin-left: 0.5in" id="callgraph-0" class="treeview"></ul>
+		</div>
+		</div> <!-- #pkg-callgraph -->
+
+		
+		
+		
+			
+			
+			<h2 id="LogModels">func <a href="/src/target/conductmodels.go?s=1682:1698#L49">LogModels</a></h2>
+			<pre>func LogModels()</pre>
+			<p>
+LogModels prints to log information on existent and allocated Models
+</p>
+
+			
+			
+
+		
+		
+			
+			
+			<h2 id="M1">type <a href="/src/target/m1.go?s=320:564#L3">M1</a></h2>
+			<pre>type M1 struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+M1 implements the liquid-gas conductivity model # 1
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="M1.DkgrDsg">func (M1) <a href="/src/target/m1.go?s=2120:2159#L96">DkgrDsg</a></h3>
+				<pre>func (o <a href="#M1">M1</a>) DkgrDsg(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<p>
+DkgrDsl returns ∂kgr/∂sg
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="M1.DklrDsl">func (M1) <a href="/src/target/m1.go?s=2018:2057#L91">DklrDsl</a></h3>
+				<pre>func (o <a href="#M1">M1</a>) DklrDsl(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<p>
+DklrDsl returns ∂klr/∂sl
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="M1.GetPrms">func (M1) <a href="/src/target/m1.go?s=702:744#L28">GetPrms</a></h3>
+				<pre>func (o <a href="#M1">M1</a>) GetPrms(example <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
+				<p>
+GetPrms gets (an example) of parameters
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="M1.Init">func (*M1) <a href="/src/target/m1.go?s=1062:1106#L42">Init</a></h3>
+				<pre>func (o *<a href="#M1">M1</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Init initialises this structure
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="M1.Kgr">func (M1) <a href="/src/target/m1.go?s=1920:1955#L86">Kgr</a></h3>
+				<pre>func (o <a href="#M1">M1</a>) Kgr(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<p>
+Kgr returns kgr
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="M1.Klr">func (M1) <a href="/src/target/m1.go?s=1835:1870#L81">Klr</a></h3>
+				<pre>func (o <a href="#M1">M1</a>) Klr(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<p>
+Klr returns klr
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Model">type <a href="/src/target/conductmodels.go?s=407:795#L6">Model</a></h2>
+			<pre>type Model interface {
+    Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) <a href="/pkg/builtin/#error">error</a>      <span class="comment">// Init initialises this structure</span>
+    GetPrms(example <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a> <span class="comment">// gets (an example) of parameters</span>
+    Klr(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a>        <span class="comment">// Klr returns klr</span>
+    Kgr(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a>        <span class="comment">// Kgr returns kgr</span>
+    DklrDsl(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a>    <span class="comment">// DklrDsl returns ∂klr/∂sl</span>
+    DkgrDsg(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a>    <span class="comment">// DkgrDsl returns ∂kgr/∂sl</span>
+}</pre>
+			<p>
+Model defines liquid-gas conductivity models
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="GetModel">func <a href="/src/target/conductmodels.go?s=1081:1148#L21">GetModel</a></h3>
+				<pre>func GetModel(simfnk, matname, modelname <a href="/pkg/builtin/#string">string</a>, getnew <a href="/pkg/builtin/#bool">bool</a>) <a href="#Model">Model</a></pre>
+				<p>
+GetModel returns (existent or new) conductivity model
+</p>
+<pre>simfnk    -- unique simulation filename key
+matname   -- name of material
+modelname -- model name
+getnew    -- force a new allocation; i.e. do not use any model found in database
+Note: returns nil on errors
+</pre>
+
+				
+				
+			
+
+			
+		
+	
+
+	
+
+
+
+
+
+</div><!-- page -->
+<div id="footer">
+<br /><br />
+<hr>
+<pre class="copyright">
+Copyright (c) 2015, Dorival Pedroso & Raul Durand
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of gofem nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+</pre><!-- copyright -->
+</div><!-- footer -->
+</body>
+</html>

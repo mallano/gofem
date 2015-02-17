@@ -1,0 +1,869 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Gofem &ndash; package out</title>
+<link type="text/css" rel="stylesheet" href="static/style.css">
+<script type="text/javascript" src="static/godocs.js"></script>
+<style type="text/css"></style>
+</head>
+<body>
+<div id="page"><h1>Gofem &ndash; <b>out</b> &ndash; results analyses and plotting</h1>
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script type='text/javascript'>
+	document.ANALYSIS_DATA = ;
+	document.CALLGRAPH = ;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/cpmech/gofem/out"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+				<dd><a href="#pkg-subdirectories">Subdirectories</a></dd>
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+package out implements FE simulation output handling for analyses and plotting
+</p>
+<pre>The main structures containing results are:
+ TseriesT -- slice of time values; e.g. T = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0}
+ TseriesR -- all results for keys, quantities (aka points), and times.
+      TseriesR[nkeys][npts..?][ntimes]. Example:
+      TseriesR = [][][]float64{
+        {
+          {100, 99, 98}, // pl @ point A (bottom of column) for 3 time outputs
+          {  0,  0,  0}, // pl @ point B (top of column) for 3 time outputs
+        },
+        {
+          {0,      0,      0}, // uy @ point A for 3 time outputs
+          {0, -0.001, -0.002}, // uy @ point B for 3 time outputs
+        },
+      }
+ Spd -- contains subplot data for further configurations. Example:
+        spd := {&#34;pl&#34; : []int{1, 1, 2}} == &#34;pl&#34; =&gt; nrow,ncol,idx
+</pre>
+
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+				<dd><a href="#pkg-variables">Variables</a></dd>
+			
+			
+				
+				<dd><a href="#Apply">func Apply() (err error)</a></dd>
+			
+				
+				<dd><a href="#End">func End()</a></dd>
+			
+				
+				<dd><a href="#Plot">func Plot(keyx, keyy string, loc PointLocator, styles []*plt.LineData)</a></dd>
+			
+				
+				<dd><a href="#Save">func Save(dirout, filename string, extra func()) (err error)</a></dd>
+			
+				
+				<dd><a href="#Show">func Show(extra func())</a></dd>
+			
+				
+				<dd><a href="#Splot">func Splot(key string, loc LineLocator, times []float64, styles []*plt.LineData)</a></dd>
+			
+				
+				<dd><a href="#Start">func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool)</a></dd>
+			
+				
+				<dd><a href="#Tseries">func Tseries(key string, loc PointLocator, sty Styles)</a></dd>
+			
+				
+				<dd><a href="#TseriesClear">func TseriesClear()</a></dd>
+			
+				
+				<dd><a href="#TseriesStart">func TseriesStart()</a></dd>
+			
+			
+				
+				<dd><a href="#Along">type Along</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Along.AlongLine">func (o Along) AlongLine(key string) Quantities</a></dd>
+				
+			
+				
+				<dd><a href="#AlongX">type AlongX</a></dd>
+				
+				
+			
+				
+				<dd><a href="#AlongY">type AlongY</a></dd>
+				
+				
+			
+				
+				<dd><a href="#AlongZ">type AlongZ</a></dd>
+				
+				
+			
+				
+				<dd><a href="#At">type At</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#At.AtPoint">func (o At) AtPoint(key string) Quantities</a></dd>
+				
+			
+				
+				<dd><a href="#IdsOrTags">type IdsOrTags</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#IdsOrTags.AtPoint">func (o IdsOrTags) AtPoint(key string) (res Quantities)</a></dd>
+				
+			
+				
+				<dd><a href="#IpDat">type IpDat</a></dd>
+				
+				
+			
+				
+				<dd><a href="#LineLocator">type LineLocator</a></dd>
+				
+				
+			
+				
+				<dd><a href="#PointLocator">type PointLocator</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Quantities">type Quantities</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Quantities.Len">func (o Quantities) Len() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Quantities.Less">func (o Quantities) Less(i, j int) bool</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Quantities.Swap">func (o Quantities) Swap(i, j int)</a></dd>
+				
+			
+				
+				<dd><a href="#Quantity">type Quantity</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Styles">type Styles</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#GetDefaultStyles">func GetDefaultStyles(n int) Styles</a></dd>
+				
+				
+			
+				
+				<dd><a href="#TseriesDat">type TseriesDat</a></dd>
+				
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/cpmech/gofem/out/auxiliary.go">auxiliary.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/out/filtering.go">filtering.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/out/out.go">out.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/out/quantity.go">quantity.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/out/spaceseries.go">spaceseries.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/out/styles.go">styles.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/out/timeseries.go">timeseries.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		<div id="pkg-callgraph" class="toggle" style="display: none">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Internal Call Graph section">Internal call graph ▹</h2>
+		</div> <!-- .expanded -->
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Internal Call Graph section">Internal call graph ▾</h2>
+			<p>
+			  In the call graph viewer below, each node
+			  is a function belonging to this package
+			  and its children are the functions it
+			  calls&mdash;perhaps dynamically.
+			</p>
+			<p>
+			  The root nodes are the entry points of the
+			  package: functions that may be called from
+			  outside the package.
+			  There may be non-exported or anonymous
+			  functions among them if they are called
+			  dynamically from another package.
+			</p>
+			<p>
+			  Click a node to visit that function's source code.
+			  From there you can visit its callers by
+			  clicking its declaring <code>func</code>
+			  token.
+			</p>
+			<p>
+			  Functions may be omitted if they were
+			  determined to be unreachable in the
+			  particular programs or tests that were
+			  analyzed.
+			</p>
+			<!-- Zero means show all package entry points. -->
+			<ul style="margin-left: 0.5in" id="callgraph-0" class="treeview"></ul>
+		</div>
+		</div> <!-- #pkg-callgraph -->
+
+		
+		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				<pre>var (
+
+    <span class="comment">// constants</span>
+    <span id="TolC">TolC</span>     <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// tolerance to compare x-y-z coordinates</span>
+    <span id="Ndiv">Ndiv</span>     <a href="/pkg/builtin/#int">int</a>     <span class="comment">// bins n-division</span>
+    <span id="SubpNrow">SubpNrow</span> <a href="/pkg/builtin/#int">int</a>     <span class="comment">// override subplot configuration parameters</span>
+    <span id="SubpNcol">SubpNcol</span> <a href="/pkg/builtin/#int">int</a>     <span class="comment">// override subplot configuration parameters</span>
+
+    <span class="comment">// data</span>
+    <span id="Sum">Sum</span>     *<a href="/pkg/github.com/cpmech/gofem/fem/">fem</a>.<a href="/pkg/github.com/cpmech/gofem/fem/#Summary">Summary</a> <span class="comment">// summary of results</span>
+    <span id="Dom">Dom</span>     *<a href="/pkg/github.com/cpmech/gofem/fem/">fem</a>.<a href="/pkg/github.com/cpmech/gofem/fem/#Domain">Domain</a>  <span class="comment">// FE domain</span>
+    <span id="Ipoints">Ipoints</span> []*<a href="#IpDat">IpDat</a>     <span class="comment">// all integration points</span>
+    <span id="NodBins">NodBins</span> <a href="/pkg/github.com/cpmech/gosl/gm/">gm</a>.<a href="/pkg/github.com/cpmech/gosl/gm/#Bins">Bins</a>      <span class="comment">// bins for nodes</span>
+    <span id="IpsBins">IpsBins</span> <a href="/pkg/github.com/cpmech/gosl/gm/">gm</a>.<a href="/pkg/github.com/cpmech/gosl/gm/#Bins">Bins</a>      <span class="comment">// bins for integration points</span>
+
+    <span class="comment">// suplot data</span>
+    <span id="Spd">Spd</span> map[<a href="/pkg/builtin/#string">string</a>][]<a href="/pkg/builtin/#int">int</a> <span class="comment">// [nkeys] subplot data</span>
+)</pre>
+				<p>
+Global variables
+</p>
+
+			
+				<pre>var (
+    <span id="TseriesKeys">TseriesKeys</span> []<a href="/pkg/builtin/#string">string</a>      <span class="comment">// [nkeys] all keys</span>
+    <span id="TseriesData">TseriesData</span> []*<a href="#TseriesDat">TseriesDat</a> <span class="comment">// [nkeys] all items</span>
+    <span id="TseriesT">TseriesT</span>    []<a href="/pkg/builtin/#float64">float64</a>     <span class="comment">// [ntimes] time series</span>
+    <span id="TseriesR">TseriesR</span>    [][][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [nkeys][nqts..?][ntimes] all time-series results</span>
+)</pre>
+				<p>
+Global variables
+</p>
+
+			
+		
+		
+			
+			
+			<h2 id="Apply">func <a href="/src/target/out.go?s=3712:3736#L128">Apply</a></h2>
+			<pre>func Apply() (err <a href="/pkg/builtin/#error">error</a>)</pre>
+			<p>
+Apply applies commands to generate T and R.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="End">func <a href="/src/target/out.go?s=2177:2187#L52">End</a></h2>
+			<pre>func End()</pre>
+			<p>
+End must be called and the end to flush log file
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Plot">func <a href="/src/target/spaceseries.go?s=311:381#L2">Plot</a></h2>
+			<pre>func Plot(keyx, keyy <a href="/pkg/builtin/#string">string</a>, loc <a href="#PointLocator">PointLocator</a>, styles []*<a href="/pkg/github.com/cpmech/gosl/plt/">plt</a>.<a href="/pkg/github.com/cpmech/gosl/plt/#LineData">LineData</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="Save">func <a href="/src/target/out.go?s=4271:4331#L157">Save</a></h2>
+			<pre>func Save(dirout, filename <a href="/pkg/builtin/#string">string</a>, extra func()) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+			<p>
+Save saves plot
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Show">func <a href="/src/target/out.go?s=4159:4182#L147">Show</a></h2>
+			<pre>func Show(extra func())</pre>
+			<p>
+Show shows plot
+</p>
+<pre>extra -- is a function to carry out extra configurations
+</pre>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Splot">func <a href="/src/target/spaceseries.go?s=225:305#L1">Splot</a></h2>
+			<pre>func Splot(key <a href="/pkg/builtin/#string">string</a>, loc <a href="#LineLocator">LineLocator</a>, times []<a href="/pkg/builtin/#float64">float64</a>, styles []*<a href="/pkg/github.com/cpmech/gosl/plt/">plt</a>.<a href="/pkg/github.com/cpmech/gosl/plt/#LineData">LineData</a>)</pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="Start">func <a href="/src/target/out.go?s=2270:2340#L57">Start</a></h2>
+			<pre>func Start(simfnpath <a href="/pkg/builtin/#string">string</a>, stageIdx, regionIdx <a href="/pkg/builtin/#int">int</a>) (startisok <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Start starts handling of results given a simulation input file
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Tseries">func <a href="/src/target/timeseries.go?s=1316:1370#L38">Tseries</a></h2>
+			<pre>func Tseries(key <a href="/pkg/builtin/#string">string</a>, loc <a href="#PointLocator">PointLocator</a>, sty <a href="#Styles">Styles</a>)</pre>
+			<p>
+Tseries specifies a variable at a particular point to be plotted along time
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="TseriesClear">func <a href="/src/target/timeseries.go?s=779:798#L18">TseriesClear</a></h2>
+			<pre>func TseriesClear()</pre>
+			<p>
+TseriesClear clears Tplot data
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="TseriesStart">func <a href="/src/target/timeseries.go?s=948:967#L24">TseriesStart</a></h2>
+			<pre>func TseriesStart()</pre>
+			<p>
+TseriesStart initialise structures containing all time-series results
+</p>
+
+			
+			
+
+		
+		
+			
+			
+			<h2 id="Along">type <a href="/src/target/filtering.go?s=654:748#L14">Along</a></h2>
+			<pre>type Along struct {
+    A []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// first point on line</span>
+    B []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// second point on line</span>
+}</pre>
+			<p>
+Along implements locator along line =&gt; LineLocator
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="Along.AlongLine">func (Along) <a href="/src/target/filtering.go?s=1795:1842#L75">AlongLine</a></h3>
+				<pre>func (o <a href="#Along">Along</a>) AlongLine(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a></pre>
+				<p>
+Along returns quantity along line
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="AlongX">type <a href="/src/target/filtering.go?s=783:804#L20">AlongX</a></h2>
+			<pre>type AlongX []<a href="/pkg/builtin/#float64">float64</a></pre>
+			<p>
+AlongX implements LineLocator
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="AlongY">type <a href="/src/target/filtering.go?s=839:860#L23">AlongY</a></h2>
+			<pre>type AlongY []<a href="/pkg/builtin/#float64">float64</a></pre>
+			<p>
+AlongY implements LineLocator
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="AlongZ">type <a href="/src/target/filtering.go?s=895:916#L26">AlongZ</a></h2>
+			<pre>type AlongZ []<a href="/pkg/builtin/#float64">float64</a></pre>
+			<p>
+AlongZ implements LineLocator
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="At">type <a href="/src/target/filtering.go?s=494:511#L8">At</a></h2>
+			<pre>type At []<a href="/pkg/builtin/#float64">float64</a></pre>
+			<p>
+At implements locator at point =&gt; PointLocator
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="At.AtPoint">func (At) <a href="/src/target/filtering.go?s=955:997#L29">AtPoint</a></h3>
+				<pre>func (o <a href="#At">At</a>) AtPoint(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a></pre>
+				<p>
+AtPoint returns quantity at point
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="IdsOrTags">type <a href="/src/target/filtering.go?s=578:598#L11">IdsOrTags</a></h2>
+			<pre>type IdsOrTags []<a href="/pkg/builtin/#int">int</a></pre>
+			<p>
+IdsOrTags implements locator a specific nodes =&gt; PointLocator
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="IdsOrTags.AtPoint">func (IdsOrTags) <a href="/src/target/filtering.go?s=1341:1396#L52">AtPoint</a></h3>
+				<pre>func (o <a href="#IdsOrTags">IdsOrTags</a>) AtPoint(key <a href="/pkg/builtin/#string">string</a>) (res <a href="#Quantities">Quantities</a>)</pre>
+				<p>
+AtPoint returns quantity at point
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="IpDat">type <a href="/src/target/out.go?s=1366:1563#L24">IpDat</a></h2>
+			<pre>type IpDat struct {
+    Eid <a href="/pkg/builtin/#int">int</a>            <span class="comment">// id of parent element</span>
+    X   []<a href="/pkg/builtin/#float64">float64</a>      <span class="comment">// ip&#39;s coordinates</span>
+    P   *<a href="/pkg/github.com/cpmech/gofem/mporous/">mporous</a>.<a href="/pkg/github.com/cpmech/gofem/mporous/#State">State</a> <span class="comment">// state @ p-element&#39;s ip</span>
+    U   *<a href="/pkg/github.com/cpmech/gofem/msolid/">msolid</a>.<a href="/pkg/github.com/cpmech/gofem/msolid/#State">State</a>  <span class="comment">// state @ u-element&#39;s ip</span>
+}</pre>
+			<p>
+IpDat holds integration point data and serves to aid locating points in space
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="LineLocator">type <a href="/src/target/filtering.go?s=378:442#L3">LineLocator</a></h2>
+			<pre>type LineLocator interface {
+    AlongLine(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a>
+}</pre>
+			<p>
+LineLocator defines interface for locating space positions
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="PointLocator">type <a href="/src/target/filtering.go?s=251:314#L1">PointLocator</a></h2>
+			<pre>type PointLocator interface {
+    AtPoint(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a>
+}</pre>
+			<p>
+PointLocator defines interface for locating space positions
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Quantities">type <a href="/src/target/quantity.go?s=392:419#L4">Quantities</a></h2>
+			<pre>type Quantities []*<a href="#Quantity">Quantity</a></pre>
+			<p>
+Quantities is a set of Quantity
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="Quantities.Len">func (Quantities) <a href="/src/target/quantity.go?s=453:482#L7">Len</a></h3>
+				<pre>func (o <a href="#Quantities">Quantities</a>) Len() <a href="/pkg/builtin/#int">int</a></pre>
+				<p>
+Len the length of Quantities
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Quantities.Less">func (Quantities) <a href="/src/target/quantity.go?s=642:681#L17">Less</a></h3>
+				<pre>func (o <a href="#Quantities">Quantities</a>) Less(i, j <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+				<p>
+Less compares Quantities considering Dist
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Quantities.Swap">func (Quantities) <a href="/src/target/quantity.go?s=532:566#L12">Swap</a></h3>
+				<pre>func (o <a href="#Quantities">Quantities</a>) Swap(i, j <a href="/pkg/builtin/#int">int</a>)</pre>
+				<p>
+Swap swaps two Quantities
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Quantity">type <a href="/src/target/quantity.go?s=226:355#L1">Quantity</a></h2>
+			<pre>type Quantity struct {
+    Value *<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// value of, e.g., &#34;ux&#34;</span>
+    Dist  <a href="/pkg/builtin/#float64">float64</a>  <span class="comment">// distance from reference point (if along line)</span>
+}</pre>
+			<p>
+Quantity holds node or ip quantity
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Styles">type <a href="/src/target/styles.go?s=235:261#L1">Styles</a></h2>
+			<pre>type Styles []<a href="/pkg/github.com/cpmech/gosl/plt/">plt</a>.<a href="/pkg/github.com/cpmech/gosl/plt/#LineData">LineData</a></pre>
+			<p>
+Styles
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="GetDefaultStyles">func <a href="/src/target/styles.go?s=263:298#L2">GetDefaultStyles</a></h3>
+				<pre>func GetDefaultStyles(n <a href="/pkg/builtin/#int">int</a>) <a href="#Styles">Styles</a></pre>
+				
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="TseriesDat">type <a href="/src/target/timeseries.go?s=320:489#L4">TseriesDat</a></h2>
+			<pre>type TseriesDat struct {
+    Qts <a href="#Quantities">Quantities</a> <span class="comment">// [npoints] points where values must be analysed/plotted</span>
+    Sty <a href="#Styles">Styles</a>     <span class="comment">// [npoints] styles =&gt; one item can have many points</span>
+}</pre>
+			<p>
+TseriesDat holds information of one key to be collected along time; e.g. &#34;pl&#34;
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+	
+
+	
+
+
+
+
+
+	
+	
+		<h2 id="pkg-subdirectories">Subdirectories</h2>
+	
+	
+	<table class="dir">
+	<tr>
+	<th>Name</th>
+	<th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+	<th style="text-align: left; width: auto">Synopsis</th>
+	</tr>
+	
+		<tr>
+		<td><a href="..">..</a></td>
+		</tr>
+	
+	
+		
+			<tr>
+			<td class="name"><a href="data/">data</a></td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="width: auto"></td>
+			</tr>
+		
+	
+	</table>
+
+	
+
+</div><!-- page -->
+<div id="footer">
+<br /><br />
+<hr>
+<pre class="copyright">
+Copyright (c) 2015, Dorival Pedroso & Raul Durand
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of gofem nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+</pre><!-- copyright -->
+</div><!-- footer -->
+</body>
+</html>

@@ -48,6 +48,9 @@
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
 				<p>
+package msolid implements models for rod elements
+</p>
+<p>
 package msolid implements models for solids based on continuum mechanics
 </p>
 <pre>*            |   Nonrate     |    Rate
@@ -124,7 +127,7 @@ package msolid implements models for solids based on continuum mechanics
 				<dd><a href="#Calc_nu_from_lG">func Calc_nu_from_lG(l, G float64) float64</a></dd>
 			
 				
-				<dd><a href="#CalcΔεElast">func CalcΔεElast(Δε []float64, K, G float64, Δp, Δq float64, axsym bool) (Δεv, Δεd float64)</a></dd>
+				<dd><a href="#CalcΔεElast">func CalcΔεElast(Δε []float64, K, G float64, Δp, Δq float64, axsym bool) (Δεv, Δεd float64, err error)</a></dd>
 			
 			
 				
@@ -132,7 +135,7 @@ package msolid implements models for solids based on continuum mechanics
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Driver.Init">func (o *Driver) Init(simfnk, modelname string, ndim int, pstress bool, prms fun.Prms)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Driver.Init">func (o *Driver) Init(simfnk, modelname string, ndim int, pstress bool, prms fun.Prms) (err error)</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Driver.Run">func (o *Driver) Run(pth *Path) (err error)</a></dd>
@@ -149,24 +152,16 @@ package msolid implements models for solids based on continuum mechanics
 					<dd>&nbsp; &nbsp; <a href="#DruckerPrager.ContD">func (o *DruckerPrager) ContD(D [][]float64, s *State) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#DruckerPrager.GetPrms">func (o *DruckerPrager) GetPrms() fun.Prms</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#DruckerPrager.GetPrms">func (o DruckerPrager) GetPrms() fun.Prms</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#DruckerPrager.Init">func (o *DruckerPrager) Init(ndim int, pstress bool, prms fun.Prms)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#DruckerPrager.Init">func (o *DruckerPrager) Init(ndim int, pstress bool, prms fun.Prms) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#DruckerPrager.InitIntVars">func (o *DruckerPrager) InitIntVars(s *State) (err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#DruckerPrager.InitIntVars">func (o DruckerPrager) InitIntVars() (s *State, err error)</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#DruckerPrager.Update">func (o *DruckerPrager) Update(s *State, ε, Δε []float64) (err error)</a></dd>
-				
-			
-				
-				<dd><a href="#Info">type Info</a></dd>
-				
-					
-					<dd>&nbsp; &nbsp; <a href="#GetInfo">func GetInfo(ndim int, modelname string) *Info</a></dd>
-				
 				
 			
 				
@@ -187,22 +182,22 @@ package msolid implements models for solids based on continuum mechanics
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#LinElast.CalcD">func (o *LinElast) CalcD(D [][]float64, s *State, firstIt bool) (err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#LinElast.CalcD">func (o LinElast) CalcD(D [][]float64, s *State, firstIt bool) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#LinElast.ContD">func (o *LinElast) ContD(D [][]float64, s *State) (err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#LinElast.ContD">func (o LinElast) ContD(D [][]float64, s *State) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#LinElast.GetPrms">func (o *LinElast) GetPrms() fun.Prms</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#LinElast.GetPrms">func (o LinElast) GetPrms() fun.Prms</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#LinElast.Init">func (o *LinElast) Init(ndim int, pstress bool, prms fun.Prms)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#LinElast.Init">func (o *LinElast) Init(ndim int, pstress bool, prms fun.Prms) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#LinElast.InitIntVars">func (o *LinElast) InitIntVars(s *State) (err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#LinElast.InitIntVars">func (o LinElast) InitIntVars() (s *State, err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#LinElast.Update">func (o *LinElast) Update(s *State, ε, Δε []float64) (err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#LinElast.Update">func (o LinElast) Update(s *State, ε, Δε []float64) (err error)</a></dd>
 				
 			
 				
@@ -213,16 +208,36 @@ package msolid implements models for solids based on continuum mechanics
 					<dd>&nbsp; &nbsp; <a href="#Ogden.CalcA">func (o *Ogden) CalcA(A [][][][]float64, s *State, firstIt bool) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Ogden.GetPrms">func (o *Ogden) GetPrms() fun.Prms</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Ogden.GetPrms">func (o Ogden) GetPrms() fun.Prms</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Ogden.Init">func (o *Ogden) Init(ndim int, pstress bool, prms fun.Prms)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Ogden.Init">func (o *Ogden) Init(ndim int, pstress bool, prms fun.Prms) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Ogden.InitIntVars">func (o *Ogden) InitIntVars(s *State) (err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Ogden.InitIntVars">func (o Ogden) InitIntVars() (s *State, err error)</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Ogden.Update">func (o *Ogden) Update(s *State, F [][]float64) (err error)</a></dd>
+				
+			
+				
+				<dd><a href="#OneDElast">type OneDElast</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#OneDElast.CalcD">func (o OneDElast) CalcD(s *State, firstIt bool) float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#OneDElast.GetPrms">func (o OneDElast) GetPrms() fun.Prms</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#OneDElast.Init">func (o *OneDElast) Init(ndim int, prms fun.Prms) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#OneDElast.InitIntVars">func (o OneDElast) InitIntVars() (s *State, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#OneDElast.Update">func (o OneDElast) Update(s *State, ε, Δε float64) (err error)</a></dd>
 				
 			
 				
@@ -230,19 +245,27 @@ package msolid implements models for solids based on continuum mechanics
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Path.ReadJson">func (o *Path) ReadJson(ndim int, fname string)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Path.ReadJson">func (o *Path) ReadJson(ndim int, fname string) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Path.ReadTable">func (o *Path) ReadTable(ndim, nincs, niout int, fname string, n int, mσ, mε float64, stresspath bool)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Path.ReadTable">func (o *Path) ReadTable(ndim, nincs, niout int, fname string, n int, mσ, mε float64, stresspath bool) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Path.SetIsoCompS">func (o *Path) SetIsoCompS(ndim, nincs, niout int, P []float64)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Path.SetIsoCompS">func (o *Path) SetIsoCompS(ndim, nincs, niout int, P []float64) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Path.SetPQstrain">func (o *Path) SetPQstrain(ndim, nincs, niout int, K, G, p0 float64, DP, DQ []float64, noise float64)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Path.SetPQstrain">func (o *Path) SetPQstrain(ndim, nincs, niout int, K, G, p0 float64, DP, DQ []float64, noise float64) (err error)</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Path.Size">func (o *Path) Size() int</a></dd>
+				
+			
+				
+				<dd><a href="#RodModel">type RodModel</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#GetRodModel">func GetRodModel(simfnk, matname, modelname string, getnew bool) RodModel</a></dd>
+				
 				
 			
 				
@@ -255,16 +278,16 @@ package msolid implements models for solids based on continuum mechanics
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#SmallElasticity.CalcD">func (o *SmallElasticity) CalcD(D [][]float64, s *State) (err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#SmallElasticity.CalcD">func (o SmallElasticity) CalcD(D [][]float64, s *State) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#SmallElasticity.GetPrms">func (o *SmallElasticity) GetPrms() fun.Prms</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#SmallElasticity.GetPrms">func (o SmallElasticity) GetPrms() fun.Prms</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#SmallElasticity.Init">func (o *SmallElasticity) Init(ndim int, pstress bool, prms fun.Prms)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#SmallElasticity.Init">func (o *SmallElasticity) Init(ndim int, pstress bool, prms fun.Prms) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#SmallElasticity.Update">func (o *SmallElasticity) Update(s *State, ε []float64) (err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#SmallElasticity.Update">func (o SmallElasticity) Update(s *State, ε []float64) (err error)</a></dd>
 				
 			
 				
@@ -291,7 +314,30 @@ package msolid implements models for solids based on continuum mechanics
 					<dd>&nbsp; &nbsp; <a href="#State.GetCopy">func (o *State) GetCopy() *State</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#State.Set">func (o *State) Set(large bool, other *State)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#State.Set">func (o *State) Set(other *State)</a></dd>
+				
+			
+				
+				<dd><a href="#VonMises">type VonMises</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VonMises.CalcD">func (o *VonMises) CalcD(D [][]float64, s *State, firstIt bool) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VonMises.ContD">func (o *VonMises) ContD(D [][]float64, s *State) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VonMises.GetPrms">func (o VonMises) GetPrms() fun.Prms</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VonMises.Init">func (o *VonMises) Init(ndim int, pstress bool, prms fun.Prms) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VonMises.InitIntVars">func (o VonMises) InitIntVars() (s *State, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#VonMises.Update">func (o *VonMises) Update(s *State, ε, Δε []float64) (err error)</a></dd>
 				
 			
 			
@@ -315,11 +361,17 @@ package msolid implements models for solids based on continuum mechanics
 			
 				<a href="/src/github.com/cpmech/gofem/msolid/ogden.go">ogden.go</a>
 			
+				<a href="/src/github.com/cpmech/gofem/msolid/onedlinelast.go">onedlinelast.go</a>
+			
 				<a href="/src/github.com/cpmech/gofem/msolid/path.go">path.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/msolid/rod.go">rod.go</a>
 			
 				<a href="/src/github.com/cpmech/gofem/msolid/solid.go">solid.go</a>
 			
 				<a href="/src/github.com/cpmech/gofem/msolid/state.go">state.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/msolid/vm.go">vm.go</a>
 			
 			</span>
 			</p>
@@ -369,7 +421,7 @@ package msolid implements models for solids based on continuum mechanics
 		
 			
 			
-			<h2 id="Calc_E_from_KG">func <a href="/src/target/elasticity.go?s=4725:4766#L171">Calc_E_from_KG</a></h2>
+			<h2 id="Calc_E_from_KG">func <a href="/src/target/elasticity.go?s=4945:4986#L180">Calc_E_from_KG</a></h2>
 			<pre>func Calc_E_from_KG(K, G <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_E_from_KG returns E given K and G
@@ -381,7 +433,7 @@ Calc_E_from_KG returns E given K and G
 		
 			
 			
-			<h2 id="Calc_E_from_Knu">func <a href="/src/target/elasticity.go?s=5162:5205#L188">Calc_E_from_Knu</a></h2>
+			<h2 id="Calc_E_from_Knu">func <a href="/src/target/elasticity.go?s=5382:5425#L197">Calc_E_from_Knu</a></h2>
 			<pre>func Calc_E_from_Knu(K, ν <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_E_from_Knu returns E given K and ν
@@ -393,7 +445,7 @@ Calc_E_from_Knu returns E given K and ν
 		
 			
 			
-			<h2 id="Calc_E_from_lG">func <a href="/src/target/elasticity.go?s=4303:4344#L154">Calc_E_from_lG</a></h2>
+			<h2 id="Calc_E_from_lG">func <a href="/src/target/elasticity.go?s=4523:4564#L163">Calc_E_from_lG</a></h2>
 			<pre>func Calc_E_from_lG(l, G <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_E_from_lG returns E given l and G
@@ -405,7 +457,7 @@ Calc_E_from_lG returns E given l and G
 		
 			
 			
-			<h2 id="Calc_G_from_Enu">func <a href="/src/target/elasticity.go?s=3987:4030#L142">Calc_G_from_Enu</a></h2>
+			<h2 id="Calc_G_from_Enu">func <a href="/src/target/elasticity.go?s=4207:4250#L151">Calc_G_from_Enu</a></h2>
 			<pre>func Calc_G_from_Enu(E, ν <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_G_from_Enu returns G given E and ν. NOTE: G == μ
@@ -417,7 +469,7 @@ Calc_G_from_Enu returns G given E and ν. NOTE: G == μ
 		
 			
 			
-			<h2 id="Calc_G_from_Knu">func <a href="/src/target/elasticity.go?s=5288:5331#L193">Calc_G_from_Knu</a></h2>
+			<h2 id="Calc_G_from_Knu">func <a href="/src/target/elasticity.go?s=5508:5551#L202">Calc_G_from_Knu</a></h2>
 			<pre>func Calc_G_from_Knu(K, ν <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_G_from_Kν returns G given K and ν
@@ -429,7 +481,7 @@ Calc_G_from_Kν returns G given K and ν
 		
 			
 			
-			<h2 id="Calc_K_from_Enu">func <a href="/src/target/elasticity.go?s=4111:4154#L147">Calc_K_from_Enu</a></h2>
+			<h2 id="Calc_K_from_Enu">func <a href="/src/target/elasticity.go?s=4331:4374#L156">Calc_K_from_Enu</a></h2>
 			<pre>func Calc_K_from_Enu(E, ν <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_K_from_Enu returns K given E and ν
@@ -441,7 +493,7 @@ Calc_K_from_Enu returns K given E and ν
 		
 			
 			
-			<h2 id="Calc_K_from_lG">func <a href="/src/target/elasticity.go?s=4548:4589#L164">Calc_K_from_lG</a></h2>
+			<h2 id="Calc_K_from_lG">func <a href="/src/target/elasticity.go?s=4768:4809#L173">Calc_K_from_lG</a></h2>
 			<pre>func Calc_K_from_lG(l, G <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_K_from_lG returns K given l and G
@@ -453,7 +505,7 @@ Calc_K_from_lG returns K given l and G
 		
 			
 			
-			<h2 id="Calc_l_from_Enu">func <a href="/src/target/elasticity.go?s=3832:3875#L137">Calc_l_from_Enu</a></h2>
+			<h2 id="Calc_l_from_Enu">func <a href="/src/target/elasticity.go?s=4052:4095#L146">Calc_l_from_Enu</a></h2>
 			<pre>func Calc_l_from_Enu(E, ν <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_l_from_Enu returns l given E and ν
@@ -465,7 +517,7 @@ Calc_l_from_Enu returns l given E and ν
 		
 			
 			
-			<h2 id="Calc_l_from_KG">func <a href="/src/target/elasticity.go?s=4982:5023#L181">Calc_l_from_KG</a></h2>
+			<h2 id="Calc_l_from_KG">func <a href="/src/target/elasticity.go?s=5202:5243#L190">Calc_l_from_KG</a></h2>
 			<pre>func Calc_l_from_KG(K, G <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_l_from_KG returns l given K and G
@@ -477,7 +529,7 @@ Calc_l_from_KG returns l given K and G
 		
 			
 			
-			<h2 id="Calc_l_from_Knu">func <a href="/src/target/elasticity.go?s=5435:5478#L198">Calc_l_from_Knu</a></h2>
+			<h2 id="Calc_l_from_Knu">func <a href="/src/target/elasticity.go?s=5655:5698#L207">Calc_l_from_Knu</a></h2>
 			<pre>func Calc_l_from_Knu(K, ν <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_l_from_Kν returns l given K and ν
@@ -489,7 +541,7 @@ Calc_l_from_Kν returns l given K and ν
 		
 			
 			
-			<h2 id="Calc_nu_from_KG">func <a href="/src/target/elasticity.go?s=4850:4892#L176">Calc_nu_from_KG</a></h2>
+			<h2 id="Calc_nu_from_KG">func <a href="/src/target/elasticity.go?s=5070:5112#L185">Calc_nu_from_KG</a></h2>
 			<pre>func Calc_nu_from_KG(K, G <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_nu_from_KG returns ν given K and G
@@ -501,7 +553,7 @@ Calc_nu_from_KG returns ν given K and G
 		
 			
 			
-			<h2 id="Calc_nu_from_lG">func <a href="/src/target/elasticity.go?s=4432:4474#L159">Calc_nu_from_lG</a></h2>
+			<h2 id="Calc_nu_from_lG">func <a href="/src/target/elasticity.go?s=4652:4694#L168">Calc_nu_from_lG</a></h2>
 			<pre>func Calc_nu_from_lG(l, G <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Calc_nu_from_lG returns ν given l and G
@@ -513,8 +565,8 @@ Calc_nu_from_lG returns ν given l and G
 		
 			
 			
-			<h2 id="CalcΔεElast">func <a href="/src/target/path.go?s=6192:6293#L254">CalcΔεElast</a></h2>
-			<pre>func CalcΔεElast(Δε []<a href="/pkg/builtin/#float64">float64</a>, K, G <a href="/pkg/builtin/#float64">float64</a>, Δp, Δq <a href="/pkg/builtin/#float64">float64</a>, axsym <a href="/pkg/builtin/#bool">bool</a>) (Δεv, Δεd <a href="/pkg/builtin/#float64">float64</a>)</pre>
+			<h2 id="CalcΔεElast">func <a href="/src/target/path.go?s=6226:6338#L254">CalcΔεElast</a></h2>
+			<pre>func CalcΔεElast(Δε []<a href="/pkg/builtin/#float64">float64</a>, K, G <a href="/pkg/builtin/#float64">float64</a>, Δp, Δq <a href="/pkg/builtin/#float64">float64</a>, axsym <a href="/pkg/builtin/#bool">bool</a>) (Δεv, Δεd <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 CalcΔεElast calculates Δε corresponding to an elastic loading with Δp and Δq
 </p>
@@ -526,7 +578,7 @@ CalcΔεElast calculates Δε corresponding to an elastic loading with Δp and �
 		
 			
 			
-			<h2 id="Driver">type <a href="/src/target/driver.go?s=384:1092#L5">Driver</a></h2>
+			<h2 id="Driver">type <a href="/src/target/driver.go?s=384:1090#L5">Driver</a></h2>
 			<pre>type Driver struct {
 
     <span class="comment">// settings</span>
@@ -562,8 +614,8 @@ Driver run simulations with constitutive models for solids
 
 			
 				
-				<h3 id="Driver.Init">func (*Driver) <a href="/src/target/driver.go?s=1121:1207#L31">Init</a></h3>
-				<pre>func (o *<a href="#Driver">Driver</a>) Init(simfnk, modelname <a href="/pkg/builtin/#string">string</a>, ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>)</pre>
+				<h3 id="Driver.Init">func (*Driver) <a href="/src/target/driver.go?s=1119:1217#L31">Init</a></h3>
+				<pre>func (o *<a href="#Driver">Driver</a>) Init(simfnk, modelname <a href="/pkg/builtin/#string">string</a>, ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises driver
 </p>
@@ -573,7 +625,7 @@ Init initialises driver
 				
 			
 				
-				<h3 id="Driver.Run">func (*Driver) <a href="/src/target/driver.go?s=1457:1500#L42">Run</a></h3>
+				<h3 id="Driver.Run">func (*Driver) <a href="/src/target/driver.go?s=1567:1610#L49">Run</a></h3>
 				<pre>func (o *<a href="#Driver">Driver</a>) Run(pth *<a href="#Path">Path</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Run runs simulation
@@ -586,7 +638,7 @@ Run runs simulation
 		
 			
 			
-			<h2 id="DruckerPrager">type <a href="/src/target/dp.go?s=323:561#L3">DruckerPrager</a></h2>
+			<h2 id="DruckerPrager">type <a href="/src/target/dp.go?s=353:591#L4">DruckerPrager</a></h2>
 			<pre>type DruckerPrager struct {
     <a href="#SmallElasticity">SmallElasticity</a>
     M  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// slope of fc line</span>
@@ -612,7 +664,7 @@ DruckerPrager implements Drucker-Prager plasticity model
 
 			
 				
-				<h3 id="DruckerPrager.CalcD">func (*DruckerPrager) <a href="/src/target/dp.go?s=3118:3198#L131">CalcD</a></h3>
+				<h3 id="DruckerPrager.CalcD">func (*DruckerPrager) <a href="/src/target/dp.go?s=3223:3303#L126">CalcD</a></h3>
 				<pre>func (o *<a href="#DruckerPrager">DruckerPrager</a>) CalcD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 CalcD computes D = dσ_new/dε_new consistent with StressUpdate
@@ -623,7 +675,7 @@ CalcD computes D = dσ_new/dε_new consistent with StressUpdate
 				
 			
 				
-				<h3 id="DruckerPrager.ContD">func (*DruckerPrager) <a href="/src/target/dp.go?s=4461:4527#L190">ContD</a></h3>
+				<h3 id="DruckerPrager.ContD">func (*DruckerPrager) <a href="/src/target/dp.go?s=4436:4502#L177">ContD</a></h3>
 				<pre>func (o *<a href="#DruckerPrager">DruckerPrager</a>) ContD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 ContD computes D = dσ_new/dε_new continuous
@@ -634,8 +686,8 @@ ContD computes D = dσ_new/dε_new continuous
 				
 			
 				
-				<h3 id="DruckerPrager.GetPrms">func (*DruckerPrager) <a href="/src/target/dp.go?s=1318:1360#L50">GetPrms</a></h3>
-				<pre>func (o *<a href="#DruckerPrager">DruckerPrager</a>) GetPrms() <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a></pre>
+				<h3 id="DruckerPrager.GetPrms">func (DruckerPrager) <a href="/src/target/dp.go?s=1413:1454#L50">GetPrms</a></h3>
+				<pre>func (o <a href="#DruckerPrager">DruckerPrager</a>) GetPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 				<p>
 GetPrms gets (an example) of parameters
 </p>
@@ -645,8 +697,8 @@ GetPrms gets (an example) of parameters
 				
 			
 				
-				<h3 id="DruckerPrager.Init">func (*DruckerPrager) <a href="/src/target/dp.go?s=906:973#L27">Init</a></h3>
-				<pre>func (o *<a href="#DruckerPrager">DruckerPrager</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>)</pre>
+				<h3 id="DruckerPrager.Init">func (*DruckerPrager) <a href="/src/target/dp.go?s=723:802#L19">Init</a></h3>
+				<pre>func (o *<a href="#DruckerPrager">DruckerPrager</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises model
 </p>
@@ -656,8 +708,8 @@ Init initialises model
 				
 			
 				
-				<h3 id="DruckerPrager.InitIntVars">func (*DruckerPrager) <a href="/src/target/dp.go?s=1556:1613#L60">InitIntVars</a></h3>
-				<pre>func (o *<a href="#DruckerPrager">DruckerPrager</a>) InitIntVars(s *<a href="#State">State</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<h3 id="DruckerPrager.InitIntVars">func (DruckerPrager) <a href="/src/target/dp.go?s=1650:1708#L60">InitIntVars</a></h3>
+				<pre>func (o <a href="#DruckerPrager">DruckerPrager</a>) InitIntVars() (s *<a href="#State">State</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 InitIntVars initialises internal (secondary) variables
 </p>
@@ -667,7 +719,7 @@ InitIntVars initialises internal (secondary) variables
 				
 			
 				
-				<h3 id="DruckerPrager.Update">func (*DruckerPrager) <a href="/src/target/dp.go?s=1672:1744#L65">Update</a></h3>
+				<h3 id="DruckerPrager.Update">func (*DruckerPrager) <a href="/src/target/dp.go?s=1802:1874#L66">Update</a></h3>
 				<pre>func (o *<a href="#DruckerPrager">DruckerPrager</a>) Update(s *<a href="#State">State</a>, ε, Δε []<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Update updates stresses for given strains
@@ -680,48 +732,9 @@ Update updates stresses for given strains
 		
 			
 			
-			<h2 id="Info">type <a href="/src/target/solid.go?s=1096:1436#L21">Info</a></h2>
-			<pre>type Info struct {
-    Nsig   <a href="/pkg/builtin/#int">int</a>      <span class="comment">// number of stress components == 2 * ndim</span>
-    Nalp   <a href="/pkg/builtin/#int">int</a>      <span class="comment">// number of alpha variables</span>
-    Nphi   <a href="/pkg/builtin/#int">int</a>      <span class="comment">// number of phi variables</span>
-    Rate   <a href="/pkg/builtin/#bool">bool</a>     <span class="comment">// is rate-type model?</span>
-    Large  <a href="/pkg/builtin/#bool">bool</a>     <span class="comment">// for large deformation</span>
-    Alphas []<a href="/pkg/builtin/#string">string</a> <span class="comment">// names of alpha variables</span>
-    Phis   []<a href="/pkg/builtin/#string">string</a> <span class="comment">// names of phi variables</span>
-}</pre>
-			<p>
-Info holds information about a particular solid model
-</p>
-
-
-			
-
-			
-
-			
-			
-			
-
-			
-				
-				<h3 id="GetInfo">func <a href="/src/target/solid.go?s=2792:2838#L57">GetInfo</a></h3>
-				<pre>func GetInfo(ndim <a href="/pkg/builtin/#int">int</a>, modelname <a href="/pkg/builtin/#string">string</a>) *<a href="#Info">Info</a></pre>
-				<p>
-GetInfo returns (existent or new) information about a particular solid model
-</p>
-
-				
-				
-			
-
-			
-		
-			
-			
-			<h2 id="KGcalculator">type <a href="/src/target/elasticity.go?s=393:476#L5">KGcalculator</a></h2>
+			<h2 id="KGcalculator">type <a href="/src/target/elasticity.go?s=393:488#L5">KGcalculator</a></h2>
 			<pre>type KGcalculator interface {
-    Init(prms <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>)
+    Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)
     Calc(s *<a href="#State">State</a>) (K, G <a href="/pkg/builtin/#float64">float64</a>)
 }</pre>
 			<p>
@@ -739,8 +752,8 @@ KGcalculator defines calculators of elasticity coefficients K and G
 
 			
 				
-				<h3 id="GetKgc">func <a href="/src/target/elasticity.go?s=598:650#L14">GetKgc</a></h3>
-				<pre>func GetKgc(name <a href="/pkg/builtin/#string">string</a>, prms <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>) <a href="#KGcalculator">KGcalculator</a></pre>
+				<h3 id="GetKgc">func <a href="/src/target/elasticity.go?s=610:662#L14">GetKgc</a></h3>
+				<pre>func GetKgc(name <a href="/pkg/builtin/#string">string</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) <a href="#KGcalculator">KGcalculator</a></pre>
 				<p>
 GetKgc returns a KG calculator
 </p>
@@ -753,7 +766,7 @@ GetKgc returns a KG calculator
 		
 			
 			
-			<h2 id="Large">type <a href="/src/target/solid.go?s=2213:2467#L46">Large</a></h2>
+			<h2 id="Large">type <a href="/src/target/solid.go?s=1846:2100#L35">Large</a></h2>
 			<pre>type Large interface {
     Update(s *<a href="#State">State</a>, F, FΔ [][]<a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#error">error</a>              <span class="comment">// updates stresses for new deformation F and FΔ</span>
     CalcA(A [][][][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#error">error</a> <span class="comment">// computes tangent modulus A = (2/J) * ∂τ/∂b . b - σ palm I</span>
@@ -798,8 +811,8 @@ LinElast implements a linear elastic model
 
 			
 				
-				<h3 id="LinElast.CalcD">func (*LinElast) <a href="/src/target/linelast.go?s=1118:1193#L33">CalcD</a></h3>
-				<pre>func (o *<a href="#LinElast">LinElast</a>) CalcD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<h3 id="LinElast.CalcD">func (LinElast) <a href="/src/target/linelast.go?s=1086:1160#L31">CalcD</a></h3>
+				<pre>func (o <a href="#LinElast">LinElast</a>) CalcD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 CalcD computes D = dσ_new/dε_new consistent with StressUpdate
 </p>
@@ -809,8 +822,8 @@ CalcD computes D = dσ_new/dε_new consistent with StressUpdate
 				
 			
 				
-				<h3 id="LinElast.ContD">func (*LinElast) <a href="/src/target/linelast.go?s=1286:1347#L38">ContD</a></h3>
-				<pre>func (o *<a href="#LinElast">LinElast</a>) ContD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<h3 id="LinElast.ContD">func (LinElast) <a href="/src/target/linelast.go?s=1253:1313#L36">ContD</a></h3>
+				<pre>func (o <a href="#LinElast">LinElast</a>) ContD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 ContD computes D = dσ_new/dε_new continuous
 </p>
@@ -820,8 +833,8 @@ ContD computes D = dσ_new/dε_new continuous
 				
 			
 				
-				<h3 id="LinElast.GetPrms">func (*LinElast) <a href="/src/target/linelast.go?s=690:727#L18">GetPrms</a></h3>
-				<pre>func (o *<a href="#LinElast">LinElast</a>) GetPrms() <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a></pre>
+				<h3 id="LinElast.GetPrms">func (LinElast) <a href="/src/target/linelast.go?s=624:660#L15">GetPrms</a></h3>
+				<pre>func (o <a href="#LinElast">LinElast</a>) GetPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 				<p>
 GetPrms gets (an example) of parameters
 </p>
@@ -831,8 +844,8 @@ GetPrms gets (an example) of parameters
 				
 			
 				
-				<h3 id="LinElast.Init">func (*LinElast) <a href="/src/target/linelast.go?s=534:596#L13">Init</a></h3>
-				<pre>func (o *<a href="#LinElast">LinElast</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>)</pre>
+				<h3 id="LinElast.Init">func (*LinElast) <a href="/src/target/linelast.go?s=449:523#L10">Init</a></h3>
+				<pre>func (o *<a href="#LinElast">LinElast</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises model
 </p>
@@ -842,8 +855,8 @@ Init initialises model
 				
 			
 				
-				<h3 id="LinElast.InitIntVars">func (*LinElast) <a href="/src/target/linelast.go?s=827:879#L23">InitIntVars</a></h3>
-				<pre>func (o *<a href="#LinElast">LinElast</a>) InitIntVars(s *<a href="#State">State</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<h3 id="LinElast.InitIntVars">func (LinElast) <a href="/src/target/linelast.go?s=760:813#L20">InitIntVars</a></h3>
+				<pre>func (o <a href="#LinElast">LinElast</a>) InitIntVars() (s *<a href="#State">State</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 InitIntVars initialises internal (secondary) variables
 </p>
@@ -853,8 +866,8 @@ InitIntVars initialises internal (secondary) variables
 				
 			
 				
-				<h3 id="LinElast.Update">func (*LinElast) <a href="/src/target/linelast.go?s=938:1005#L28">Update</a></h3>
-				<pre>func (o *<a href="#LinElast">LinElast</a>) Update(s *<a href="#State">State</a>, ε, Δε []<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<h3 id="LinElast.Update">func (LinElast) <a href="/src/target/linelast.go?s=907:973#L26">Update</a></h3>
+				<pre>func (o <a href="#LinElast">LinElast</a>) Update(s *<a href="#State">State</a>, ε, Δε []<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Update updates stresses for given strains
 </p>
@@ -866,13 +879,16 @@ Update updates stresses for given strains
 		
 			
 			
-			<h2 id="Ogden">type <a href="/src/target/ogden.go?s=345:777#L6">Ogden</a></h2>
+			<h2 id="Ogden">type <a href="/src/target/ogden.go?s=345:886#L6">Ogden</a></h2>
 			<pre>type Ogden struct {
 
+    <span class="comment">// basic data</span>
+    Nsig <a href="/pkg/builtin/#int">int</a> <span class="comment">// number of stress components</span>
+
     <span class="comment">// parameters</span>
-    Alp []<a href="/pkg/builtin/#float64">float64</a>
-    Mu  []<a href="/pkg/builtin/#float64">float64</a>
-    K   <a href="/pkg/builtin/#float64">float64</a>
+    Alp []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// α parameters</span>
+    Mu  []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// μ parameters</span>
+    K   <a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// Bulk modulus</span>
 
     <span class="comment">// auxiliary</span>
     Fi [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// inverse of F [3][3]</span>
@@ -898,7 +914,7 @@ Ogden implements a linear elastic model
 
 			
 				
-				<h3 id="Ogden.CalcA">func (*Ogden) <a href="/src/target/ogden.go?s=2574:2650#L101">CalcA</a></h3>
+				<h3 id="Ogden.CalcA">func (*Ogden) <a href="/src/target/ogden.go?s=2692:2768#L105">CalcA</a></h3>
 				<pre>func (o *<a href="#Ogden">Ogden</a>) CalcA(A [][][][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 CalcA computes tangent modulus A = (2/J) * ∂τ/∂b . b - σ palm I
@@ -909,8 +925,8 @@ CalcA computes tangent modulus A = (2/J) * ∂τ/∂b . b - σ palm I
 				
 			
 				
-				<h3 id="Ogden.GetPrms">func (*Ogden) <a href="/src/target/ogden.go?s=1601:1635#L62">GetPrms</a></h3>
-				<pre>func (o *<a href="#Ogden">Ogden</a>) GetPrms() <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a></pre>
+				<h3 id="Ogden.GetPrms">func (Ogden) <a href="/src/target/ogden.go?s=1680:1713#L65">GetPrms</a></h3>
+				<pre>func (o <a href="#Ogden">Ogden</a>) GetPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 				<p>
 GetPrms gets (an example) of parameters
 </p>
@@ -920,8 +936,8 @@ GetPrms gets (an example) of parameters
 				
 			
 				
-				<h3 id="Ogden.Init">func (*Ogden) <a href="/src/target/ogden.go?s=985:1044#L33">Init</a></h3>
-				<pre>func (o *<a href="#Ogden">Ogden</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>)</pre>
+				<h3 id="Ogden.Init">func (*Ogden) <a href="/src/target/ogden.go?s=1013:1084#L33">Init</a></h3>
+				<pre>func (o *<a href="#Ogden">Ogden</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises model
 </p>
@@ -931,8 +947,8 @@ Init initialises model
 				
 			
 				
-				<h3 id="Ogden.InitIntVars">func (*Ogden) <a href="/src/target/ogden.go?s=1720:1769#L67">InitIntVars</a></h3>
-				<pre>func (o *<a href="#Ogden">Ogden</a>) InitIntVars(s *<a href="#State">State</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<h3 id="Ogden.InitIntVars">func (Ogden) <a href="/src/target/ogden.go?s=1798:1848#L70">InitIntVars</a></h3>
+				<pre>func (o <a href="#Ogden">Ogden</a>) InitIntVars() (s *<a href="#State">State</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 InitIntVars initialises internal (secondary) variables
 </p>
@@ -942,7 +958,7 @@ InitIntVars initialises internal (secondary) variables
 				
 			
 				
-				<h3 id="Ogden.Update">func (*Ogden) <a href="/src/target/ogden.go?s=1828:1887#L72">Update</a></h3>
+				<h3 id="Ogden.Update">func (*Ogden) <a href="/src/target/ogden.go?s=1941:2000#L76">Update</a></h3>
 				<pre>func (o *<a href="#Ogden">Ogden</a>) Update(s *<a href="#State">State</a>, F [][]<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Update updates stresses for given strains
@@ -955,7 +971,86 @@ Update updates stresses for given strains
 		
 			
 			
-			<h2 id="Path">type <a href="/src/target/path.go?s=349:1168#L6">Path</a></h2>
+			<h2 id="OneDElast">type <a href="/src/target/onedlinelast.go?s=275:341#L1">OneDElast</a></h2>
+			<pre>type OneDElast struct {
+    E    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Young modulus</span>
+    Nsig <a href="/pkg/builtin/#int">int</a>
+}</pre>
+			<p>
+OneDElast implements a linear elastic model
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="OneDElast.CalcD">func (OneDElast) <a href="/src/target/onedlinelast.go?s=1160:1216#L44">CalcD</a></h3>
+				<pre>func (o <a href="#OneDElast">OneDElast</a>) CalcD(s *<a href="#State">State</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<p>
+CalcD computes D = dσ_new/dε_new consistent with StressUpdate
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="OneDElast.GetPrms">func (OneDElast) <a href="/src/target/onedlinelast.go?s=688:725#L25">GetPrms</a></h3>
+				<pre>func (o <a href="#OneDElast">OneDElast</a>) GetPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
+				<p>
+GetPrms gets (an example) of parameters
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="OneDElast.Init">func (*OneDElast) <a href="/src/target/onedlinelast.go?s=483:544#L11">Init</a></h3>
+				<pre>func (o *<a href="#OneDElast">OneDElast</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Init initialises model
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="OneDElast.InitIntVars">func (OneDElast) <a href="/src/target/onedlinelast.go?s=842:896#L32">InitIntVars</a></h3>
+				<pre>func (o <a href="#OneDElast">OneDElast</a>) InitIntVars() (s *<a href="#State">State</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+InitIntVars initialises internal (secondary) variables
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="OneDElast.Update">func (OneDElast) <a href="/src/target/onedlinelast.go?s=990:1055#L38">Update</a></h3>
+				<pre>func (o <a href="#OneDElast">OneDElast</a>) Update(s *<a href="#State">State</a>, ε, Δε <a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Update updates stresses for given strains
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Path">type <a href="/src/target/path.go?s=349:1084#L6">Path</a></h2>
 			<pre>type Path struct {
 
     <span class="comment">// from json</span>
@@ -992,8 +1087,8 @@ Path holds data for solid constitutive model simulations
 
 			
 				
-				<h3 id="Path.ReadJson">func (*Path) <a href="/src/target/path.go?s=2587:2634#L79">ReadJson</a></h3>
-				<pre>func (o *<a href="#Path">Path</a>) ReadJson(ndim <a href="/pkg/builtin/#int">int</a>, fname <a href="/pkg/builtin/#string">string</a>)</pre>
+				<h3 id="Path.ReadJson">func (*Path) <a href="/src/target/path.go?s=2541:2600#L78">ReadJson</a></h3>
+				<pre>func (o *<a href="#Path">Path</a>) ReadJson(ndim <a href="/pkg/builtin/#int">int</a>, fname <a href="/pkg/builtin/#string">string</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 ReadJson reads json file
 </p>
@@ -1003,8 +1098,8 @@ ReadJson reads json file
 				
 			
 				
-				<h3 id="Path.ReadTable">func (*Path) <a href="/src/target/path.go?s=3005:3109#L99">ReadTable</a></h3>
-				<pre>func (o *<a href="#Path">Path</a>) ReadTable(ndim, nincs, niout <a href="/pkg/builtin/#int">int</a>, fname <a href="/pkg/builtin/#string">string</a>, n <a href="/pkg/builtin/#int">int</a>, mσ, mε <a href="/pkg/builtin/#float64">float64</a>, stresspath <a href="/pkg/builtin/#bool">bool</a>)</pre>
+				<h3 id="Path.ReadTable">func (*Path) <a href="/src/target/path.go?s=2988:3104#L98">ReadTable</a></h3>
+				<pre>func (o *<a href="#Path">Path</a>) ReadTable(ndim, nincs, niout <a href="/pkg/builtin/#int">int</a>, fname <a href="/pkg/builtin/#string">string</a>, n <a href="/pkg/builtin/#int">int</a>, mσ, mε <a href="/pkg/builtin/#float64">float64</a>, stresspath <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 ReadTable loads path from datafile in table format
 </p>
@@ -1016,8 +1111,8 @@ ReadTable loads path from datafile in table format
 				
 			
 				
-				<h3 id="Path.SetIsoCompS">func (*Path) <a href="/src/target/path.go?s=1327:1390#L35">SetIsoCompS</a></h3>
-				<pre>func (o *<a href="#Path">Path</a>) SetIsoCompS(ndim, nincs, niout <a href="/pkg/builtin/#int">int</a>, P []<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<h3 id="Path.SetIsoCompS">func (*Path) <a href="/src/target/path.go?s=1243:1318#L34">SetIsoCompS</a></h3>
+				<pre>func (o *<a href="#Path">Path</a>) SetIsoCompS(ndim, nincs, niout <a href="/pkg/builtin/#int">int</a>, P []<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 SetIsoCompS sets an isotropic compression path (stress driven)
 </p>
@@ -1027,8 +1122,8 @@ SetIsoCompS sets an isotropic compression path (stress driven)
 				
 			
 				
-				<h3 id="Path.SetPQstrain">func (*Path) <a href="/src/target/path.go?s=1801:1902#L52">SetPQstrain</a></h3>
-				<pre>func (o *<a href="#Path">Path</a>) SetPQstrain(ndim, nincs, niout <a href="/pkg/builtin/#int">int</a>, K, G, p0 <a href="/pkg/builtin/#float64">float64</a>, DP, DQ []<a href="/pkg/builtin/#float64">float64</a>, noise <a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<h3 id="Path.SetPQstrain">func (*Path) <a href="/src/target/path.go?s=1736:1849#L51">SetPQstrain</a></h3>
+				<pre>func (o *<a href="#Path">Path</a>) SetPQstrain(ndim, nincs, niout <a href="/pkg/builtin/#int">int</a>, K, G, p0 <a href="/pkg/builtin/#float64">float64</a>, DP, DQ []<a href="/pkg/builtin/#float64">float64</a>, noise <a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 SetPQstrain sets a p-q path with w=1 (compression); but given in terms of strains
 </p>
@@ -1038,7 +1133,7 @@ SetPQstrain sets a p-q path with w=1 (compression); but given in terms of strain
 				
 			
 				
-				<h3 id="Path.Size">func (*Path) <a href="/src/target/path.go?s=1216:1241#L32">Size</a></h3>
+				<h3 id="Path.Size">func (*Path) <a href="/src/target/path.go?s=1132:1157#L31">Size</a></h3>
 				<pre>func (o *<a href="#Path">Path</a>) Size() <a href="/pkg/builtin/#int">int</a></pre>
 				<p>
 Size returns the number of path components
@@ -1051,7 +1146,50 @@ Size returns the number of path components
 		
 			
 			
-			<h2 id="Small">type <a href="/src/target/solid.go?s=1815:2140#L39">Small</a></h2>
+			<h2 id="RodModel">type <a href="/src/target/rod.go?s=365:765#L4">RodModel</a></h2>
+			<pre>type RodModel interface {
+    Init(ndim <a href="/pkg/builtin/#int">int</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) <a href="/pkg/builtin/#error">error</a>   <span class="comment">// initialises model</span>
+    GetPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>                    <span class="comment">// gets (an example) of parameters</span>
+    CalcD(s *<a href="#State">State</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// computes D = dσ_new/dε_new consistent with StressUpdate</span>
+    Update(s *<a href="#State">State</a>, ε, Δε <a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)
+    InitIntVars() (*<a href="#State">State</a>, <a href="/pkg/builtin/#error">error</a>) <span class="comment">// initialises AND allocates internal (secondary) variables</span>
+}</pre>
+			<p>
+RodModel defines the interface for rod models
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="GetRodModel">func <a href="/src/target/rod.go?s=1042:1115#L18">GetRodModel</a></h3>
+				<pre>func GetRodModel(simfnk, matname, modelname <a href="/pkg/builtin/#string">string</a>, getnew <a href="/pkg/builtin/#bool">bool</a>) <a href="#RodModel">RodModel</a></pre>
+				<p>
+GetModel returns (existent or new) rod model
+</p>
+<pre>simfnk    -- unique simulation filename key
+matname   -- name of material
+modelname -- model name
+getnew    -- force a new allocation; i.e. do not use any model found in database
+Note: returns nil on errors
+</pre>
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="Small">type <a href="/src/target/solid.go?s=1448:1773#L28">Small</a></h2>
 			<pre>type Small interface {
     Update(s *<a href="#State">State</a>, ε, Δε []<a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#error">error</a>            <span class="comment">// updates stresses for given strains</span>
     CalcD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#error">error</a> <span class="comment">// computes D = dσ_new/dε_new consistent with StressUpdate</span>
@@ -1076,8 +1214,9 @@ Small defines rate type solid models for small strain analyses
 		
 			
 			
-			<h2 id="SmallElasticity">type <a href="/src/target/elasticity.go?s=887:1180#L25">SmallElasticity</a></h2>
+			<h2 id="SmallElasticity">type <a href="/src/target/elasticity.go?s=856:1200#L25">SmallElasticity</a></h2>
 			<pre>type SmallElasticity struct {
+    Nsig  <a href="/pkg/builtin/#int">int</a>          <span class="comment">// number of stress components</span>
     E, Nu <a href="/pkg/builtin/#float64">float64</a>      <span class="comment">// Young modulus and Poisson coefficient</span>
     L, G  <a href="/pkg/builtin/#float64">float64</a>      <span class="comment">// Lame&#39;s coefficients. L == λ, G == μ</span>
     K     <a href="/pkg/builtin/#float64">float64</a>      <span class="comment">// Bulk modulus</span>
@@ -1101,8 +1240,8 @@ SmallElasticity implements linear/non-linear elasticity for small strain analyse
 
 			
 				
-				<h3 id="SmallElasticity.CalcD">func (*SmallElasticity) <a href="/src/target/elasticity.go?s=2971:3039#L103">CalcD</a></h3>
-				<pre>func (o *<a href="#SmallElasticity">SmallElasticity</a>) CalcD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<h3 id="SmallElasticity.CalcD">func (SmallElasticity) <a href="/src/target/elasticity.go?s=3180:3247#L113">CalcD</a></h3>
+				<pre>func (o <a href="#SmallElasticity">SmallElasticity</a>) CalcD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 CalcD computes D = dσ_new/dε_new (consistent)
 </p>
@@ -1112,8 +1251,8 @@ CalcD computes D = dσ_new/dε_new (consistent)
 				
 			
 				
-				<h3 id="SmallElasticity.GetPrms">func (*SmallElasticity) <a href="/src/target/elasticity.go?s=2360:2404#L77">GetPrms</a></h3>
-				<pre>func (o *<a href="#SmallElasticity">SmallElasticity</a>) GetPrms() <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a></pre>
+				<h3 id="SmallElasticity.GetPrms">func (SmallElasticity) <a href="/src/target/elasticity.go?s=2572:2615#L87">GetPrms</a></h3>
+				<pre>func (o <a href="#SmallElasticity">SmallElasticity</a>) GetPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 				<p>
 GetPrms gets (an example) of parameters
 </p>
@@ -1123,8 +1262,8 @@ GetPrms gets (an example) of parameters
 				
 			
 				
-				<h3 id="SmallElasticity.Init">func (*SmallElasticity) <a href="/src/target/elasticity.go?s=1217:1286#L34">Init</a></h3>
-				<pre>func (o *<a href="#SmallElasticity">SmallElasticity</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>)</pre>
+				<h3 id="SmallElasticity.Init">func (*SmallElasticity) <a href="/src/target/elasticity.go?s=1237:1318#L35">Init</a></h3>
+				<pre>func (o *<a href="#SmallElasticity">SmallElasticity</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises this structure
 </p>
@@ -1134,8 +1273,8 @@ Init initialises this structure
 				
 			
 				
-				<h3 id="SmallElasticity.Update">func (*SmallElasticity) <a href="/src/target/elasticity.go?s=2542:2610#L85">Update</a></h3>
-				<pre>func (o *<a href="#SmallElasticity">SmallElasticity</a>) Update(s *<a href="#State">State</a>, ε []<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<h3 id="SmallElasticity.Update">func (SmallElasticity) <a href="/src/target/elasticity.go?s=2753:2820#L95">Update</a></h3>
+				<pre>func (o <a href="#SmallElasticity">SmallElasticity</a>) Update(s *<a href="#State">State</a>, ε []<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Update computes new stresses for new strains ε
 </p>
@@ -1147,7 +1286,7 @@ Update computes new stresses for new strains ε
 		
 			
 			
-			<h2 id="SmallStrainUpdater">type <a href="/src/target/solid.go?s=2561:2710#L52">SmallStrainUpdater</a></h2>
+			<h2 id="SmallStrainUpdater">type <a href="/src/target/solid.go?s=2194:2343#L41">SmallStrainUpdater</a></h2>
 			<pre>type SmallStrainUpdater interface {
     StrainUpdate(s *<a href="#State">State</a>, Δσ []<a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#error">error</a> <span class="comment">// updates strains for given stresses (small strains formulation)</span>
 }</pre>
@@ -1170,11 +1309,11 @@ SmallStrainUpdater define small-strain models that can update strains for given 
 		
 			
 			
-			<h2 id="Solid">type <a href="/src/target/solid.go?s=1486:1747#L32">Solid</a></h2>
+			<h2 id="Solid">type <a href="/src/target/solid.go?s=1087:1380#L21">Solid</a></h2>
 			<pre>type Solid interface {
-    Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>) <span class="comment">// initialises model</span>
-    GetPrms() <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>                          <span class="comment">// gets (an example) of parameters</span>
-    InitIntVars(s *<a href="#State">State</a>) <a href="/pkg/builtin/#error">error</a>                 <span class="comment">// initialises internal (secondary) variables</span>
+    Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) <a href="/pkg/builtin/#error">error</a> <span class="comment">// initialises model</span>
+    GetPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>                                <span class="comment">// gets (an example) of parameters</span>
+    InitIntVars() (*<a href="#State">State</a>, <a href="/pkg/builtin/#error">error</a>)                     <span class="comment">// initialises AND allocates internal (secondary) variables</span>
 }</pre>
 			<p>
 Solid defines the interface for solid models
@@ -1191,7 +1330,7 @@ Solid defines the interface for solid models
 
 			
 				
-				<h3 id="GetModel">func <a href="/src/target/solid.go?s=3378:3445#L80">GetModel</a></h3>
+				<h3 id="GetModel">func <a href="/src/target/solid.go?s=2622:2689#L51">GetModel</a></h3>
 				<pre>func GetModel(simfnk, matname, modelname <a href="/pkg/builtin/#string">string</a>, getnew <a href="/pkg/builtin/#bool">bool</a>) <a href="#Solid">Solid</a></pre>
 				<p>
 GetModel returns (existent or new) solid model
@@ -1200,6 +1339,7 @@ GetModel returns (existent or new) solid model
 matname   -- name of material
 modelname -- model name
 getnew    -- force a new allocation; i.e. do not use any model found in database
+Note: returns nil on errors
 </pre>
 
 				
@@ -1210,12 +1350,23 @@ getnew    -- force a new allocation; i.e. do not use any model found in database
 		
 			
 			
-			<h2 id="State">type <a href="/src/target/state.go?s=416:679#L4">State</a></h2>
+			<h2 id="State">type <a href="/src/target/state.go?s=416:1021#L4">State</a></h2>
 			<pre>type State struct {
-    Sig []<a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// σ: Cauchy stress tensor (effective) [nsig]</span>
-    Alp []<a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// α: internal variables of rate type [nalp]</span>
-    Phi []<a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// φ: internal variables of non-rate type [nphi]</span>
-    F   [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// deformation gradient [3][3]</span>
+
+    <span class="comment">// essential</span>
+    Sig []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// σ: Cauchy stress tensor (effective) [nsig]</span>
+
+    <span class="comment">// for plasticity</span>
+    Alp        []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// α: internal variables of rate type [nalp]</span>
+    Dgam       <a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// Δγ: increment of Lagrange multiplier (for plasticity only)</span>
+    Loading    <a href="/pkg/builtin/#bool">bool</a>      <span class="comment">// unloading flag (for plasticity only)</span>
+    ApexReturn <a href="/pkg/builtin/#bool">bool</a>      <span class="comment">// return-to-apex (for plasticity only)</span>
+
+    <span class="comment">// additional internal variables</span>
+    Phi []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// additional internal variables; e.g. for holding Δσ in the general stress updater</span>
+
+    <span class="comment">// for large deformation</span>
+    F [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// deformation gradient [3][3]</span>
 }</pre>
 			<p>
 State holds all continuum mechanics data, including for updating the state
@@ -1232,7 +1383,7 @@ State holds all continuum mechanics data, including for updating the state
 
 			
 				
-				<h3 id="NewState">func <a href="/src/target/state.go?s=825:879#L13">NewState</a></h3>
+				<h3 id="NewState">func <a href="/src/target/state.go?s=1167:1221#L24">NewState</a></h3>
 				<pre>func NewState(nsig, nalp, nphi <a href="/pkg/builtin/#int">int</a>, large <a href="/pkg/builtin/#bool">bool</a>) *<a href="#State">State</a></pre>
 				<p>
 NewState allocates state structure for small or large deformation analyses
@@ -1246,7 +1397,7 @@ NewState allocates state structure for small or large deformation analyses
 
 			
 				
-				<h3 id="State.GetCopy">func (*State) <a href="/src/target/state.go?s=1560:1592#L40">GetCopy</a></h3>
+				<h3 id="State.GetCopy">func (*State) <a href="/src/target/state.go?s=1935:1967#L55">GetCopy</a></h3>
 				<pre>func (o *<a href="#State">State</a>) GetCopy() *<a href="#State">State</a></pre>
 				<p>
 GetCopy returns a copy of this state
@@ -1257,14 +1408,106 @@ GetCopy returns a copy of this state
 				
 			
 				
-				<h3 id="State.Set">func (*State) <a href="/src/target/state.go?s=1223:1268#L27">Set</a></h3>
-				<pre>func (o *<a href="#State">State</a>) Set(large <a href="/pkg/builtin/#bool">bool</a>, other *<a href="#State">State</a>)</pre>
+				<h3 id="State.Set">func (*State) <a href="/src/target/state.go?s=1603:1636#L42">Set</a></h3>
+				<pre>func (o *<a href="#State">State</a>) Set(other *<a href="#State">State</a>)</pre>
 				<p>
 Set copies states
 </p>
 <pre>Note: 1) this and other states must have been pre-allocated with the same sizes
       2) this method does not check for errors
 </pre>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="VonMises">type <a href="/src/target/vm.go?s=343:485#L4">VonMises</a></h2>
+			<pre>type VonMises struct {
+    <a href="#SmallElasticity">SmallElasticity</a>
+
+    H <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// hardening variable</span>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+VonMises implements von Mises plasticity model
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="VonMises.CalcD">func (*VonMises) <a href="/src/target/vm.go?s=2477:2552#L101">CalcD</a></h3>
+				<pre>func (o *<a href="#VonMises">VonMises</a>) CalcD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+CalcD computes D = dσ_new/dε_new consistent with StressUpdate
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="VonMises.ContD">func (*VonMises) <a href="/src/target/vm.go?s=3290:3351#L135">ContD</a></h3>
+				<pre>func (o *<a href="#VonMises">VonMises</a>) ContD(D [][]<a href="/pkg/builtin/#float64">float64</a>, s *<a href="#State">State</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ContD computes D = dσ_new/dε_new continuous
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="VonMises.GetPrms">func (VonMises) <a href="/src/target/vm.go?s=1121:1157#L42">GetPrms</a></h3>
+				<pre>func (o <a href="#VonMises">VonMises</a>) GetPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
+				<p>
+GetPrms gets (an example) of parameters
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="VonMises.Init">func (*VonMises) <a href="/src/target/vm.go?s=612:686#L17">Init</a></h3>
+				<pre>func (o *<a href="#VonMises">VonMises</a>) Init(ndim <a href="/pkg/builtin/#int">int</a>, pstress <a href="/pkg/builtin/#bool">bool</a>, prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Init initialises model
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="VonMises.InitIntVars">func (VonMises) <a href="/src/target/vm.go?s=1300:1353#L50">InitIntVars</a></h3>
+				<pre>func (o <a href="#VonMises">VonMises</a>) InitIntVars() (s *<a href="#State">State</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+InitIntVars initialises internal (secondary) variables
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="VonMises.Update">func (*VonMises) <a href="/src/target/vm.go?s=1447:1514#L56">Update</a></h3>
+				<pre>func (o *<a href="#VonMises">VonMises</a>) Update(s *<a href="#State">State</a>, ε, Δε []<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Update updates stresses for given strains
+</p>
 
 				
 				

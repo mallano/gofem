@@ -20,6 +20,8 @@ type TseriesDat struct {
 var (
 	TseriesKeys []string      // [nkeys] all keys
 	TseriesData []*TseriesDat // [nkeys] all items
+	TseriesT    []float64     // [ntimes] time series
+	TseriesR    [][][]float64 // [nkeys][nqts..?][ntimes] all time-series results
 )
 
 // TseriesClear clears Tplot data
@@ -31,11 +33,11 @@ func TseriesClear() {
 // TseriesStart initialise structures containing all time-series results
 func TseriesStart() {
 	nkeys := len(TseriesKeys)
-	R = make([][][]float64, nkeys)
+	TseriesR = make([][][]float64, nkeys)
 	for i, dat := range TseriesData {
-		R[i] = make([][]float64, len(dat.Qts))
+		TseriesR[i] = make([][]float64, len(dat.Qts))
 		for j, _ := range dat.Qts {
-			R[i][j] = make([]float64, Sum.NumTidx)
+			TseriesR[i][j] = make([]float64, Sum.NumTidx)
 		}
 		sort.Sort(dat.Qts)
 	}

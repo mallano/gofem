@@ -68,9 +68,18 @@ func Test_out01(tst *testing.T) {
 	}
 	defer End()
 
+	// commands for reading time-series
+	Tseries("ux", &IdsOrTags{0, 1, 2, 3}, nil)
+
+	// apply commands
+	err := Apply()
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+	}
+
 	// check FE simulation results
-	//onequa_solution(tst, 1, Dom, 1e-15, 1e-14)
-	utl.Pforan("T = %v\n", T)
+	utl.Pforan("T = %v\n", TseriesT)
+	utl.Pforan("R = %v\n", TseriesR)
 }
 
 // this test needs 'fem' package to be tested first
@@ -98,7 +107,7 @@ func Test_out02(tst *testing.T) {
 	xip := Ipoints[0].X
 	utl.Pfcyan("xip = %v\n", xip)
 
-	// commands for time-plots
+	// commands for reading time-series
 	Tseries("pl", &At{2.5, 0}, nil)
 	Tseries("pl", &At{2.5, 10}, nil)
 	Tseries("sl", &At{xip[0], xip[1]}, nil)
@@ -149,7 +158,7 @@ func Test_out03(tst *testing.T) {
 	}
 	defer End()
 
-	// commands for time-plots
+	// commands for reading time-series
 	Tseries("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
 	Tseries("pl", &At{2.5, 10}, Styles{{Label: "B"}})
 
