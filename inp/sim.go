@@ -45,6 +45,7 @@ type Data struct {
 
 // SetDefault sets defaults values
 func (o *Data) SetDefault() {
+	o.Encoder = "gob"
 }
 
 // PostProcess performs a post-processing of the just read json file
@@ -54,7 +55,7 @@ func (o *Data) PostProcess(dir, fn string, erasefiles bool) {
 	if o.DirOut == "" {
 		o.DirOut = "/tmp/gofem/" + o.FnameKey
 	}
-	if o.Encoder == "" {
+	if o.Encoder != "gob" || o.Encoder != "json" {
 		o.Encoder = "gob"
 	}
 	os.MkdirAll(o.DirOut, 0777)

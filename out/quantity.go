@@ -84,6 +84,16 @@ func get_ip_quantity(key string, ipid int, dist float64) *Quantity {
 			return &Quantity{&ip.U.Sig[1], dist, ip.X}
 		case "sz":
 			return &Quantity{&ip.U.Sig[2], dist, ip.X}
+		case "sxy":
+			return &Quantity{&ip.U.Sig[3], dist, ip.X}
+		case "syz":
+			if len(ip.U.Sig) == 6 {
+				return &Quantity{&ip.U.Sig[4], dist, ip.X}
+			}
+		case "szx":
+			if len(ip.U.Sig) == 6 {
+				return &Quantity{&ip.U.Sig[5], dist, ip.X}
+			}
 		}
 	}
 	return nil

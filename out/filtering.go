@@ -17,8 +17,13 @@ type LineLocator interface {
 // At implements locator at point => PointLocator
 type At []float64
 
-// IdsOrTags implements locator a specific nodes => PointLocator
-type IdsOrTags []int
+// Verts implements locator at point => PointLocator
+// Ids or tags of vertices can be stored in Verts
+type Verts []int
+
+// Cells implements locator at point => PointLocator
+// Pairs of ids or tags of cells and integration points indices can be stored in Cells
+type Cells [][]int
 
 // Along implements locator along line => LineLocator
 type Along struct {
@@ -59,7 +64,7 @@ func (o At) AtPoint(key string) Quantities {
 }
 
 // AtPoint returns quantity at point
-func (o IdsOrTags) AtPoint(key string) (res Quantities) {
+func (o Verts) AtPoint(key string) (res Quantities) {
 	for _, idortag := range o {
 		if idortag < 0 {
 			tag := idortag
@@ -73,6 +78,39 @@ func (o IdsOrTags) AtPoint(key string) (res Quantities) {
 		} else {
 			id := idortag
 			q := get_nod_quantity(key, id, 0)
+			if q != nil {
+				res = append(res, q)
+			}
+		}
+	}
+	return
+}
+
+// AtPoint returns quantity at point
+func (o Cells) AtPoint(key string) (res Quantities) {
+	ncells := len(o)
+	for i := 0; i < ncells; i++ {
+		if len(o[i]) != 2 {
+			continue
+		}
+		idortag := o[i][0]
+		if idortag < 0 {
+			tag := idortag
+			cells := Dom.Msh.CellTag2cells[tag]
+			for _, c := range cells {
+				cid := c.Id
+				idx := o[i][1]
+				ipid := Cid2ips[cid][idx]
+				q := get_ip_quantity(key, ipid, 0)
+				if q != nil {
+					res = append(res, q)
+				}
+			}
+		} else {
+			cid := idortag
+			idx := o[i][1]
+			ipid := Cid2ips[cid][idx]
+			q := get_ip_quantity(key, ipid, 0)
 			if q != nil {
 				res = append(res, q)
 			}

@@ -12,31 +12,43 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-func onequa_solution(tst *testing.T, t float64, u, xu, σ, xσ []float64, tolu, tolσ float64) {
+func onequa_solution(t float64) (σx, σy, σz, εx, εy float64) {
+	qnV := -100.0
+	qnH := -50.0
+	E := 1000.0
+	ν := 0.25
+	σx = qnH * t
+	σy = qnV * t
+	σz = ν * (σx + σy)
+	εx = (σx - ν*(σy+σz)) / E
+	εy = (σy - ν*(σz+σx)) / E
+	return
+}
+
+func onequa_check_u(tst *testing.T, t float64, u, x []float64, tol float64) {
 
 	// analytical solution
-	qnV, qnH := -100.0, -50.0
-	E, ν := 1000.0, 0.25
-	lx, ly := 1.0, 1.0
-	σx, σy := qnH*t, qnV*t
-	σz := ν * (σx + σy)
-	εx := (σx - ν*(σy+σz)) / E
-	εy := (σy - ν*(σz+σx)) / E
+	_, _, _, εx, εy := onequa_solution(t)
 
 	// check displacements
-	ux := lx * εx * xu[0] / lx
-	uy := ly * εy * xu[1] / ly
-	utl.CheckScalar(tst, "ux", tolu, u[0], ux)
-	utl.CheckScalar(tst, "uy", tolu, u[1], uy)
+	lx := 1.0
+	ly := 1.0
+	ux := lx * εx * x[0] / lx
+	uy := ly * εy * x[1] / ly
+	utl.CheckScalar(tst, "ux", tol, u[0], ux)
+	utl.CheckScalar(tst, "uy", tol, u[1], uy)
+}
 
-	/*
-		// check stresses
-		e := dom.Elems[0].(*fem.ElemU)
-		σcor := []float64{σx, σy, σz, 0}
-		for idx, _ := range e.IpsElem {
-			utl.CheckVector(tst, "σ", tolσ, e.States[idx].Sig, σcor)
-		}
-	*/
+func onequa_check_sig(tst *testing.T, t float64, σ, x []float64, tol float64) {
+
+	// analytical solution
+	σx, σy, σz, _, _ := onequa_solution(t)
+
+	// check stresses
+	utl.CheckScalar(tst, "σx ", tol, σ[0], σx)
+	utl.CheckScalar(tst, "σy ", tol, σ[1], σy)
+	utl.CheckScalar(tst, "σz ", tol, σ[2], σz)
+	utl.CheckScalar(tst, "σxy", tol, σ[3], 0)
 }
 
 func Test_out01(tst *testing.T) {
@@ -49,7 +61,7 @@ func Test_out01(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("out01")
 
 	// run FE simulation
@@ -71,7 +83,45 @@ func Test_out01(tst *testing.T) {
 	defer End()
 
 	// commands for reading time-series
-	Tseries("ux", &IdsOrTags{0, 1, 2, 3}, nil)
+	verts := Verts{0, 1, 2, 3}
+	cells := Cells{{0, 0}, {0, 1}, {-1, 2}, {-1, 3}}
+	Tseries("ux", &verts, nil)
+	Tseries("uy", &verts, nil)
+	Tseries("sx", &cells, nil)
+	Tseries("sy", &cells, nil)
+	Tseries("sz", &cells, nil)
+	Tseries("sxy", &cells, nil)
+
+	// check slices
+	nnod := 4
+	nele := 1
+	nip := 4
+	utl.IntAssert(len(Dom.Nodes), nnod)
+	utl.IntAssert(len(Ipoints), nele*nip)
+	utl.IntAssert(len(Cid2ips), 1)
+	utl.IntAssert(len(TseriesKeys), 6)
+	utl.IntAssert(len(TseriesData), 6)
+	utl.IntAssert(len(TseriesKey2idx), 6)
+	utl.CompareStrs(tst, "TplotKeys", TseriesKeys, []string{"ux", "uy", "sx", "sy", "sz", "sxy"})
+	utl.IntAssert(TseriesKey2idx["ux"], 0)
+	utl.IntAssert(TseriesKey2idx["uy"], 1)
+	utl.IntAssert(TseriesKey2idx["sx"], 2)
+	utl.IntAssert(TseriesKey2idx["sy"], 3)
+	utl.IntAssert(TseriesKey2idx["sz"], 4)
+	utl.IntAssert(TseriesKey2idx["sxy"], 5)
+
+	// check quantities
+	for i, dat := range TseriesData {
+		key := TseriesKeys[i]
+		if key == "ux" || key == "uy" {
+			utl.IntAssert(len(dat.Qts), 4)
+			utl.IntAssert(len(dat.Sty), 4)
+		}
+		if key == "sx" || key == "sy" || key == "sz" || key == "sxy" {
+			utl.IntAssert(len(dat.Qts), 4)
+			utl.IntAssert(len(dat.Sty), 4)
+		}
+	}
 
 	// apply commands
 	err := Apply()
@@ -79,38 +129,45 @@ func Test_out01(tst *testing.T) {
 		tst.Errorf("test failed: %v\n", err)
 	}
 
-	// check FE simulation results
-	tolu, tolσ := 1e-15, 1e-15
-	utl.Pforan("T = %v\n", TseriesTimes)
-	utl.Pforan("R = %v\n", TseriesRes)
-	utl.Pforan("Q = %v\n", TseriesData[0].Qts)
-	//for i, key := range TseriesKeys {
-	//dat := TseriesData[i]
-	//switch key {
-	//case "ux":
-	//}
-	//}
-	u := make([]float64, 2)
-	σ := make([]float64, 4)
-	xu := make([]float64, 2)
-	xσ := make([]float64, 2)
-	//iux :=
-	for i, dat := range TseriesData {
-		utl.Pforan("t = %v\n", TseriesTimes[i])
-		utl.Pforan("q = %v\n", dat.Qts)
-		t := TseriesTimes[i]
-		//for _, key := range TseriesKeys {
-		//if key=="ux"{u[0]=
-		//}
+	// check displacements
+	tolu := 1e-15
+	iux := TseriesKey2idx["ux"]
+	iuy := TseriesKey2idx["uy"]
+	for i, q := range TseriesData[iux].Qts {
+		utl.PfWhite("\nx=%g\n", q.X)
+		for j, t := range TseriesTimes {
+			utl.Pfyel("t=%g\n", t)
+			u := []float64{
+				TseriesRes[iux][i][j],
+				TseriesRes[iuy][i][j],
+			}
+			onequa_check_u(tst, t, u, q.X, tolu)
+		}
+	}
 
-		onequa_solution(tst, t, u, xu, σ, xσ, tolu, tolσ)
+	// check stresses
+	tolσ := 1e-14
+	isx := TseriesKey2idx["sx"]
+	isy := TseriesKey2idx["sy"]
+	isz := TseriesKey2idx["sz"]
+	isxy := TseriesKey2idx["sxy"]
+	for i, q := range TseriesData[isx].Qts {
+		utl.PfWhite("\nx=%g\n", q.X)
+		for j, t := range TseriesTimes {
+			utl.Pfyel("t=%g\n", t)
+			σ := []float64{
+				TseriesRes[isx][i][j],
+				TseriesRes[isy][i][j],
+				TseriesRes[isz][i][j],
+				TseriesRes[isxy][i][j],
+			}
+			onequa_check_sig(tst, t, σ, q.X, tolσ)
+		}
 	}
 
 	// show figure
 	if !utl.Tsilent {
-		//Show(func() {
-		//plt.Gll("$t$", "$p_{\\ell}$", "")
-		//})
+		Show(nil)
 	}
 }
 
@@ -125,7 +182,7 @@ func Test_out02(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("out02")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
@@ -183,7 +240,7 @@ func Test_out03(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("out03")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"

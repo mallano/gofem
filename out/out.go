@@ -23,8 +23,10 @@ package out
 
 import (
 	"github.com/cpmech/gofem/fem"
+	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/mporous"
 	"github.com/cpmech/gofem/msolid"
+	"github.com/cpmech/gofem/shp"
 	"github.com/cpmech/gosl/gm"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
@@ -32,7 +34,7 @@ import (
 
 // IpDat holds integration point data and serves to aid locating points in space
 type IpDat struct {
-	Eid int            // id of parent element
+	Cid int            // id of parent element
 	X   []float64      // ip's coordinates
 	P   *mporous.State // state @ p-element's ip
 	U   *msolid.State  // state @ u-element's ip
@@ -51,6 +53,7 @@ var (
 	Sum     *fem.Summary // summary of results
 	Dom     *fem.Domain  // FE domain
 	Ipoints []*IpDat     // all integration points
+	Cid2ips [][]int      // [ncells][nip] maps cell id to index in Ipoints
 	NodBins gm.Bins      // bins for nodes
 	IpsBins gm.Bins      // bins for integration points
 
@@ -101,6 +104,7 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 	// clear previous data
 	TseriesClear()
 	Ipoints = make([]*IpDat, 0)
+	Cid2ips = make([][]int, len(Dom.Msh.Cells))
 	Spd = make(map[string][]int)
 
 	// bins
@@ -124,14 +128,41 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 
 	// add integration points to slice of ips and to bins
 	for _, ele := range Dom.Elems {
+		var cell *inp.Cell
+		var ips []*shp.Ipoint
+		var xmat [][]float64
+		var pstates []*mporous.State
+		var ustates []*msolid.State
 		switch e := ele.(type) {
 		case *fem.ElemP:
-			for idx, ip := range e.IpsElem {
-				C := e.Cell.Shp.IpRealCoords(e.X, ip)
+			cell = e.Cell
+			ips = e.IpsElem
+			xmat = e.X
+			pstates = e.States
+		case *fem.ElemU:
+			cell = e.Cell
+			ips = e.IpsElem
+			xmat = e.X
+			ustates = e.States
+		}
+		if cell != nil {
+			ids := make([]int, len(ips))
+			for idx, ip := range ips {
+				x := cell.Shp.IpRealCoords(xmat, ip)
 				id := len(Ipoints)
-				Ipoints = append(Ipoints, &IpDat{e.Cell.Id, C, e.States[idx], nil})
-				IpsBins.Append(C, id)
+				ids[idx] = id
+				var pstate *mporous.State
+				var ustate *msolid.State
+				if pstates != nil {
+					pstate = pstates[idx]
+				}
+				if ustates != nil {
+					ustate = ustates[idx]
+				}
+				Ipoints = append(Ipoints, &IpDat{cell.Id, x, pstate, ustate})
+				IpsBins.Append(x, id)
 			}
+			Cid2ips[cell.Id] = ids
 		}
 	}
 
@@ -144,8 +175,8 @@ func Apply() (err error) {
 	TseriesStart()
 	TseriesTimes = make([]float64, Sum.NumTidx)
 	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
-		if !Dom.ReadSol(tidx) {
-			return utl.Err("ReadSol failed. See log files\n")
+		if !Dom.In(tidx) {
+			return utl.Err("Domain.In failed. See log files\n")
 		}
 		TseriesTimes[tidx] = Dom.Sol.T
 		for i, dat := range TseriesData {
@@ -180,6 +211,7 @@ func Save(dirout, filename string, extra func()) (err error) {
 
 // plot_all plots all results
 func plot_all() {
+	plt.Reset()
 	nplots := len(TseriesRes)
 	nrow, ncol := utl.BestSquare(nplots)
 	if SubpNrow > 0 {

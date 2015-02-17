@@ -27,18 +27,18 @@ type Decoder interface {
 
 // GetEncoder returns a new encoder
 func GetEncoder(w io.Writer) Encoder {
-	if Global.Sim.Data.Encoder == "gob" {
-		return gob.NewEncoder(w)
+	if Global.Sim.Data.Encoder == "json" {
+		return json.NewEncoder(w)
 	}
-	return json.NewEncoder(w)
+	return gob.NewEncoder(w)
 }
 
 // GetDecoder returns a new decoder
 func GetDecoder(r io.Reader) Decoder {
-	if Global.Sim.Data.Encoder == "gob" {
-		return gob.NewDecoder(r)
+	if Global.Sim.Data.Encoder == "json" {
+		return json.NewDecoder(r)
 	}
-	return json.NewDecoder(r)
+	return gob.NewDecoder(r)
 }
 
 // SaveSol saves Solution to a file which name is set with tidx (time output index)
@@ -145,7 +145,7 @@ func (o Domain) SaveIvs(tidx int) (ok bool) {
 	return true
 }
 
-// ReadSol reads elements's internal values from a file which name is set with tidx (time output index)
+// ReadIvs reads elements's internal values from a file which name is set with tidx (time output index)
 func (o *Domain) ReadIvs(tidx int) (ok bool) {
 
 	// open file
