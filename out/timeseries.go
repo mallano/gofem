@@ -44,7 +44,7 @@ func Tseries(key string, loc PointLocator, sty Styles) {
 	}
 	n := len(qts)
 	if len(sty) != n {
-		sty = GetDefaultStyles(n)
+		sty = GetDefaultStyles(qts)
 	}
 	idx := utl.StrIndexSmall(TseriesKeys, key)
 	if idx < 0 {

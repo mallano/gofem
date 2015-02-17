@@ -199,6 +199,7 @@ func plot_all() {
 			args := sty.GetArgs("clip_on=0")
 			plt.Plot(TseriesT, Y, args)
 		}
+		plt.Gll(GetTexLabel("time", ""), GetTexLabel(key, ""), "")
 	}
 	return
 }

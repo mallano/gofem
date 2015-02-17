@@ -80,6 +80,14 @@ func Test_out01(tst *testing.T) {
 	// check FE simulation results
 	utl.Pforan("T = %v\n", TseriesT)
 	utl.Pforan("R = %v\n", TseriesR)
+	utl.Pforan("Q = %v\n", TseriesData[0].Qts)
+
+	// show figure
+	if !utl.Tsilent {
+		Show(func() {
+			//plt.Gll("$t$", "$p_{\\ell}$", "")
+		})
+	}
 }
 
 // this test needs 'fem' package to be tested first

@@ -6,8 +6,9 @@ package out
 
 // Quantity holds node or ip quantity
 type Quantity struct {
-	Value *float64 // value of, e.g., "ux"
-	Dist  float64  // distance from reference point (if along line)
+	Value *float64  // value of, e.g., "ux"
+	Dist  float64   // distance from reference point (if along line)
+	X     []float64 // coordinates
 }
 
 // Quantities is a set of Quantity
@@ -55,11 +56,11 @@ func get_nod_quantity(key string, nid int, dist float64) *Quantity {
 	if dof != nil {
 		switch ntderiv {
 		case 0:
-			return &Quantity{&Dom.Sol.Y[dof.Eq], dist}
+			return &Quantity{&Dom.Sol.Y[dof.Eq], dist, nod.Vert.C}
 		case 1:
-			return &Quantity{&Dom.Sol.Dydt[dof.Eq], dist}
+			return &Quantity{&Dom.Sol.Dydt[dof.Eq], dist, nod.Vert.C}
 		case 2:
-			return &Quantity{&Dom.Sol.D2ydt2[dof.Eq], dist}
+			return &Quantity{&Dom.Sol.D2ydt2[dof.Eq], dist, nod.Vert.C}
 		}
 	}
 	return nil
@@ -70,19 +71,19 @@ func get_ip_quantity(key string, ipid int, dist float64) *Quantity {
 	if ip.P != nil {
 		switch key {
 		case "pl":
-			return &Quantity{&ip.P.Pl, dist}
+			return &Quantity{&ip.P.Pl, dist, ip.X}
 		case "sl":
-			return &Quantity{&ip.P.Sl, dist}
+			return &Quantity{&ip.P.Sl, dist, ip.X}
 		}
 	}
 	if ip.U != nil {
 		switch key {
 		case "sx":
-			return &Quantity{&ip.U.Sig[0], dist}
+			return &Quantity{&ip.U.Sig[0], dist, ip.X}
 		case "sy":
-			return &Quantity{&ip.U.Sig[1], dist}
+			return &Quantity{&ip.U.Sig[1], dist, ip.X}
 		case "sz":
-			return &Quantity{&ip.U.Sig[2], dist}
+			return &Quantity{&ip.U.Sig[2], dist, ip.X}
 		}
 	}
 	return nil
