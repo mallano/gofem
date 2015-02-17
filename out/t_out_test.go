@@ -61,15 +61,16 @@ func Test_out01(tst *testing.T) {
 		return
 	}
 
-	// check FE simulation results
-	//onequa_solution(tst, 1, Dom, 1e-15, 1e-14)
-
 	// load results
 	if !Start("data/onequa4.sim", 0, 0) {
 		tst.Errorf("Start failed\n")
 		return
 	}
 	defer End()
+
+	// check FE simulation results
+	//onequa_solution(tst, 1, Dom, 1e-15, 1e-14)
+	utl.Pforan("T = %v\n", T)
 }
 
 // this test needs 'fem' package to be tested first
