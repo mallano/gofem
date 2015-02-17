@@ -202,6 +202,74 @@ func MatfileOld2New(dirout string, fnnew, fnold string, convertsymbols bool) {
 	utl.WriteFileSD(dirout, fnnew, mats_new.String())
 }
 
+// MatfileNew2Old converts a new mat file to the old mat file format
+//  convertsymbols -- convert back symbols with Greek characters to UTF-8
+func MatfileNew2Old(dirout string, fnold, fnnew string, convertsymbols bool) {
+
+	// read file
+	b, err := utl.ReadFile(fnnew)
+	if err != nil {
+		utl.PfRed("cannot open file: %v", err.Error())
+		return
+	}
+
+	// decode
+	var mats_new MatDb
+	err = json.Unmarshal(b, &mats_new)
+	if err != nil {
+		utl.PfRed("cannot unmarshal file: %v", err.Error())
+		return
+	}
+
+	// oldmatdata implements the old data format
+	type oldmatdata struct {
+		Name  string
+		Desc  string
+		Model string
+		Prms  []string
+		Vals  []float64
+		Units []string
+		Extra string
+	}
+
+	// convert
+	var mats_old []oldmatdata
+	for _, m := range mats_new.Materials {
+		var oldmat oldmatdata
+		oldmat.Name = m.Name
+		oldmat.Desc = m.Desc
+		oldmat.Model = m.Model
+		for _, prm := range m.Prms {
+			name := prm.N
+			if convertsymbols {
+				if n, ok := invertedconversiontable[prm.N]; ok {
+					name = n
+				}
+			}
+			oldmat.Prms = append(oldmat.Prms, name)
+			oldmat.Vals = append(oldmat.Vals, prm.V)
+			oldmat.Extra = prm.Extra
+			if len(prm.U) > 0 {
+				oldmat.Units = append(oldmat.Units, prm.U)
+			}
+		}
+		mats_old = append(mats_old, oldmat)
+	}
+
+	// encode
+	buf, err := json.MarshalIndent(mats_old, "", "  ")
+	if err != nil {
+		return
+	}
+
+	// save file
+	if dirout == "" {
+		utl.WriteFileS(fnold, string(buf))
+		return
+	}
+	utl.WriteFileSD(dirout, fnold, string(buf))
+}
+
 // convert greek to ansi
 var conversiontable = map[string]string{
 	"α":   "alp",
@@ -227,4 +295,30 @@ var conversiontable = map[string]string{
 	"ρG":  "RhoG",
 	"ρS":  "RhoS",
 	"RΘg": "RthG",
+}
+
+var invertedconversiontable = map[string]string{
+	"alp":   "α",
+	"alpL":  "αl",
+	"bet":   "β",
+	"betaL": "βl",
+	"betaG": "βg",
+	"betD":  "βd",
+	"betW":  "βw",
+	"bet1":  "β1",
+	"bet2":  "β2",
+	"nu":    "ν",
+	"phi":   "φ",
+	"lam":   "λ",
+	"lamD":  "λd",
+	"lamW":  "λw",
+	"lam0L": "λ0l",
+	"lam1L": "λ1l",
+	"lam0G": "λ0g",
+	"lam1G": "λ1g",
+	"Rho":   "ρ",
+	"RhoL":  "ρL",
+	"RhoG":  "ρG",
+	"RhoS":  "ρS",
+	"RthG":  "RΘg",
 }

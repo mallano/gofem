@@ -122,3 +122,20 @@ func Test_mat02(tst *testing.T) {
 	}
 	utl.Pfblue2("%v\n", mdb)
 }
+
+func Test_mat03(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
+	//utl.Tsilent = false
+	utl.TTitle("mat03 (inverse conversion)")
+
+	convertsymbols := true
+	MatfileNew2Old("/tmp/gofem/inp", "converted_porous.mat", "data/porous.mat", convertsymbols)
+}
