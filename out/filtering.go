@@ -134,7 +134,7 @@ func (o Along) Locate(key string) (res Quantities) {
 			res = append(res, q)
 		}
 	}
-	return nil
+	return
 }
 
 // AllCells returns all cell/ip indices

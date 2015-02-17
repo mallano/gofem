@@ -4,6 +4,8 @@
 
 package out
 
+import "github.com/cpmech/gosl/utl"
+
 // Quantity holds node or ip quantity
 type Quantity struct {
 	Value *float64  // value of, e.g., "ux"
@@ -97,4 +99,25 @@ func get_ip_quantity(key string, ipid int, dist float64) *Quantity {
 		}
 	}
 	return nil
+}
+
+func (o Quantity) String() string {
+	l := utl.Sf("{\"value\":%g, \"dist\":%g, \"x\":[%g,%g", *o.Value, o.Dist, o.X[0], o.X[1])
+	if len(o.X) == 3 {
+		l += utl.Sf(",%g", o.X[2])
+	}
+	l += "]}"
+	return l
+}
+
+func (o Quantities) String() string {
+	l := "{\n"
+	for i, q := range o {
+		if i > 0 {
+			l += ",\n"
+		}
+		l += utl.Sf("  %v", q)
+	}
+	l += "\n}"
+	return l
 }

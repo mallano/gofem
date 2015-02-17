@@ -213,20 +213,24 @@ func Test_out02(tst *testing.T) {
 
 	// cells: commands for reading time-series
 	var cells Locator
-	var nkeys int
-	testnumber := 0
+	var nkeys, nipsel int
+	testnumber := 1
 	switch testnumber {
 	case 1:
 		cells = Along{[]float64{xip[0], 0}, []float64{xip[0], 1}}
 		nkeys = 6
+		nipsel = 4
 	default:
 		cells = AllCells()
 		nkeys = 6
+		nipsel = 8
 	}
 	Tseries("sx", cells, nil)
 	Tseries("sy", cells, nil)
 	Tseries("sz", cells, nil)
 	Tseries("sxy", cells, nil)
+
+	utl.Pforan("keys = %v\n", TseriesKeys)
 
 	// check slices
 	nnod := 6
@@ -254,8 +258,8 @@ func Test_out02(tst *testing.T) {
 			utl.IntAssert(len(dat.Sty), 1)
 		}
 		if key == "sx" || key == "sy" || key == "sz" || key == "sxy" {
-			utl.IntAssert(len(dat.Qts), 8)
-			utl.IntAssert(len(dat.Sty), 8)
+			utl.IntAssert(len(dat.Qts), nipsel)
+			utl.IntAssert(len(dat.Sty), nipsel)
 		}
 	}
 
@@ -308,7 +312,7 @@ func Test_out02(tst *testing.T) {
 }
 
 // this test needs 'fem' package to be tested first
-func Test_out03(tst *testing.T) {
+func test_out03(tst *testing.T) {
 
 	prevTs := utl.Tsilent
 	defer func() {
@@ -366,7 +370,7 @@ func Test_out03(tst *testing.T) {
 }
 
 // this test needs 'fem' package to be tested first
-func Test_out04(tst *testing.T) {
+func test_out04(tst *testing.T) {
 
 	prevTs := utl.Tsilent
 	defer func() {
@@ -386,9 +390,13 @@ func Test_out04(tst *testing.T) {
 	}
 	defer End()
 
+	// get first ip coordinates
+	ip := Ipoints[0].X
+
 	// commands for reading time-series
 	Tseries("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
 	Tseries("pl", &At{2.5, 10}, Styles{{Label: "B"}})
+	Tseries("sl", &At{ip[0], ip[1]}, Styles{{Label: "ip"}})
 
 	// apply commands
 	err := Apply()
@@ -401,7 +409,6 @@ func Test_out04(tst *testing.T) {
 		Show(func() {
 			plt.SubplotI(Spd["pl"])
 			plt.AxisYrange(-10, 110)
-			plt.Gll("$t$", "$p_{\\ell}$", "")
 		})
 	}
 }

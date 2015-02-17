@@ -31,6 +31,10 @@ func GetTexLabel(key, unit string) string {
 		l += "u_y"
 	case "uz":
 		l += "u_z"
+	case "sl":
+		l += "s_{\\ell}"
+	case "sg":
+		l += "s_g"
 	case "pl":
 		l += "p_{\\ell}"
 	case "pg":
@@ -48,7 +52,7 @@ func GetTexLabel(key, unit string) string {
 	case "szx":
 		l += "\\sigma_{zx}"
 	default:
-		l += "UNKNOWN_LABEL"
+		l += key
 	}
 	if unit != "" {
 		l += "\\;" + unit
