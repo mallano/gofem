@@ -44,6 +44,11 @@ func GetDecoder(r io.Reader) Decoder {
 // SaveSol saves Solution to a file which name is set with tidx (time output index)
 func (o Domain) SaveSol(tidx int) (ok bool) {
 
+	// skip if not root
+	if !Global.Root {
+		return true
+	}
+
 	// buffer and encoder
 	var buf bytes.Buffer
 	enc := GetEncoder(&buf)
@@ -190,6 +195,11 @@ type Summary struct {
 // SaveSums saves summary to disc
 func SaveSum(sum *Summary) (ok bool) {
 
+	// skip if not root
+	if !Global.Root {
+		return true
+	}
+
 	// buffer and encoder
 	var buf bytes.Buffer
 	enc := GetEncoder(&buf)
@@ -232,13 +242,13 @@ func ReadSum() *Summary {
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
 
 func out_nod_path(tidx int) string {
-	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_nod_%010d.%s", Global.Sim.Data.FnameKey, tidx, Global.Sim.Data.Encoder))
+	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_nod_%010d.%s", Global.Sim.Data.FnameKey, Global.Rank, tidx, Global.Sim.Data.Encoder))
 }
 
 func out_ele_path(tidx int) string {
-	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_ele_%010d_p%d.%s", Global.Sim.Data.FnameKey, tidx, Global.Rank, Global.Sim.Data.Encoder))
+	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_ele_%010d.%s", Global.Sim.Data.FnameKey, Global.Rank, tidx, Global.Sim.Data.Encoder))
 }
 
 func out_sum_path() string {
-	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_sum_p%d.%s", Global.Sim.Data.FnameKey, Global.Rank, Global.Sim.Data.Encoder))
+	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_sum.%s", Global.Sim.Data.FnameKey, Global.Rank, Global.Sim.Data.Encoder))
 }
