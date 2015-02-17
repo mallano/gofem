@@ -6,8 +6,8 @@ package out
 
 import "github.com/cpmech/gosl/plt"
 
-func Splot(key string, loc LineLocator, times []float64, styles []*plt.LineData) {
+func Splot(key string, loc Locator, times []float64, styles []*plt.LineData) {
 }
 
-func Plot(keyx, keyy string, loc PointLocator, styles []*plt.LineData) {
+func Plot(keyx, keyy string, loc Locator, styles []*plt.LineData) {
 }

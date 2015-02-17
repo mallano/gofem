@@ -5,13 +5,8 @@
 package out
 
 // PointLocator defines interface for locating space positions
-type PointLocator interface {
-	AtPoint(key string) Quantities
-}
-
-// LineLocator defines interface for locating space positions
-type LineLocator interface {
-	AlongLine(key string) Quantities
+type Locator interface {
+	Locate(key string) Quantities
 }
 
 // At implements locator at point => PointLocator
@@ -41,7 +36,7 @@ type AlongY []float64
 type AlongZ []float64
 
 // AtPoint returns quantity at point
-func (o At) AtPoint(key string) Quantities {
+func (o At) Locate(key string) Quantities {
 
 	// node quantity
 	id := NodBins.Find(o)
@@ -64,7 +59,7 @@ func (o At) AtPoint(key string) Quantities {
 }
 
 // AtPoint returns quantity at point
-func (o Verts) AtPoint(key string) (res Quantities) {
+func (o Verts) Locate(key string) (res Quantities) {
 	for _, idortag := range o {
 		if idortag < 0 {
 			tag := idortag
@@ -87,7 +82,7 @@ func (o Verts) AtPoint(key string) (res Quantities) {
 }
 
 // AtPoint returns quantity at point
-func (o Cells) AtPoint(key string) (res Quantities) {
+func (o Cells) Locate(key string) (res Quantities) {
 	ncells := len(o)
 	for i := 0; i < ncells; i++ {
 		if len(o[i]) != 2 {
@@ -120,7 +115,7 @@ func (o Cells) AtPoint(key string) (res Quantities) {
 }
 
 // Along returns quantity along line
-func (o Along) AlongLine(key string) (res Quantities) {
+func (o Along) Locate(key string) (res Quantities) {
 
 	// node quantities
 	ids := NodBins.FindAlongLine(o.A, o.B, TolC)

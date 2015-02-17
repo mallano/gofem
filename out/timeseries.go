@@ -40,8 +40,8 @@ func TseriesStart() {
 }
 
 // Tseries specifies a variable at a particular point to be plotted along time
-func Tseries(key string, loc PointLocator, sty Styles) {
-	qts := loc.AtPoint(key)
+func Tseries(key string, loc Locator, sty Styles) {
+	qts := loc.Locate(key)
 	if qts == nil {
 		return
 	}

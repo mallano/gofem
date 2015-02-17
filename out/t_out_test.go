@@ -181,7 +181,7 @@ func Test_out02(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("out02")
 
 	// run FE simulation
@@ -202,11 +202,27 @@ func Test_out02(tst *testing.T) {
 	}
 	defer End()
 
-	// commands for reading time-series
+	// verts: commands for reading time-series
 	verts := Verts{-1}
-	cells := AllCells()
 	Tseries("ux", verts, nil)
 	Tseries("uy", verts, nil)
+
+	// get second ip coordinates
+	xip := Ipoints[1].X
+	utl.Pfcyan("xip = %v\n", xip)
+
+	// cells: commands for reading time-series
+	var cells Locator
+	var nkeys int
+	testnumber := 0
+	switch testnumber {
+	case 1:
+		cells = Along{[]float64{xip[0], 0}, []float64{xip[0], 1}}
+		nkeys = 6
+	default:
+		cells = AllCells()
+		nkeys = 6
+	}
 	Tseries("sx", cells, nil)
 	Tseries("sy", cells, nil)
 	Tseries("sz", cells, nil)
@@ -219,9 +235,9 @@ func Test_out02(tst *testing.T) {
 	utl.IntAssert(len(Dom.Nodes), nnod)
 	utl.IntAssert(len(Ipoints), nele*nip)
 	utl.IntAssert(len(Cid2ips), 2)
-	utl.IntAssert(len(TseriesKeys), 6)
-	utl.IntAssert(len(TseriesData), 6)
-	utl.IntAssert(len(TseriesKey2idx), 6)
+	utl.IntAssert(len(TseriesKeys), nkeys)
+	utl.IntAssert(len(TseriesData), nkeys)
+	utl.IntAssert(len(TseriesKey2idx), nkeys)
 	utl.CompareStrs(tst, "TplotKeys", TseriesKeys, []string{"ux", "uy", "sx", "sy", "sz", "sxy"})
 	utl.IntAssert(TseriesKey2idx["ux"], 0)
 	utl.IntAssert(TseriesKey2idx["uy"], 1)
