@@ -20,12 +20,14 @@ def Cmd(command, verbose=False, debug=False):
     return out, err
 
 pkgs = [
-    ("shp",     "shape structures and quadrature points"),
-    ("inp",     "input data structures. simulation, materials, meshes"),
-    ("msolid",  "models for solids"),
-    ("mreten",  "models for liquid retention in porous media"),
-    ("mporous", "models for porous media"),
-    ("fem",     "finite element method"),
+    ("shp",      "shape structures and quadrature points"),
+    ("inp",      "input data structures. simulation, materials, meshes"),
+    ("msolid",   "models for solids"),
+    ("mconduct", "models for liquid/gas conductivity in porous media"),
+    ("mreten",   "models for liquid retention in porous media"),
+    ("mporous",  "models for porous media"),
+    ("fem",      "finite element method"),
+    ("out",      "results analyses and plotting"),
 ]
 
 odir  = 'doc/'

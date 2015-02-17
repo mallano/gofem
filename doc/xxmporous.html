@@ -48,6 +48,13 @@
 				<p>
 package mporous implements models for porous media based on the Theory of Porous Media
 </p>
+<p>
+package mporous implements models for porous media based on the Theory of Porous Media
+</p>
+<pre>References:
+ [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
+ [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
+</pre>
 
 			</div>
 		</div>
@@ -69,44 +76,90 @@ package mporous implements models for porous media based on the Theory of Porous
 			
 			
 				
-				<dd><a href="#CalcL">func CalcL(pl float64, sta *StateLG, mdl *Model, derivs bool) (err error)</a></dd>
+				<dd><a href="#CalcLGS">func CalcLGS(divus float64, sta *State, mdl *Model, derivs bool) (err error)</a></dd>
 			
 				
-				<dd><a href="#CalcLGS">func CalcLGS(pl, pg, divus float64, sta *StateLG, mdl *Model, derivs bool) (err error)</a></dd>
+				<dd><a href="#GetLGcndPrms">func GetLGcndPrms() fun.Prms</a></dd>
 			
 				
-				<dd><a href="#CalcLS">func CalcLS(pl, divus float64, sta *StateLG, mdl *Model, derivs bool) (err error)</a></dd>
+				<dd><a href="#GetPathCycle">func GetPathCycle(pc0 float64, P []float64, np int) []float64</a></dd>
 			
+				
+				<dd><a href="#LogModels">func LogModels()</a></dd>
+			
+			
+				
+				<dd><a href="#Driver">type Driver</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Driver.Init">func (o *Driver) Init(mdl *Model) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Driver.Run">func (o *Driver) Run(Pc []float64) (err error)</a></dd>
+				
+			
+				
+				<dd><a href="#LGcondM1">type LGcondM1</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#LGcondM1.DkgrDsg">func (o LGcondM1) DkgrDsg(sg float64) float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#LGcondM1.DklrDsl">func (o LGcondM1) DklrDsl(sl float64) float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#LGcondM1.Init">func (o *LGcondM1) Init(prms fun.Prms) (err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#LGcondM1.Kgr">func (o LGcondM1) Kgr(sg float64) float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#LGcondM1.Klr">func (o LGcondM1) Klr(sl float64) float64</a></dd>
+				
 			
 				
 				<dd><a href="#Model">type Model</a></dd>
 				
+					
+					<dd>&nbsp; &nbsp; <a href="#GetModel">func GetModel(simfnk, matname string, getnew bool) *Model</a></dd>
+				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Model.Cc">func (o *Model) Cc(pc, sl float64, wet bool, Δpc float64) float64</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Model.Ccb">func (o Model) Ccb(s *State) (dsldpc float64, err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Model.DCcDpc">func (o *Model) DCcDpc(pc, sl float64, wet bool, Δpc float64) float64</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Model.Ccd">func (o Model) Ccd(s *State) (dCcdpc float64, err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Model.DkgrDsg">func (o *Model) DkgrDsg(sg float64) float64</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Model.GetPrms">func (o Model) GetPrms(example bool) fun.Prms</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Model.DklrDsl">func (o *Model) DklrDsl(sl float64) float64</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Model.Init">func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Model.Init">func (o *Model) Init(prms fun.Prms)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Model.NewState">func (o Model) NewState(pl, pg, divus float64) (s *State, err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Model.Kgr">func (o *Model) Kgr(sl float64) float64</a></dd>
-				
-					
-					<dd>&nbsp; &nbsp; <a href="#Model.Klr">func (o *Model) Klr(sl float64) float64</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Model.Update">func (o Model) Update(s *State, Δpl, Δpg, divusNew float64) (err error)</a></dd>
 				
 			
 				
-				<dd><a href="#StateLG">type StateLG</a></dd>
+				<dd><a href="#State">type State</a></dd>
 				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#State.GetCopy">func (o State) GetCopy() *State</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#State.Lderivs">func (o State) Lderivs(m *Model) (Cpl, dCpldpl, dklrdpl float64, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#State.Lvars">func (o State) Lvars(m *Model) (Cpl float64, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#State.Set">func (o *State) Set(another *State)</a></dd>
 				
 			
 			
@@ -119,6 +172,12 @@ package mporous implements models for porous media based on the Theory of Porous
 			<h4>Package files</h4>
 			<p>
 			<span style="font-size:90%">
+			
+				<a href="/src/github.com/cpmech/gofem/mporous/cndm1.go">cndm1.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/mporous/driver.go">driver.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/mporous/path.go">path.go</a>
 			
 				<a href="/src/github.com/cpmech/gofem/mporous/porous.go">porous.go</a>
 			
@@ -173,6 +232,42 @@ package mporous implements models for porous media based on the Theory of Porous
 		
 			<h2 id="pkg-variables">Variables</h2>
 			
+				<pre>var <span id="D">D</span> struct {
+
+    <span class="comment">// 1 liquid balance related coefficients</span>
+    Cpl_pl  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpl/∂pl</span>
+    Cpl_pg  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpl/∂pg</span>
+    Cpl_usM <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpl/∂us multiplier</span>
+
+    <span class="comment">// 2 liquid balance related coefficients</span>
+    Cpg_pl  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpg/∂pl</span>
+    Cpg_pg  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpg/∂pg</span>
+    Cpg_usM <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpg/∂us multiplier</span>
+
+    <span class="comment">// 3 liquid balance related coefficients</span>
+    Cvs_pl <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cvs/∂pl</span>
+    Cvs_pg <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cvs/∂pg</span>
+
+    <span class="comment">// 1 gas balance related coefficients</span>
+    Dpl_pl  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpl/∂pl</span>
+    Dpl_pg  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpl/∂pg</span>
+    Dpl_usM <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpl/∂us multiplier</span>
+
+    <span class="comment">// 2 gas balance related coefficients</span>
+    Dpg_pl  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpg/∂pl</span>
+    Dpg_pg  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpg/∂pg</span>
+    Dpg_usM <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpg/∂us multiplier</span>
+
+    <span class="comment">// 3 gas balance related coefficients</span>
+    Dvs_pl <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dvs/∂pl</span>
+    Dvs_pg <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dvs/∂pg</span>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+				<p>
+Derivatives
+</p>
+
+			
 				<pre>var <span id="TPM">TPM</span> struct {
 
     <span class="comment">// other porous media data</span>
@@ -195,7 +290,7 @@ package mporous implements models for porous media based on the Theory of Porous
     <span class="comment">// conductivity and retention models variables</span>
     Klr <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// relative liquid conductivity</span>
     Kgr <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// relative gas conductivity</span>
-    Cc  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// liquid retention model = ∂sl/∂pc</span>
+    Ccb <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// liquid retention model = dsl/dpc</span>
     Cl  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// liquid compresssibility</span>
     Cg  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// gas compressibility</span>
 
@@ -209,48 +304,8 @@ package mporous implements models for porous media based on the Theory of Porous
     Dpg <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Dpg coefficient</span>
     Dvs <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Dvs coefficient</span>
 
-    <span class="comment">// liquid conductivity</span>
-    DklrDpl <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂klr/∂pl</span>
-    DklrDpg <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂klr/∂pg</span>
-
-    <span class="comment">// gas conductivity</span>
-    DkgrDpl <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂kgr/∂pl</span>
-    DkgrDpg <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂kgr/∂pg</span>
-
-    <span class="comment">// liquid retention model</span>
-    DCcDpc <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cc/∂pc</span>
-
-    <span class="comment">// mixture density</span>
-    DrhoDpl <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂ρ/∂pl</span>
-    DrhoDpg <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂ρ/∂pg</span>
-
-    <span class="comment">// 1 liquid balance related coefficients</span>
-    DCplDpl  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpl/∂pl</span>
-    DCplDpg  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpl/∂pg</span>
-    DCplDusM <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpl/∂us multiplier</span>
-
-    <span class="comment">// 2 liquid balance related coefficients</span>
-    DCpgDpl  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpg/∂pl</span>
-    DCpgDpg  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpg/∂pg</span>
-    DCpgDusM <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cpg/∂us multiplier</span>
-
-    <span class="comment">// 3 liquid balance related coefficients</span>
-    DCvsDpl <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cvs/∂pl</span>
-    DCvsDpg <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Cvs/∂pg</span>
-
-    <span class="comment">// 1 gas balance related coefficients</span>
-    DDplDpl  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpl/∂pl</span>
-    DDplDpg  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpl/∂pg</span>
-    DDplDusM <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpl/∂us multiplier</span>
-
-    <span class="comment">// 2 gas balance related coefficients</span>
-    DDpgDpl  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpg/∂pl</span>
-    DDpgDpg  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpg/∂pg</span>
-    DDpgDusM <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dpg/∂us multiplier</span>
-
-    <span class="comment">// 3 gas balance related coefficients</span>
-    DDvsDpl <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dvs/∂pl</span>
-    DDvsDpg <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ∂Dvs/∂pg</span>
+    <span class="comment">// liquid retention model derivative</span>
+    Ccd <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// dCc/dpc</span>
 }</pre>
 				<p>
 scratchpad for TPM calculations
@@ -261,22 +316,8 @@ scratchpad for TPM calculations
 		
 			
 			
-			<h2 id="CalcL">func <a href="/src/target/tpm.go?s=6673:6746#L238">CalcL</a></h2>
-			<pre>func CalcL(pl <a href="/pkg/builtin/#float64">float64</a>, sta *<a href="#StateLG">StateLG</a>, mdl *<a href="#Model">Model</a>, derivs <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
-			<p>
-CalcL calculates TPM variables for models with liquid only
-</p>
-<pre>With: pg = sg = ρG = 0 and divus = 0
-</pre>
-
-			
-			
-
-		
-			
-			
-			<h2 id="CalcLGS">func <a href="/src/target/tpm.go?s=2665:2751#L81">CalcLGS</a></h2>
-			<pre>func CalcLGS(pl, pg, divus <a href="/pkg/builtin/#float64">float64</a>, sta *<a href="#StateLG">StateLG</a>, mdl *<a href="#Model">Model</a>, derivs <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+			<h2 id="CalcLGS">func <a href="/src/target/tpm.go?s=2617:2693#L83">CalcLGS</a></h2>
+			<pre>func CalcLGS(divus <a href="/pkg/builtin/#float64">float64</a>, sta *<a href="#State">State</a>, mdl *<a href="#Model">Model</a>, derivs <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 CalcLGS calculates TPM variables for models with liquid, gas and solid
 </p>
@@ -287,49 +328,66 @@ CalcLGS calculates TPM variables for models with liquid, gas and solid
 		
 			
 			
-			<h2 id="CalcLS">func <a href="/src/target/tpm.go?s=5187:5268#L176">CalcLS</a></h2>
-			<pre>func CalcLS(pl, divus <a href="/pkg/builtin/#float64">float64</a>, sta *<a href="#StateLG">StateLG</a>, mdl *<a href="#Model">Model</a>, derivs <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+			<h2 id="GetLGcndPrms">func <a href="/src/target/cndm1.go?s=715:743#L24">GetLGcndPrms</a></h2>
+			<pre>func GetLGcndPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 			<p>
-CalcLS calculates TPM variables for models with liquid and solid
+GetLGcndPrms gets (an example) of parameters
 </p>
-<pre>With: pg = sg = ρG = 0
+
+			
+			
+
+		
+			
+			
+			<h2 id="GetPathCycle">func <a href="/src/target/path.go?s=372:433#L1">GetPathCycle</a></h2>
+			<pre>func GetPathCycle(pc0 <a href="/pkg/builtin/#float64">float64</a>, P []<a href="/pkg/builtin/#float64">float64</a>, np <a href="/pkg/builtin/#int">int</a>) []<a href="/pkg/builtin/#float64">float64</a></pre>
+			<p>
+GetPathCycle sets a path with cycles of drying-wetting
+</p>
+<pre>pc0   -- initial capillary pressure
+P     -- example: {10, 5, 20, 0}
+np    -- number of points in each branch
 </pre>
 
 			
 			
 
 		
+			
+			
+			<h2 id="LogModels">func <a href="/src/target/porous.go?s=9730:9746#L363">LogModels</a></h2>
+			<pre>func LogModels()</pre>
+			<p>
+LogModels prints to log information on existent and allocated Models
+</p>
+
+			
+			
+
+		
 		
 			
 			
-			<h2 id="Model">type <a href="/src/target/porous.go?s=371:1381#L1">Model</a></h2>
-			<pre>type Model struct {
+			<h2 id="Driver">type <a href="/src/target/driver.go?s=319:764#L3">Driver</a></h2>
+			<pre>type Driver struct {
 
-    <span class="comment">// parameters</span>
-    Nf0   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// nf0: initial volume fraction of all fluids ~ porosity</span>
-    RhoL0 <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ρL0: initial liquid real density</span>
-    RhoG0 <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ρG0: initial gas real density</span>
-    RhoS  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// real (intrinsic) density of solids</span>
-    Gamlr <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// γlr: liquid reference unit weight at temperature θini</span>
-    Gamgr <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// γgr: gas reference unit weight at temperature θini</span>
-    Kl    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// liquid bulk moduli at temperature θini</span>
-    Tini  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// T==Θ initial temperature</span>
-    RTg   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// R*Θ*g: initial gas constant</span>
-    R     <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// gas constant</span>
-    Gref  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// reference gravity, at time of measuring ksat, kgas</span>
-    Cl    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// liquid compresssibility</span>
-    Cg    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// gas compressibility</span>
+    <span class="comment">// input</span>
+    Mdl *<a href="#Model">Model</a> <span class="comment">// porous model</span>
 
-    <span class="comment">// parameters for relative conductivity</span>
-    Pλ0l, Pλ1l, Pαl, Pβl <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// liquid conductivity parameters</span>
-    Pλ0g, Pλ1g, Pαg, Pβg <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// gas conductivity parameters</span>
+    <span class="comment">// settings</span>
+    Silent  <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// do not show error messages</span>
+    CheckD  <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// do check consistent matrix</span>
+    UseDfwd <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// use DerivFwd (forward differences) instead of DerivCen (central differences) when checking D</span>
+    TolCcb  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// tolerance to check Ccb</span>
+    TolCcd  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// tolerance to check Ccd</span>
+    VerD    <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// verbose check of D</span>
 
-    <span class="comment">// conductivity tensors</span>
-    Klsat [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// klsat ÷ Gref</span>
-    Kgsat [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// kgsat ÷ Gref</span>
+    <span class="comment">// results</span>
+    Res []*<a href="#State">State</a> <span class="comment">// results</span>
 }</pre>
 			<p>
-Model holds material parameters for porous media
+Driver run simulations with models for porous media
 </p>
 
 
@@ -345,10 +403,10 @@ Model holds material parameters for porous media
 
 			
 				
-				<h3 id="Model.Cc">func (*Model) <a href="/src/target/porous.go?s=1849:1915#L52">Cc</a></h3>
-				<pre>func (o *<a href="#Model">Model</a>) Cc(pc, sl <a href="/pkg/builtin/#float64">float64</a>, wet <a href="/pkg/builtin/#bool">bool</a>, Δpc <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<h3 id="Driver.Init">func (*Driver) <a href="/src/target/driver.go?s=793:838#L21">Init</a></h3>
+				<pre>func (o *<a href="#Driver">Driver</a>) Init(mdl *<a href="#Model">Model</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
-Cc returns ∂sl/∂pc consistent with the update method
+Init initialises driver
 </p>
 
 				
@@ -356,21 +414,44 @@ Cc returns ∂sl/∂pc consistent with the update method
 				
 			
 				
-				<h3 id="Model.DCcDpc">func (*Model) <a href="/src/target/porous.go?s=1995:2065#L57">DCcDpc</a></h3>
-				<pre>func (o *<a href="#Model">Model</a>) DCcDpc(pc, sl <a href="/pkg/builtin/#float64">float64</a>, wet <a href="/pkg/builtin/#bool">bool</a>, Δpc <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<h3 id="Driver.Run">func (*Driver) <a href="/src/target/driver.go?s=954:1000#L31">Run</a></h3>
+				<pre>func (o *<a href="#Driver">Driver</a>) Run(Pc []<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
-DCcDpc returns ∂Cc/∂pc consistent with the update method
+Run runs simulation
 </p>
 
 				
 				
 				
 			
+		
+			
+			
+			<h2 id="LGcondM1">type <a href="/src/target/cndm1.go?s=415:665#L4">LGcondM1</a></h2>
+			<pre>type LGcondM1 struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+LGcondM1 implements the liquid-gas conductivity model # 1
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
 				
-				<h3 id="Model.DkgrDsg">func (*Model) <a href="/src/target/porous.go?s=1730:1773#L47">DkgrDsg</a></h3>
-				<pre>func (o *<a href="#Model">Model</a>) DkgrDsg(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<h3 id="LGcondM1.DkgrDsg">func (LGcondM1) <a href="/src/target/cndm1.go?s=2148:2193#L92">DkgrDsg</a></h3>
+				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) DkgrDsg(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
-DkgrDsg returns ∂kgr/∂sg
+DkgrDsl returns ∂kgr/∂sg
 </p>
 
 				
@@ -378,8 +459,8 @@ DkgrDsg returns ∂kgr/∂sg
 				
 			
 				
-				<h3 id="Model.DklrDsl">func (*Model) <a href="/src/target/porous.go?s=1639:1682#L42">DklrDsl</a></h3>
-				<pre>func (o *<a href="#Model">Model</a>) DklrDsl(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<h3 id="LGcondM1.DklrDsl">func (LGcondM1) <a href="/src/target/cndm1.go?s=2040:2085#L87">DklrDsl</a></h3>
+				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) DklrDsl(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 DklrDsl returns ∂klr/∂sl
 </p>
@@ -389,8 +470,8 @@ DklrDsl returns ∂klr/∂sl
 				
 			
 				
-				<h3 id="Model.Init">func (*Model) <a href="/src/target/porous.go?s=1418:1453#L28">Init</a></h3>
-				<pre>func (o *<a href="#Model">Model</a>) Init(prms <a href="/pkg/code.google.com/p/gosl/fun/">fun</a>.<a href="/pkg/code.google.com/p/gosl/fun/#Prms">Prms</a>)</pre>
+				<h3 id="LGcondM1.Init">func (*LGcondM1) <a href="/src/target/cndm1.go?s=1061:1111#L38">Init</a></h3>
+				<pre>func (o *<a href="#LGcondM1">LGcondM1</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises this structure
 </p>
@@ -400,8 +481,8 @@ Init initialises this structure
 				
 			
 				
-				<h3 id="Model.Kgr">func (*Model) <a href="/src/target/porous.go?s=1552:1591#L37">Kgr</a></h3>
-				<pre>func (o *<a href="#Model">Model</a>) Kgr(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<h3 id="LGcondM1.Kgr">func (LGcondM1) <a href="/src/target/cndm1.go?s=1936:1977#L82">Kgr</a></h3>
+				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) Kgr(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 Kgr returns kgr
 </p>
@@ -411,8 +492,8 @@ Kgr returns kgr
 				
 			
 				
-				<h3 id="Model.Klr">func (*Model) <a href="/src/target/porous.go?s=1478:1517#L32">Klr</a></h3>
-				<pre>func (o *<a href="#Model">Model</a>) Klr(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+				<h3 id="LGcondM1.Klr">func (LGcondM1) <a href="/src/target/cndm1.go?s=1845:1886#L77">Klr</a></h3>
+				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) Klr(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 Klr returns klr
 </p>
@@ -424,19 +505,170 @@ Klr returns klr
 		
 			
 			
-			<h2 id="StateLG">type <a href="/src/target/states.go?s=262:588#L1">StateLG</a></h2>
-			<pre>type StateLG struct {
-    Sl    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// sl: liquid saturation</span>
-    RhoL  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ρL: real (intrinsic) density of liquid</span>
-    RhoG  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ρG: real (intrinsic) density of gas</span>
-    Ns0   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ns0: initial partial fraction of solids</span>
-    Wet   <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// wetting flag</span>
-    Delpc <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Δpc: step increment of capillary pressure</span>
+			<h2 id="Model">type <a href="/src/target/porous.go?s=1302:2725#L15">Model</a></h2>
+			<pre>type Model struct {
+
+    <span class="comment">// constants</span>
+    NmaxIt  <a href="/pkg/builtin/#int">int</a>     <span class="comment">// max number iterations in Update</span>
+    Itol    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// iterations tolerance in Update</span>
+    MEtrial <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// perform Modified-Euler trial to start update process</span>
+    ShowR   <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// show residual values in Update</span>
+    AllBE   <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// use BE for all models, including those that directly implements sl=f(pc)</span>
+    Ncns    <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// use non-consistent method for all derivatives (see [1])</span>
+    Ncns2   <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// use non-consistent method only for second order derivatives (see [1])</span>
+
+    <span class="comment">// parameters</span>
+    Nf0   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// nf0: initial volume fraction of all fluids ~ porosity</span>
+    RhoL0 <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ρL0: initial liquid real density</span>
+    RhoG0 <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ρG0: initial gas real density</span>
+    RhoS0 <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// real (intrinsic) density of solids</span>
+    BulkL <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// liquid bulk moduli at temperature θini</span>
+    RTg   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// R*Θ*g: initial gas constant</span>
+    Gref  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// reference gravity, at time of measuring ksat, kgas</span>
+    Pkl   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// isotrpic liquid saturated conductivity</span>
+    Pkg   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// isotrpic gas saturated conductivity</span>
+
+    <span class="comment">// derived</span>
+    Cl    <a href="/pkg/builtin/#float64">float64</a>     <span class="comment">// liquid compresssibility</span>
+    Cg    <a href="/pkg/builtin/#float64">float64</a>     <span class="comment">// gas compressibility</span>
+    Klsat [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// klsat ÷ Gref</span>
+    Kgsat [][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// kgsat ÷ Gref</span>
+
+    <span class="comment">// conductivity and retention models</span>
+    Cnd <a href="/pkg/github.com/cpmech/gofem/mconduct/">mconduct</a>.<a href="/pkg/github.com/cpmech/gofem/mconduct/#Model">Model</a> <span class="comment">// liquid-gas conductivity models</span>
+    Lrm <a href="/pkg/github.com/cpmech/gofem/mreten/">mreten</a>.<a href="/pkg/github.com/cpmech/gofem/mreten/#Model">Model</a>   <span class="comment">// retention model</span>
+    <span class="comment">// contains filtered or unexported fields</span>
 }</pre>
 			<p>
-StateLG holds state variables for porous media with liquid and gas
+Model holds material parameters for porous media
+</p>
+<pre>References:
+ [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
+ [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
+</pre>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="GetModel">func <a href="/src/target/porous.go?s=9291:9348#L343">GetModel</a></h3>
+				<pre>func GetModel(simfnk, matname <a href="/pkg/builtin/#string">string</a>, getnew <a href="/pkg/builtin/#bool">bool</a>) *<a href="#Model">Model</a></pre>
+				<p>
+GetModel returns (existent or new) model for porous media
+</p>
+<pre>simfnk    -- unique simulation filename key
+matname   -- name of material
+getnew    -- force a new allocation; i.e. do not use any model found in database
+Note: returns nil on errors
+</pre>
+
+				
+				
+			
+
+			
+				
+				<h3 id="Model.Ccb">func (Model) <a href="/src/target/porous.go?s=7987:8043#L291">Ccb</a></h3>
+				<pre>func (o <a href="#Model">Model</a>) Ccb(s *<a href="#State">State</a>) (dsldpc <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Ccb (Cc-bar) returns dsl/dpc consistent with the update method
+</p>
+<pre>See Eq. (54) on page 618 of [1]
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Model.Ccd">func (Model) <a href="/src/target/porous.go?s=8510:8566#L315">Ccd</a></h3>
+				<pre>func (o <a href="#Model">Model</a>) Ccd(s *<a href="#State">State</a>) (dCcdpc <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Ccd (Cc-dash) returns dCc/dpc consistent with the update method
+</p>
+<pre>See Eqs. (55) and (56) on page 618 of [1]
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Model.GetPrms">func (Model) <a href="/src/target/porous.go?s=4362:4407#L133">GetPrms</a></h3>
+				<pre>func (o <a href="#Model">Model</a>) GetPrms(example <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
+				<p>
+GetPrms gets (an example) of parameters
 </p>
 
+				
+				
+				
+			
+				
+				<h3 id="Model.Init">func (*Model) <a href="/src/target/porous.go?s=2762:2847#L52">Init</a></h3>
+				<pre>func (o *<a href="#Model">Model</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>, cnd <a href="/pkg/github.com/cpmech/gofem/mconduct/">mconduct</a>.<a href="/pkg/github.com/cpmech/gofem/mconduct/#Model">Model</a>, lrm <a href="/pkg/github.com/cpmech/gofem/mreten/">mreten</a>.<a href="/pkg/github.com/cpmech/gofem/mreten/#Model">Model</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Init initialises this structure
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Model.NewState">func (Model) <a href="/src/target/porous.go?s=5157:5225#L162">NewState</a></h3>
+				<pre>func (o <a href="#Model">Model</a>) NewState(pl, pg, divus <a href="/pkg/builtin/#float64">float64</a>) (s *<a href="#State">State</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+NewState creates and initialises a new state structure
+</p>
+<pre>Note: returns nil on errors
+</pre>
+
+				
+				
+				
+			
+				
+				<h3 id="Model.Update">func (Model) <a href="/src/target/porous.go?s=5485:5558#L181">Update</a></h3>
+				<pre>func (o <a href="#Model">Model</a>) Update(s *<a href="#State">State</a>, Δpl, Δpg, divusNew <a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Update updates state
+</p>
+
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="State">type <a href="/src/target/states.go?s=665:1123#L1">State</a></h2>
+			<pre>type State struct {
+    Pl    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// pl: liquid pressure</span>
+    Pg    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// pg: gas pressure</span>
+    Divus <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// div(us): divergence of solids displacement</span>
+    Sl    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// sl: liquid saturation</span>
+    Ns0   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ns0: initial partial fraction of solids</span>
+    RhoL  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ρL: real (intrinsic) density of liquid</span>
+    RhoG  <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// ρG: real (intrinsic) density of gas</span>
+    Dpc   <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Δpc: step increment of capillary pressure</span>
+    Wet   <a href="/pkg/builtin/#bool">bool</a>    <span class="comment">// wetting flag</span>
+}</pre>
+			<p>
+State holds state variables for porous media with liquid and gas
+</p>
+<pre>References:
+ [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
+ [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
+</pre>
+
 
 			
 
@@ -448,6 +680,52 @@ StateLG holds state variables for porous media with liquid and gas
 
 			
 
+			
+				
+				<h3 id="State.GetCopy">func (State) <a href="/src/target/states.go?s=1160:1191#L14">GetCopy</a></h3>
+				<pre>func (o <a href="#State">State</a>) GetCopy() *<a href="#State">State</a></pre>
+				<p>
+GetCopy returns a copy of State
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="State.Lderivs">func (State) <a href="/src/target/states.go?s=1972:2047#L60">Lderivs</a></h3>
+				<pre>func (o <a href="#State">State</a>) Lderivs(m *<a href="#Model">Model</a>) (Cpl, dCpldpl, dklrdpl <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Lderivs calculates derivatives for liquid-only simulations
+see Eq. (A.1) of [2]
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="State.Lvars">func (State) <a href="/src/target/states.go?s=1652:1707#L43">Lvars</a></h3>
+				<pre>func (o <a href="#State">State</a>) Lvars(m *<a href="#Model">Model</a>) (Cpl <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Lvars calculates variables for liquid-only simulations
+see Eq. (7) of [2]
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="State.Set">func (*State) <a href="/src/target/states.go?s=1340:1375#L29">Set</a></h3>
+				<pre>func (o *<a href="#State">State</a>) Set(another *<a href="#State">State</a>)</pre>
+				<p>
+Set sets this State with another State
+</p>
+
+				
+				
+				
 			
 		
 	

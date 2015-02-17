@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package out implements FE simulation output handling and plotting
+// package out implements FE simulation output handling for analyses and plotting
 //  The main structures containing results are:
-//   T -- slice of time values; e.g. T = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0}
-//   R -- all results for keys, quantities (aka points), and times.
-//        R[nkeys][npts..?][ntimes]. Example:
-//        R = [][][]float64{
+//   TseriesT -- slice of time values; e.g. T = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0}
+//   TseriesR -- all results for keys, quantities (aka points), and times.
+//        TseriesR[nkeys][npts..?][ntimes]. Example:
+//        TseriesR = [][][]float64{
 //          {
 //            {100, 99, 98}, // pl @ point A (bottom of column) for 3 time outputs
 //            {  0,  0,  0}, // pl @ point B (top of column) for 3 time outputs
@@ -30,7 +30,7 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-// IpDat holds integration point data
+// IpDat holds integration point data and serves to aid locating points in space
 type IpDat struct {
 	Eid int            // id of parent element
 	X   []float64      // ip's coordinates
@@ -54,9 +54,13 @@ var (
 	NodBins gm.Bins      // bins for nodes
 	IpsBins gm.Bins      // bins for integration points
 
-	// results
-	T   []float64        // [ntimes] time series
-	R   [][][]float64    // [nkeys][nqts..?][ntimes] all time-series results
+	// time-series data
+	TseriesKeys []string      // [nkeys] all keys
+	TseriesData []*TseriesDat // [nkeys] all items
+	TseriesT    []float64     // [ntimes] time series
+	TseriesR    [][][]float64 // [nkeys][nqts..?][ntimes] all time-series results
+
+	// suplot data
 	Spd map[string][]int // [nkeys] subplot data
 )
 
@@ -65,7 +69,7 @@ func End() {
 	fem.End()
 }
 
-// Start starts handling and plotting of results given a simulation input file
+// Start starts handling of results given a simulation input file
 func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 
 	// constants
@@ -93,11 +97,11 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 		return
 	}
 
-	// clear previous plot data
-	TplotClear()
+	// clear previous data
+	TseriesClear()
 	Ipoints = make([]*IpDat, 0)
-	T = make([]float64, 0)
-	R = make([][][]float64, 0)
+	TseriesT = make([]float64, 0)
+	TseriesR = make([][][]float64, 0)
 	Spd = make(map[string][]int)
 
 	// bins
@@ -138,16 +142,16 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 
 // Apply applies commands to generate T and R.
 func Apply() (err error) {
-	TplotStart()
-	T = make([]float64, Sum.NumTidx)
+	TseriesStart()
+	TseriesT = make([]float64, Sum.NumTidx)
 	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
 		if !Dom.ReadSol(tidx) {
 			return utl.Err("ReadSol failed. See log files\n")
 		}
-		T[tidx] = Dom.Sol.T
-		for i, dat := range TplotData {
+		TseriesT[tidx] = Dom.Sol.T
+		for i, dat := range TseriesData {
 			for j, q := range dat.Qts {
-				R[i][j][tidx] = *q.Value
+				TseriesR[i][j][tidx] = *q.Value
 			}
 		}
 	}
@@ -177,7 +181,7 @@ func Save(dirout, filename string, extra func()) (err error) {
 
 // plot_all plots all results
 func plot_all() {
-	nplots := len(R)
+	nplots := len(TseriesR)
 	nrow, ncol := utl.BestSquare(nplots)
 	if SubpNrow > 0 {
 		nrow = SubpNrow
@@ -187,13 +191,13 @@ func plot_all() {
 	}
 	Spd = make(map[string][]int)
 	for i := 0; i < nplots; i++ {
-		key := TplotKeys[i]
+		key := TseriesKeys[i]
 		Spd[key] = []int{nrow, ncol, i + 1}
 		plt.Subplot(nrow, ncol, i+1)
-		for j, Y := range R[i] {
-			sty := TplotData[i].Sty[j]
+		for j, Y := range TseriesR[i] {
+			sty := TseriesData[i].Sty[j]
 			args := sty.GetArgs("clip_on=0")
-			plt.Plot(T, Y, args)
+			plt.Plot(TseriesT, Y, args)
 		}
 	}
 	return

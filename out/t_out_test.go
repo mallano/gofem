@@ -61,15 +61,25 @@ func Test_out01(tst *testing.T) {
 		return
 	}
 
-	// check FE simulation results
-	//onequa_solution(tst, 1, Dom, 1e-15, 1e-14)
-
 	// load results
 	if !Start("data/onequa4.sim", 0, 0) {
 		tst.Errorf("Start failed\n")
 		return
 	}
 	defer End()
+
+	// commands for reading time-series
+	Tseries("ux", &IdsOrTags{0, 1, 2, 3}, nil)
+
+	// apply commands
+	err := Apply()
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+	}
+
+	// check FE simulation results
+	utl.Pforan("T = %v\n", TseriesT)
+	utl.Pforan("R = %v\n", TseriesR)
 }
 
 // this test needs 'fem' package to be tested first
@@ -97,10 +107,10 @@ func Test_out02(tst *testing.T) {
 	xip := Ipoints[0].X
 	utl.Pfcyan("xip = %v\n", xip)
 
-	// commands for time-plots
-	Tplot("pl", &At{2.5, 0}, nil)
-	Tplot("pl", &At{2.5, 10}, nil)
-	Tplot("sl", &At{xip[0], xip[1]}, nil)
+	// commands for reading time-series
+	Tseries("pl", &At{2.5, 0}, nil)
+	Tseries("pl", &At{2.5, 10}, nil)
+	Tseries("sl", &At{xip[0], xip[1]}, nil)
 
 	// check slices
 	nnod := 27
@@ -108,13 +118,13 @@ func Test_out02(tst *testing.T) {
 	nip := 4
 	utl.IntAssert(len(Dom.Nodes), nnod)
 	utl.IntAssert(len(Ipoints), nele*nip)
-	utl.IntAssert(len(TplotKeys), 2)
-	utl.IntAssert(len(TplotData), 2)
-	utl.CompareStrs(tst, "TplotKeys", TplotKeys, []string{"pl", "sl"})
+	utl.IntAssert(len(TseriesKeys), 2)
+	utl.IntAssert(len(TseriesData), 2)
+	utl.CompareStrs(tst, "TplotKeys", TseriesKeys, []string{"pl", "sl"})
 
 	// check quantities
-	for i, dat := range TplotData {
-		key := TplotKeys[i]
+	for i, dat := range TseriesData {
+		key := TseriesKeys[i]
 		utl.Pforan("key=%v => dat=%v\n", key, dat)
 		if key == "pl" {
 			utl.IntAssert(len(dat.Qts), 2)
@@ -148,9 +158,9 @@ func Test_out03(tst *testing.T) {
 	}
 	defer End()
 
-	// commands for time-plots
-	Tplot("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
-	Tplot("pl", &At{2.5, 10}, Styles{{Label: "B"}})
+	// commands for reading time-series
+	Tseries("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
+	Tseries("pl", &At{2.5, 10}, Styles{{Label: "B"}})
 
 	// apply commands
 	err := Apply()
