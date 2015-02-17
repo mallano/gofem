@@ -239,6 +239,7 @@ func MatfileNew2Old(dirout string, fnold, fnnew string, convertsymbols bool) {
 		oldmat.Name = m.Name
 		oldmat.Desc = m.Desc
 		oldmat.Model = m.Model
+		oldmat.Extra = m.Extra
 		for _, prm := range m.Prms {
 			name := prm.N
 			if convertsymbols {
@@ -248,7 +249,6 @@ func MatfileNew2Old(dirout string, fnold, fnnew string, convertsymbols bool) {
 			}
 			oldmat.Prms = append(oldmat.Prms, name)
 			oldmat.Vals = append(oldmat.Vals, prm.V)
-			oldmat.Extra = prm.Extra
 			if len(prm.U) > 0 {
 				oldmat.Units = append(oldmat.Units, prm.U)
 			}
