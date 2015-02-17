@@ -65,11 +65,13 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	dir := filepath.Dir(simfilepath)
 	fn := filepath.Base(simfilepath)
 	Global.Sim = inp.ReadSim(dir, fn, erasefiles)
-	if LogErrCond(Global.Sim == nil, "ReadSim failed\n") {
+	LogErrCond(Global.Sim == nil, "ReadSim failed\n")
+	if Stop() {
 		return
 	}
 	Global.Mdb = inp.ReadMat(Global.Sim.Data.FnameDir, Global.Sim.Data.Matfile)
-	if LogErrCond(Global.Mdb == nil, "ReadMat failed\n") {
+	LogErrCond(Global.Mdb == nil, "ReadMat failed\n")
+	if Stop() {
 		return
 	}
 

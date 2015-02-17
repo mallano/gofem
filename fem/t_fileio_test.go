@@ -48,7 +48,7 @@ func Test_fileio01(tst *testing.T) {
 		tst.Errorf("test failed")
 		return
 	}
-	utl.Pfblue2("file %v written\n", out_nod_path(tidx))
+	utl.Pfblue2("file %v written\n", out_nod_path(tidx, Global.Rank))
 
 	// domain B
 	domB := NewDomain(Global.Sim.Regions[0])

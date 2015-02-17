@@ -38,21 +38,27 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 
 	// allocate domain
 	d := NewDomain(Global.Sim.Regions[0])
-	if !d.SetStage(0, Global.Sim.Stages[0]) {
+	LogErrCond(!d.SetStage(0, Global.Sim.Stages[0]), "TestingCompareResultsU: SetStage failed")
+	if Stop() {
 		tst.Errorf("SetStage failed\n")
+		return
 	}
 
 	// read file
 	buf, err := utl.ReadFile(cmpfname)
-	if LogErr(err, "TestingCompareResultsU") {
+	LogErr(err, "TestingCompareResultsU: ReadFile failed")
+	if Stop() {
 		tst.Errorf("ReadFile failed\n")
+		return
 	}
 
 	// unmarshal json
 	var cmp_set T_results_set
 	err = json.Unmarshal(buf, &cmp_set)
-	if LogErr(err, "TestingCompareResultsU") {
+	LogErr(err, "TestingCompareResultsU: Unmarshal failed")
+	if Stop() {
 		tst.Errorf("Unmarshal failed\n")
+		return
 	}
 
 	// run comparisons
@@ -65,11 +71,13 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 		}
 
 		// load gofem results
-		if !d.In(tidx) {
-			tst.Errorf("reading results failed\n")
+		LogErrCond(!d.In(tidx), "TestingCompareResultsU: reading of results failed")
+		if Stop() {
+			tst.Errorf("reading of results failed\n")
+			return
 		}
 		if verbose {
-			utl.Pfyel("solution.t = %v\n", d.Sol.T)
+			utl.Pfyel("time = %v\n", d.Sol.T)
 		}
 
 		// check K matrices
@@ -79,11 +87,15 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 			}
 			for eid, Ksg := range cmp.Kmats {
 				if e, ok := d.Elems[eid].(*ElemU); ok {
-					if !e.AddToKb(d.Kb, d.Sol, true) {
+					if LogErrCond(!e.AddToKb(d.Kb, d.Sol, true), "TestingCompareResultsU: AddToKb failed") {
 						tst.Errorf("AddToKb failed\n")
+						break
 					}
 					utl.CheckMatrix(tst, utl.Sf("K%d", eid), tolK, e.K, Ksg)
 				}
+			}
+			if Stop() {
+				return
 			}
 		}
 
@@ -138,8 +150,8 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 func TestConsistentTangentK(tst *testing.T, d *Domain, ele Elem, tol float64, verb bool) {
 	derivfcn := num.DerivCen
 	if e, ok := ele.(*ElemP); ok {
-		if !e.AddToKb(d.Kb, d.Sol, false) {
-			tst.Errorf("K computation failed\n")
+		if LogErrCond(!e.AddToKb(d.Kb, d.Sol, false), "TestConsistentTangentK: AddToKb failed") {
+			tst.Errorf("AddToKb failed\n")
 			return
 		}
 		for i, I := range e.Pmap {

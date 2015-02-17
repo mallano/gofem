@@ -78,7 +78,7 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 	}
 
 	// save file
-	fil, err := os.Create(out_nod_path(tidx))
+	fil, err := os.Create(out_nod_path(tidx, Global.Rank))
 	if LogErr(err, "SaveSol") {
 		return
 	}
@@ -91,7 +91,7 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 func (o *Domain) ReadSol(tidx int) (ok bool) {
 
 	// open file
-	fil, err := os.Open(out_nod_path(tidx))
+	fil, err := os.Open(out_nod_path(tidx, 0)) // read always from proc # 0
 	if LogErr(err, "ReadSol") {
 		return
 	}
@@ -210,7 +210,7 @@ func SaveSum(sum *Summary) (ok bool) {
 	}
 
 	// save file
-	fil, err := os.Create(out_sum_path())
+	fil, err := os.Create(out_sum_path(Global.Rank))
 	if LogErr(err, "SaveSum") {
 		return
 	}
@@ -223,7 +223,7 @@ func SaveSum(sum *Summary) (ok bool) {
 func ReadSum() *Summary {
 
 	// open file
-	fil, err := os.Open(out_sum_path())
+	fil, err := os.Open(out_sum_path(0)) // read always from proc # 0
 	if LogErr(err, "ReadSum") {
 		return nil
 	}
@@ -241,14 +241,14 @@ func ReadSum() *Summary {
 
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
 
-func out_nod_path(tidx int) string {
-	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_nod_%010d.%s", Global.Sim.Data.FnameKey, Global.Rank, tidx, Global.Sim.Data.Encoder))
+func out_nod_path(tidx, proc int) string {
+	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_nod_%010d.%s", Global.Sim.Data.FnameKey, proc, tidx, Global.Sim.Data.Encoder))
 }
 
 func out_ele_path(tidx int) string {
 	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_ele_%010d.%s", Global.Sim.Data.FnameKey, Global.Rank, tidx, Global.Sim.Data.Encoder))
 }
 
-func out_sum_path() string {
-	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_sum.%s", Global.Sim.Data.FnameKey, Global.Rank, Global.Sim.Data.Encoder))
+func out_sum_path(proc int) string {
+	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_sum.%s", Global.Sim.Data.FnameKey, proc, Global.Sim.Data.Encoder))
 }
