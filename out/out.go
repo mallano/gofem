@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package out implements FE simulation output handling and plotting
+// package out implements FE simulation output handling for analyses and plotting
 //  The main structures containing results are:
 //   T -- slice of time values; e.g. T = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0}
 //   R -- all results for keys, quantities (aka points), and times.
@@ -30,7 +30,7 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-// IpDat holds integration point data
+// IpDat holds integration point data and serves to aid locating points in space
 type IpDat struct {
 	Eid int            // id of parent element
 	X   []float64      // ip's coordinates
@@ -65,7 +65,7 @@ func End() {
 	fem.End()
 }
 
-// Start starts handling and plotting of results given a simulation input file
+// Start starts handling of results given a simulation input file
 func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 
 	// constants
@@ -93,8 +93,8 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 		return
 	}
 
-	// clear previous plot data
-	TplotClear()
+	// clear previous data
+	TseriesClear()
 	Ipoints = make([]*IpDat, 0)
 	T = make([]float64, 0)
 	R = make([][][]float64, 0)
@@ -138,14 +138,14 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 
 // Apply applies commands to generate T and R.
 func Apply() (err error) {
-	TplotStart()
+	TseriesStart()
 	T = make([]float64, Sum.NumTidx)
 	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
 		if !Dom.ReadSol(tidx) {
 			return utl.Err("ReadSol failed. See log files\n")
 		}
 		T[tidx] = Dom.Sol.T
-		for i, dat := range TplotData {
+		for i, dat := range TseriesData {
 			for j, q := range dat.Qts {
 				R[i][j][tidx] = *q.Value
 			}
@@ -187,11 +187,11 @@ func plot_all() {
 	}
 	Spd = make(map[string][]int)
 	for i := 0; i < nplots; i++ {
-		key := TplotKeys[i]
+		key := TseriesKeys[i]
 		Spd[key] = []int{nrow, ncol, i + 1}
 		plt.Subplot(nrow, ncol, i+1)
 		for j, Y := range R[i] {
-			sty := TplotData[i].Sty[j]
+			sty := TseriesData[i].Sty[j]
 			args := sty.GetArgs("clip_on=0")
 			plt.Plot(T, Y, args)
 		}

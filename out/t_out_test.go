@@ -99,9 +99,9 @@ func Test_out02(tst *testing.T) {
 	utl.Pfcyan("xip = %v\n", xip)
 
 	// commands for time-plots
-	Tplot("pl", &At{2.5, 0}, nil)
-	Tplot("pl", &At{2.5, 10}, nil)
-	Tplot("sl", &At{xip[0], xip[1]}, nil)
+	Tseries("pl", &At{2.5, 0}, nil)
+	Tseries("pl", &At{2.5, 10}, nil)
+	Tseries("sl", &At{xip[0], xip[1]}, nil)
 
 	// check slices
 	nnod := 27
@@ -109,13 +109,13 @@ func Test_out02(tst *testing.T) {
 	nip := 4
 	utl.IntAssert(len(Dom.Nodes), nnod)
 	utl.IntAssert(len(Ipoints), nele*nip)
-	utl.IntAssert(len(TplotKeys), 2)
-	utl.IntAssert(len(TplotData), 2)
-	utl.CompareStrs(tst, "TplotKeys", TplotKeys, []string{"pl", "sl"})
+	utl.IntAssert(len(TseriesKeys), 2)
+	utl.IntAssert(len(TseriesData), 2)
+	utl.CompareStrs(tst, "TplotKeys", TseriesKeys, []string{"pl", "sl"})
 
 	// check quantities
-	for i, dat := range TplotData {
-		key := TplotKeys[i]
+	for i, dat := range TseriesData {
+		key := TseriesKeys[i]
 		utl.Pforan("key=%v => dat=%v\n", key, dat)
 		if key == "pl" {
 			utl.IntAssert(len(dat.Qts), 2)
@@ -150,8 +150,8 @@ func Test_out03(tst *testing.T) {
 	defer End()
 
 	// commands for time-plots
-	Tplot("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
-	Tplot("pl", &At{2.5, 10}, Styles{{Label: "B"}})
+	Tseries("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
+	Tseries("pl", &At{2.5, 10}, Styles{{Label: "B"}})
 
 	// apply commands
 	err := Apply()

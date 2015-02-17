@@ -10,30 +10,29 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-// TplotDat holds information of one key to be ploted along time; e.g. "pl"
-type TplotDat struct {
-	Qts Quantities // [npoints] points where values must be plotted
+// TseriesDat holds information of one key to be collected along time; e.g. "pl"
+type TseriesDat struct {
+	Qts Quantities // [npoints] points where values must be analysed/plotted
 	Sty Styles     // [npoints] styles => one item can have many points
 }
 
 // Global variables
 var (
-	TplotKeys []string    // [nkeys] all keys
-	TplotData []*TplotDat // [nkeys] all items
+	TseriesKeys []string      // [nkeys] all keys
+	TseriesData []*TseriesDat // [nkeys] all items
 )
 
-// TplotClear clears Tplot data
-func TplotClear() {
-	TplotKeys = make([]string, 0)
-	TplotData = make([]*TplotDat, 0)
+// TseriesClear clears Tplot data
+func TseriesClear() {
+	TseriesKeys = make([]string, 0)
+	TseriesData = make([]*TseriesDat, 0)
 }
 
-// TplotStart initialise structures for Time Plots
-//  Returns results: R[nkeys][nqts...?][ntimes]
-func TplotStart() {
-	nkeys := len(TplotKeys)
+// TseriesStart initialise structures containing all time-series results
+func TseriesStart() {
+	nkeys := len(TseriesKeys)
 	R = make([][][]float64, nkeys)
-	for i, dat := range TplotData {
+	for i, dat := range TseriesData {
 		R[i] = make([][]float64, len(dat.Qts))
 		for j, _ := range dat.Qts {
 			R[i][j] = make([]float64, Sum.NumTidx)
@@ -43,8 +42,8 @@ func TplotStart() {
 	return
 }
 
-// Tplot specifies a variable at a particular point to be plotted along time
-func Tplot(key string, loc PointLocator, sty Styles) {
+// Tseries specifies a variable at a particular point to be plotted along time
+func Tseries(key string, loc PointLocator, sty Styles) {
 	qts := loc.AtPoint(key)
 	if qts == nil {
 		return
@@ -53,12 +52,12 @@ func Tplot(key string, loc PointLocator, sty Styles) {
 	if len(sty) != n {
 		sty = GetDefaultStyles(n)
 	}
-	idx := utl.StrIndexSmall(TplotKeys, key)
+	idx := utl.StrIndexSmall(TseriesKeys, key)
 	if idx < 0 {
-		TplotKeys = append(TplotKeys, key)
-		TplotData = append(TplotData, &TplotDat{Qts: qts, Sty: sty})
+		TseriesKeys = append(TseriesKeys, key)
+		TseriesData = append(TseriesData, &TseriesDat{Qts: qts, Sty: sty})
 		return
 	}
-	TplotData[idx].Qts = append(TplotData[idx].Qts, qts...)
-	TplotData[idx].Sty = append(TplotData[idx].Sty, sty...)
+	TseriesData[idx].Qts = append(TseriesData[idx].Qts, qts...)
+	TseriesData[idx].Sty = append(TseriesData[idx].Sty, sty...)
 }
