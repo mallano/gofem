@@ -54,6 +54,12 @@ var (
 	NodBins gm.Bins      // bins for nodes
 	IpsBins gm.Bins      // bins for integration points
 
+	// time-series data
+	TseriesKeys []string      // [nkeys] all keys
+	TseriesData []*TseriesDat // [nkeys] all items
+	TseriesT    []float64     // [ntimes] time series
+	TseriesR    [][][]float64 // [nkeys][nqts..?][ntimes] all time-series results
+
 	// suplot data
 	Spd map[string][]int // [nkeys] subplot data
 )

@@ -16,14 +16,6 @@ type TseriesDat struct {
 	Sty Styles     // [npoints] styles => one item can have many points
 }
 
-// Global variables
-var (
-	TseriesKeys []string      // [nkeys] all keys
-	TseriesData []*TseriesDat // [nkeys] all items
-	TseriesT    []float64     // [ntimes] time series
-	TseriesR    [][][]float64 // [nkeys][nqts..?][ntimes] all time-series results
-)
-
 // TseriesClear clears Tplot data
 func TseriesClear() {
 	TseriesKeys = make([]string, 0)

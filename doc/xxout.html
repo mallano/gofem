@@ -291,6 +291,12 @@ package out implements FE simulation output handling for analyses and plotting
     <span id="NodBins">NodBins</span> <a href="/pkg/github.com/cpmech/gosl/gm/">gm</a>.<a href="/pkg/github.com/cpmech/gosl/gm/#Bins">Bins</a>      <span class="comment">// bins for nodes</span>
     <span id="IpsBins">IpsBins</span> <a href="/pkg/github.com/cpmech/gosl/gm/">gm</a>.<a href="/pkg/github.com/cpmech/gosl/gm/#Bins">Bins</a>      <span class="comment">// bins for integration points</span>
 
+    <span class="comment">// time-series data</span>
+    <span id="TseriesKeys">TseriesKeys</span> []<a href="/pkg/builtin/#string">string</a>      <span class="comment">// [nkeys] all keys</span>
+    <span id="TseriesData">TseriesData</span> []*<a href="#TseriesDat">TseriesDat</a> <span class="comment">// [nkeys] all items</span>
+    <span id="TseriesT">TseriesT</span>    []<a href="/pkg/builtin/#float64">float64</a>     <span class="comment">// [ntimes] time series</span>
+    <span id="TseriesR">TseriesR</span>    [][][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [nkeys][nqts..?][ntimes] all time-series results</span>
+
     <span class="comment">// suplot data</span>
     <span id="Spd">Spd</span> map[<a href="/pkg/builtin/#string">string</a>][]<a href="/pkg/builtin/#int">int</a> <span class="comment">// [nkeys] subplot data</span>
 )</pre>
@@ -299,22 +305,11 @@ Global variables
 </p>
 
 			
-				<pre>var (
-    <span id="TseriesKeys">TseriesKeys</span> []<a href="/pkg/builtin/#string">string</a>      <span class="comment">// [nkeys] all keys</span>
-    <span id="TseriesData">TseriesData</span> []*<a href="#TseriesDat">TseriesDat</a> <span class="comment">// [nkeys] all items</span>
-    <span id="TseriesT">TseriesT</span>    []<a href="/pkg/builtin/#float64">float64</a>     <span class="comment">// [ntimes] time series</span>
-    <span id="TseriesR">TseriesR</span>    [][][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [nkeys][nqts..?][ntimes] all time-series results</span>
-)</pre>
-				<p>
-Global variables
-</p>
-
-			
 		
 		
 			
 			
-			<h2 id="Apply">func <a href="/src/target/out.go?s=3712:3736#L128">Apply</a></h2>
+			<h2 id="Apply">func <a href="/src/target/out.go?s=3959:3983#L134">Apply</a></h2>
 			<pre>func Apply() (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Apply applies commands to generate T and R.
@@ -326,7 +321,7 @@ Apply applies commands to generate T and R.
 		
 			
 			
-			<h2 id="End">func <a href="/src/target/out.go?s=2177:2187#L52">End</a></h2>
+			<h2 id="End">func <a href="/src/target/out.go?s=2424:2434#L58">End</a></h2>
 			<pre>func End()</pre>
 			<p>
 End must be called and the end to flush log file
@@ -347,7 +342,7 @@ End must be called and the end to flush log file
 		
 			
 			
-			<h2 id="Save">func <a href="/src/target/out.go?s=4271:4331#L157">Save</a></h2>
+			<h2 id="Save">func <a href="/src/target/out.go?s=4518:4578#L163">Save</a></h2>
 			<pre>func Save(dirout, filename <a href="/pkg/builtin/#string">string</a>, extra func()) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Save saves plot
@@ -359,7 +354,7 @@ Save saves plot
 		
 			
 			
-			<h2 id="Show">func <a href="/src/target/out.go?s=4159:4182#L147">Show</a></h2>
+			<h2 id="Show">func <a href="/src/target/out.go?s=4406:4429#L153">Show</a></h2>
 			<pre>func Show(extra func())</pre>
 			<p>
 Show shows plot
@@ -382,7 +377,7 @@ Show shows plot
 		
 			
 			
-			<h2 id="Start">func <a href="/src/target/out.go?s=2270:2340#L57">Start</a></h2>
+			<h2 id="Start">func <a href="/src/target/out.go?s=2517:2587#L63">Start</a></h2>
 			<pre>func Start(simfnpath <a href="/pkg/builtin/#string">string</a>, stageIdx, regionIdx <a href="/pkg/builtin/#int">int</a>) (startisok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 			<p>
 Start starts handling of results given a simulation input file
@@ -394,7 +389,7 @@ Start starts handling of results given a simulation input file
 		
 			
 			
-			<h2 id="Tseries">func <a href="/src/target/timeseries.go?s=1316:1370#L38">Tseries</a></h2>
+			<h2 id="Tseries">func <a href="/src/target/timeseries.go?s=1062:1116#L30">Tseries</a></h2>
 			<pre>func Tseries(key <a href="/pkg/builtin/#string">string</a>, loc <a href="#PointLocator">PointLocator</a>, sty <a href="#Styles">Styles</a>)</pre>
 			<p>
 Tseries specifies a variable at a particular point to be plotted along time
@@ -406,7 +401,7 @@ Tseries specifies a variable at a particular point to be plotted along time
 		
 			
 			
-			<h2 id="TseriesClear">func <a href="/src/target/timeseries.go?s=779:798#L18">TseriesClear</a></h2>
+			<h2 id="TseriesClear">func <a href="/src/target/timeseries.go?s=525:544#L10">TseriesClear</a></h2>
 			<pre>func TseriesClear()</pre>
 			<p>
 TseriesClear clears Tplot data
@@ -418,7 +413,7 @@ TseriesClear clears Tplot data
 		
 			
 			
-			<h2 id="TseriesStart">func <a href="/src/target/timeseries.go?s=948:967#L24">TseriesStart</a></h2>
+			<h2 id="TseriesStart">func <a href="/src/target/timeseries.go?s=694:713#L16">TseriesStart</a></h2>
 			<pre>func TseriesStart()</pre>
 			<p>
 TseriesStart initialise structures containing all time-series results
