@@ -24,7 +24,6 @@ type Rod struct {
 	Nu   int         // total number of unknowns == 2 * nsn
 
 	// parameters
-	//E float64 // Young's modulus
 	A float64 // cross-sectional area
 
 	// variables for dynamics
@@ -63,13 +62,17 @@ func init() {
 		// new info
 		var info Info
 
+		// number of nodes in element
+		cell := msh.Cells[cid]
+		nverts := cell.Shp.Nverts
+
 		// solution variables
 		ykeys := []string{"ux", "uy"}
 		if msh.Ndim == 3 {
 			ykeys = []string{"ux", "uy", "uz"}
 		}
-		info.Dofs = make([][]string, 2)
-		for m := 0; m < 2; m++ {
+		info.Dofs = make([][]string, nverts)
+		for m := 0; m < nverts; m++ {
 			info.Dofs[m] = ykeys
 		}
 
@@ -112,8 +115,6 @@ func init() {
 		// parameters
 		for _, p := range matdata.Prms {
 			switch p.N {
-			//case "E":
-			//o.E = p.V
 			case "A":
 				o.A = p.V
 			}
@@ -129,8 +130,6 @@ func init() {
 			return nil
 		}
 		nip = len(o.IpsElem)
-
-		// state
 
 		// scratchpad. computed @ each ip
 		o.K = la.MatAlloc(o.Nu, o.Nu)
