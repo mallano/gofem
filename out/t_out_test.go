@@ -12,7 +12,7 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-func onequa_solution(tst *testing.T, t float64, dom *fem.Domain, tolu, tolσ float64) {
+func onequa_solution(tst *testing.T, t float64, u, xu, σ, xσ []float64, tolu, tolσ float64) {
 
 	// analytical solution
 	qnV, qnH := -100.0, -50.0
@@ -24,17 +24,19 @@ func onequa_solution(tst *testing.T, t float64, dom *fem.Domain, tolu, tolσ flo
 	εy := (σy - ν*(σz+σx)) / E
 
 	// check displacements
-	ux := lx * εx
-	uy := ly * εy
-	Ycor := []float64{0, 0, ux, 0, ux, uy, 0, uy}
-	utl.CheckVector(tst, "Y", tolu, dom.Sol.Y, Ycor)
+	ux := lx * εx * xu[0] / lx
+	uy := ly * εy * xu[1] / ly
+	utl.CheckScalar(tst, "ux", tolu, u[0], ux)
+	utl.CheckScalar(tst, "uy", tolu, u[1], uy)
 
-	// check stresses
-	e := dom.Elems[0].(*fem.ElemU)
-	σcor := []float64{σx, σy, σz, 0}
-	for idx, _ := range e.IpsElem {
-		utl.CheckVector(tst, "σ", tolσ, e.States[idx].Sig, σcor)
-	}
+	/*
+		// check stresses
+		e := dom.Elems[0].(*fem.ElemU)
+		σcor := []float64{σx, σy, σz, 0}
+		for idx, _ := range e.IpsElem {
+			utl.CheckVector(tst, "σ", tolσ, e.States[idx].Sig, σcor)
+		}
+	*/
 }
 
 func Test_out01(tst *testing.T) {
@@ -78,15 +80,37 @@ func Test_out01(tst *testing.T) {
 	}
 
 	// check FE simulation results
-	utl.Pforan("T = %v\n", TseriesT)
-	utl.Pforan("R = %v\n", TseriesR)
+	tolu, tolσ := 1e-15, 1e-15
+	utl.Pforan("T = %v\n", TseriesTimes)
+	utl.Pforan("R = %v\n", TseriesRes)
 	utl.Pforan("Q = %v\n", TseriesData[0].Qts)
+	//for i, key := range TseriesKeys {
+	//dat := TseriesData[i]
+	//switch key {
+	//case "ux":
+	//}
+	//}
+	u := make([]float64, 2)
+	σ := make([]float64, 4)
+	xu := make([]float64, 2)
+	xσ := make([]float64, 2)
+	//iux :=
+	for i, dat := range TseriesData {
+		utl.Pforan("t = %v\n", TseriesTimes[i])
+		utl.Pforan("q = %v\n", dat.Qts)
+		t := TseriesTimes[i]
+		//for _, key := range TseriesKeys {
+		//if key=="ux"{u[0]=
+		//}
+
+		onequa_solution(tst, t, u, xu, σ, xσ, tolu, tolσ)
+	}
 
 	// show figure
 	if !utl.Tsilent {
-		Show(func() {
-			//plt.Gll("$t$", "$p_{\\ell}$", "")
-		})
+		//Show(func() {
+		//plt.Gll("$t$", "$p_{\\ell}$", "")
+		//})
 	}
 }
 
@@ -128,7 +152,10 @@ func Test_out02(tst *testing.T) {
 	utl.IntAssert(len(Ipoints), nele*nip)
 	utl.IntAssert(len(TseriesKeys), 2)
 	utl.IntAssert(len(TseriesData), 2)
+	utl.IntAssert(len(TseriesKey2idx), 2)
 	utl.CompareStrs(tst, "TplotKeys", TseriesKeys, []string{"pl", "sl"})
+	utl.IntAssert(TseriesKey2idx["pl"], 0)
+	utl.IntAssert(TseriesKey2idx["sl"], 1)
 
 	// check quantities
 	for i, dat := range TseriesData {

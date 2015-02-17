@@ -20,16 +20,19 @@ type TseriesDat struct {
 func TseriesClear() {
 	TseriesKeys = make([]string, 0)
 	TseriesData = make([]*TseriesDat, 0)
+	TseriesTimes = make([]float64, 0)
+	TseriesRes = make([][][]float64, 0)
+	TseriesKey2idx = make(map[string]int)
 }
 
 // TseriesStart initialise structures containing all time-series results
 func TseriesStart() {
 	nkeys := len(TseriesKeys)
-	TseriesR = make([][][]float64, nkeys)
+	TseriesRes = make([][][]float64, nkeys)
 	for i, dat := range TseriesData {
-		TseriesR[i] = make([][]float64, len(dat.Qts))
+		TseriesRes[i] = make([][]float64, len(dat.Qts))
 		for j, _ := range dat.Qts {
-			TseriesR[i][j] = make([]float64, Sum.NumTidx)
+			TseriesRes[i][j] = make([]float64, Sum.NumTidx)
 		}
 		sort.Sort(dat.Qts)
 	}
@@ -48,6 +51,7 @@ func Tseries(key string, loc PointLocator, sty Styles) {
 	}
 	idx := utl.StrIndexSmall(TseriesKeys, key)
 	if idx < 0 {
+		TseriesKey2idx[key] = len(TseriesKeys)
 		TseriesKeys = append(TseriesKeys, key)
 		TseriesData = append(TseriesData, &TseriesDat{Qts: qts, Sty: sty})
 		return
