@@ -83,6 +83,9 @@ package inp implements the input data read from a (.sim) JSON file
 				<dd><a href="#LogErrCond">func LogErrCond(condition bool, msg string, prm ...interface{}) (stop bool)</a></dd>
 			
 				
+				<dd><a href="#MatfileNew2Old">func MatfileNew2Old(dirout string, fnold, fnnew string, convertsymbols bool)</a></dd>
+			
+				
 				<dd><a href="#MatfileOld2New">func MatfileOld2New(dirout string, fnnew, fnold string, convertsymbols bool)</a></dd>
 			
 			
@@ -391,6 +394,20 @@ LogErr logs error and returs stop flag
 			<p>
 LogErr logs error using condition (==true) to stop and returs stop flag
 </p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="MatfileNew2Old">func <a href="/src/target/mat.go?s=5093:5169#L197">MatfileNew2Old</a></h2>
+			<pre>func MatfileNew2Old(dirout <a href="/pkg/builtin/#string">string</a>, fnold, fnnew <a href="/pkg/builtin/#string">string</a>, convertsymbols <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+MatfileNew2Old converts a new mat file to the old mat file format
+</p>
+<pre>convertsymbols -- convert back symbols with Greek characters to UTF-8
+</pre>
 
 			
 			

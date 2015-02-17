@@ -787,7 +787,7 @@ Run runs FE simulation
 		
 			
 			
-			<h2 id="SaveSum">func <a href="/src/target/fileio.go?s=3655:3691#L181">SaveSum</a></h2>
+			<h2 id="SaveSum">func <a href="/src/target/fileio.go?s=3713:3749#L186">SaveSum</a></h2>
 			<pre>func SaveSum(sum *<a href="#Summary">Summary</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 			<p>
 SaveSums saves summary to disc
@@ -1118,7 +1118,7 @@ NewDomain returns a new domain
 
 			
 				
-				<h3 id="Domain.In">func (*Domain) <a href="/src/target/fileio.go?s=3364:3403#L167">In</a></h3>
+				<h3 id="Domain.In">func (*Domain) <a href="/src/target/fileio.go?s=3422:3461#L172">In</a></h3>
 				<pre>func (o *<a href="#Domain">Domain</a>) In(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 In performes the inverse operation from Out
@@ -1129,7 +1129,7 @@ In performes the inverse operation from Out
 				
 			
 				
-				<h3 id="Domain.Out">func (*Domain) <a href="/src/target/fileio.go?s=3212:3252#L159">Out</a></h3>
+				<h3 id="Domain.Out">func (*Domain) <a href="/src/target/fileio.go?s=3270:3310#L164">Out</a></h3>
 				<pre>func (o *<a href="#Domain">Domain</a>) Out(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 Out performs output of Solution and Internal values to files
@@ -1140,7 +1140,7 @@ Out performs output of Solution and Internal values to files
 				
 			
 				
-				<h3 id="Domain.ReadIvs">func (*Domain) <a href="/src/target/fileio.go?s=2840:2884#L139">ReadIvs</a></h3>
+				<h3 id="Domain.ReadIvs">func (*Domain) <a href="/src/target/fileio.go?s=2898:2942#L144">ReadIvs</a></h3>
 				<pre>func (o *<a href="#Domain">Domain</a>) ReadIvs(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 ReadIvs reads elements&#39;s internal values from a file which name is set with tidx (time output index)
@@ -1151,7 +1151,7 @@ ReadIvs reads elements&#39;s internal values from a file which name is set with 
 				
 			
 				
-				<h3 id="Domain.ReadSol">func (*Domain) <a href="/src/target/fileio.go?s=1662:1706#L76">ReadSol</a></h3>
+				<h3 id="Domain.ReadSol">func (*Domain) <a href="/src/target/fileio.go?s=1720:1764#L81">ReadSol</a></h3>
 				<pre>func (o *<a href="#Domain">Domain</a>) ReadSol(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 ReadSol reads Solution from a file which name is set with tidx (time output index)
@@ -1162,7 +1162,7 @@ ReadSol reads Solution from a file which name is set with tidx (time output inde
 				
 			
 				
-				<h3 id="Domain.SaveIvs">func (Domain) <a href="/src/target/fileio.go?s=2356:2399#L115">SaveIvs</a></h3>
+				<h3 id="Domain.SaveIvs">func (Domain) <a href="/src/target/fileio.go?s=2414:2457#L120">SaveIvs</a></h3>
 				<pre>func (o <a href="#Domain">Domain</a>) SaveIvs(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 SaveIvs saves elements&#39;s internal values to a file which name is set with tidx (time output index)
@@ -2617,7 +2617,7 @@ yb =  | p |         \ p / (ny x 1)
 		
 			
 			
-			<h2 id="Summary">type <a href="/src/target/fileio.go?s=3506:3619#L175">Summary</a></h2>
+			<h2 id="Summary">type <a href="/src/target/fileio.go?s=3564:3677#L180">Summary</a></h2>
 			<pre>type Summary struct {
     TidxIni []<a href="/pkg/builtin/#int">int</a> <span class="comment">// [nstg] first stage&#39;s time-output-index</span>
     NumTidx <a href="/pkg/builtin/#int">int</a>   <span class="comment">// number of tidx</span>
@@ -2637,7 +2637,7 @@ Summary records summary of outputs
 
 			
 				
-				<h3 id="ReadSum">func <a href="/src/target/fileio.go?s=4022:4045#L203">ReadSum</a></h3>
+				<h3 id="ReadSum">func <a href="/src/target/fileio.go?s=4138:4161#L213">ReadSum</a></h3>
 				<pre>func ReadSum() *<a href="#Summary">Summary</a></pre>
 				<p>
 ReadSum reads summary back

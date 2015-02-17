@@ -97,7 +97,7 @@ package out implements FE simulation output handling for analyses and plotting
 				<dd><a href="#GetTexLabel">func GetTexLabel(key, unit string) string</a></dd>
 			
 				
-				<dd><a href="#Plot">func Plot(keyx, keyy string, loc PointLocator, styles []*plt.LineData)</a></dd>
+				<dd><a href="#Plot">func Plot(keyx, keyy string, loc Locator, styles []*plt.LineData)</a></dd>
 			
 				
 				<dd><a href="#Save">func Save(dirout, filename string, extra func()) (err error)</a></dd>
@@ -106,13 +106,13 @@ package out implements FE simulation output handling for analyses and plotting
 				<dd><a href="#Show">func Show(extra func())</a></dd>
 			
 				
-				<dd><a href="#Splot">func Splot(key string, loc LineLocator, times []float64, styles []*plt.LineData)</a></dd>
+				<dd><a href="#Splot">func Splot(key string, loc Locator, times []float64, styles []*plt.LineData)</a></dd>
 			
 				
 				<dd><a href="#Start">func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool)</a></dd>
 			
 				
-				<dd><a href="#Tseries">func Tseries(key string, loc PointLocator, sty Styles)</a></dd>
+				<dd><a href="#Tseries">func Tseries(key string, loc Locator, sty Styles)</a></dd>
 			
 				
 				<dd><a href="#TseriesClear">func TseriesClear()</a></dd>
@@ -126,7 +126,7 @@ package out implements FE simulation output handling for analyses and plotting
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Along.AlongLine">func (o Along) AlongLine(key string) Quantities</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Along.Locate">func (o Along) Locate(key string) (res Quantities)</a></dd>
 				
 			
 				
@@ -149,15 +149,18 @@ package out implements FE simulation output handling for analyses and plotting
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#At.AtPoint">func (o At) AtPoint(key string) Quantities</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#At.Locate">func (o At) Locate(key string) Quantities</a></dd>
 				
 			
 				
 				<dd><a href="#Cells">type Cells</a></dd>
 				
+					
+					<dd>&nbsp; &nbsp; <a href="#AllCells">func AllCells() Cells</a></dd>
+				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Cells.AtPoint">func (o Cells) AtPoint(key string) (res Quantities)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Cells.Locate">func (o Cells) Locate(key string) (res Quantities)</a></dd>
 				
 			
 				
@@ -166,12 +169,7 @@ package out implements FE simulation output handling for analyses and plotting
 				
 			
 				
-				<dd><a href="#LineLocator">type LineLocator</a></dd>
-				
-				
-			
-				
-				<dd><a href="#PointLocator">type PointLocator</a></dd>
+				<dd><a href="#Locator">type Locator</a></dd>
 				
 				
 			
@@ -186,12 +184,18 @@ package out implements FE simulation output handling for analyses and plotting
 					<dd>&nbsp; &nbsp; <a href="#Quantities.Less">func (o Quantities) Less(i, j int) bool</a></dd>
 				
 					
+					<dd>&nbsp; &nbsp; <a href="#Quantities.String">func (o Quantities) String() string</a></dd>
+				
+					
 					<dd>&nbsp; &nbsp; <a href="#Quantities.Swap">func (o Quantities) Swap(i, j int)</a></dd>
 				
 			
 				
 				<dd><a href="#Quantity">type Quantity</a></dd>
 				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Quantity.String">func (o Quantity) String() string</a></dd>
 				
 			
 				
@@ -212,7 +216,7 @@ package out implements FE simulation output handling for analyses and plotting
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Verts.AtPoint">func (o Verts) AtPoint(key string) (res Quantities)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Verts.Locate">func (o Verts) Locate(key string) (res Quantities)</a></dd>
 				
 			
 			
@@ -355,8 +359,8 @@ End must be called and the end to flush log file
 		
 			
 			
-			<h2 id="Plot">func <a href="/src/target/spaceseries.go?s=311:381#L2">Plot</a></h2>
-			<pre>func Plot(keyx, keyy <a href="/pkg/builtin/#string">string</a>, loc <a href="#PointLocator">PointLocator</a>, styles []*<a href="/pkg/github.com/cpmech/gosl/plt/">plt</a>.<a href="/pkg/github.com/cpmech/gosl/plt/#LineData">LineData</a>)</pre>
+			<h2 id="Plot">func <a href="/src/target/spaceseries.go?s=307:372#L2">Plot</a></h2>
+			<pre>func Plot(keyx, keyy <a href="/pkg/builtin/#string">string</a>, loc <a href="#Locator">Locator</a>, styles []*<a href="/pkg/github.com/cpmech/gosl/plt/">plt</a>.<a href="/pkg/github.com/cpmech/gosl/plt/#LineData">LineData</a>)</pre>
 			
 			
 			
@@ -390,8 +394,8 @@ Show shows plot
 		
 			
 			
-			<h2 id="Splot">func <a href="/src/target/spaceseries.go?s=225:305#L1">Splot</a></h2>
-			<pre>func Splot(key <a href="/pkg/builtin/#string">string</a>, loc <a href="#LineLocator">LineLocator</a>, times []<a href="/pkg/builtin/#float64">float64</a>, styles []*<a href="/pkg/github.com/cpmech/gosl/plt/">plt</a>.<a href="/pkg/github.com/cpmech/gosl/plt/#LineData">LineData</a>)</pre>
+			<h2 id="Splot">func <a href="/src/target/spaceseries.go?s=225:301#L1">Splot</a></h2>
+			<pre>func Splot(key <a href="/pkg/builtin/#string">string</a>, loc <a href="#Locator">Locator</a>, times []<a href="/pkg/builtin/#float64">float64</a>, styles []*<a href="/pkg/github.com/cpmech/gosl/plt/">plt</a>.<a href="/pkg/github.com/cpmech/gosl/plt/#LineData">LineData</a>)</pre>
 			
 			
 			
@@ -411,8 +415,8 @@ Start starts handling of results given a simulation input file
 		
 			
 			
-			<h2 id="Tseries">func <a href="/src/target/timeseries.go?s=1179:1233#L33">Tseries</a></h2>
-			<pre>func Tseries(key <a href="/pkg/builtin/#string">string</a>, loc <a href="#PointLocator">PointLocator</a>, sty <a href="#Styles">Styles</a>)</pre>
+			<h2 id="Tseries">func <a href="/src/target/timeseries.go?s=1179:1228#L33">Tseries</a></h2>
+			<pre>func Tseries(key <a href="/pkg/builtin/#string">string</a>, loc <a href="#Locator">Locator</a>, sty <a href="#Styles">Styles</a>)</pre>
 			<p>
 Tseries specifies a variable at a particular point to be plotted along time
 </p>
@@ -448,7 +452,7 @@ TseriesStart initialise structures containing all time-series results
 		
 			
 			
-			<h2 id="Along">type <a href="/src/target/filtering.go?s=848:942#L19">Along</a></h2>
+			<h2 id="Along">type <a href="/src/target/filtering.go?s=714:808#L14">Along</a></h2>
 			<pre>type Along struct {
     A []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// first point on line</span>
     B []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// second point on line</span>
@@ -470,8 +474,8 @@ Along implements locator along line =&gt; LineLocator
 
 			
 				
-				<h3 id="Along.AlongLine">func (Along) <a href="/src/target/filtering.go?s=2627:2674#L113">AlongLine</a></h3>
-				<pre>func (o <a href="#Along">Along</a>) AlongLine(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a></pre>
+				<h3 id="Along.Locate">func (Along) <a href="/src/target/filtering.go?s=2490:2540#L108">Locate</a></h3>
+				<pre>func (o <a href="#Along">Along</a>) Locate(key <a href="/pkg/builtin/#string">string</a>) (res <a href="#Quantities">Quantities</a>)</pre>
 				<p>
 Along returns quantity along line
 </p>
@@ -483,7 +487,7 @@ Along returns quantity along line
 		
 			
 			
-			<h2 id="AlongX">type <a href="/src/target/filtering.go?s=977:998#L25">AlongX</a></h2>
+			<h2 id="AlongX">type <a href="/src/target/filtering.go?s=843:864#L20">AlongX</a></h2>
 			<pre>type AlongX []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 AlongX implements LineLocator
@@ -504,7 +508,7 @@ AlongX implements LineLocator
 		
 			
 			
-			<h2 id="AlongY">type <a href="/src/target/filtering.go?s=1033:1054#L28">AlongY</a></h2>
+			<h2 id="AlongY">type <a href="/src/target/filtering.go?s=899:920#L23">AlongY</a></h2>
 			<pre>type AlongY []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 AlongY implements LineLocator
@@ -525,7 +529,7 @@ AlongY implements LineLocator
 		
 			
 			
-			<h2 id="AlongZ">type <a href="/src/target/filtering.go?s=1089:1110#L31">AlongZ</a></h2>
+			<h2 id="AlongZ">type <a href="/src/target/filtering.go?s=955:976#L26">AlongZ</a></h2>
 			<pre>type AlongZ []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 AlongZ implements LineLocator
@@ -546,7 +550,7 @@ AlongZ implements LineLocator
 		
 			
 			
-			<h2 id="At">type <a href="/src/target/filtering.go?s=494:511#L8">At</a></h2>
+			<h2 id="At">type <a href="/src/target/filtering.go?s=360:377#L3">At</a></h2>
 			<pre>type At []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 At implements locator at point =&gt; PointLocator
@@ -565,8 +569,8 @@ At implements locator at point =&gt; PointLocator
 
 			
 				
-				<h3 id="At.AtPoint">func (At) <a href="/src/target/filtering.go?s=1149:1191#L34">AtPoint</a></h3>
-				<pre>func (o <a href="#At">At</a>) AtPoint(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a></pre>
+				<h3 id="At.Locate">func (At) <a href="/src/target/filtering.go?s=1015:1056#L29">Locate</a></h3>
+				<pre>func (o <a href="#At">At</a>) Locate(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a></pre>
 				<p>
 AtPoint returns quantity at point
 </p>
@@ -578,7 +582,7 @@ AtPoint returns quantity at point
 		
 			
 			
-			<h2 id="Cells">type <a href="/src/target/filtering.go?s=774:792#L16">Cells</a></h2>
+			<h2 id="Cells">type <a href="/src/target/filtering.go?s=640:658#L11">Cells</a></h2>
 			<pre>type Cells [][]<a href="/pkg/builtin/#int">int</a></pre>
 			<p>
 Cells implements locator at point =&gt; PointLocator
@@ -595,11 +599,21 @@ Pairs of ids or tags of cells and integration points indices can be stored in Ce
 			
 
 			
+				
+				<h3 id="AllCells">func <a href="/src/target/filtering.go?s=2958:2979#L131">AllCells</a></h3>
+				<pre>func AllCells() <a href="#Cells">Cells</a></pre>
+				<p>
+AllCells returns all cell/ip indices
+</p>
+
+				
+				
+			
 
 			
 				
-				<h3 id="Cells.AtPoint">func (Cells) <a href="/src/target/filtering.go?s=1985:2036#L80">AtPoint</a></h3>
-				<pre>func (o <a href="#Cells">Cells</a>) AtPoint(key <a href="/pkg/builtin/#string">string</a>) (res <a href="#Quantities">Quantities</a>)</pre>
+				<h3 id="Cells.Locate">func (Cells) <a href="/src/target/filtering.go?s=1849:1899#L75">Locate</a></h3>
+				<pre>func (o <a href="#Cells">Cells</a>) Locate(key <a href="/pkg/builtin/#string">string</a>) (res <a href="#Quantities">Quantities</a>)</pre>
 				<p>
 AtPoint returns quantity at point
 </p>
@@ -637,32 +651,9 @@ IpDat holds integration point data and serves to aid locating points in space
 		
 			
 			
-			<h2 id="LineLocator">type <a href="/src/target/filtering.go?s=378:442#L3">LineLocator</a></h2>
-			<pre>type LineLocator interface {
-    AlongLine(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a>
-}</pre>
-			<p>
-LineLocator defines interface for locating space positions
-</p>
-
-
-			
-
-			
-
-			
-			
-			
-
-			
-
-			
-		
-			
-			
-			<h2 id="PointLocator">type <a href="/src/target/filtering.go?s=251:314#L1">PointLocator</a></h2>
-			<pre>type PointLocator interface {
-    AtPoint(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a>
+			<h2 id="Locator">type <a href="/src/target/filtering.go?s=251:308#L1">Locator</a></h2>
+			<pre>type Locator interface {
+    Locate(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a>
 }</pre>
 			<p>
 PointLocator defines interface for locating space positions
@@ -683,7 +674,7 @@ PointLocator defines interface for locating space positions
 		
 			
 			
-			<h2 id="Quantities">type <a href="/src/target/quantity.go?s=426:453#L5">Quantities</a></h2>
+			<h2 id="Quantities">type <a href="/src/target/quantity.go?s=463:490#L7">Quantities</a></h2>
 			<pre>type Quantities []*<a href="#Quantity">Quantity</a></pre>
 			<p>
 Quantities is a set of Quantity
@@ -702,7 +693,7 @@ Quantities is a set of Quantity
 
 			
 				
-				<h3 id="Quantities.Len">func (Quantities) <a href="/src/target/quantity.go?s=487:516#L8">Len</a></h3>
+				<h3 id="Quantities.Len">func (Quantities) <a href="/src/target/quantity.go?s=524:553#L10">Len</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) Len() <a href="/pkg/builtin/#int">int</a></pre>
 				<p>
 Len the length of Quantities
@@ -713,7 +704,7 @@ Len the length of Quantities
 				
 			
 				
-				<h3 id="Quantities.Less">func (Quantities) <a href="/src/target/quantity.go?s=676:715#L18">Less</a></h3>
+				<h3 id="Quantities.Less">func (Quantities) <a href="/src/target/quantity.go?s=713:752#L20">Less</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) Less(i, j <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 				<p>
 Less compares Quantities considering Dist
@@ -724,7 +715,15 @@ Less compares Quantities considering Dist
 				
 			
 				
-				<h3 id="Quantities.Swap">func (Quantities) <a href="/src/target/quantity.go?s=566:600#L13">Swap</a></h3>
+				<h3 id="Quantities.String">func (Quantities) <a href="/src/target/quantity.go?s=2634:2669#L103">String</a></h3>
+				<pre>func (o <a href="#Quantities">Quantities</a>) String() <a href="/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Quantities.Swap">func (Quantities) <a href="/src/target/quantity.go?s=603:637#L15">Swap</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) Swap(i, j <a href="/pkg/builtin/#int">int</a>)</pre>
 				<p>
 Swap swaps two Quantities
@@ -737,7 +736,7 @@ Swap swaps two Quantities
 		
 			
 			
-			<h2 id="Quantity">type <a href="/src/target/quantity.go?s=226:389#L1">Quantity</a></h2>
+			<h2 id="Quantity">type <a href="/src/target/quantity.go?s=263:426#L1">Quantity</a></h2>
 			<pre>type Quantity struct {
     Value *<a href="/pkg/builtin/#float64">float64</a>  <span class="comment">// value of, e.g., &#34;ux&#34;</span>
     Dist  <a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// distance from reference point (if along line)</span>
@@ -758,6 +757,14 @@ Quantity holds node or ip quantity
 
 			
 
+			
+				
+				<h3 id="Quantity.String">func (Quantity) <a href="/src/target/quantity.go?s=2431:2464#L94">String</a></h3>
+				<pre>func (o <a href="#Quantity">Quantity</a>) String() <a href="/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
 			
 		
 			
@@ -814,7 +821,7 @@ TseriesDat holds information of one key to be collected along time; e.g. &#34;pl
 		
 			
 			
-			<h2 id="Verts">type <a href="/src/target/filtering.go?s=616:632#L12">Verts</a></h2>
+			<h2 id="Verts">type <a href="/src/target/filtering.go?s=482:498#L7">Verts</a></h2>
 			<pre>type Verts []<a href="/pkg/builtin/#int">int</a></pre>
 			<p>
 Verts implements locator at point =&gt; PointLocator
@@ -834,8 +841,8 @@ Ids or tags of vertices can be stored in Verts
 
 			
 				
-				<h3 id="Verts.AtPoint">func (Verts) <a href="/src/target/filtering.go?s=1535:1586#L57">AtPoint</a></h3>
-				<pre>func (o <a href="#Verts">Verts</a>) AtPoint(key <a href="/pkg/builtin/#string">string</a>) (res <a href="#Quantities">Quantities</a>)</pre>
+				<h3 id="Verts.Locate">func (Verts) <a href="/src/target/filtering.go?s=1400:1450#L52">Locate</a></h3>
+				<pre>func (o <a href="#Verts">Verts</a>) Locate(key <a href="/pkg/builtin/#string">string</a>) (res <a href="#Quantities">Quantities</a>)</pre>
 				<p>
 AtPoint returns quantity at point
 </p>
