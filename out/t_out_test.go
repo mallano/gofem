@@ -85,12 +85,12 @@ func Test_out01(tst *testing.T) {
 	// commands for reading time-series
 	verts := Verts{0, 1, 2, 3}
 	cells := Cells{{0, 0}, {0, 1}, {-1, 2}, {-1, 3}}
-	Tseries("ux", &verts, nil)
-	Tseries("uy", &verts, nil)
-	Tseries("sx", &cells, nil)
-	Tseries("sy", &cells, nil)
-	Tseries("sz", &cells, nil)
-	Tseries("sxy", &cells, nil)
+	Tseries("ux", verts, nil)
+	Tseries("uy", verts, nil)
+	Tseries("sx", cells, nil)
+	Tseries("sy", cells, nil)
+	Tseries("sz", cells, nil)
+	Tseries("sxy", cells, nil)
 
 	// check slices
 	nnod := 4
@@ -171,7 +171,6 @@ func Test_out01(tst *testing.T) {
 	}
 }
 
-// this test needs 'fem' package to be tested first
 func Test_out02(tst *testing.T) {
 
 	prevTs := utl.Tsilent
@@ -182,8 +181,129 @@ func Test_out02(tst *testing.T) {
 		}
 	}()
 
-	//utl.Tsilent = false
+	utl.Tsilent = false
 	utl.TTitle("out02")
+
+	// run FE simulation
+	if !fem.Start("data/twoqua4.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+		return
+	}
+	defer fem.End()
+	if !fem.Run() {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// load results
+	if !Start("data/twoqua4.sim", 0, 0) {
+		tst.Errorf("Start failed\n")
+		return
+	}
+	defer End()
+
+	// commands for reading time-series
+	verts := Verts{-1}
+	cells := AllCells()
+	Tseries("ux", verts, nil)
+	Tseries("uy", verts, nil)
+	Tseries("sx", cells, nil)
+	Tseries("sy", cells, nil)
+	Tseries("sz", cells, nil)
+	Tseries("sxy", cells, nil)
+
+	// check slices
+	nnod := 6
+	nele := 2
+	nip := 4
+	utl.IntAssert(len(Dom.Nodes), nnod)
+	utl.IntAssert(len(Ipoints), nele*nip)
+	utl.IntAssert(len(Cid2ips), 2)
+	utl.IntAssert(len(TseriesKeys), 6)
+	utl.IntAssert(len(TseriesData), 6)
+	utl.IntAssert(len(TseriesKey2idx), 6)
+	utl.CompareStrs(tst, "TplotKeys", TseriesKeys, []string{"ux", "uy", "sx", "sy", "sz", "sxy"})
+	utl.IntAssert(TseriesKey2idx["ux"], 0)
+	utl.IntAssert(TseriesKey2idx["uy"], 1)
+	utl.IntAssert(TseriesKey2idx["sx"], 2)
+	utl.IntAssert(TseriesKey2idx["sy"], 3)
+	utl.IntAssert(TseriesKey2idx["sz"], 4)
+	utl.IntAssert(TseriesKey2idx["sxy"], 5)
+
+	// check quantities
+	for i, dat := range TseriesData {
+		key := TseriesKeys[i]
+		if key == "ux" || key == "uy" {
+			utl.IntAssert(len(dat.Qts), 1)
+			utl.IntAssert(len(dat.Sty), 1)
+		}
+		if key == "sx" || key == "sy" || key == "sz" || key == "sxy" {
+			utl.IntAssert(len(dat.Qts), 8)
+			utl.IntAssert(len(dat.Sty), 8)
+		}
+	}
+
+	// apply commands
+	err := Apply()
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+	}
+
+	// check displacements
+	tolu := 1e-15
+	iux := TseriesKey2idx["ux"]
+	iuy := TseriesKey2idx["uy"]
+	for i, q := range TseriesData[iux].Qts {
+		utl.PfWhite("\nx=%g\n", q.X)
+		for j, t := range TseriesTimes {
+			utl.Pfyel("t=%g\n", t)
+			u := []float64{
+				TseriesRes[iux][i][j],
+				TseriesRes[iuy][i][j],
+			}
+			onequa_check_u(tst, t, u, q.X, tolu)
+		}
+	}
+
+	// check stresses
+	tolσ := 1e-13
+	isx := TseriesKey2idx["sx"]
+	isy := TseriesKey2idx["sy"]
+	isz := TseriesKey2idx["sz"]
+	isxy := TseriesKey2idx["sxy"]
+	for i, q := range TseriesData[isx].Qts {
+		utl.PfWhite("\nx=%g\n", q.X)
+		for j, t := range TseriesTimes {
+			utl.Pfyel("t=%g\n", t)
+			σ := []float64{
+				TseriesRes[isx][i][j],
+				TseriesRes[isy][i][j],
+				TseriesRes[isz][i][j],
+				TseriesRes[isxy][i][j],
+			}
+			onequa_check_sig(tst, t, σ, q.X, tolσ)
+		}
+	}
+
+	// show figure
+	if !utl.Tsilent {
+		//Show(nil)
+	}
+}
+
+// this test needs 'fem' package to be tested first
+func Test_out03(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
+	//utl.Tsilent = false
+	utl.TTitle("out03")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
 	if !Start(datadir+"p01.sim", 0, 0) {
@@ -197,9 +317,9 @@ func Test_out02(tst *testing.T) {
 	utl.Pfcyan("xip = %v\n", xip)
 
 	// commands for reading time-series
-	Tseries("pl", &At{2.5, 0}, nil)
-	Tseries("pl", &At{2.5, 10}, nil)
-	Tseries("sl", &At{xip[0], xip[1]}, nil)
+	Tseries("pl", At{2.5, 0}, nil)
+	Tseries("pl", At{2.5, 10}, nil)
+	Tseries("sl", At{xip[0], xip[1]}, nil)
 
 	// check slices
 	nnod := 27
@@ -230,7 +350,7 @@ func Test_out02(tst *testing.T) {
 }
 
 // this test needs 'fem' package to be tested first
-func Test_out03(tst *testing.T) {
+func Test_out04(tst *testing.T) {
 
 	prevTs := utl.Tsilent
 	defer func() {
@@ -241,7 +361,7 @@ func Test_out03(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("out03")
+	utl.TTitle("out04")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
 	if !Start(datadir+"p01.sim", 0, 0) {

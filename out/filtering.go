@@ -120,6 +120,35 @@ func (o Cells) AtPoint(key string) (res Quantities) {
 }
 
 // Along returns quantity along line
-func (o Along) AlongLine(key string) Quantities {
+func (o Along) AlongLine(key string) (res Quantities) {
+
+	// node quantities
+	ids := NodBins.FindAlongLine(o.A, o.B, TolC)
+	for _, id := range ids {
+		q := get_nod_quantity(key, id, 0)
+		if q != nil {
+			res = append(res, q)
+		}
+	}
+
+	// integration point quantitites
+	ids = IpsBins.FindAlongLine(o.A, o.B, TolC)
+	for _, id := range ids {
+		q := get_ip_quantity(key, id, 0)
+		if q != nil {
+			res = append(res, q)
+		}
+	}
 	return nil
+}
+
+// AllCells returns all cell/ip indices
+func AllCells() Cells {
+	cells := make([][]int, 0)
+	for i, ips := range Cid2ips {
+		for j, _ := range ips {
+			cells = append(cells, []int{i, j})
+		}
+	}
+	return cells
 }
