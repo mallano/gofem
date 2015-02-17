@@ -312,7 +312,7 @@ func Test_out02(tst *testing.T) {
 }
 
 // this test needs 'fem' package to be tested first
-func test_out03(tst *testing.T) {
+func Test_out03(tst *testing.T) {
 
 	prevTs := utl.Tsilent
 	defer func() {
@@ -332,14 +332,15 @@ func test_out03(tst *testing.T) {
 	}
 	defer End()
 
-	// get first ip coordinates
-	xip := Ipoints[0].X
-	utl.Pfcyan("xip = %v\n", xip)
+	// get ip
+	n := len(Ipoints)
+	ip := Ipoints[n-1].X
+	utl.Pfcyan("ip = %v\n", ip)
 
 	// commands for reading time-series
 	Tseries("pl", At{2.5, 0}, nil)
 	Tseries("pl", At{2.5, 10}, nil)
-	Tseries("sl", At{xip[0], xip[1]}, nil)
+	Tseries("sl", At{ip[0], ip[1]}, nil)
 
 	// check slices
 	nnod := 27
@@ -357,7 +358,7 @@ func test_out03(tst *testing.T) {
 	// check quantities
 	for i, dat := range TseriesData {
 		key := TseriesKeys[i]
-		utl.Pforan("key=%v => dat=%v\n", key, dat)
+		utl.Pforan("key=%v => dat=\n%v\n", key, dat)
 		if key == "pl" {
 			utl.IntAssert(len(dat.Qts), 2)
 			utl.IntAssert(len(dat.Sty), 2)
@@ -370,7 +371,7 @@ func test_out03(tst *testing.T) {
 }
 
 // this test needs 'fem' package to be tested first
-func test_out04(tst *testing.T) {
+func Test_out04(tst *testing.T) {
 
 	prevTs := utl.Tsilent
 	defer func() {
@@ -390,8 +391,9 @@ func test_out04(tst *testing.T) {
 	}
 	defer End()
 
-	// get first ip coordinates
-	ip := Ipoints[0].X
+	// get last ip
+	n := len(Ipoints)
+	ip := Ipoints[n-1].X
 
 	// commands for reading time-series
 	Tseries("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
