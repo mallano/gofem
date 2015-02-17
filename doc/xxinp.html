@@ -551,7 +551,7 @@ Data holds global data for simulations
 
 			
 				
-				<h3 id="Data.PostProcess">func (*Data) <a href="/src/target/sim.go?s=1551:1610#L41">PostProcess</a></h3>
+				<h3 id="Data.PostProcess">func (*Data) <a href="/src/target/sim.go?s=1570:1629#L42">PostProcess</a></h3>
 				<pre>func (o *<a href="#Data">Data</a>) PostProcess(dir, fn <a href="/pkg/builtin/#string">string</a>, erasefiles <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 PostProcess performs a post-processing of the just read json file
@@ -575,7 +575,7 @@ SetDefault sets defaults values
 		
 			
 			
-			<h2 id="EleCond">type <a href="/src/target/sim.go?s=6057:6376#L186">EleCond</a></h2>
+			<h2 id="EleCond">type <a href="/src/target/sim.go?s=6102:6421#L187">EleCond</a></h2>
 			<pre>type EleCond struct {
     Tag   <a href="/pkg/builtin/#int">int</a>      `json:&#34;tag&#34;`   <span class="comment">// tag of cell/element</span>
     Keys  []<a href="/pkg/builtin/#string">string</a> `json:&#34;keys&#34;`  <span class="comment">// key indicating type of condition. ex: &#34;g&#34; (gravity), &#34;qn&#34; for beams, etc.</span>
@@ -601,7 +601,7 @@ EleCond holds element condition
 		
 			
 			
-			<h2 id="ElemData">type <a href="/src/target/sim.go?s=4163:4521#L141">ElemData</a></h2>
+			<h2 id="ElemData">type <a href="/src/target/sim.go?s=4208:4566#L142">ElemData</a></h2>
 			<pre>type ElemData struct {
     Tag   <a href="/pkg/builtin/#int">int</a>    `json:&#34;tag&#34;`   <span class="comment">// tag of element</span>
     Mat   <a href="/pkg/builtin/#string">string</a> `json:&#34;mat&#34;`   <span class="comment">// material name</span>
@@ -628,7 +628,7 @@ ElemData holds element data
 		
 			
 			
-			<h2 id="FaceBc">type <a href="/src/target/sim.go?s=4967:5288#L162">FaceBc</a></h2>
+			<h2 id="FaceBc">type <a href="/src/target/sim.go?s=5012:5333#L163">FaceBc</a></h2>
 			<pre>type FaceBc struct {
     Tag   <a href="/pkg/builtin/#int">int</a>      `json:&#34;tag&#34;`   <span class="comment">// tag of face</span>
     Keys  []<a href="/pkg/builtin/#string">string</a> `json:&#34;keys&#34;`  <span class="comment">// key indicating type of bcs. ex: qn, pw, ux, uy, uz, wwx, wwy, wwz</span>
@@ -735,7 +735,7 @@ String prints functions
 		
 			
 			
-			<h2 id="HydroStData">type <a href="/src/target/sim.go?s=6948:7221#L207">HydroStData</a></h2>
+			<h2 id="HydroStData">type <a href="/src/target/sim.go?s=6993:7266#L208">HydroStData</a></h2>
 			<pre>type HydroStData struct {
     GamW   <a href="/pkg/builtin/#float64">float64</a> `json:&#34;gamw&#34;`   <span class="comment">// unit weight of water to use in HydroSt</span>
     Zwater <a href="/pkg/builtin/#float64">float64</a> `json:&#34;zwater&#34;` <span class="comment">// water elevation to set ponding or unsaturated condition</span>
@@ -760,7 +760,7 @@ HydroStData holds data to set hydrostatic initial state
 		
 			
 			
-			<h2 id="LinSolData">type <a href="/src/target/sim.go?s=2001:2372#L58">LinSolData</a></h2>
+			<h2 id="LinSolData">type <a href="/src/target/sim.go?s=2046:2417#L59">LinSolData</a></h2>
 			<pre>type LinSolData struct {
     Name      <a href="/pkg/builtin/#string">string</a> `json:&#34;name&#34;`      <span class="comment">// &#34;mumps&#34; or &#34;umfpack&#34;</span>
     Symmetric <a href="/pkg/builtin/#bool">bool</a>   `json:&#34;symmetric&#34;` <span class="comment">// use symmetric solver</span>
@@ -786,7 +786,7 @@ LinSolData holds data for linear solvers
 
 			
 				
-				<h3 id="LinSolData.PostProcess">func (*LinSolData) <a href="/src/target/sim.go?s=2577:2611#L75">PostProcess</a></h3>
+				<h3 id="LinSolData.PostProcess">func (*LinSolData) <a href="/src/target/sim.go?s=2622:2656#L76">PostProcess</a></h3>
 				<pre>func (o *<a href="#LinSolData">LinSolData</a>) PostProcess()</pre>
 				<p>
 PostProcess performs a post-processing of the just read json file
@@ -797,7 +797,7 @@ PostProcess performs a post-processing of the just read json file
 				
 			
 				
-				<h3 id="LinSolData.SetDefault">func (*LinSolData) <a href="/src/target/sim.go?s=2409:2442#L68">SetDefault</a></h3>
+				<h3 id="LinSolData.SetDefault">func (*LinSolData) <a href="/src/target/sim.go?s=2454:2487#L69">SetDefault</a></h3>
 				<pre>func (o *<a href="#LinSolData">LinSolData</a>) SetDefault()</pre>
 				<p>
 SetDefault sets defaults values
@@ -1027,7 +1027,7 @@ String returns a JSON representation of *Mesh
 		
 			
 			
-			<h2 id="NodeBc">type <a href="/src/target/sim.go?s=5703:6020#L178">NodeBc</a></h2>
+			<h2 id="NodeBc">type <a href="/src/target/sim.go?s=5748:6065#L179">NodeBc</a></h2>
 			<pre>type NodeBc struct {
     Tag   <a href="/pkg/builtin/#int">int</a>      `json:&#34;tag&#34;`   <span class="comment">// tag of node</span>
     Keys  []<a href="/pkg/builtin/#string">string</a> `json:&#34;keys&#34;`  <span class="comment">// key indicating type of bcs. ex: pw, ux, uy, uz, wwx, wwy, wwz</span>
@@ -1053,7 +1053,7 @@ NodeBc holds node boundary condition
 		
 			
 			
-			<h2 id="Region">type <a href="/src/target/sim.go?s=4551:4925#L150">Region</a></h2>
+			<h2 id="Region">type <a href="/src/target/sim.go?s=4596:4970#L151">Region</a></h2>
 			<pre>type Region struct {
 
     <span class="comment">// input data</span>
@@ -1079,7 +1079,7 @@ Region holds region data
 
 			
 				
-				<h3 id="Region.Etag2data">func (*Region) <a href="/src/target/sim.go?s=11352:11398#L349">Etag2data</a></h3>
+				<h3 id="Region.Etag2data">func (*Region) <a href="/src/target/sim.go?s=11397:11443#L350">Etag2data</a></h3>
 				<pre>func (d *<a href="#Region">Region</a>) Etag2data(etag <a href="/pkg/builtin/#int">int</a>) *<a href="#ElemData">ElemData</a></pre>
 				<p>
 Etag2data returns the ElemData corresponding to element tag
@@ -1094,7 +1094,7 @@ Etag2data returns the ElemData corresponding to element tag
 		
 			
 			
-			<h2 id="SeamBc">type <a href="/src/target/sim.go?s=5340:5661#L170">SeamBc</a></h2>
+			<h2 id="SeamBc">type <a href="/src/target/sim.go?s=5385:5706#L171">SeamBc</a></h2>
 			<pre>type SeamBc struct {
     Tag   <a href="/pkg/builtin/#int">int</a>      `json:&#34;tag&#34;`   <span class="comment">// tag of seam</span>
     Keys  []<a href="/pkg/builtin/#string">string</a> `json:&#34;keys&#34;`  <span class="comment">// key indicating type of bcs. ex: qn, pw, ux, uy, uz, wwx, wwy, wwz</span>
@@ -1120,7 +1120,7 @@ SeamBc holds seam (3D edge) boundary condition
 		
 			
 			
-			<h2 id="Simulation">type <a href="/src/target/sim.go?s=8325:8757#L238">Simulation</a></h2>
+			<h2 id="Simulation">type <a href="/src/target/sim.go?s=8370:8802#L239">Simulation</a></h2>
 			<pre>type Simulation struct {
     Data      <a href="#Data">Data</a>       `json:&#34;data&#34;`      <span class="comment">// stores global simulation data</span>
     Functions <a href="#FuncsData">FuncsData</a>  `json:&#34;functions&#34;` <span class="comment">// stores all boundary condition functions</span>
@@ -1144,7 +1144,7 @@ Simulation holds all simulation data
 
 			
 				
-				<h3 id="ReadSim">func <a href="/src/target/sim.go?s=8905:8962#L250">ReadSim</a></h3>
+				<h3 id="ReadSim">func <a href="/src/target/sim.go?s=8950:9007#L251">ReadSim</a></h3>
 				<pre>func ReadSim(dir, fn <a href="/pkg/builtin/#string">string</a>, erasefiles <a href="/pkg/builtin/#bool">bool</a>) *<a href="#Simulation">Simulation</a></pre>
 				<p>
 ReadSim reads all simulation data from a .sim JSON file
@@ -1159,7 +1159,7 @@ ReadSim reads all simulation data from a .sim JSON file
 
 			
 				
-				<h3 id="Simulation.GetInfo">func (*Simulation) <a href="/src/target/sim.go?s=11525:11578#L358">GetInfo</a></h3>
+				<h3 id="Simulation.GetInfo">func (*Simulation) <a href="/src/target/sim.go?s=11570:11623#L359">GetInfo</a></h3>
 				<pre>func (o *<a href="#Simulation">Simulation</a>) GetInfo(w <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Writer">Writer</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 GetInfo returns formatted information
@@ -1172,7 +1172,7 @@ GetInfo returns formatted information
 		
 			
 			
-			<h2 id="SolverData">type <a href="/src/target/sim.go?s=2750:3638#L86">SolverData</a></h2>
+			<h2 id="SolverData">type <a href="/src/target/sim.go?s=2795:3683#L87">SolverData</a></h2>
 			<pre>type SolverData struct {
 
     <span class="comment">// constants</span>
@@ -1215,7 +1215,7 @@ SolverData holds FEM solver data
 
 			
 				
-				<h3 id="SolverData.PostProcess">func (*SolverData) <a href="/src/target/sim.go?s=4029:4063#L136">PostProcess</a></h3>
+				<h3 id="SolverData.PostProcess">func (*SolverData) <a href="/src/target/sim.go?s=4074:4108#L137">PostProcess</a></h3>
 				<pre>func (o *<a href="#SolverData">SolverData</a>) PostProcess()</pre>
 				<p>
 PostProcess performs a post-processing of the just read json file
@@ -1226,7 +1226,7 @@ PostProcess performs a post-processing of the just read json file
 				
 			
 				
-				<h3 id="SolverData.SetDefault">func (*SolverData) <a href="/src/target/sim.go?s=3674:3707#L113">SetDefault</a></h3>
+				<h3 id="SolverData.SetDefault">func (*SolverData) <a href="/src/target/sim.go?s=3719:3752#L114">SetDefault</a></h3>
 				<pre>func (o *<a href="#SolverData">SolverData</a>) SetDefault()</pre>
 				<p>
 SetDefault set defaults values
@@ -1239,7 +1239,7 @@ SetDefault set defaults values
 		
 			
 			
-			<h2 id="Stage">type <a href="/src/target/sim.go?s=7249:8283#L214">Stage</a></h2>
+			<h2 id="Stage">type <a href="/src/target/sim.go?s=7294:8328#L215">Stage</a></h2>
 			<pre>type Stage struct {
 
     <span class="comment">// main</span>
@@ -1281,7 +1281,7 @@ Stage holds stage data
 		
 			
 			
-			<h2 id="TimeControl">type <a href="/src/target/sim.go?s=6446:6887#L194">TimeControl</a></h2>
+			<h2 id="TimeControl">type <a href="/src/target/sim.go?s=6491:6932#L195">TimeControl</a></h2>
 			<pre>type TimeControl struct {
     Tf     <a href="/pkg/builtin/#float64">float64</a> `json:&#34;tf&#34;`     <span class="comment">// final time</span>
     Dt     <a href="/pkg/builtin/#float64">float64</a> `json:&#34;dt&#34;`     <span class="comment">// time step size (if constant)</span>

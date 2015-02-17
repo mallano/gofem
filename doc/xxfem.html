@@ -787,7 +787,7 @@ Run runs FE simulation
 		
 			
 			
-			<h2 id="SaveSum">func <a href="/src/target/fileio.go?s=3653:3689#L181">SaveSum</a></h2>
+			<h2 id="SaveSum">func <a href="/src/target/fileio.go?s=3655:3691#L181">SaveSum</a></h2>
 			<pre>func SaveSum(sum *<a href="#Summary">Summary</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 			<p>
 SaveSums saves summary to disc
@@ -991,7 +991,7 @@ Decoder defines decoders; e.g. gob or json
 
 			
 				
-				<h3 id="GetDecoder">func <a href="/src/target/fileio.go?s=709:745#L27">GetDecoder</a></h3>
+				<h3 id="GetDecoder">func <a href="/src/target/fileio.go?s=710:746#L27">GetDecoder</a></h3>
 				<pre>func GetDecoder(r <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Reader">Reader</a>) <a href="#Decoder">Decoder</a></pre>
 				<p>
 GetDecoder returns a new decoder
@@ -1118,7 +1118,7 @@ NewDomain returns a new domain
 
 			
 				
-				<h3 id="Domain.In">func (*Domain) <a href="/src/target/fileio.go?s=3362:3401#L167">In</a></h3>
+				<h3 id="Domain.In">func (*Domain) <a href="/src/target/fileio.go?s=3364:3403#L167">In</a></h3>
 				<pre>func (o *<a href="#Domain">Domain</a>) In(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 In performes the inverse operation from Out
@@ -1129,7 +1129,7 @@ In performes the inverse operation from Out
 				
 			
 				
-				<h3 id="Domain.Out">func (*Domain) <a href="/src/target/fileio.go?s=3210:3250#L159">Out</a></h3>
+				<h3 id="Domain.Out">func (*Domain) <a href="/src/target/fileio.go?s=3212:3252#L159">Out</a></h3>
 				<pre>func (o *<a href="#Domain">Domain</a>) Out(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 Out performs output of Solution and Internal values to files
@@ -1140,10 +1140,10 @@ Out performs output of Solution and Internal values to files
 				
 			
 				
-				<h3 id="Domain.ReadIvs">func (*Domain) <a href="/src/target/fileio.go?s=2838:2882#L139">ReadIvs</a></h3>
+				<h3 id="Domain.ReadIvs">func (*Domain) <a href="/src/target/fileio.go?s=2840:2884#L139">ReadIvs</a></h3>
 				<pre>func (o *<a href="#Domain">Domain</a>) ReadIvs(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
-ReadSol reads elements&#39;s internal values from a file which name is set with tidx (time output index)
+ReadIvs reads elements&#39;s internal values from a file which name is set with tidx (time output index)
 </p>
 
 				
@@ -1151,7 +1151,7 @@ ReadSol reads elements&#39;s internal values from a file which name is set with 
 				
 			
 				
-				<h3 id="Domain.ReadSol">func (*Domain) <a href="/src/target/fileio.go?s=1660:1704#L76">ReadSol</a></h3>
+				<h3 id="Domain.ReadSol">func (*Domain) <a href="/src/target/fileio.go?s=1662:1706#L76">ReadSol</a></h3>
 				<pre>func (o *<a href="#Domain">Domain</a>) ReadSol(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 ReadSol reads Solution from a file which name is set with tidx (time output index)
@@ -1162,7 +1162,7 @@ ReadSol reads Solution from a file which name is set with tidx (time output inde
 				
 			
 				
-				<h3 id="Domain.SaveIvs">func (Domain) <a href="/src/target/fileio.go?s=2354:2397#L115">SaveIvs</a></h3>
+				<h3 id="Domain.SaveIvs">func (Domain) <a href="/src/target/fileio.go?s=2356:2399#L115">SaveIvs</a></h3>
 				<pre>func (o <a href="#Domain">Domain</a>) SaveIvs(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 SaveIvs saves elements&#39;s internal values to a file which name is set with tidx (time output index)
@@ -1173,7 +1173,7 @@ SaveIvs saves elements&#39;s internal values to a file which name is set with ti
 				
 			
 				
-				<h3 id="Domain.SaveSol">func (Domain) <a href="/src/target/fileio.go?s=931:974#L35">SaveSol</a></h3>
+				<h3 id="Domain.SaveSol">func (Domain) <a href="/src/target/fileio.go?s=933:976#L35">SaveSol</a></h3>
 				<pre>func (o <a href="#Domain">Domain</a>) SaveSol(tidx <a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 SaveSol saves Solution to a file which name is set with tidx (time output index)
@@ -2381,7 +2381,7 @@ Set sets new point natural boundary condition data
 		
 			
 			
-			<h2 id="Rod">type <a href="/src/target/e_rod.go?s=452:1482#L8">Rod</a></h2>
+			<h2 id="Rod">type <a href="/src/target/e_rod.go?s=452:1450#L8">Rod</a></h2>
 			<pre>type Rod struct {
 
     <span class="comment">// basic data</span>
@@ -2391,7 +2391,6 @@ Set sets new point natural boundary condition data
     Nu   <a href="/pkg/builtin/#int">int</a>         <span class="comment">// total number of unknowns == 2 * nsn</span>
 
     <span class="comment">// parameters</span>
-    <span class="comment">//E float64 // Young&#39;s modulus</span>
     A <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// cross-sectional area</span>
 
     <span class="comment">// variables for dynamics</span>
@@ -2432,7 +2431,7 @@ Rod represents a structural rod element (for only axial loads)
 
 			
 				
-				<h3 id="Rod.AddToKb">func (Rod) <a href="/src/target/e_rod.go?s=4950:5025#L206">AddToKb</a></h3>
+				<h3 id="Rod.AddToKb">func (Rod) <a href="/src/target/e_rod.go?s=4972:5047#L205">AddToKb</a></h3>
 				<pre>func (o <a href="#Rod">Rod</a>) AddToKb(Kb *<a href="/pkg/github.com/cpmech/gosl/la/">la</a>.<a href="/pkg/github.com/cpmech/gosl/la/#Triplet">Triplet</a>, sol *<a href="#Solution">Solution</a>, firstIt <a href="/pkg/builtin/#bool">bool</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 adds element K to global Jacobian matrix Kb
@@ -2443,7 +2442,7 @@ adds element K to global Jacobian matrix Kb
 				
 			
 				
-				<h3 id="Rod.AddToRhs">func (Rod) <a href="/src/target/e_rod.go?s=4270:4330#L176">AddToRhs</a></h3>
+				<h3 id="Rod.AddToRhs">func (Rod) <a href="/src/target/e_rod.go?s=4292:4352#L175">AddToRhs</a></h3>
 				<pre>func (o <a href="#Rod">Rod</a>) AddToRhs(fb []<a href="/pkg/builtin/#float64">float64</a>, sol *<a href="#Solution">Solution</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 adds -R to global residual vector fb
@@ -2454,7 +2453,7 @@ adds -R to global residual vector fb
 				
 			
 				
-				<h3 id="Rod.BackupIvs">func (*Rod) <a href="/src/target/e_rod.go?s=7558:7593#L313">BackupIvs</a></h3>
+				<h3 id="Rod.BackupIvs">func (*Rod) <a href="/src/target/e_rod.go?s=7580:7615#L312">BackupIvs</a></h3>
 				<pre>func (o *<a href="#Rod">Rod</a>) BackupIvs() (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 BackupIvs create copy of internal variables
@@ -2465,7 +2464,7 @@ BackupIvs create copy of internal variables
 				
 			
 				
-				<h3 id="Rod.Decode">func (Rod) <a href="/src/target/e_rod.go?s=8107:8149#L336">Decode</a></h3>
+				<h3 id="Rod.Decode">func (Rod) <a href="/src/target/e_rod.go?s=8129:8171#L335">Decode</a></h3>
 				<pre>func (o <a href="#Rod">Rod</a>) Decode(dec <a href="#Decoder">Decoder</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 Decode decodes internal variables
@@ -2476,7 +2475,7 @@ Decode decodes internal variables
 				
 			
 				
-				<h3 id="Rod.Encode">func (Rod) <a href="/src/target/e_rod.go?s=7974:8016#L331">Encode</a></h3>
+				<h3 id="Rod.Encode">func (Rod) <a href="/src/target/e_rod.go?s=7996:8038#L330">Encode</a></h3>
 				<pre>func (o <a href="#Rod">Rod</a>) Encode(enc <a href="#Encoder">Encoder</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 Encode encodes internal variables
@@ -2487,7 +2486,7 @@ Encode encodes internal variables
 				
 			
 				
-				<h3 id="Rod.InitIvs">func (*Rod) <a href="/src/target/e_rod.go?s=7080:7126#L296">InitIvs</a></h3>
+				<h3 id="Rod.InitIvs">func (*Rod) <a href="/src/target/e_rod.go?s=7102:7148#L295">InitIvs</a></h3>
 				<pre>func (o *<a href="#Rod">Rod</a>) InitIvs(sol *<a href="#Solution">Solution</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 InitIvs reset (and fix) internal variables after primary variables have been changed
@@ -2498,7 +2497,7 @@ InitIvs reset (and fix) internal variables after primary variables have been cha
 				
 			
 				
-				<h3 id="Rod.InterpStarVars">func (*Rod) <a href="/src/target/e_rod.go?s=3916:3969#L156">InterpStarVars</a></h3>
+				<h3 id="Rod.InterpStarVars">func (*Rod) <a href="/src/target/e_rod.go?s=3938:3991#L155">InterpStarVars</a></h3>
 				<pre>func (o *<a href="#Rod">Rod</a>) InterpStarVars(sol *<a href="#Solution">Solution</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 InterpStarVars interpolates star variables to integration points
@@ -2509,7 +2508,7 @@ InterpStarVars interpolates star variables to integration points
 				
 			
 				
-				<h3 id="Rod.RestoreIvs">func (*Rod) <a href="/src/target/e_rod.go?s=7722:7758#L321">RestoreIvs</a></h3>
+				<h3 id="Rod.RestoreIvs">func (*Rod) <a href="/src/target/e_rod.go?s=7744:7780#L320">RestoreIvs</a></h3>
 				<pre>func (o *<a href="#Rod">Rod</a>) RestoreIvs() (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 RestoreIvs restore internal variables from copies
@@ -2520,7 +2519,7 @@ RestoreIvs restore internal variables from copies
 				
 			
 				
-				<h3 id="Rod.SetEleConds">func (*Rod) <a href="/src/target/e_rod.go?s=4105:4178#L168">SetEleConds</a></h3>
+				<h3 id="Rod.SetEleConds">func (*Rod) <a href="/src/target/e_rod.go?s=4127:4200#L167">SetEleConds</a></h3>
 				<pre>func (o *<a href="#Rod">Rod</a>) SetEleConds(key <a href="/pkg/builtin/#string">string</a>, f <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 SetEleConds set element conditions
@@ -2531,7 +2530,7 @@ SetEleConds set element conditions
 				
 			
 				
-				<h3 id="Rod.SetEqs">func (*Rod) <a href="/src/target/e_rod.go?s=3610:3674#L144">SetEqs</a></h3>
+				<h3 id="Rod.SetEqs">func (*Rod) <a href="/src/target/e_rod.go?s=3632:3696#L143">SetEqs</a></h3>
 				<pre>func (o *<a href="#Rod">Rod</a>) SetEqs(eqs [][]<a href="/pkg/builtin/#int">int</a>, mixedform_eqs []<a href="/pkg/builtin/#int">int</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 SetEqs set equations
@@ -2542,7 +2541,7 @@ SetEqs set equations
 				
 			
 				
-				<h3 id="Rod.SetIvs">func (*Rod) <a href="/src/target/e_rod.go?s=7434:7492#L308">SetIvs</a></h3>
+				<h3 id="Rod.SetIvs">func (*Rod) <a href="/src/target/e_rod.go?s=7456:7514#L307">SetIvs</a></h3>
 				<pre>func (o *<a href="#Rod">Rod</a>) SetIvs(zvars map[<a href="/pkg/builtin/#string">string</a>][]<a href="/pkg/builtin/#float64">float64</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 SetIvs set secondary variables; e.g. during initialisation via files
@@ -2553,7 +2552,7 @@ SetIvs set secondary variables; e.g. during initialisation via files
 				
 			
 				
-				<h3 id="Rod.SetNatBcs">func (*Rod) <a href="/src/target/e_rod.go?s=6786:6870#L289">SetNatBcs</a></h3>
+				<h3 id="Rod.SetNatBcs">func (*Rod) <a href="/src/target/e_rod.go?s=6808:6892#L288">SetNatBcs</a></h3>
 				<pre>func (o *<a href="#Rod">Rod</a>) SetNatBcs(key <a href="/pkg/builtin/#string">string</a>, idxface <a href="/pkg/builtin/#int">int</a>, f <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Func">Func</a>, extra <a href="/pkg/builtin/#string">string</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 SetSurfLoads set surface loads (natural boundary conditions)
@@ -2564,7 +2563,7 @@ SetSurfLoads set surface loads (natural boundary conditions)
 				
 			
 				
-				<h3 id="Rod.Update">func (*Rod) <a href="/src/target/e_rod.go?s=6073:6118#L255">Update</a></h3>
+				<h3 id="Rod.Update">func (*Rod) <a href="/src/target/e_rod.go?s=6095:6140#L254">Update</a></h3>
 				<pre>func (o *<a href="#Rod">Rod</a>) Update(sol *<a href="#Solution">Solution</a>) (ok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 				<p>
 Update perform (tangent) update
@@ -2618,7 +2617,7 @@ yb =  | p |         \ p / (ny x 1)
 		
 			
 			
-			<h2 id="Summary">type <a href="/src/target/fileio.go?s=3504:3617#L175">Summary</a></h2>
+			<h2 id="Summary">type <a href="/src/target/fileio.go?s=3506:3619#L175">Summary</a></h2>
 			<pre>type Summary struct {
     TidxIni []<a href="/pkg/builtin/#int">int</a> <span class="comment">// [nstg] first stage&#39;s time-output-index</span>
     NumTidx <a href="/pkg/builtin/#int">int</a>   <span class="comment">// number of tidx</span>
@@ -2638,7 +2637,7 @@ Summary records summary of outputs
 
 			
 				
-				<h3 id="ReadSum">func <a href="/src/target/fileio.go?s=4020:4043#L203">ReadSum</a></h3>
+				<h3 id="ReadSum">func <a href="/src/target/fileio.go?s=4022:4045#L203">ReadSum</a></h3>
 				<pre>func ReadSum() *<a href="#Summary">Summary</a></pre>
 				<p>
 ReadSum reads summary back

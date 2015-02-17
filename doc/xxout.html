@@ -51,10 +51,10 @@
 package out implements FE simulation output handling for analyses and plotting
 </p>
 <pre>The main structures containing results are:
- TseriesT -- slice of time values; e.g. T = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0}
- TseriesR -- all results for keys, quantities (aka points), and times.
-      TseriesR[nkeys][npts..?][ntimes]. Example:
-      TseriesR = [][][]float64{
+ TseriesTimes -- slice of time values; e.g. T = {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0}
+ TseriesRres  -- all results for keys, quantities (aka points), and times.
+      TseriesRes[nkeys][npts..?][ntimes]. Example:
+      TseriesRes = [][][]float64{
         {
           {100, 99, 98}, // pl @ point A (bottom of column) for 3 time outputs
           {  0,  0,  0}, // pl @ point B (top of column) for 3 time outputs
@@ -92,6 +92,9 @@ package out implements FE simulation output handling for analyses and plotting
 			
 				
 				<dd><a href="#End">func End()</a></dd>
+			
+				
+				<dd><a href="#GetTexLabel">func GetTexLabel(key, unit string) string</a></dd>
 			
 				
 				<dd><a href="#Plot">func Plot(keyx, keyy string, loc PointLocator, styles []*plt.LineData)</a></dd>
@@ -150,11 +153,11 @@ package out implements FE simulation output handling for analyses and plotting
 				
 			
 				
-				<dd><a href="#IdsOrTags">type IdsOrTags</a></dd>
+				<dd><a href="#Cells">type Cells</a></dd>
 				
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#IdsOrTags.AtPoint">func (o IdsOrTags) AtPoint(key string) (res Quantities)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Cells.AtPoint">func (o Cells) AtPoint(key string) (res Quantities)</a></dd>
 				
 			
 				
@@ -195,13 +198,21 @@ package out implements FE simulation output handling for analyses and plotting
 				<dd><a href="#Styles">type Styles</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#GetDefaultStyles">func GetDefaultStyles(n int) Styles</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#GetDefaultStyles">func GetDefaultStyles(qts Quantities) Styles</a></dd>
 				
 				
 			
 				
 				<dd><a href="#TseriesDat">type TseriesDat</a></dd>
 				
+				
+			
+				
+				<dd><a href="#Verts">type Verts</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Verts.AtPoint">func (o Verts) AtPoint(key string) (res Quantities)</a></dd>
 				
 			
 			
@@ -288,14 +299,16 @@ package out implements FE simulation output handling for analyses and plotting
     <span id="Sum">Sum</span>     *<a href="/pkg/github.com/cpmech/gofem/fem/">fem</a>.<a href="/pkg/github.com/cpmech/gofem/fem/#Summary">Summary</a> <span class="comment">// summary of results</span>
     <span id="Dom">Dom</span>     *<a href="/pkg/github.com/cpmech/gofem/fem/">fem</a>.<a href="/pkg/github.com/cpmech/gofem/fem/#Domain">Domain</a>  <span class="comment">// FE domain</span>
     <span id="Ipoints">Ipoints</span> []*<a href="#IpDat">IpDat</a>     <span class="comment">// all integration points</span>
+    <span id="Cid2ips">Cid2ips</span> [][]<a href="/pkg/builtin/#int">int</a>      <span class="comment">// [ncells][nip] maps cell id to index in Ipoints</span>
     <span id="NodBins">NodBins</span> <a href="/pkg/github.com/cpmech/gosl/gm/">gm</a>.<a href="/pkg/github.com/cpmech/gosl/gm/#Bins">Bins</a>      <span class="comment">// bins for nodes</span>
     <span id="IpsBins">IpsBins</span> <a href="/pkg/github.com/cpmech/gosl/gm/">gm</a>.<a href="/pkg/github.com/cpmech/gosl/gm/#Bins">Bins</a>      <span class="comment">// bins for integration points</span>
 
     <span class="comment">// time-series data</span>
-    <span id="TseriesKeys">TseriesKeys</span> []<a href="/pkg/builtin/#string">string</a>      <span class="comment">// [nkeys] all keys</span>
-    <span id="TseriesData">TseriesData</span> []*<a href="#TseriesDat">TseriesDat</a> <span class="comment">// [nkeys] all items</span>
-    <span id="TseriesT">TseriesT</span>    []<a href="/pkg/builtin/#float64">float64</a>     <span class="comment">// [ntimes] time series</span>
-    <span id="TseriesR">TseriesR</span>    [][][]<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// [nkeys][nqts..?][ntimes] all time-series results</span>
+    <span id="TseriesKeys">TseriesKeys</span>    []<a href="/pkg/builtin/#string">string</a>       <span class="comment">// [nkeys] all keys</span>
+    <span id="TseriesData">TseriesData</span>    []*<a href="#TseriesDat">TseriesDat</a>  <span class="comment">// [nkeys] all items</span>
+    <span id="TseriesTimes">TseriesTimes</span>   []<a href="/pkg/builtin/#float64">float64</a>      <span class="comment">// [ntimes] time series</span>
+    <span id="TseriesRes">TseriesRes</span>     [][][]<a href="/pkg/builtin/#float64">float64</a>  <span class="comment">// [nkeys][nqts..?][ntimes] all time-series results</span>
+    <span id="TseriesKey2idx">TseriesKey2idx</span> map[<a href="/pkg/builtin/#string">string</a>]<a href="/pkg/builtin/#int">int</a> <span class="comment">// [nkeys] key =&gt; index in TseriesKeys or TseriesData</span>
 
     <span class="comment">// suplot data</span>
     <span id="Spd">Spd</span> map[<a href="/pkg/builtin/#string">string</a>][]<a href="/pkg/builtin/#int">int</a> <span class="comment">// [nkeys] subplot data</span>
@@ -309,7 +322,7 @@ Global variables
 		
 			
 			
-			<h2 id="Apply">func <a href="/src/target/out.go?s=3959:3983#L134">Apply</a></h2>
+			<h2 id="Apply">func <a href="/src/target/out.go?s=4736:4760#L164">Apply</a></h2>
 			<pre>func Apply() (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Apply applies commands to generate T and R.
@@ -321,12 +334,21 @@ Apply applies commands to generate T and R.
 		
 			
 			
-			<h2 id="End">func <a href="/src/target/out.go?s=2424:2434#L58">End</a></h2>
+			<h2 id="End">func <a href="/src/target/out.go?s=2671:2681#L62">End</a></h2>
 			<pre>func End()</pre>
 			<p>
 End must be called and the end to flush log file
 </p>
 
+			
+			
+
+		
+			
+			
+			<h2 id="GetTexLabel">func <a href="/src/target/styles.go?s=464:505#L13">GetTexLabel</a></h2>
+			<pre>func GetTexLabel(key, unit <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#string">string</a></pre>
+			
 			
 			
 
@@ -342,7 +364,7 @@ End must be called and the end to flush log file
 		
 			
 			
-			<h2 id="Save">func <a href="/src/target/out.go?s=4518:4578#L163">Save</a></h2>
+			<h2 id="Save">func <a href="/src/target/out.go?s=5302:5362#L193">Save</a></h2>
 			<pre>func Save(dirout, filename <a href="/pkg/builtin/#string">string</a>, extra func()) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Save saves plot
@@ -354,7 +376,7 @@ Save saves plot
 		
 			
 			
-			<h2 id="Show">func <a href="/src/target/out.go?s=4406:4429#L153">Show</a></h2>
+			<h2 id="Show">func <a href="/src/target/out.go?s=5190:5213#L183">Show</a></h2>
 			<pre>func Show(extra func())</pre>
 			<p>
 Show shows plot
@@ -377,7 +399,7 @@ Show shows plot
 		
 			
 			
-			<h2 id="Start">func <a href="/src/target/out.go?s=2517:2587#L63">Start</a></h2>
+			<h2 id="Start">func <a href="/src/target/out.go?s=2764:2834#L67">Start</a></h2>
 			<pre>func Start(simfnpath <a href="/pkg/builtin/#string">string</a>, stageIdx, regionIdx <a href="/pkg/builtin/#int">int</a>) (startisok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 			<p>
 Start starts handling of results given a simulation input file
@@ -389,7 +411,7 @@ Start starts handling of results given a simulation input file
 		
 			
 			
-			<h2 id="Tseries">func <a href="/src/target/timeseries.go?s=1062:1116#L30">Tseries</a></h2>
+			<h2 id="Tseries">func <a href="/src/target/timeseries.go?s=1179:1233#L33">Tseries</a></h2>
 			<pre>func Tseries(key <a href="/pkg/builtin/#string">string</a>, loc <a href="#PointLocator">PointLocator</a>, sty <a href="#Styles">Styles</a>)</pre>
 			<p>
 Tseries specifies a variable at a particular point to be plotted along time
@@ -413,7 +435,7 @@ TseriesClear clears Tplot data
 		
 			
 			
-			<h2 id="TseriesStart">func <a href="/src/target/timeseries.go?s=694:713#L16">TseriesStart</a></h2>
+			<h2 id="TseriesStart">func <a href="/src/target/timeseries.go?s=805:824#L19">TseriesStart</a></h2>
 			<pre>func TseriesStart()</pre>
 			<p>
 TseriesStart initialise structures containing all time-series results
@@ -426,7 +448,7 @@ TseriesStart initialise structures containing all time-series results
 		
 			
 			
-			<h2 id="Along">type <a href="/src/target/filtering.go?s=654:748#L14">Along</a></h2>
+			<h2 id="Along">type <a href="/src/target/filtering.go?s=848:942#L19">Along</a></h2>
 			<pre>type Along struct {
     A []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// first point on line</span>
     B []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// second point on line</span>
@@ -448,7 +470,7 @@ Along implements locator along line =&gt; LineLocator
 
 			
 				
-				<h3 id="Along.AlongLine">func (Along) <a href="/src/target/filtering.go?s=1795:1842#L75">AlongLine</a></h3>
+				<h3 id="Along.AlongLine">func (Along) <a href="/src/target/filtering.go?s=2627:2674#L113">AlongLine</a></h3>
 				<pre>func (o <a href="#Along">Along</a>) AlongLine(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a></pre>
 				<p>
 Along returns quantity along line
@@ -461,7 +483,7 @@ Along returns quantity along line
 		
 			
 			
-			<h2 id="AlongX">type <a href="/src/target/filtering.go?s=783:804#L20">AlongX</a></h2>
+			<h2 id="AlongX">type <a href="/src/target/filtering.go?s=977:998#L25">AlongX</a></h2>
 			<pre>type AlongX []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 AlongX implements LineLocator
@@ -482,7 +504,7 @@ AlongX implements LineLocator
 		
 			
 			
-			<h2 id="AlongY">type <a href="/src/target/filtering.go?s=839:860#L23">AlongY</a></h2>
+			<h2 id="AlongY">type <a href="/src/target/filtering.go?s=1033:1054#L28">AlongY</a></h2>
 			<pre>type AlongY []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 AlongY implements LineLocator
@@ -503,7 +525,7 @@ AlongY implements LineLocator
 		
 			
 			
-			<h2 id="AlongZ">type <a href="/src/target/filtering.go?s=895:916#L26">AlongZ</a></h2>
+			<h2 id="AlongZ">type <a href="/src/target/filtering.go?s=1089:1110#L31">AlongZ</a></h2>
 			<pre>type AlongZ []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 AlongZ implements LineLocator
@@ -543,7 +565,7 @@ At implements locator at point =&gt; PointLocator
 
 			
 				
-				<h3 id="At.AtPoint">func (At) <a href="/src/target/filtering.go?s=955:997#L29">AtPoint</a></h3>
+				<h3 id="At.AtPoint">func (At) <a href="/src/target/filtering.go?s=1149:1191#L34">AtPoint</a></h3>
 				<pre>func (o <a href="#At">At</a>) AtPoint(key <a href="/pkg/builtin/#string">string</a>) <a href="#Quantities">Quantities</a></pre>
 				<p>
 AtPoint returns quantity at point
@@ -556,10 +578,11 @@ AtPoint returns quantity at point
 		
 			
 			
-			<h2 id="IdsOrTags">type <a href="/src/target/filtering.go?s=578:598#L11">IdsOrTags</a></h2>
-			<pre>type IdsOrTags []<a href="/pkg/builtin/#int">int</a></pre>
+			<h2 id="Cells">type <a href="/src/target/filtering.go?s=774:792#L16">Cells</a></h2>
+			<pre>type Cells [][]<a href="/pkg/builtin/#int">int</a></pre>
 			<p>
-IdsOrTags implements locator a specific nodes =&gt; PointLocator
+Cells implements locator at point =&gt; PointLocator
+Pairs of ids or tags of cells and integration points indices can be stored in Cells
 </p>
 
 
@@ -575,8 +598,8 @@ IdsOrTags implements locator a specific nodes =&gt; PointLocator
 
 			
 				
-				<h3 id="IdsOrTags.AtPoint">func (IdsOrTags) <a href="/src/target/filtering.go?s=1341:1396#L52">AtPoint</a></h3>
-				<pre>func (o <a href="#IdsOrTags">IdsOrTags</a>) AtPoint(key <a href="/pkg/builtin/#string">string</a>) (res <a href="#Quantities">Quantities</a>)</pre>
+				<h3 id="Cells.AtPoint">func (Cells) <a href="/src/target/filtering.go?s=1985:2036#L80">AtPoint</a></h3>
+				<pre>func (o <a href="#Cells">Cells</a>) AtPoint(key <a href="/pkg/builtin/#string">string</a>) (res <a href="#Quantities">Quantities</a>)</pre>
 				<p>
 AtPoint returns quantity at point
 </p>
@@ -588,9 +611,9 @@ AtPoint returns quantity at point
 		
 			
 			
-			<h2 id="IpDat">type <a href="/src/target/out.go?s=1366:1563#L24">IpDat</a></h2>
+			<h2 id="IpDat">type <a href="/src/target/out.go?s=1440:1637#L26">IpDat</a></h2>
 			<pre>type IpDat struct {
-    Eid <a href="/pkg/builtin/#int">int</a>            <span class="comment">// id of parent element</span>
+    Cid <a href="/pkg/builtin/#int">int</a>            <span class="comment">// id of parent element</span>
     X   []<a href="/pkg/builtin/#float64">float64</a>      <span class="comment">// ip&#39;s coordinates</span>
     P   *<a href="/pkg/github.com/cpmech/gofem/mporous/">mporous</a>.<a href="/pkg/github.com/cpmech/gofem/mporous/#State">State</a> <span class="comment">// state @ p-element&#39;s ip</span>
     U   *<a href="/pkg/github.com/cpmech/gofem/msolid/">msolid</a>.<a href="/pkg/github.com/cpmech/gofem/msolid/#State">State</a>  <span class="comment">// state @ u-element&#39;s ip</span>
@@ -660,7 +683,7 @@ PointLocator defines interface for locating space positions
 		
 			
 			
-			<h2 id="Quantities">type <a href="/src/target/quantity.go?s=392:419#L4">Quantities</a></h2>
+			<h2 id="Quantities">type <a href="/src/target/quantity.go?s=426:453#L5">Quantities</a></h2>
 			<pre>type Quantities []*<a href="#Quantity">Quantity</a></pre>
 			<p>
 Quantities is a set of Quantity
@@ -679,7 +702,7 @@ Quantities is a set of Quantity
 
 			
 				
-				<h3 id="Quantities.Len">func (Quantities) <a href="/src/target/quantity.go?s=453:482#L7">Len</a></h3>
+				<h3 id="Quantities.Len">func (Quantities) <a href="/src/target/quantity.go?s=487:516#L8">Len</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) Len() <a href="/pkg/builtin/#int">int</a></pre>
 				<p>
 Len the length of Quantities
@@ -690,7 +713,7 @@ Len the length of Quantities
 				
 			
 				
-				<h3 id="Quantities.Less">func (Quantities) <a href="/src/target/quantity.go?s=642:681#L17">Less</a></h3>
+				<h3 id="Quantities.Less">func (Quantities) <a href="/src/target/quantity.go?s=676:715#L18">Less</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) Less(i, j <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 				<p>
 Less compares Quantities considering Dist
@@ -701,7 +724,7 @@ Less compares Quantities considering Dist
 				
 			
 				
-				<h3 id="Quantities.Swap">func (Quantities) <a href="/src/target/quantity.go?s=532:566#L12">Swap</a></h3>
+				<h3 id="Quantities.Swap">func (Quantities) <a href="/src/target/quantity.go?s=566:600#L13">Swap</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) Swap(i, j <a href="/pkg/builtin/#int">int</a>)</pre>
 				<p>
 Swap swaps two Quantities
@@ -714,10 +737,11 @@ Swap swaps two Quantities
 		
 			
 			
-			<h2 id="Quantity">type <a href="/src/target/quantity.go?s=226:355#L1">Quantity</a></h2>
+			<h2 id="Quantity">type <a href="/src/target/quantity.go?s=226:389#L1">Quantity</a></h2>
 			<pre>type Quantity struct {
-    Value *<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// value of, e.g., &#34;ux&#34;</span>
-    Dist  <a href="/pkg/builtin/#float64">float64</a>  <span class="comment">// distance from reference point (if along line)</span>
+    Value *<a href="/pkg/builtin/#float64">float64</a>  <span class="comment">// value of, e.g., &#34;ux&#34;</span>
+    Dist  <a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// distance from reference point (if along line)</span>
+    X     []<a href="/pkg/builtin/#float64">float64</a> <span class="comment">// coordinates</span>
 }</pre>
 			<p>
 Quantity holds node or ip quantity
@@ -738,7 +762,7 @@ Quantity holds node or ip quantity
 		
 			
 			
-			<h2 id="Styles">type <a href="/src/target/styles.go?s=235:261#L1">Styles</a></h2>
+			<h2 id="Styles">type <a href="/src/target/styles.go?s=270:296#L3">Styles</a></h2>
 			<pre>type Styles []<a href="/pkg/github.com/cpmech/gosl/plt/">plt</a>.<a href="/pkg/github.com/cpmech/gosl/plt/#LineData">LineData</a></pre>
 			<p>
 Styles
@@ -755,8 +779,8 @@ Styles
 
 			
 				
-				<h3 id="GetDefaultStyles">func <a href="/src/target/styles.go?s=263:298#L2">GetDefaultStyles</a></h3>
-				<pre>func GetDefaultStyles(n <a href="/pkg/builtin/#int">int</a>) <a href="#Styles">Styles</a></pre>
+				<h3 id="GetDefaultStyles">func <a href="/src/target/styles.go?s=298:342#L5">GetDefaultStyles</a></h3>
+				<pre>func GetDefaultStyles(qts <a href="#Quantities">Quantities</a>) <a href="#Styles">Styles</a></pre>
 				
 				
 				
@@ -786,6 +810,39 @@ TseriesDat holds information of one key to be collected along time; e.g. &#34;pl
 
 			
 
+			
+		
+			
+			
+			<h2 id="Verts">type <a href="/src/target/filtering.go?s=616:632#L12">Verts</a></h2>
+			<pre>type Verts []<a href="/pkg/builtin/#int">int</a></pre>
+			<p>
+Verts implements locator at point =&gt; PointLocator
+Ids or tags of vertices can be stored in Verts
+</p>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="Verts.AtPoint">func (Verts) <a href="/src/target/filtering.go?s=1535:1586#L57">AtPoint</a></h3>
+				<pre>func (o <a href="#Verts">Verts</a>) AtPoint(key <a href="/pkg/builtin/#string">string</a>) (res <a href="#Quantities">Quantities</a>)</pre>
+				<p>
+AtPoint returns quantity at point
+</p>
+
+				
+				
+				
 			
 		
 	
