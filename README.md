@@ -12,6 +12,6 @@ under the BSD-style license found in the LICENSE file.
 
 go get github.com/cpmech/gofem/...
 
-## Website
+## Documentation for developers
 
-http://cpmech.github.io/gofem
+http://rawgit.com/cpmech/gofem/master/doc/index.html
