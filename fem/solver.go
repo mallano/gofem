@@ -107,7 +107,9 @@ func Run() (runisok bool) {
 	// make sure to call linear solver clean up routines upon exit
 	defer func() {
 		for _, d := range domains {
-			d.LinSol.Clean()
+			if !d.InitLSol {
+				d.LinSol.Clean()
+			}
 		}
 	}()
 
