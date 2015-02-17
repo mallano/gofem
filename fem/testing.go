@@ -6,6 +6,7 @@ package fem
 
 import (
 	"encoding/json"
+	"math/rand"
 	"testing"
 
 	"github.com/cpmech/gosl/num"
@@ -147,20 +148,94 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 	}
 }
 
-func TestConsistentTangentK(tst *testing.T, d *Domain, ele Elem, tol float64, verb bool) {
-	derivfcn := num.DerivCen
-	if e, ok := ele.(*ElemP); ok {
-		if LogErrCond(!e.AddToKb(d.Kb, d.Sol, false), "TestConsistentTangentK: AddToKb failed") {
-			tst.Errorf("AddToKb failed\n")
-			return
+func TestConsistentTangentK(tst *testing.T, eid int, tol float64, verb bool) {
+
+	// read summary
+	sum := ReadSum()
+	tidx := sum.NumTidx - 1
+
+	// allocate domain
+	d := NewDomain(Global.Sim.Regions[0])
+	LogErrCond(!d.SetStage(0, Global.Sim.Stages[0]), "TestConsistentTangentK: SetStage failed")
+	if Stop() {
+		tst.Errorf("SetStage failed\n")
+		return
+	}
+
+	// load gofem results
+	LogErrCond(!d.In(tidx), "TestConsistentTangentK: reading of results failed")
+	if Stop() {
+		tst.Errorf("reading of results failed\n")
+		return
+	}
+
+	// create copy of solution array
+	ΔY := make([]float64, d.Ny)
+	Y := make([]float64, d.Ny)
+	copy(Y, d.Sol.Y)
+
+	// update solution with random numbers
+	for i := 0; i < d.Ny; i++ {
+		d.Sol.ΔY[i] = rand.Float64()
+		d.Sol.Y[i] += d.Sol.ΔY[i]
+	}
+
+	// create backup copy of all secondary variables
+	for _, e := range d.ElemIntvars {
+		e.BackupIvs()
+	}
+
+	// update secondary variables
+	for _, e := range d.Elems {
+		if !e.Update(d.Sol) {
+			break
 		}
-		for i, I := range e.Pmap {
-			for j, J := range e.Pmap {
-				dnum := derivfcn(func(x float64, args ...interface{}) (res float64) {
-					return d.Fb[I]
-				}, d.Sol.Y[J])
-				utl.AnaNum(utl.Sf("K%d%d", i, j), tol, e.K[i][j], dnum, verb)
-			}
+	}
+	if Stop() {
+		tst.Errorf("Update of secondary variables failed\n")
+		return
+	}
+
+	// get element structures
+	var Ymap []int
+	var K [][]float64
+	var restorefcn func() bool
+	ele := d.Elems[eid]
+	if e, ok := ele.(*ElemP); ok {
+		Ymap = e.Pmap
+		K = e.K
+		restorefcn = e.RestoreIvs
+	}
+	if e, ok := ele.(*ElemU); ok {
+		Ymap = e.Umap
+		K = e.K
+		restorefcn = e.RestoreIvs
+	}
+
+	// analytical K
+	if LogErrCond(!ele.AddToKb(d.Kb, d.Sol, false), "TestConsistentTangentK: AddToKb failed") {
+		tst.Errorf("AddToKb failed\n")
+		return
+	}
+
+	// check
+	derivfcn := num.DerivCen
+	var tmp float64
+	for i, I := range Ymap {
+		for j, J := range Ymap {
+			dnum := derivfcn(func(x float64, args ...interface{}) (res float64) {
+				tmp, d.Sol.Y[J] = d.Sol.Y[J], x
+				for l := 0; l < d.Ny; l++ {
+					ΔY[l] = d.Sol.Y[J] - Y[J]
+				}
+				if restorefcn != nil {
+					restorefcn()
+				}
+				ele.Update(d.Sol)
+				ele.AddToRhs(d.Fb, d.Sol)
+				return d.Fb[I]
+			}, d.Sol.Y[J])
+			utl.AnaNum(utl.Sf("K%d%d", i, j), tol, K[i][j], dnum, verb)
 		}
 	}
 }

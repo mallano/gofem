@@ -161,11 +161,44 @@ func Test_p01b(tst *testing.T) {
 		}
 	}()
 
-	//utl.Tsilent = false
+	utl.Tsilent = false
 	utl.TTitle("p01b")
 
 	// run simulation
 	if !Start("data/p01.sim", true, !utl.Tsilent) {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// make sure to flush log
+	defer End()
+
+	// run simulation
+	if !Run() {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// test consistent matrix
+	eid := 3
+	TestConsistentTangentK(tst, eid, 1e-10, true)
+}
+
+func Test_p02(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
+	utl.Tsilent = false
+	utl.TTitle("p02")
+
+	// run simulation
+	if !Start("data/p02.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
 		return
 	}
