@@ -168,6 +168,19 @@ func Test_spo751b(tst *testing.T) {
 	// make sure to flush log
 	defer End()
 
+	// for debugging Kb
+	eid := 3
+	tolKb := 1e-4
+	verb := true
+	//if true {
+	if false {
+		TestingDefineDebugKb(tst, eid, tolKb, verb)
+		defer func() {
+			Global.DebugKb = nil
+		}()
+
+	}
+
 	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")
@@ -175,10 +188,12 @@ func Test_spo751b(tst *testing.T) {
 	}
 
 	// check
-	skipK := true
-	tolK := 1e-17
-	tolu := 1e-12
-	tols := 1e-14
-	verb := false
-	TestingCompareResultsU(tst, "data/spo751.sim", "cmp/spo751.cmp", tolK, tolu, tols, skipK, verb)
+	if true {
+		//if false {
+		skipK := true
+		tolK := 1e-17
+		tolu := 1e-12
+		tols := 1e-14
+		TestingCompareResultsU(tst, "data/spo751.sim", "cmp/spo751.cmp", tolK, tolu, tols, skipK, verb)
+	}
 }

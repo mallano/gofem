@@ -161,7 +161,7 @@ func Test_p01b(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("p01b")
 
 	// run simulation
@@ -178,10 +178,6 @@ func Test_p01b(tst *testing.T) {
 		tst.Errorf("test failed\n")
 		return
 	}
-
-	// test consistent matrix
-	eid := 3
-	TestConsistentTangentK(tst, eid, 1e-10, true)
 }
 
 func Test_p02(tst *testing.T) {
@@ -205,6 +201,18 @@ func Test_p02(tst *testing.T) {
 
 	// make sure to flush log
 	defer End()
+
+	// for debugging Kb
+	eid := 3
+	tolKb := 1e-7
+	verb := true
+	if false {
+		//if true {
+		TestingDefineDebugKb(tst, eid, tolKb, verb)
+		defer func() {
+			Global.DebugKb = nil
+		}()
+	}
 
 	// run simulation
 	if !Run() {

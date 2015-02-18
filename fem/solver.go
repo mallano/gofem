@@ -33,6 +33,9 @@ var Global struct {
 
 	// auxiliar structures
 	DynCoefs *DynCoefs // dynamic coefficients
+
+	// for debugging
+	DebugKb func(d *Domain, firstIt bool)
 }
 
 // End must be called and the end to flush log file
@@ -306,6 +309,11 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 			}
 			if Stop() {
 				return
+			}
+
+			// debug
+			if Global.DebugKb != nil {
+				Global.DebugKb(d, it == 0)
 			}
 
 			// join A and tr(A) matrices into Kb

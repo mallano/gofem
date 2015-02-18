@@ -6,9 +6,10 @@ package fem
 
 import (
 	"encoding/json"
-	"math/rand"
 	"testing"
 
+	"github.com/cpmech/gofem/mporous"
+	"github.com/cpmech/gofem/msolid"
 	"github.com/cpmech/gosl/num"
 	"github.com/cpmech/gosl/utl"
 )
@@ -148,94 +149,94 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 	}
 }
 
-func TestConsistentTangentK(tst *testing.T, eid int, tol float64, verb bool) {
-
-	// read summary
-	sum := ReadSum()
-	tidx := sum.NumTidx - 1
-
-	// allocate domain
-	d := NewDomain(Global.Sim.Regions[0])
-	LogErrCond(!d.SetStage(0, Global.Sim.Stages[0]), "TestConsistentTangentK: SetStage failed")
-	if Stop() {
-		tst.Errorf("SetStage failed\n")
-		return
-	}
-
-	// load gofem results
-	LogErrCond(!d.In(tidx), "TestConsistentTangentK: reading of results failed")
-	if Stop() {
-		tst.Errorf("reading of results failed\n")
-		return
-	}
-
-	// create copy of solution array
-	ΔY := make([]float64, d.Ny)
-	Y := make([]float64, d.Ny)
-	copy(Y, d.Sol.Y)
-
-	// update solution with random numbers
-	for i := 0; i < d.Ny; i++ {
-		d.Sol.ΔY[i] = rand.Float64()
-		d.Sol.Y[i] += d.Sol.ΔY[i]
-	}
-
-	// create backup copy of all secondary variables
-	for _, e := range d.ElemIntvars {
-		e.BackupIvs()
-	}
-
-	// update secondary variables
-	for _, e := range d.Elems {
-		if !e.Update(d.Sol) {
-			break
-		}
-	}
-	if Stop() {
-		tst.Errorf("Update of secondary variables failed\n")
-		return
-	}
-
-	// get element structures
-	var Ymap []int
-	var K [][]float64
-	var restorefcn func() bool
-	ele := d.Elems[eid]
-	if e, ok := ele.(*ElemP); ok {
-		Ymap = e.Pmap
-		K = e.K
-		restorefcn = e.RestoreIvs
-	}
-	if e, ok := ele.(*ElemU); ok {
-		Ymap = e.Umap
-		K = e.K
-		restorefcn = e.RestoreIvs
-	}
-
-	// analytical K
-	if LogErrCond(!ele.AddToKb(d.Kb, d.Sol, false), "TestConsistentTangentK: AddToKb failed") {
-		tst.Errorf("AddToKb failed\n")
-		return
-	}
-
-	// check
+func TestingDefineDebugKb(tst *testing.T, eid int, tol float64, verb bool) {
+	//derivfcn := num.DerivFwd
+	//derivfcn := num.DerivBwd
 	derivfcn := num.DerivCen
-	var tmp float64
-	for i, I := range Ymap {
-		for j, J := range Ymap {
-			dnum := derivfcn(func(x float64, args ...interface{}) (res float64) {
-				tmp, d.Sol.Y[J] = d.Sol.Y[J], x
-				for l := 0; l < d.Ny; l++ {
-					ΔY[l] = d.Sol.Y[J] - Y[J]
+	Global.DebugKb = func(d *Domain, firstIt bool) {
+
+		// get element structures
+		var Ymap []int
+		var K [][]float64
+		var restorefcn func() bool
+		var p_StatesBkp []*mporous.State
+		var u_StatesBkp []*msolid.State
+		ele := d.Elems[eid]
+		if e, ok := ele.(*ElemP); ok {
+			Ymap = e.Pmap
+			K = e.K
+			nip := len(e.IpsElem)
+			p_StatesBkp = make([]*mporous.State, nip)
+			for i := 0; i < nip; i++ {
+				p_StatesBkp[i] = e.StatesBkp[i].GetCopy()
+			}
+			restorefcn = func() bool {
+				for i, s := range e.States {
+					s.Set(p_StatesBkp[i])
 				}
-				if restorefcn != nil {
+				return true
+			}
+		}
+		if e, ok := ele.(*ElemU); ok {
+			Ymap = e.Umap
+			K = e.K
+			nip := len(e.IpsElem)
+			u_StatesBkp = make([]*msolid.State, nip)
+			for i := 0; i < nip; i++ {
+				u_StatesBkp[i] = e.StatesBkp[i].GetCopy()
+			}
+			restorefcn = func() bool {
+				for i, s := range e.States {
+					s.Set(u_StatesBkp[i])
+				}
+				return true
+			}
+		}
+		if Ymap == nil || restorefcn == nil {
+			tst.Errorf("TestingDefineDebugKb: cannot detect element type")
+			return
+		}
+
+		// auxliary vectors
+		Fbtmp := make([]float64, d.Ny)
+		ΔYbkp := make([]float64, d.Ny)
+		Yold := make([]float64, d.Ny)
+		for i := 0; i < d.Ny; i++ {
+			Yold[i] = d.Sol.Y[i] - d.Sol.ΔY[i]
+		}
+		//utl.Pforan("Yold = %v\n", Yold)
+		//utl.Pforan("Ynew = %v\n", d.Sol.Y)
+		//utl.Pforan("ΔY   = %v\n", d.Sol.ΔY)
+		copy(ΔYbkp, d.Sol.ΔY)
+		defer func() {
+			restorefcn()
+			copy(d.Sol.ΔY, ΔYbkp)
+		}()
+
+		// check
+		var tmp float64
+		for i, I := range Ymap {
+			for j, J := range Ymap {
+				dnum := derivfcn(func(x float64, args ...interface{}) float64 {
+					tmp, d.Sol.Y[J] = d.Sol.Y[J], x
+					for l := 0; l < d.Ny; l++ {
+						Fbtmp[l] = 0
+						d.Sol.ΔY[l] = d.Sol.Y[l] - Yold[l]
+					}
 					restorefcn()
+					ele.Update(d.Sol)
+					ele.AddToRhs(Fbtmp, d.Sol)
+					d.Sol.Y[J] = tmp
+					return -Fbtmp[I]
+				}, d.Sol.Y[J])
+				if d.Sol.T > 0.7 {
+					//utl.AnaNum(utl.Sf("K%3d%3d", i, j), tol, K[i][j], dnum, verb)
+					utl.CheckAnaNum(tst, utl.Sf("K%3d%3d", i, j), tol, K[i][j], dnum, verb)
 				}
-				ele.Update(d.Sol)
-				ele.AddToRhs(d.Fb, d.Sol)
-				return d.Fb[I]
-			}, d.Sol.Y[J])
-			utl.AnaNum(utl.Sf("K%d%d", i, j), tol, K[i][j], dnum, verb)
+			}
+			//if i > 0 && d.Sol.T > 0.951 {
+			//utl.Panic("stop: firstIt=%v", firstIt)
+			//}
 		}
 	}
 }

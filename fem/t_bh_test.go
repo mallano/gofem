@@ -137,7 +137,7 @@ func Test_bh16b(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("bh16b")
 
 	// run simulation
@@ -148,6 +148,17 @@ func Test_bh16b(tst *testing.T) {
 
 	// make sure to flush log
 	defer End()
+
+	// for debugging Kb
+	eid := 3
+	tolKb := 1e-12
+	verb := true
+	if false {
+		TestingDefineDebugKb(tst, eid, tolKb, verb)
+		defer func() {
+			Global.DebugKb = nil
+		}()
+	}
 
 	// run simulation
 	if !Run() {
@@ -160,14 +171,9 @@ func Test_bh16b(tst *testing.T) {
 	tolK := 1e-12
 	tolu := 1e-15
 	tols := 1e-12
-	verb := true
 	if false {
 		TestingCompareResultsU(tst, "data/bh16.sim", "cmp/bh16.cmp", tolK, tolu, tols, skipK, verb)
 	}
-
-	// test consistent matrix
-	eid := 3
-	TestConsistentTangentK(tst, eid, 1e-10, true)
 }
 
 func Test_bh14(tst *testing.T) {

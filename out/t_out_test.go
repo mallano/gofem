@@ -312,7 +312,7 @@ func Test_out02(tst *testing.T) {
 }
 
 // this test needs 'fem' package to be tested first
-func Test_out03(tst *testing.T) {
+func test_out03(tst *testing.T) {
 
 	prevTs := utl.Tsilent
 	defer func() {
@@ -371,7 +371,7 @@ func Test_out03(tst *testing.T) {
 }
 
 // this test needs 'fem' package to be tested first
-func Test_out04(tst *testing.T) {
+func test_out04(tst *testing.T) {
 
 	prevTs := utl.Tsilent
 	defer func() {
@@ -386,6 +386,51 @@ func Test_out04(tst *testing.T) {
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
 	if !Start(datadir+"p01.sim", 0, 0) {
+		tst.Errorf("Start failed\n")
+		return
+	}
+	defer End()
+
+	// get last ip
+	n := len(Ipoints)
+	ip := Ipoints[n-1].X
+
+	// commands for reading time-series
+	Tseries("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
+	Tseries("pl", &At{2.5, 10}, Styles{{Label: "B"}})
+	Tseries("sl", &At{ip[0], ip[1]}, Styles{{Label: "ip"}})
+
+	// apply commands
+	err := Apply()
+	if err != nil {
+		tst.Errorf("test failed: %v\n", err)
+	}
+
+	// show figure
+	if !utl.Tsilent {
+		Show(func() {
+			plt.SubplotI(Spd["pl"])
+			plt.AxisYrange(-10, 110)
+		})
+	}
+}
+
+// this test needs 'fem' package to be tested first
+func test_out05(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
+	utl.Tsilent = false
+	utl.TTitle("out05")
+
+	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
+	if !Start(datadir+"p02.sim", 0, 0) {
 		tst.Errorf("Start failed\n")
 		return
 	}
