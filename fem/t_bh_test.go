@@ -35,7 +35,7 @@ func Test_bh16a(tst *testing.T) {
 		}
 	}()
 
-	//utl.Tsilent = false
+	utl.Tsilent = false
 	utl.TTitle("bh16a")
 
 	// start simulation
@@ -125,6 +125,14 @@ func Test_bh16a(tst *testing.T) {
 	sort.Ints(ct_uy_eqs)
 	utl.CompareInts(tst, "constrained ux equations", ct_ux_eqs, []int{0, 6})
 	utl.CompareInts(tst, "constrained uy equations", ct_uy_eqs, []int{1, 7})
+
+	// check ip data
+	for _, ele := range dom.Elems {
+		e := ele.(*ElemU)
+		labels, data := e.OutIpsData()
+		idx := utl.StrIndexSmall(labels, "sx")
+		utl.Pfyel("labels=%v  data=%v\n", labels, *data[0].Vals[idx])
+	}
 }
 
 func Test_bh16b(tst *testing.T) {
