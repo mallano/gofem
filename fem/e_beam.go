@@ -341,3 +341,8 @@ func (o Beam) Encode(enc Encoder) (ok bool) {
 func (o Beam) Decode(dec Decoder) (ok bool) {
 	return true
 }
+
+// OutIpsData returns data from all integration points for output
+func (o Beam) OutIpsData() (labels []string, data []*OutIpData) {
+	return
+}

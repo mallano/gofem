@@ -226,6 +226,11 @@ func (o ElemUP) Decode(dec Decoder) (ok bool) {
 	return o.p.Decode(dec)
 }
 
+// OutIpsData returns data from all integration points for output
+func (o ElemUP) OutIpsData() (labels []string, data []*OutIpData) {
+	return
+}
+
 // auxiliary ////////////////////////////////////////////////////////////////////////////////////////
 
 // ipvars computes current values @ integration points. idx == index of integration point

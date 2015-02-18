@@ -454,6 +454,11 @@ func (o ElemP) Decode(dec Decoder) (ok bool) {
 	return !LogErr(dec.Decode(&o.States), "Decode")
 }
 
+// OutIpsData returns data from all integration points for output
+func (o ElemP) OutIpsData() (labels []string, data []*OutIpData) {
+	return
+}
+
 // auxiliary ////////////////////////////////////////////////////////////////////////////////////////
 
 // ipvars computes current values @ integration points. idx == index of integration point

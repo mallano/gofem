@@ -11,6 +11,12 @@ import (
 	"github.com/cpmech/gosl/la"
 )
 
+// OutIpData is an auxiliary structure to transfer data from integration points (IP) to output routines.
+type OutIpData struct {
+	Vals []*float64
+	X    []float64
+}
+
 // Elem defines what elements must calculate
 type Elem interface {
 
@@ -32,6 +38,9 @@ type Elem interface {
 	// reading and writing of element data
 	Encode(enc Encoder) (ok bool) // encodes internal variables
 	Decode(dec Decoder) (ok bool) // decodes internal variables
+
+	// output
+	OutIpsData() (labels []string, data []*OutIpData) // returns data from all integration points for output
 }
 
 // ElemConnector defines connector elements; elements that depend upon others
