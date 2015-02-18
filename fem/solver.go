@@ -341,17 +341,17 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		}
 
 		// update primary variables (y)
-		if Global.Sim.Data.Steady {
-			for i := 0; i < d.Ny; i++ {
-				d.Sol.Y[i] += d.Wb[i]  // y += δy
-				d.Sol.ΔY[i] += d.Wb[i] // ΔY += δy
+		for i := 0; i < d.Ny; i++ {
+			d.Sol.Y[i] += d.Wb[i]  // y += δy
+			d.Sol.ΔY[i] += d.Wb[i] // ΔY += δy
+		}
+		if !Global.Sim.Data.Steady {
+			for _, I := range d.T1eqs {
+				d.Sol.Dydt[I] = Global.DynCoefs.β1*d.Sol.Y[I] - d.Sol.Psi[I]
 			}
-		} else {
-			for i := 0; i < d.Ny; i++ {
-				d.Sol.Y[i] += d.Wb[i]  // y += δy
-				d.Sol.ΔY[i] += d.Wb[i] // ΔY += δy
-				d.Sol.Dydt[i] = Global.DynCoefs.α4*d.Sol.Y[i] - d.Sol.Chi[i]
-				d.Sol.D2ydt2[i] = Global.DynCoefs.α1*d.Sol.Y[i] - d.Sol.Zet[i]
+			for _, I := range d.T2eqs {
+				d.Sol.Dydt[I] = Global.DynCoefs.α4*d.Sol.Y[I] - d.Sol.Chi[I]
+				d.Sol.D2ydt2[I] = Global.DynCoefs.α1*d.Sol.Y[I] - d.Sol.Zet[I]
 			}
 		}
 
