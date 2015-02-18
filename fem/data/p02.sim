@@ -9,7 +9,7 @@
       { "n":"ca", "v":100 },
       { "n":"cb", "v":0   },
       { "n":"ta", "v":0   },
-      { "n":"tb", "v":1e3 }]
+      { "n":"tb", "v":5000}]
     },
     { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] }
   ],
@@ -21,6 +21,9 @@
       ]
     }
   ],
+  "solver" : {
+    "theta" : 0.5
+  },
   "stages" : [
     {
       "desc"    : "decrease pressure @ bottom",
@@ -32,7 +35,7 @@
         { "tag":-1, "keys":["g"], "funcs":["grav"] }
       ],
       "control" : {
-        "tf"    : 1000,
+        "tf"    : 5000,
         "dt"    : 10,
         "dtout" : 10
       }

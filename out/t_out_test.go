@@ -441,9 +441,9 @@ func test_out05(tst *testing.T) {
 	ip := Ipoints[n-1].X
 
 	// commands for reading time-series
-	Tseries("pl", &At{2.5, 0}, Styles{{Label: "A", Marker: "o"}})
-	Tseries("pl", &At{2.5, 10}, Styles{{Label: "B"}})
-	Tseries("sl", &At{ip[0], ip[1]}, Styles{{Label: "ip"}})
+	Tseries("pl", &At{2.5, 0}, nil)
+	Tseries("pl", &At{2.5, 10}, nil)
+	Tseries("sl", &At{ip[0], ip[1]}, nil)
 
 	// apply commands
 	err := Apply()
@@ -451,11 +451,11 @@ func test_out05(tst *testing.T) {
 		tst.Errorf("test failed: %v\n", err)
 	}
 
+	//e := Dom.Elems[3].(*fem.ElemP)
+	//utl.Pforan("sl @ ip = %v\n", e.States[3].Sl)
+
 	// show figure
 	if !utl.Tsilent {
-		Show(func() {
-			plt.SubplotI(Spd["pl"])
-			plt.AxisYrange(-10, 110)
-		})
+		Show(nil)
 	}
 }
