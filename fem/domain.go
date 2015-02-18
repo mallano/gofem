@@ -63,7 +63,6 @@ type Domain struct {
 	// stage: subsets of elements
 	ElemIntvars []ElemIntvars   // elements with internal vars in this processor
 	ElemConnect []ElemConnector // connector elements in this processor
-	ElemWriters []ElemWriter    // writer elements in this processor
 
 	// stage: coefficients and prescribed forces
 	EssenBcs EssentialBcs // constraints (Lagrange multipliers)
@@ -134,7 +133,6 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 
 	// subsets of elements
 	o.ElemConnect = make([]ElemConnector, 0)
-	o.ElemWriters = make([]ElemWriter, 0)
 	o.ElemIntvars = make([]ElemIntvars, 0)
 
 	// set special features
@@ -395,9 +393,6 @@ func (o *Domain) add_element_to_subsets(ele Elem) {
 	}
 	if e, ok := ele.(ElemConnector); ok {
 		o.ElemConnect = append(o.ElemConnect, e)
-	}
-	if e, ok := ele.(ElemWriter); ok {
-		o.ElemWriters = append(o.ElemWriters, e)
 	}
 }
 

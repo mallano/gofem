@@ -134,7 +134,7 @@ func (o Domain) SaveIvs(tidx int) (ok bool) {
 	enc := GetEncoder(&buf)
 
 	// encode internal variables
-	for _, e := range o.ElemWriters {
+	for _, e := range o.Elems {
 		if !e.Encode(enc) {
 			return
 		}
@@ -162,7 +162,7 @@ func (o *Domain) ReadIvs(tidx int) (ok bool) {
 
 	// decode internal variables
 	dec := GetDecoder(fil)
-	for _, e := range o.ElemWriters {
+	for _, e := range o.Elems {
 		if !e.Decode(dec) {
 			return
 		}

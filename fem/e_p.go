@@ -442,6 +442,18 @@ func (o *ElemP) RestoreIvs() (ok bool) {
 	return true
 }
 
+// writer ///////////////////////////////////////////////////////////////////////////////////////////
+
+// Encode encodes internal variables
+func (o ElemP) Encode(enc Encoder) (ok bool) {
+	return !LogErr(enc.Encode(o.States), "Encode")
+}
+
+// Decode decodes internal variables
+func (o ElemP) Decode(dec Decoder) (ok bool) {
+	return !LogErr(dec.Decode(&o.States), "Decode")
+}
+
 // auxiliary ////////////////////////////////////////////////////////////////////////////////////////
 
 // ipvars computes current values @ integration points. idx == index of integration point

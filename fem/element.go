@@ -28,18 +28,15 @@ type Elem interface {
 	AddToRhs(fb []float64, sol *Solution) (ok bool)                // adds -R to global residual vector fb
 	AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) // adds element K to global Jacobian matrix Kb
 	Update(sol *Solution) (ok bool)                                // perform (tangent) update
+
+	// reading and writing of element data
+	Encode(enc Encoder) (ok bool) // encodes internal variables
+	Decode(dec Decoder) (ok bool) // decodes internal variables
 }
 
 // ElemConnector defines connector elements; elements that depend upon others
 type ElemConnector interface {
 	Connect(elems []Elem, cid2elem []Elem) (ok bool) // connect multiple elements; e.g.: connect rod/solid elements in Rjoints
-}
-
-// ElemWriter defines elements that can write output
-type ElemWriter interface {
-	Encode(enc Encoder) (ok bool) // encodes internal variables
-	Decode(dec Decoder) (ok bool) // decodes internal variables
-	//Write(enc Encoder, sol *Solution) // writes internal variables to Writer
 }
 
 // ElemIntvars defines elements with {z,q} internal variables

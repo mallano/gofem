@@ -190,7 +190,7 @@ func Test_p02(tst *testing.T) {
 		}
 	}()
 
-	utl.Tsilent = false
+	//utl.Tsilent = false
 	utl.TTitle("p02")
 
 	// run simulation

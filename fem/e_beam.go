@@ -331,3 +331,13 @@ func (o Beam) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 func (o *Beam) Update(sol *Solution) (ok bool) {
 	return true
 }
+
+// Encode encodes internal variables
+func (o Beam) Encode(enc Encoder) (ok bool) {
+	return true
+}
+
+// Decode decodes internal variables
+func (o Beam) Decode(dec Decoder) (ok bool) {
+	return true
+}
