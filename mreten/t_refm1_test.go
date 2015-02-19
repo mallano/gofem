@@ -9,22 +9,12 @@ import (
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/plt"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_refm1a(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
 	doplot := false
 	//doplot := true
-	//utl.Tsilent = false
 	chk.PrintTitle("refm1a")
 
 	mdl := GetModel("testsim", "mat1", "ref-m1", false)
@@ -44,7 +34,7 @@ func Test_refm1a(tst *testing.T) {
 	tolCc := 1e-17
 	tolD1a, tolD1b := 1e-11, 1e-11
 	tolD2a, tolD2b := 1e-12, 1e-10
-	Check(tst, mdl, pc0, sl0, pcf, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, true, []float64{0}, 1e-7, doplot)
+	Check(tst, mdl, pc0, sl0, pcf, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, chk.Verbose, []float64{0}, 1e-7, doplot)
 
 	slf, err := Update(mdl, pc0, sl0, pcf-pc0)
 	if err != nil {
@@ -58,7 +48,7 @@ func Test_refm1a(tst *testing.T) {
 
 	tolD1b = 1e-4
 	tolD2a, tolD2b = 1e-11, 1e-10
-	Check(tst, mdl, pcf, slf, pc0, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, true, []float64{0}, 1e-7, doplot)
+	Check(tst, mdl, pcf, slf, pc0, nptsB, tolCc, tolD1a, tolD1b, tolD2a, tolD2b, chk.Verbose, []float64{0}, 1e-7, doplot)
 
 	if doplot {
 		PlotEnd(true)
