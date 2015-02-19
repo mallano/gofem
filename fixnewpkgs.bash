@@ -14,6 +14,9 @@ fix_pkgs() {
     for f in *.go; do
         sed -i -e 's/utl.Panic/chk.Panic/g' \
                -e 's/utl.Err\>/chk.Err/g' \
+               -e 's/utl.CallerInfo/chk.CallerInfo/g' \
+               -e 's/utl.IntAssert/chk.IntAssert/g' \
+               -e 's/utl.StrAssert/chk.StrAssert/g' \
                -e 's/utl.CheckScalar/chk.Scalar/g' \
                -e 's/utl.CheckString/chk.String/g' \
                -e 's/utl.CheckVector/chk.Vector/g' \
@@ -39,6 +42,8 @@ fix_pkgs() {
                -e 's/utl.FnKey/io.FnKey/g' \
                -e 's/utl.RemoveAll/io.RemoveAll/g' \
                -e 's/utl.ReadFile/io.ReadFile/g' \
+               -e 's/utl.Ramp/fun.Ramp/g' \
+               -e 's/utl.Heav/fun.Heav/g' \
                -e 's/utl.Sramp/fun.Sramp/g' $f
         goimports -w $f
     done
@@ -55,8 +60,8 @@ fix_pkgs_simple() {
     echo "[1;32m>>> fixing $PKG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<[0m"
     cd $PKG
 
-    for f in *.go; do
-        sed -i -e 's/utl.Keycode/io.Keycode/g' $f
+    for f in t_*.go; do
+        sed -i -e 's/utl.IntAssert/chk.IntAssert/g'
         goimports -w $f
     done
 
@@ -65,6 +70,6 @@ fix_pkgs_simple() {
 
 for p in fem inp mconduct mporous mreten msolid out shp; do
 #for p in inp; do
-    fix_pkgs $p 1
-#    fix_pkgs_simple $p 1
+#    fix_pkgs $p 1
+    fix_pkgs_simple $p 1
 done
