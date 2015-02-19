@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Gofem : Go Finite Element Method">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Gofem</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/cpmech/gofem">View on GitHub</a>
+
+          <h1 id="project_title">Gofem</h1>
+          <h2 id="project_tagline">Go Finite Element Method</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/cpmech/gofem/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/cpmech/gofem/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>
+<a id="welcome-to-gofem-an-implementation-of-the-finite-element-method-in-go-golang" class="anchor" href="#welcome-to-gofem-an-implementation-of-the-finite-element-method-in-go-golang" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to Gofem, an implementation of the Finite Element Method in Go (golang).</h3>
+
+<p>This project includes a number of routines to develop the FEM for solid and porous media. Our targeted simulations include the static and dynamics of structures, multi-phase fluid flow through porous media, and the behaviour of porous media considering the coupling between liquid, gas and solids. Some sub-packages are created to make the FEM implementation easier; these include:</p>
+
+<ul>
+<li>
+<strong>shp</strong>      shape structures and quadrature points</li>
+<li>
+<strong>inp</strong>      input data structures. simulation, materials, meshes</li>
+<li>
+<strong>msolid</strong>   models for solids</li>
+<li>
+<strong>mconduct</strong> models for liquid/gas conductivity in porous media</li>
+<li>
+<strong>mreten</strong>   models for liquid retention in porous media</li>
+<li>
+<strong>mporous</strong>  models for porous media</li>
+<li>
+<strong>fem</strong>      finite element method</li>
+<li>
+<strong>out</strong>      results analyses and plotting</li>
+</ul>
+
+<p>Gofem is developed in/for Debian systems at the moment. It depends on <a href="https://github.com/cpmech/gosl">Gosl that is available here</a>. See also <a href="http://cpmech.github.io/gosl">http://cpmech.github.io/gosl</a></p>
+
+<h3>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h3>
+
+<p>After installing Go (golang) and <a href="https://github.com/cpmech/gosl">Gosl</a>, type (don't forget the three dots):</p>
+
+<pre><code>go get github.com/cpmech/gofem/...
+</code></pre>
+
+<h3>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h3>
+
+<p>The documentation of Gofem, automatically generated with <code>go doc</code>, <a href="http://rawgit.com/cpmech/gofem/master/doc/index.html">is available here</a></p>
+
+<h3>
+<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>Dorival Pedroso <a href="https://github.com/cpmech" class="user-mention">@cpmech</a> and Raul Durand <a href="https://github.com/RaulDurand" class="user-mention">@RaulDurand</a>.</p>
+
+<h3>
+<a id="references" class="anchor" href="#references" aria-hidden="true"><span class="octicon octicon-link"></span></a>References</h3>
+
+<p>Most of Gofem was developed to support the numerical research that resulted in the following papers:</p>
+
+<ol>
+<li>Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
+</li>
+<li>Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
+</li>
+<li>Pedroso DM, Sheng D and Zhao, J (2009) The concept of reference curves for constitutive modelling in soil mechanics, Computers and Geotechnics, 36(1-2), 149-165, <a href="http://dx.doi.org/10.1016/j.compgeo.2008.01.009">http://dx.doi.org/10.1016/j.compgeo.2008.01.009</a>
+</li>
+<li>Pedroso DM and Williams DJ (2010) A novel approach for modelling soil-water characteristic curves with hysteresis, Computers and Geotechnics, 37(3), 374-380, <a href="http://dx.doi.org/10.1016/j.compgeo.2009.12.004">http://dx.doi.org/10.1016/j.compgeo.2009.12.004</a>
+</li>
+<li>Pedroso DM and Williams DJ (2011) Automatic Calibration of soil-water characteristic curves using genetic algorithms. Computers and Geotechnics, 38(3), 330-340, <a href="http://dx.doi.org/10.1016/j.compgeo.2010.12.004">http://dx.doi.org/10.1016/j.compgeo.2010.12.004</a>
+</li>
+</ol>
+
+<h3>
+<a id="acknowledgements" class="anchor" href="#acknowledgements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Acknowledgements</h3>
+
+<p>Funding from the Australian Research Council is acknowledged.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Gofem maintained by <a href="https://github.com/cpmech">cpmech</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-37633752-7");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
