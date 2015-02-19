@@ -11,7 +11,6 @@ import (
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
-	"github.com/cpmech/gosl/utl"
 )
 
 func onequa_solution(t float64) (σx, σy, σz, εx, εy float64) {
@@ -59,7 +58,7 @@ func Test_out01(tst *testing.T) {
 	chk.PrintTitle("out01")
 
 	// run FE simulation
-	if !fem.Start("data/onequa4.sim", true, !utl.Tsilent) {
+	if !fem.Start("data/onequa4.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -90,30 +89,30 @@ func Test_out01(tst *testing.T) {
 	nnod := 4
 	nele := 1
 	nip := 4
-	utl.IntAssert(len(Dom.Nodes), nnod)
-	utl.IntAssert(len(Ipoints), nele*nip)
-	utl.IntAssert(len(Cid2ips), 1)
-	utl.IntAssert(len(TseriesKeys), 6)
-	utl.IntAssert(len(TseriesData), 6)
-	utl.IntAssert(len(TseriesKey2idx), 6)
+	chk.IntAssert(len(Dom.Nodes), nnod)
+	chk.IntAssert(len(Ipoints), nele*nip)
+	chk.IntAssert(len(Cid2ips), 1)
+	chk.IntAssert(len(TseriesKeys), 6)
+	chk.IntAssert(len(TseriesData), 6)
+	chk.IntAssert(len(TseriesKey2idx), 6)
 	chk.Strings(tst, "TplotKeys", TseriesKeys, []string{"ux", "uy", "sx", "sy", "sz", "sxy"})
-	utl.IntAssert(TseriesKey2idx["ux"], 0)
-	utl.IntAssert(TseriesKey2idx["uy"], 1)
-	utl.IntAssert(TseriesKey2idx["sx"], 2)
-	utl.IntAssert(TseriesKey2idx["sy"], 3)
-	utl.IntAssert(TseriesKey2idx["sz"], 4)
-	utl.IntAssert(TseriesKey2idx["sxy"], 5)
+	chk.IntAssert(TseriesKey2idx["ux"], 0)
+	chk.IntAssert(TseriesKey2idx["uy"], 1)
+	chk.IntAssert(TseriesKey2idx["sx"], 2)
+	chk.IntAssert(TseriesKey2idx["sy"], 3)
+	chk.IntAssert(TseriesKey2idx["sz"], 4)
+	chk.IntAssert(TseriesKey2idx["sxy"], 5)
 
 	// check quantities
 	for i, dat := range TseriesData {
 		key := TseriesKeys[i]
 		if key == "ux" || key == "uy" {
-			utl.IntAssert(len(dat.Qts), 4)
-			utl.IntAssert(len(dat.Sty), 4)
+			chk.IntAssert(len(dat.Qts), 4)
+			chk.IntAssert(len(dat.Sty), 4)
 		}
 		if key == "sx" || key == "sy" || key == "sz" || key == "sxy" {
-			utl.IntAssert(len(dat.Qts), 4)
-			utl.IntAssert(len(dat.Sty), 4)
+			chk.IntAssert(len(dat.Qts), 4)
+			chk.IntAssert(len(dat.Sty), 4)
 		}
 	}
 
@@ -160,7 +159,7 @@ func Test_out01(tst *testing.T) {
 	}
 
 	// show figure
-	if !utl.Tsilent {
+	if chk.Verbose {
 		Show(nil)
 	}
 }
@@ -171,7 +170,7 @@ func Test_out02(tst *testing.T) {
 	chk.PrintTitle("out02")
 
 	// run FE simulation
-	if !fem.Start("data/twoqua4.sim", true, !utl.Tsilent) {
+	if !fem.Start("data/twoqua4.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -222,30 +221,30 @@ func Test_out02(tst *testing.T) {
 	nnod := 6
 	nele := 2
 	nip := 4
-	utl.IntAssert(len(Dom.Nodes), nnod)
-	utl.IntAssert(len(Ipoints), nele*nip)
-	utl.IntAssert(len(Cid2ips), 2)
-	utl.IntAssert(len(TseriesKeys), nkeys)
-	utl.IntAssert(len(TseriesData), nkeys)
-	utl.IntAssert(len(TseriesKey2idx), nkeys)
+	chk.IntAssert(len(Dom.Nodes), nnod)
+	chk.IntAssert(len(Ipoints), nele*nip)
+	chk.IntAssert(len(Cid2ips), 2)
+	chk.IntAssert(len(TseriesKeys), nkeys)
+	chk.IntAssert(len(TseriesData), nkeys)
+	chk.IntAssert(len(TseriesKey2idx), nkeys)
 	chk.Strings(tst, "TplotKeys", TseriesKeys, []string{"ux", "uy", "sx", "sy", "sz", "sxy"})
-	utl.IntAssert(TseriesKey2idx["ux"], 0)
-	utl.IntAssert(TseriesKey2idx["uy"], 1)
-	utl.IntAssert(TseriesKey2idx["sx"], 2)
-	utl.IntAssert(TseriesKey2idx["sy"], 3)
-	utl.IntAssert(TseriesKey2idx["sz"], 4)
-	utl.IntAssert(TseriesKey2idx["sxy"], 5)
+	chk.IntAssert(TseriesKey2idx["ux"], 0)
+	chk.IntAssert(TseriesKey2idx["uy"], 1)
+	chk.IntAssert(TseriesKey2idx["sx"], 2)
+	chk.IntAssert(TseriesKey2idx["sy"], 3)
+	chk.IntAssert(TseriesKey2idx["sz"], 4)
+	chk.IntAssert(TseriesKey2idx["sxy"], 5)
 
 	// check quantities
 	for i, dat := range TseriesData {
 		key := TseriesKeys[i]
 		if key == "ux" || key == "uy" {
-			utl.IntAssert(len(dat.Qts), 1)
-			utl.IntAssert(len(dat.Sty), 1)
+			chk.IntAssert(len(dat.Qts), 1)
+			chk.IntAssert(len(dat.Sty), 1)
 		}
 		if key == "sx" || key == "sy" || key == "sz" || key == "sxy" {
-			utl.IntAssert(len(dat.Qts), nipsel)
-			utl.IntAssert(len(dat.Sty), nipsel)
+			chk.IntAssert(len(dat.Qts), nipsel)
+			chk.IntAssert(len(dat.Sty), nipsel)
 		}
 	}
 
@@ -292,7 +291,7 @@ func Test_out02(tst *testing.T) {
 	}
 
 	// show figure
-	if !utl.Tsilent {
+	if chk.Verbose {
 		//Show(nil)
 	}
 }
@@ -324,26 +323,26 @@ func test_out03(tst *testing.T) {
 	nnod := 27
 	nele := 4
 	nip := 4
-	utl.IntAssert(len(Dom.Nodes), nnod)
-	utl.IntAssert(len(Ipoints), nele*nip)
-	utl.IntAssert(len(TseriesKeys), 2)
-	utl.IntAssert(len(TseriesData), 2)
-	utl.IntAssert(len(TseriesKey2idx), 2)
+	chk.IntAssert(len(Dom.Nodes), nnod)
+	chk.IntAssert(len(Ipoints), nele*nip)
+	chk.IntAssert(len(TseriesKeys), 2)
+	chk.IntAssert(len(TseriesData), 2)
+	chk.IntAssert(len(TseriesKey2idx), 2)
 	chk.Strings(tst, "TplotKeys", TseriesKeys, []string{"pl", "sl"})
-	utl.IntAssert(TseriesKey2idx["pl"], 0)
-	utl.IntAssert(TseriesKey2idx["sl"], 1)
+	chk.IntAssert(TseriesKey2idx["pl"], 0)
+	chk.IntAssert(TseriesKey2idx["sl"], 1)
 
 	// check quantities
 	for i, dat := range TseriesData {
 		key := TseriesKeys[i]
 		io.Pforan("key=%v => dat=\n%v\n", key, dat)
 		if key == "pl" {
-			utl.IntAssert(len(dat.Qts), 2)
-			utl.IntAssert(len(dat.Sty), 2)
+			chk.IntAssert(len(dat.Qts), 2)
+			chk.IntAssert(len(dat.Sty), 2)
 		}
 		if key == "sl" {
-			utl.IntAssert(len(dat.Qts), 1)
-			utl.IntAssert(len(dat.Sty), 1)
+			chk.IntAssert(len(dat.Qts), 1)
+			chk.IntAssert(len(dat.Sty), 1)
 		}
 	}
 }
@@ -377,7 +376,7 @@ func test_out04(tst *testing.T) {
 	}
 
 	// show figure
-	if !utl.Tsilent {
+	if chk.Verbose {
 		Show(func() {
 			plt.SubplotI(Spd["pl"])
 			plt.AxisYrange(-10, 110)
@@ -388,7 +387,6 @@ func test_out04(tst *testing.T) {
 // this test needs 'fem' package to be tested first
 func test_out05(tst *testing.T) {
 
-	utl.Tsilent = false
 	chk.PrintTitle("out05")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
@@ -417,7 +415,7 @@ func test_out05(tst *testing.T) {
 	//io.Pforan("sl @ ip = %v\n", e.States[3].Sl)
 
 	// show figure
-	if !utl.Tsilent {
+	if chk.Verbose {
 		Show(nil)
 	}
 }
