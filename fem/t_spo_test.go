@@ -141,6 +141,7 @@ func Test_spo751a(tst *testing.T) {
 
 func Test_spo751b(tst *testing.T) {
 
+	//verbose()
 	chk.PrintTitle("spo751b")
 
 	// run simulation

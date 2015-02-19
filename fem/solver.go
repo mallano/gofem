@@ -127,10 +127,10 @@ func Run() (runisok bool) {
 	if Global.Verbose {
 		cpu_time := time.Now()
 		defer func() {
-			io.Pfblue2("cpu time = %v\n", time.Now().Sub(cpu_time))
+			io.Pfblue2("cpu time   = %v\n", time.Now().Sub(cpu_time))
 		}()
 		defer func() {
-			io.Pf("\nfinal time = %g\n", t)
+			io.Pfcyan("\nfinal time = %g\n", t)
 		}()
 	}
 
@@ -198,9 +198,9 @@ func Run() (runisok bool) {
 
 			// message
 			if Global.Verbose {
-				//time.Sleep(10000000)
+				//time.Sleep(100000000)
 				if !Global.Sim.Data.ShowR {
-					io.Pf("time = %g\n", t)
+					io.Pf("time       = %g\r", t)
 				}
 			}
 

@@ -144,6 +144,7 @@ func Test_sg52a(tst *testing.T) {
 
 func Test_sg52b(tst *testing.T) {
 
+	//verbose()
 	chk.PrintTitle("sg52b")
 
 	// run simulation
@@ -489,6 +490,7 @@ func Test_sg114(tst *testing.T) {
 
 func Test_sg1121(tst *testing.T) {
 
+	verbose()
 	chk.PrintTitle("sg1121")
 
 	// run simulation
