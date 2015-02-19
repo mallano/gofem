@@ -55,15 +55,7 @@ func onequa_check_sig(tst *testing.T, t float64, σ, x []float64, tol float64) {
 
 func Test_out01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
+	//verbose()
 	chk.PrintTitle("out01")
 
 	// run FE simulation
@@ -175,15 +167,7 @@ func Test_out01(tst *testing.T) {
 
 func Test_out02(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
+	//verbose()
 	chk.PrintTitle("out02")
 
 	// run FE simulation
@@ -316,15 +300,7 @@ func Test_out02(tst *testing.T) {
 // this test needs 'fem' package to be tested first
 func test_out03(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
+	//verbose()
 	chk.PrintTitle("out03")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
@@ -375,15 +351,7 @@ func test_out03(tst *testing.T) {
 // this test needs 'fem' package to be tested first
 func test_out04(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
+	//verbose()
 	chk.PrintTitle("out04")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
@@ -419,14 +387,6 @@ func test_out04(tst *testing.T) {
 
 // this test needs 'fem' package to be tested first
 func test_out05(tst *testing.T) {
-
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
 
 	utl.Tsilent = false
 	chk.PrintTitle("out05")
