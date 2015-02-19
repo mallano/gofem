@@ -12,25 +12,14 @@ import (
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/utl"
 )
 
 func init() {
-	utl.Tsilent = true
 	log.SetOutput(ioutil.Discard)
 }
 
 func Test_msh01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("msh01")
 
 	msh := ReadMsh("data", "bh16.msh")
@@ -48,15 +37,6 @@ func Test_msh01(tst *testing.T) {
 
 func Test_sim01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sim01")
 
 	sim := ReadSim("data", "bh16.sim", true)
@@ -64,7 +44,7 @@ func Test_sim01(tst *testing.T) {
 		tst.Errorf("test failed\n")
 		return
 	}
-	if !utl.Tsilent {
+	if chk.Verbose {
 		sim.GetInfo(os.Stdout)
 		io.Pf("\n")
 	}
@@ -72,15 +52,6 @@ func Test_sim01(tst *testing.T) {
 
 func Test_mat01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("mat01")
 
 	mdb1 := ReadMat("data", "bh.mat")
@@ -103,15 +74,6 @@ func Test_mat01(tst *testing.T) {
 
 func Test_mat02(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("mat02 (conversion)")
 
 	convertsymbols := true
@@ -127,15 +89,6 @@ func Test_mat02(tst *testing.T) {
 
 func Test_mat03(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("mat03 (inverse conversion)")
 
 	convertsymbols := true

@@ -9,20 +9,10 @@ import (
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_porous01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("porous01")
 
 	mdb := ReadMat("data", "porous.mat")
@@ -70,15 +60,6 @@ func Test_porous01(tst *testing.T) {
 
 func Test_porous02(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("porous02")
 
 	mdb := ReadMat("data", "porous.mat")
