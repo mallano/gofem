@@ -164,7 +164,7 @@ package mconduct implements models for liquid and gas conductivity in porous med
 		
 			
 			
-			<h2 id="LogModels">func <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=1682:1698#L49">LogModels</a></h2>
+			<h2 id="LogModels">func <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=1680:1696#L49">LogModels</a></h2>
 			<pre>func LogModels()</pre>
 			<p>
 LogModels prints to log information on existent and allocated Models
@@ -266,7 +266,7 @@ Klr returns klr
 		
 			
 			
-			<h2 id="Model">type <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=407:795#L6">Model</a></h2>
+			<h2 id="Model">type <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=406:794#L6">Model</a></h2>
 			<pre>type Model interface {
     Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) <a href="/pkg/builtin/#error">error</a>      <span class="comment">// Init initialises this structure</span>
     GetPrms(example <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a> <span class="comment">// gets (an example) of parameters</span>
@@ -290,7 +290,7 @@ Model defines liquid-gas conductivity models
 
 			
 				
-				<h3 id="GetModel">func <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=1081:1148#L21">GetModel</a></h3>
+				<h3 id="GetModel">func <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=1080:1147#L21">GetModel</a></h3>
 				<pre>func GetModel(simfnk, matname, modelname <a href="/pkg/builtin/#string">string</a>, getnew <a href="/pkg/builtin/#bool">bool</a>) <a href="#Model">Model</a></pre>
 				<p>
 GetModel returns (existent or new) conductivity model

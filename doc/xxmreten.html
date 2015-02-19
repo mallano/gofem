@@ -280,7 +280,7 @@
 		
 			
 			
-			<h2 id="Check">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/testing.go?s=341:520#L7">Check</a></h2>
+			<h2 id="Check">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/testing.go?s=400:579#L9">Check</a></h2>
 			<pre>func Check(tst *<a href="/pkg/testing/">testing</a>.<a href="/pkg/testing/#T">T</a>, mdl <a href="#Model">Model</a>, pc0, sl0, pcf <a href="/pkg/builtin/#float64">float64</a>, npts <a href="/pkg/builtin/#int">int</a>, tolCc, tolD1a, tolD1b, tolD2a, tolD2b <a href="/pkg/builtin/#float64">float64</a>, verbose <a href="/pkg/builtin/#bool">bool</a>, pcSkip []<a href="/pkg/builtin/#float64">float64</a>, tolSkip <a href="/pkg/builtin/#float64">float64</a>, doplot <a href="/pkg/builtin/#bool">bool</a>)</pre>
 			<p>
 Check checks derivatives
@@ -292,7 +292,7 @@ Check checks derivatives
 		
 			
 			
-			<h2 id="LogModels">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=3501:3517#L102">LogModels</a></h2>
+			<h2 id="LogModels">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=3499:3515#L102">LogModels</a></h2>
 			<pre>func LogModels()</pre>
 			<p>
 LogModels prints to log information on existent and allocated Models
@@ -304,7 +304,7 @@ LogModels prints to log information on existent and allocated Models
 		
 			
 			
-			<h2 id="Plot">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/plot.go?s=263:356#L2">Plot</a></h2>
+			<h2 id="Plot">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/plot.go?s=292:385#L3">Plot</a></h2>
 			<pre>func Plot(mdl <a href="#Model">Model</a>, pc0, sl0, pcf <a href="/pkg/builtin/#float64">float64</a>, npts <a href="/pkg/builtin/#int">int</a>, args1, args2, label <a href="/pkg/builtin/#string">string</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			
 			
@@ -313,7 +313,7 @@ LogModels prints to log information on existent and allocated Models
 		
 			
 			
-			<h2 id="PlotEnd">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/plot.go?s=918:941#L28">PlotEnd</a></h2>
+			<h2 id="PlotEnd">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/plot.go?s=945:968#L29">PlotEnd</a></h2>
 			<pre>func PlotEnd(show <a href="/pkg/builtin/#bool">bool</a>)</pre>
 			
 			
@@ -322,7 +322,7 @@ LogModels prints to log information on existent and allocated Models
 		
 			
 			
-			<h2 id="Update">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=1723:1796#L30">Update</a></h2>
+			<h2 id="Update">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=1722:1795#L30">Update</a></h2>
 			<pre>func Update(mdl <a href="#Model">Model</a>, pc0, sl0, Δpc <a href="/pkg/builtin/#float64">float64</a>) (slNew <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Update updates pc and sl for given Δpc. An implicit ODE solver is used.
@@ -557,7 +557,7 @@ SlMin returns sl_min
 		
 			
 			
-			<h2 id="Model">type <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=745:1474#L14">Model</a></h2>
+			<h2 id="Model">type <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=744:1473#L14">Model</a></h2>
 			<pre>type Model interface {
     Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) <a href="/pkg/builtin/#error">error</a>                                              <span class="comment">// initialises retention model</span>
     GetPrms(example <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>                                         <span class="comment">// gets (an example) of parameters</span>
@@ -590,7 +590,7 @@ Model implements a liquid retention model (LRM)
 
 			
 				
-				<h3 id="GetModel">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=2900:2967#L74">GetModel</a></h3>
+				<h3 id="GetModel">func <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=2899:2966#L74">GetModel</a></h3>
 				<pre>func GetModel(simfnk, matname, modelname <a href="/pkg/builtin/#string">string</a>, getnew <a href="/pkg/builtin/#bool">bool</a>) <a href="#Model">Model</a></pre>
 				<p>
 GetModel returns (existent or new) liquid retention model
@@ -610,7 +610,7 @@ Note: returns nil on errors
 		
 			
 			
-			<h2 id="Nonrate">type <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=1564:1645#L25">Nonrate</a></h2>
+			<h2 id="Nonrate">type <a href="https://github.com/cpmech/gofem/blob/master/mreten/retention.go?s=1563:1644#L25">Nonrate</a></h2>
 			<pre>type Nonrate interface {
     Sl(pc <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// compute sl directly from pc</span>
 }</pre>

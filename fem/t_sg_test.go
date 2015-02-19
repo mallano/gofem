@@ -490,7 +490,7 @@ func Test_sg114(tst *testing.T) {
 
 func Test_sg1121(tst *testing.T) {
 
-	verbose()
+	//verbose()
 	chk.PrintTitle("sg1121")
 
 	// run simulation

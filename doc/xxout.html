@@ -326,7 +326,7 @@ Global variables
 		
 			
 			
-			<h2 id="Apply">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=4736:4760#L164">Apply</a></h2>
+			<h2 id="Apply">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=4766:4790#L165">Apply</a></h2>
 			<pre>func Apply() (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Apply applies commands to generate T and R.
@@ -338,7 +338,7 @@ Apply applies commands to generate T and R.
 		
 			
 			
-			<h2 id="End">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=2671:2681#L62">End</a></h2>
+			<h2 id="End">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=2701:2711#L63">End</a></h2>
 			<pre>func End()</pre>
 			<p>
 End must be called and the end to flush log file
@@ -350,7 +350,7 @@ End must be called and the end to flush log file
 		
 			
 			
-			<h2 id="GetTexLabel">func <a href="https://github.com/cpmech/gofem/blob/master/out/styles.go?s=464:505#L13">GetTexLabel</a></h2>
+			<h2 id="GetTexLabel">func <a href="https://github.com/cpmech/gofem/blob/master/out/styles.go?s=462:503#L13">GetTexLabel</a></h2>
 			<pre>func GetTexLabel(key, unit <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#string">string</a></pre>
 			
 			
@@ -368,7 +368,7 @@ End must be called and the end to flush log file
 		
 			
 			
-			<h2 id="Save">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=5302:5362#L193">Save</a></h2>
+			<h2 id="Save">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=5332:5392#L194">Save</a></h2>
 			<pre>func Save(dirout, filename <a href="/pkg/builtin/#string">string</a>, extra func()) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 Save saves plot
@@ -380,7 +380,7 @@ Save saves plot
 		
 			
 			
-			<h2 id="Show">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=5190:5213#L183">Show</a></h2>
+			<h2 id="Show">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=5220:5243#L184">Show</a></h2>
 			<pre>func Show(extra func())</pre>
 			<p>
 Show shows plot
@@ -403,7 +403,7 @@ Show shows plot
 		
 			
 			
-			<h2 id="Start">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=2764:2834#L67">Start</a></h2>
+			<h2 id="Start">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=2794:2864#L68">Start</a></h2>
 			<pre>func Start(simfnpath <a href="/pkg/builtin/#string">string</a>, stageIdx, regionIdx <a href="/pkg/builtin/#int">int</a>) (startisok <a href="/pkg/builtin/#bool">bool</a>)</pre>
 			<p>
 Start starts handling of results given a simulation input file
@@ -625,7 +625,7 @@ AtPoint returns quantity at point
 		
 			
 			
-			<h2 id="IpDat">type <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=1440:1637#L26">IpDat</a></h2>
+			<h2 id="IpDat">type <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=1470:1667#L27">IpDat</a></h2>
 			<pre>type IpDat struct {
     Cid <a href="/pkg/builtin/#int">int</a>            <span class="comment">// id of parent element</span>
     X   []<a href="/pkg/builtin/#float64">float64</a>      <span class="comment">// ip&#39;s coordinates</span>
@@ -674,7 +674,7 @@ PointLocator defines interface for locating space positions
 		
 			
 			
-			<h2 id="Quantities">type <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=463:490#L7">Quantities</a></h2>
+			<h2 id="Quantities">type <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=462:489#L7">Quantities</a></h2>
 			<pre>type Quantities []*<a href="#Quantity">Quantity</a></pre>
 			<p>
 Quantities is a set of Quantity
@@ -693,7 +693,7 @@ Quantities is a set of Quantity
 
 			
 				
-				<h3 id="Quantities.Len">func (Quantities) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=524:553#L10">Len</a></h3>
+				<h3 id="Quantities.Len">func (Quantities) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=523:552#L10">Len</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) Len() <a href="/pkg/builtin/#int">int</a></pre>
 				<p>
 Len the length of Quantities
@@ -704,7 +704,7 @@ Len the length of Quantities
 				
 			
 				
-				<h3 id="Quantities.Less">func (Quantities) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=713:752#L20">Less</a></h3>
+				<h3 id="Quantities.Less">func (Quantities) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=712:751#L20">Less</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) Less(i, j <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 				<p>
 Less compares Quantities considering Dist
@@ -715,7 +715,7 @@ Less compares Quantities considering Dist
 				
 			
 				
-				<h3 id="Quantities.String">func (Quantities) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=2634:2669#L103">String</a></h3>
+				<h3 id="Quantities.String">func (Quantities) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=2631:2666#L103">String</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) String() <a href="/pkg/builtin/#string">string</a></pre>
 				
 				
@@ -723,7 +723,7 @@ Less compares Quantities considering Dist
 				
 			
 				
-				<h3 id="Quantities.Swap">func (Quantities) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=603:637#L15">Swap</a></h3>
+				<h3 id="Quantities.Swap">func (Quantities) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=602:636#L15">Swap</a></h3>
 				<pre>func (o <a href="#Quantities">Quantities</a>) Swap(i, j <a href="/pkg/builtin/#int">int</a>)</pre>
 				<p>
 Swap swaps two Quantities
@@ -736,7 +736,7 @@ Swap swaps two Quantities
 		
 			
 			
-			<h2 id="Quantity">type <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=263:426#L1">Quantity</a></h2>
+			<h2 id="Quantity">type <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=262:425#L1">Quantity</a></h2>
 			<pre>type Quantity struct {
     Value *<a href="/pkg/builtin/#float64">float64</a>  <span class="comment">// value of, e.g., &#34;ux&#34;</span>
     Dist  <a href="/pkg/builtin/#float64">float64</a>   <span class="comment">// distance from reference point (if along line)</span>
@@ -759,7 +759,7 @@ Quantity holds node or ip quantity
 
 			
 				
-				<h3 id="Quantity.String">func (Quantity) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=2431:2464#L94">String</a></h3>
+				<h3 id="Quantity.String">func (Quantity) <a href="https://github.com/cpmech/gofem/blob/master/out/quantity.go?s=2430:2463#L94">String</a></h3>
 				<pre>func (o <a href="#Quantity">Quantity</a>) String() <a href="/pkg/builtin/#string">string</a></pre>
 				
 				
@@ -769,7 +769,7 @@ Quantity holds node or ip quantity
 		
 			
 			
-			<h2 id="Styles">type <a href="https://github.com/cpmech/gofem/blob/master/out/styles.go?s=270:296#L3">Styles</a></h2>
+			<h2 id="Styles">type <a href="https://github.com/cpmech/gofem/blob/master/out/styles.go?s=269:295#L3">Styles</a></h2>
 			<pre>type Styles []<a href="/pkg/github.com/cpmech/gosl/plt/">plt</a>.<a href="/pkg/github.com/cpmech/gosl/plt/#LineData">LineData</a></pre>
 			<p>
 Styles
@@ -786,7 +786,7 @@ Styles
 
 			
 				
-				<h3 id="GetDefaultStyles">func <a href="https://github.com/cpmech/gofem/blob/master/out/styles.go?s=298:342#L5">GetDefaultStyles</a></h3>
+				<h3 id="GetDefaultStyles">func <a href="https://github.com/cpmech/gofem/blob/master/out/styles.go?s=297:341#L5">GetDefaultStyles</a></h3>
 				<pre>func GetDefaultStyles(qts <a href="#Quantities">Quantities</a>) <a href="#Styles">Styles</a></pre>
 				
 				
