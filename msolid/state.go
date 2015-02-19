@@ -6,8 +6,8 @@
 package msolid
 
 import (
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/la"
-	"github.com/cpmech/gosl/utl"
 )
 
 // State holds all continuum mechanics data, including for updating the state
@@ -50,9 +50,9 @@ func NewState(nsig, nalp, nphi int, large bool) *State {
 //  Note: 1) this and other states must have been pre-allocated with the same sizes
 //        2) this method does not check for errors
 func (o *State) Set(other *State) {
-	utl.IntAssert(len(o.Sig), len(other.Sig))
-	utl.IntAssert(len(o.Alp), len(other.Alp))
-	utl.IntAssert(len(o.Phi), len(other.Phi))
+	chk.IntAssert(len(o.Sig), len(other.Sig))
+	chk.IntAssert(len(o.Alp), len(other.Alp))
+	chk.IntAssert(len(o.Phi), len(other.Phi))
 	copy(o.Sig, other.Sig)
 	copy(o.Alp, other.Alp)
 	copy(o.Phi, other.Phi)
