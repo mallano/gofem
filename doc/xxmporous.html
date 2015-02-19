@@ -48,12 +48,13 @@
 				<p>
 package mporous implements models for porous media based on the Theory of Porous Media
 </p>
-<p>
-package mporous implements models for porous media based on the Theory of Porous Media
-</p>
 <pre>References:
- [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
- [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
+ [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis.
+     Int Journal for Numerical Methods in Engineering, 101(8) 606-634
+     <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
+ [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media.
+     Computer Methods in Applied Mechanics and Engineering, 285 791-816
+     <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
 </pre>
 
 			</div>
@@ -328,7 +329,7 @@ CalcLGS calculates TPM variables for models with liquid, gas and solid
 		
 			
 			
-			<h2 id="GetLGcndPrms">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=715:743#L24">GetLGcndPrms</a></h2>
+			<h2 id="GetLGcndPrms">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=625:653#L23">GetLGcndPrms</a></h2>
 			<pre>func GetLGcndPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 			<p>
 GetLGcndPrms gets (an example) of parameters
@@ -356,7 +357,7 @@ np    -- number of points in each branch
 		
 			
 			
-			<h2 id="LogModels">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=9784:9800#L365">LogModels</a></h2>
+			<h2 id="LogModels">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=9856:9872#L373">LogModels</a></h2>
 			<pre>func LogModels()</pre>
 			<p>
 LogModels prints to log information on existent and allocated Models
@@ -427,7 +428,7 @@ Run runs simulation
 		
 			
 			
-			<h2 id="LGcondM1">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=415:665#L4">LGcondM1</a></h2>
+			<h2 id="LGcondM1">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=325:575#L3">LGcondM1</a></h2>
 			<pre>type LGcondM1 struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre>
@@ -448,7 +449,7 @@ LGcondM1 implements the liquid-gas conductivity model # 1
 
 			
 				
-				<h3 id="LGcondM1.DkgrDsg">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=2148:2193#L92">DkgrDsg</a></h3>
+				<h3 id="LGcondM1.DkgrDsg">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=2058:2103#L91">DkgrDsg</a></h3>
 				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) DkgrDsg(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 DkgrDsl returns ∂kgr/∂sg
@@ -459,7 +460,7 @@ DkgrDsl returns ∂kgr/∂sg
 				
 			
 				
-				<h3 id="LGcondM1.DklrDsl">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=2040:2085#L87">DklrDsl</a></h3>
+				<h3 id="LGcondM1.DklrDsl">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=1950:1995#L86">DklrDsl</a></h3>
 				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) DklrDsl(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 DklrDsl returns ∂klr/∂sl
@@ -470,7 +471,7 @@ DklrDsl returns ∂klr/∂sl
 				
 			
 				
-				<h3 id="LGcondM1.Init">func (*LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=1061:1111#L38">Init</a></h3>
+				<h3 id="LGcondM1.Init">func (*LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=971:1021#L37">Init</a></h3>
 				<pre>func (o *<a href="#LGcondM1">LGcondM1</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises this structure
@@ -481,7 +482,7 @@ Init initialises this structure
 				
 			
 				
-				<h3 id="LGcondM1.Kgr">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=1936:1977#L82">Kgr</a></h3>
+				<h3 id="LGcondM1.Kgr">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=1846:1887#L81">Kgr</a></h3>
 				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) Kgr(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 Kgr returns kgr
@@ -492,7 +493,7 @@ Kgr returns kgr
 				
 			
 				
-				<h3 id="LGcondM1.Klr">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=1845:1886#L77">Klr</a></h3>
+				<h3 id="LGcondM1.Klr">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=1755:1796#L76">Klr</a></h3>
 				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) Klr(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 Klr returns klr
@@ -505,7 +506,7 @@ Klr returns klr
 		
 			
 			
-			<h2 id="Model">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=1361:2784#L17">Model</a></h2>
+			<h2 id="Model">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=1433:2856#L25">Model</a></h2>
 			<pre>type Model struct {
 
     <span class="comment">// constants</span>
@@ -543,8 +544,12 @@ Klr returns klr
 Model holds material parameters for porous media
 </p>
 <pre>References:
- [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
- [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
+ [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis.
+     Int Journal for Numerical Methods in Engineering, 101(8) 606-634
+     <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
+ [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media.
+     Computer Methods in Applied Mechanics and Engineering, 285 791-816
+     <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
 </pre>
 
 
@@ -558,7 +563,7 @@ Model holds material parameters for porous media
 
 			
 				
-				<h3 id="GetModel">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=9346:9403#L345">GetModel</a></h3>
+				<h3 id="GetModel">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=9418:9475#L353">GetModel</a></h3>
 				<pre>func GetModel(simfnk, matname <a href="/pkg/builtin/#string">string</a>, getnew <a href="/pkg/builtin/#bool">bool</a>) *<a href="#Model">Model</a></pre>
 				<p>
 GetModel returns (existent or new) model for porous media
@@ -575,7 +580,7 @@ Note: returns nil on errors
 
 			
 				
-				<h3 id="Model.Ccb">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=8042:8098#L293">Ccb</a></h3>
+				<h3 id="Model.Ccb">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=8114:8170#L301">Ccb</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) Ccb(s *<a href="#State">State</a>) (dsldpc <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Ccb (Cc-bar) returns dsl/dpc consistent with the update method
@@ -588,7 +593,7 @@ Ccb (Cc-bar) returns dsl/dpc consistent with the update method
 				
 			
 				
-				<h3 id="Model.Ccd">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=8565:8621#L317">Ccd</a></h3>
+				<h3 id="Model.Ccd">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=8637:8693#L325">Ccd</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) Ccd(s *<a href="#State">State</a>) (dCcdpc <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Ccd (Cc-dash) returns dCc/dpc consistent with the update method
@@ -601,7 +606,7 @@ Ccd (Cc-dash) returns dCc/dpc consistent with the update method
 				
 			
 				
-				<h3 id="Model.GetPrms">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=4421:4466#L135">GetPrms</a></h3>
+				<h3 id="Model.GetPrms">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=4493:4538#L143">GetPrms</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) GetPrms(example <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 				<p>
 GetPrms gets (an example) of parameters
@@ -612,7 +617,7 @@ GetPrms gets (an example) of parameters
 				
 			
 				
-				<h3 id="Model.Init">func (*Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=2821:2906#L54">Init</a></h3>
+				<h3 id="Model.Init">func (*Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=2893:2978#L62">Init</a></h3>
 				<pre>func (o *<a href="#Model">Model</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>, cnd <a href="/pkg/github.com/cpmech/gofem/mconduct/">mconduct</a>.<a href="/pkg/github.com/cpmech/gofem/mconduct/#Model">Model</a>, lrm <a href="/pkg/github.com/cpmech/gofem/mreten/">mreten</a>.<a href="/pkg/github.com/cpmech/gofem/mreten/#Model">Model</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises this structure
@@ -623,7 +628,7 @@ Init initialises this structure
 				
 			
 				
-				<h3 id="Model.NewState">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=5216:5284#L164">NewState</a></h3>
+				<h3 id="Model.NewState">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=5288:5356#L172">NewState</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) NewState(pl, pg, divus <a href="/pkg/builtin/#float64">float64</a>) (s *<a href="#State">State</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 NewState creates and initialises a new state structure
@@ -636,7 +641,7 @@ NewState creates and initialises a new state structure
 				
 			
 				
-				<h3 id="Model.Update">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=5544:5617#L183">Update</a></h3>
+				<h3 id="Model.Update">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=5616:5689#L191">Update</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) Update(s *<a href="#State">State</a>, Δpl, Δpg, divusNew <a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Update updates state
@@ -649,7 +654,7 @@ Update updates state
 		
 			
 			
-			<h2 id="State">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=665:1123#L1">State</a></h2>
+			<h2 id="State">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=701:1159#L5">State</a></h2>
 			<pre>type State struct {
     Pl    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// pl: liquid pressure</span>
     Pg    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// pg: gas pressure</span>
@@ -665,8 +670,12 @@ Update updates state
 State holds state variables for porous media with liquid and gas
 </p>
 <pre>References:
- [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
- [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
+ [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis.
+     Int Journal for Numerical Methods in Engineering, 101(8) 606-634
+     <a href="http://dx.doi.org/10.1002/nme.4808">http://dx.doi.org/10.1002/nme.4808</a>
+ [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media.
+     Computer Methods in Applied Mechanics and Engineering, 285 791-816
+     <a href="http://dx.doi.org/10.1016/j.cma.2014.12.009">http://dx.doi.org/10.1016/j.cma.2014.12.009</a>
 </pre>
 
 
@@ -682,7 +691,7 @@ State holds state variables for porous media with liquid and gas
 
 			
 				
-				<h3 id="State.GetCopy">func (State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1160:1191#L14">GetCopy</a></h3>
+				<h3 id="State.GetCopy">func (State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1196:1227#L18">GetCopy</a></h3>
 				<pre>func (o <a href="#State">State</a>) GetCopy() *<a href="#State">State</a></pre>
 				<p>
 GetCopy returns a copy of State
@@ -693,7 +702,7 @@ GetCopy returns a copy of State
 				
 			
 				
-				<h3 id="State.Lderivs">func (State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1972:2047#L60">Lderivs</a></h3>
+				<h3 id="State.Lderivs">func (State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=2008:2083#L64">Lderivs</a></h3>
 				<pre>func (o <a href="#State">State</a>) Lderivs(m *<a href="#Model">Model</a>) (Cpl, dCpldpl, dklrdpl <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Lderivs calculates derivatives for liquid-only simulations
@@ -705,7 +714,7 @@ see Eq. (A.1) of [2]
 				
 			
 				
-				<h3 id="State.Lvars">func (State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1652:1707#L43">Lvars</a></h3>
+				<h3 id="State.Lvars">func (State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1688:1743#L47">Lvars</a></h3>
 				<pre>func (o <a href="#State">State</a>) Lvars(m *<a href="#Model">Model</a>) (Cpl <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Lvars calculates variables for liquid-only simulations
@@ -717,7 +726,7 @@ see Eq. (7) of [2]
 				
 			
 				
-				<h3 id="State.Set">func (*State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1340:1375#L29">Set</a></h3>
+				<h3 id="State.Set">func (*State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1376:1411#L33">Set</a></h3>
 				<pre>func (o *<a href="#State">State</a>) Set(another *<a href="#State">State</a>)</pre>
 				<p>
 Set sets this State with another State

@@ -18,7 +18,10 @@ import (
 )
 
 // ElemP implements an element for transient seepage analyses [1]
-//  [1] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 http://dx.doi.org/10.1016/j.cma.2014.12.009
+//  References:
+//   [1] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media.
+//       Computer Methods in Applied Mechanics and Engineering, 285 791-816,
+//       http://dx.doi.org/10.1016/j.cma.2014.12.009
 type ElemP struct {
 
 	// basic data

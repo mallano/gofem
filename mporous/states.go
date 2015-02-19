@@ -6,8 +6,12 @@ package mporous
 
 // State holds state variables for porous media with liquid and gas
 //  References:
-//   [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 http://dx.doi.org/10.1002/nme.4808
-//   [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 http://dx.doi.org/10.1016/j.cma.2014.12.009
+//   [1] Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis.
+//       Int Journal for Numerical Methods in Engineering, 101(8) 606-634
+//       http://dx.doi.org/10.1002/nme.4808
+//   [2] Pedroso DM (2015) A solution to transient seepage in unsaturated porous media.
+//       Computer Methods in Applied Mechanics and Engineering, 285 791-816
+//       http://dx.doi.org/10.1016/j.cma.2014.12.009
 type State struct {
 	Pl    float64 // pl: liquid pressure
 	Pg    float64 // pg: gas pressure

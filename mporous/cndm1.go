@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mporous implements models for porous media based on the Theory of Porous Media
 package mporous
 
 import (
