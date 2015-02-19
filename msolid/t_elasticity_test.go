@@ -11,7 +11,6 @@ import (
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
-	"github.com/cpmech/gosl/utl"
 )
 
 func check_constants(tst *testing.T, E, ν, Kcor, Gcor, lcor float64) {
@@ -44,15 +43,7 @@ func check_constants(tst *testing.T, E, ν, Kcor, Gcor, lcor float64) {
 
 func Test_elast01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
+	//verbose()
 	chk.PrintTitle("elast01")
 
 	check_constants(tst, 60, 0.25, 40, 24, 24)
@@ -61,15 +52,7 @@ func Test_elast01(tst *testing.T) {
 
 func Test_elast02(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
+	//verbose()
 	chk.PrintTitle("elast02")
 
 	K, G := 2.0, 3.0/4.0

@@ -52,7 +52,7 @@ func (o *Driver) Init(simfnk, modelname string, ndim int, pstress bool, prms fun
 	}
 	o.D = la.MatAlloc(o.nsig, o.nsig)
 	o.TolD = 1e-8
-	o.VerD = true
+	o.VerD = chk.Verbose
 	return
 }
 
