@@ -11,18 +11,9 @@ import (
 	"github.com/cpmech/gofem/mreten"
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/plt"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_mdl01(tst *testing.T) {
-
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
 
 	doplot := false
 	//doplot := true

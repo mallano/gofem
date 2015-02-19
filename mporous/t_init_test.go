@@ -1,11 +1,20 @@
-// Copyright 2012 Dorival Pedroso & Raul Durand. All rights reserved.
+// Copyright 2012 Dorival de Moraes Pedroso. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package mporous
 
-import "github.com/cpmech/gosl/utl"
+import (
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
+)
 
 func init() {
-	utl.Tsilent = true
+	io.Verbose = false
+	//chk.Verbose = true
+}
+
+func verbose() {
+	io.Verbose = true
+	chk.Verbose = true
 }

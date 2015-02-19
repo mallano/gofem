@@ -33,7 +33,7 @@ func (o *Driver) Init(mdl *Model) (err error) {
 	o.Mdl = mdl
 	o.TolCcb = 1e-7
 	o.TolCcd = 1e-7
-	o.VerD = true
+	o.VerD = chk.Verbose
 	o.CheckD = true
 	return
 }
