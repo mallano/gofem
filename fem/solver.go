@@ -13,7 +13,6 @@ import (
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/mpi"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Global holds global data
@@ -201,7 +200,7 @@ func Run() (runisok bool) {
 			if Global.Verbose {
 				//time.Sleep(10000000)
 				if !Global.Sim.Data.ShowR {
-					utl.PrintTimeLong(t)
+					io.Pf("time = %g\n", t)
 				}
 			}
 

@@ -10,24 +10,14 @@ import (
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_frees01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	utl.Tsilent = false
 	chk.PrintTitle("frees01")
 
 	// start simulation
-	if !Start("data/frees01.sim", true, !utl.Tsilent) {
+	if !Start("data/frees01.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -49,8 +39,8 @@ func Test_frees01(tst *testing.T) {
 	}
 
 	// nodes and elements
-	utl.IntAssert(len(dom.Nodes), 62)
-	utl.IntAssert(len(dom.Elems), 15)
+	chk.IntAssert(len(dom.Nodes), 62)
+	chk.IntAssert(len(dom.Elems), 15)
 
 	// vertices with "fl"
 	seepverts := map[int]bool{3: true, 45: true, 7: true, 49: true, 11: true, 53: true, 15: true, 57: true, 19: true, 61: true, 23: true}
@@ -59,10 +49,10 @@ func Test_frees01(tst *testing.T) {
 	var seepeqs []int
 	for _, nod := range dom.Nodes {
 		if seepverts[nod.Vert.Id] {
-			utl.IntAssert(len(nod.Dofs), 2)
+			chk.IntAssert(len(nod.Dofs), 2)
 			seepeqs = append(seepeqs, nod.Dofs[1].Eq)
 		} else {
-			utl.IntAssert(len(nod.Dofs), 1)
+			chk.IntAssert(len(nod.Dofs), 1)
 		}
 	}
 	sort.Ints(seepeqs)

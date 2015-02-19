@@ -9,24 +9,14 @@ import (
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_fileio01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("fileio01")
 
 	// start
-	if !Start("data/bh16.sim", true, !utl.Tsilent) {
+	if !Start("data/bh16.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 	}
 	defer End()

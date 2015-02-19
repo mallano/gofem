@@ -49,19 +49,10 @@ func Test_p01a(tst *testing.T) {
 	 *           10                          4
 	 */
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("p01a")
 
 	// start simulation
-	if !Start("data/p01.sim", true, !utl.Tsilent) {
+	if !Start("data/p01.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -83,13 +74,13 @@ func Test_p01a(tst *testing.T) {
 	}
 
 	// nodes and elements
-	utl.IntAssert(len(dom.Nodes), 27)
-	utl.IntAssert(len(dom.Elems), 4)
+	chk.IntAssert(len(dom.Nodes), 27)
+	chk.IntAssert(len(dom.Elems), 4)
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.Dofs), 1)
-		utl.StrAssert(nod.Dofs[0].Key, "pl")
+		chk.IntAssert(len(nod.Dofs), 1)
+		chk.StrAssert(nod.Dofs[0].Key, "pl")
 	}
 
 	// check equations
@@ -116,10 +107,10 @@ func Test_p01a(tst *testing.T) {
 	}
 
 	// constraints
-	utl.IntAssert(len(dom.EssenBcs.Bcs), 3)
+	chk.IntAssert(len(dom.EssenBcs.Bcs), 3)
 	var ct_pl_eqs []int // equations with pl prescribed [sorted]
 	for _, c := range dom.EssenBcs.Bcs {
-		utl.IntAssert(len(c.Eqs), 1)
+		chk.IntAssert(len(c.Eqs), 1)
 		eq := c.Eqs[0]
 		io.Pforan("key=%v eq=%v\n", c.Key, eq)
 		switch c.Key {
@@ -155,19 +146,10 @@ func Test_p01a(tst *testing.T) {
 
 func Test_p01b(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("p01b")
 
 	// run simulation
-	if !Start("data/p01.sim", true, !utl.Tsilent) {
+	if !Start("data/p01.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -184,19 +166,10 @@ func Test_p01b(tst *testing.T) {
 
 func Test_p02(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("p02")
 
 	// run simulation
-	if !Start("data/p02.sim", true, !utl.Tsilent) {
+	if !Start("data/p02.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -207,10 +180,9 @@ func Test_p02(tst *testing.T) {
 	// for debugging Kb
 	eid := 3
 	tolKb := 1e-7
-	verb := true
 	if false {
 		//if true {
-		TestingDefineDebugKb(tst, eid, tolKb, verb)
+		TestingDefineDebugKb(tst, eid, tolKb, chk.Verbose)
 		defer func() {
 			Global.DebugKb = nil
 		}()

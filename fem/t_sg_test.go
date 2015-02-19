@@ -38,19 +38,10 @@ func Test_sg52a(tst *testing.T) {
 	 *            |------- 1 m -------|
 	 */
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg52a")
 
 	// start simulation
-	if !Start("data/sg52.sim", true, !utl.Tsilent) {
+	if !Start("data/sg52.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -72,12 +63,12 @@ func Test_sg52a(tst *testing.T) {
 	}
 
 	// nodes and elements
-	utl.IntAssert(len(dom.Nodes), 9)
-	utl.IntAssert(len(dom.Elems), 8)
+	chk.IntAssert(len(dom.Nodes), 9)
+	chk.IntAssert(len(dom.Elems), 8)
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.Dofs), 2)
+		chk.IntAssert(len(nod.Dofs), 2)
 	}
 
 	// check equations
@@ -89,18 +80,18 @@ func Test_sg52a(tst *testing.T) {
 	ny := 9 * 2
 	nλ := 6
 	nyb := ny + nλ
-	utl.IntAssert(len(dom.Sol.Y), ny)
-	utl.IntAssert(len(dom.Sol.Dydt), 0)
-	utl.IntAssert(len(dom.Sol.D2ydt2), 0)
-	utl.IntAssert(len(dom.Sol.Psi), 0)
-	utl.IntAssert(len(dom.Sol.Zet), 0)
-	utl.IntAssert(len(dom.Sol.Chi), 0)
-	utl.IntAssert(len(dom.Sol.L), nλ)
-	utl.IntAssert(len(dom.Sol.ΔY), ny)
+	chk.IntAssert(len(dom.Sol.Y), ny)
+	chk.IntAssert(len(dom.Sol.Dydt), 0)
+	chk.IntAssert(len(dom.Sol.D2ydt2), 0)
+	chk.IntAssert(len(dom.Sol.Psi), 0)
+	chk.IntAssert(len(dom.Sol.Zet), 0)
+	chk.IntAssert(len(dom.Sol.Chi), 0)
+	chk.IntAssert(len(dom.Sol.L), nλ)
+	chk.IntAssert(len(dom.Sol.ΔY), ny)
 
 	// check linear solver arrays
-	utl.IntAssert(len(dom.Fb), nyb)
-	utl.IntAssert(len(dom.Wb), nyb)
+	chk.IntAssert(len(dom.Fb), nyb)
+	chk.IntAssert(len(dom.Wb), nyb)
 
 	// check umap
 	umaps := [][]int{
@@ -120,11 +111,11 @@ func Test_sg52a(tst *testing.T) {
 	}
 
 	// constraints
-	utl.IntAssert(len(dom.EssenBcs.Bcs), nλ)
+	chk.IntAssert(len(dom.EssenBcs.Bcs), nλ)
 	var ct_ux_eqs []int // constrained ux equations [sorted]
 	var ct_uy_eqs []int // constrained uy equations [sorted]
 	for _, c := range dom.EssenBcs.Bcs {
-		utl.IntAssert(len(c.Eqs), 1)
+		chk.IntAssert(len(c.Eqs), 1)
 		eq := c.Eqs[0]
 		io.Pforan("key=%v eq=%v\n", c.Key, eq)
 		switch c.Key {
@@ -142,30 +133,21 @@ func Test_sg52a(tst *testing.T) {
 	chk.Ints(tst, "constrained uy equations", ct_uy_eqs, []int{13, 15, 17})
 
 	// point loads
-	utl.IntAssert(len(dom.PtNatBcs.Bcs), 3)
-	utl.StrAssert(dom.PtNatBcs.Bcs[0].Key, "fuy")
-	utl.StrAssert(dom.PtNatBcs.Bcs[1].Key, "fuy")
-	utl.StrAssert(dom.PtNatBcs.Bcs[2].Key, "fuy")
-	utl.IntAssert(dom.PtNatBcs.Bcs[0].Eq, 3)
-	utl.IntAssert(dom.PtNatBcs.Bcs[1].Eq, 1)
-	utl.IntAssert(dom.PtNatBcs.Bcs[2].Eq, 9)
+	chk.IntAssert(len(dom.PtNatBcs.Bcs), 3)
+	chk.StrAssert(dom.PtNatBcs.Bcs[0].Key, "fuy")
+	chk.StrAssert(dom.PtNatBcs.Bcs[1].Key, "fuy")
+	chk.StrAssert(dom.PtNatBcs.Bcs[2].Key, "fuy")
+	chk.IntAssert(dom.PtNatBcs.Bcs[0].Eq, 3)
+	chk.IntAssert(dom.PtNatBcs.Bcs[1].Eq, 1)
+	chk.IntAssert(dom.PtNatBcs.Bcs[2].Eq, 9)
 }
 
 func Test_sg52b(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg52b")
 
 	// run simulation
-	if !Start("data/sg52.sim", true, !utl.Tsilent) {
+	if !Start("data/sg52.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -184,25 +166,15 @@ func Test_sg52b(tst *testing.T) {
 	tolK := 1e-9
 	tolu := 1e-17
 	tols := 1.56e-15
-	verb := true
-	TestingCompareResultsU(tst, "data/sg52.sim", "cmp/sg52.cmp", tolK, tolu, tols, skipK, verb)
+	TestingCompareResultsU(tst, "data/sg52.sim", "cmp/sg52.cmp", tolK, tolu, tols, skipK, chk.Verbose)
 }
 
 func Test_sg57(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg57")
 
 	// run simulation
-	if !Start("data/sg57.sim", true, !utl.Tsilent) {
+	if !Start("data/sg57.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -221,25 +193,15 @@ func Test_sg57(tst *testing.T) {
 	tolK := 0.35
 	tolu := 2e-9
 	tols := 0.0002
-	verb := true
-	TestingCompareResultsU(tst, "data/sg57.sim", "cmp/sg57.cmp", tolK, tolu, tols, skipK, verb)
+	TestingCompareResultsU(tst, "data/sg57.sim", "cmp/sg57.cmp", tolK, tolu, tols, skipK, chk.Verbose)
 }
 
 func Test_sg511(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg511")
 
 	// run simulation
-	if !Start("data/sg511.sim", true, !utl.Tsilent) {
+	if !Start("data/sg511.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -258,25 +220,15 @@ func Test_sg511(tst *testing.T) {
 	tolK := 0.1
 	tolu := 3e-14
 	tols := 1.56e-7
-	verb := true
-	TestingCompareResultsU(tst, "data/sg511.sim", "cmp/sg511.cmp", tolK, tolu, tols, skipK, verb)
+	TestingCompareResultsU(tst, "data/sg511.sim", "cmp/sg511.cmp", tolK, tolu, tols, skipK, chk.Verbose)
 }
 
 func Test_sg515(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg515")
 
 	// run simulation
-	if !Start("data/sg515.sim", true, !utl.Tsilent) {
+	if !Start("data/sg515.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -295,25 +247,15 @@ func Test_sg515(tst *testing.T) {
 	tolK := 0.15
 	tolu := 3e-13
 	tols := 3e-8
-	verb := true
-	TestingCompareResultsU(tst, "data/sg515.sim", "cmp/sg515.cmp", tolK, tolu, tols, skipK, verb)
+	TestingCompareResultsU(tst, "data/sg515.sim", "cmp/sg515.cmp", tolK, tolu, tols, skipK, chk.Verbose)
 }
 
 func Test_sg517(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg517")
 
 	// run simulation
-	if !Start("data/sg517.sim", true, !utl.Tsilent) {
+	if !Start("data/sg517.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -332,25 +274,15 @@ func Test_sg517(tst *testing.T) {
 	tolK := 0.0036
 	tolu := 1e-6
 	tols := 1e-4
-	verb := true
-	TestingCompareResultsU(tst, "data/sg517.sim", "cmp/sg517.cmp", tolK, tolu, tols, skipK, verb)
+	TestingCompareResultsU(tst, "data/sg517.sim", "cmp/sg517.cmp", tolK, tolu, tols, skipK, chk.Verbose)
 }
 
 func Test_sg524(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg524")
 
 	// run simulation
-	if !Start("data/sg524.sim", true, !utl.Tsilent) {
+	if !Start("data/sg524.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -369,25 +301,15 @@ func Test_sg524(tst *testing.T) {
 	tolK := 1e-17
 	tolu := 1e-8
 	tols := 1e-7
-	verb := true
-	TestingCompareResultsU(tst, "data/sg524.sim", "cmp/sg524.cmp", tolK, tolu, tols, skipK, verb)
+	TestingCompareResultsU(tst, "data/sg524.sim", "cmp/sg524.cmp", tolK, tolu, tols, skipK, chk.Verbose)
 }
 
 func Test_sg530(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg530")
 
 	// run simulation
-	if !Start("data/sg530.sim", true, !utl.Tsilent) {
+	if !Start("data/sg530.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -406,25 +328,15 @@ func Test_sg530(tst *testing.T) {
 	tolK := 1e-17
 	tolu := 1e-17
 	tols := 1e-15
-	verb := true
-	TestingCompareResultsU(tst, "data/sg530.sim", "cmp/sg530.cmp", tolK, tolu, tols, skipK, verb)
+	TestingCompareResultsU(tst, "data/sg530.sim", "cmp/sg530.cmp", tolK, tolu, tols, skipK, chk.Verbose)
 }
 
 func Test_sg111(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg111")
 
 	// run simulation
-	if !Start("data/sg111.sim", true, !utl.Tsilent) {
+	if !Start("data/sg111.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -494,19 +406,10 @@ func Test_sg111(tst *testing.T) {
 
 func Test_sg114(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg114")
 
 	// run simulation
-	if !Start("data/sg114.sim", true, !utl.Tsilent) {
+	if !Start("data/sg114.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -586,19 +489,10 @@ func Test_sg114(tst *testing.T) {
 
 func Test_sg1121(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("sg1121")
 
 	// run simulation
-	if !Start("data/sg1121.sim", true, !utl.Tsilent) {
+	if !Start("data/sg1121.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}

@@ -37,19 +37,10 @@ func Test_spo751a(tst *testing.T) {
 	 *      0 3 5 8 10  13  15    18   20
 	 */
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("spo751a")
 
 	// start simulation
-	if !Start("data/spo751.sim", true, !utl.Tsilent) {
+	if !Start("data/spo751.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -71,12 +62,12 @@ func Test_spo751a(tst *testing.T) {
 	}
 
 	// nodes and elements
-	utl.IntAssert(len(dom.Nodes), 23)
-	utl.IntAssert(len(dom.Elems), 4)
+	chk.IntAssert(len(dom.Nodes), 23)
+	chk.IntAssert(len(dom.Elems), 4)
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.Dofs), 2)
+		chk.IntAssert(len(nod.Dofs), 2)
 	}
 
 	// check equations
@@ -88,18 +79,18 @@ func Test_spo751a(tst *testing.T) {
 	ny := 23 * 2
 	nλ := 9 + 9
 	nyb := ny + nλ
-	utl.IntAssert(len(dom.Sol.Y), ny)
-	utl.IntAssert(len(dom.Sol.Dydt), 0)
-	utl.IntAssert(len(dom.Sol.D2ydt2), 0)
-	utl.IntAssert(len(dom.Sol.Psi), 0)
-	utl.IntAssert(len(dom.Sol.Zet), 0)
-	utl.IntAssert(len(dom.Sol.Chi), 0)
-	utl.IntAssert(len(dom.Sol.L), nλ)
-	utl.IntAssert(len(dom.Sol.ΔY), ny)
+	chk.IntAssert(len(dom.Sol.Y), ny)
+	chk.IntAssert(len(dom.Sol.Dydt), 0)
+	chk.IntAssert(len(dom.Sol.D2ydt2), 0)
+	chk.IntAssert(len(dom.Sol.Psi), 0)
+	chk.IntAssert(len(dom.Sol.Zet), 0)
+	chk.IntAssert(len(dom.Sol.Chi), 0)
+	chk.IntAssert(len(dom.Sol.L), nλ)
+	chk.IntAssert(len(dom.Sol.ΔY), ny)
 
 	// check linear solver arrays
-	utl.IntAssert(len(dom.Fb), nyb)
-	utl.IntAssert(len(dom.Wb), nyb)
+	chk.IntAssert(len(dom.Fb), nyb)
+	chk.IntAssert(len(dom.Wb), nyb)
 
 	// check umap
 	umaps := [][]int{
@@ -115,14 +106,14 @@ func Test_spo751a(tst *testing.T) {
 	}
 
 	// constraints
-	utl.IntAssert(len(dom.EssenBcs.Bcs), nλ)
+	chk.IntAssert(len(dom.EssenBcs.Bcs), nλ)
 	var ct_uy_eqs []int // constrained uy equations [sorted]
 	var ct_incsup_xeqs []int
 	var ct_incsup_yeqs []int
 	αrad := 120.0 * math.Pi / 180.0
 	cα, sα := math.Cos(αrad), math.Sin(αrad)
 	for _, c := range dom.EssenBcs.Bcs {
-		utl.IntAssertLessThanOrEqualTo(1, len(c.Eqs)) // 1 ≤ neqs
+		chk.IntAssertLessThanOrEqualTo(1, len(c.Eqs)) // 1 ≤ neqs
 		io.Pforan("c.Key=%s c.Eqs=%v\n", c.Key, c.Eqs)
 		if len(c.Eqs) == 1 {
 			if c.Key == "uy" {
@@ -150,19 +141,10 @@ func Test_spo751a(tst *testing.T) {
 
 func Test_spo751b(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("spo751b")
 
 	// run simulation
-	if !Start("data/spo751.sim", true, !utl.Tsilent) {
+	if !Start("data/spo751.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -173,10 +155,9 @@ func Test_spo751b(tst *testing.T) {
 	// for debugging Kb
 	eid := 3
 	tolKb := 1e-4
-	verb := true
 	//if true {
 	if false {
-		TestingDefineDebugKb(tst, eid, tolKb, verb)
+		TestingDefineDebugKb(tst, eid, tolKb, chk.Verbose)
 		defer func() {
 			Global.DebugKb = nil
 		}()
@@ -196,6 +177,6 @@ func Test_spo751b(tst *testing.T) {
 		tolK := 1e-17
 		tolu := 1e-12
 		tols := 1e-14
-		TestingCompareResultsU(tst, "data/spo751.sim", "cmp/spo751.cmp", tolK, tolu, tols, skipK, verb)
+		TestingCompareResultsU(tst, "data/spo751.sim", "cmp/spo751.cmp", tolK, tolu, tols, skipK, chk.Verbose)
 	}
 }

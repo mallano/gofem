@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/cpmech/gofem/fem"
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/mpi"
 	"github.com/cpmech/gosl/utl"
@@ -53,6 +54,5 @@ func main() {
 	tolK := 1e-17
 	tolu := 1e-12
 	tols := 1e-14
-	verb := false
-	fem.TestingCompareResultsU(&tst, "data/spo751.sim", "cmp/spo751.cmp", tolK, tolu, tols, skipK, verb)
+	fem.TestingCompareResultsU(&tst, "data/spo751.sim", "cmp/spo751.cmp", tolK, tolu, tols, skipK, chk.Verbose)
 }

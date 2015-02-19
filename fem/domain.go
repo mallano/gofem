@@ -9,8 +9,8 @@ import (
 
 	"github.com/cpmech/gofem/inp"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/la"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Solution holds the solution data @ nodes.
@@ -158,7 +158,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		if info == nil {
 			return
 		}
-		utl.IntAssert(len(info.Dofs), len(c.Verts))
+		chk.IntAssert(len(info.Dofs), len(c.Verts))
 
 		// store y and f information
 		for ykey, fkey := range info.Y2F {

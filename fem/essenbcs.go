@@ -7,6 +7,7 @@ package fem
 import (
 	"math"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
@@ -138,7 +139,7 @@ func GetIsEssenKeyMap() map[string]bool {
 func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string) (setisok bool) {
 
 	// len(nod) must be greater than 0
-	utl.IntAssertLessThan(0, len(nodes)) // 0 < len(nod)
+	chk.IntAssertLessThan(0, len(nodes)) // 0 < len(nod)
 
 	// rigid element
 	if key == "rigid" {

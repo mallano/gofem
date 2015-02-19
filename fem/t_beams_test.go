@@ -10,24 +10,14 @@ import (
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_beam01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
-	//utl.Tsilent = false
 	chk.PrintTitle("beam01")
 
 	// domain
-	if !Start("data/beam01.sim", true, !utl.Tsilent) {
+	if !Start("data/beam01.sim", true, chk.Verbose) {
 		tst.Errorf("test failed\n")
 	}
 	defer End()
@@ -40,12 +30,12 @@ func Test_beam01(tst *testing.T) {
 	}
 
 	// nodes and elements
-	utl.IntAssert(len(dom.Nodes), 2)
-	utl.IntAssert(len(dom.Elems), 1)
+	chk.IntAssert(len(dom.Nodes), 2)
+	chk.IntAssert(len(dom.Elems), 1)
 
 	// check dofs
 	for _, nod := range dom.Nodes {
-		utl.IntAssert(len(nod.Dofs), 3)
+		chk.IntAssert(len(nod.Dofs), 3)
 	}
 
 	// check equations
@@ -57,18 +47,18 @@ func Test_beam01(tst *testing.T) {
 	ny := 6
 	nλ := 3
 	nyb := ny + nλ
-	utl.IntAssert(len(dom.Sol.Y), ny)
-	utl.IntAssert(len(dom.Sol.Dydt), 0)
-	utl.IntAssert(len(dom.Sol.D2ydt2), 0)
-	utl.IntAssert(len(dom.Sol.Psi), 0)
-	utl.IntAssert(len(dom.Sol.Zet), 0)
-	utl.IntAssert(len(dom.Sol.Chi), 0)
-	utl.IntAssert(len(dom.Sol.L), nλ)
-	utl.IntAssert(len(dom.Sol.ΔY), ny)
+	chk.IntAssert(len(dom.Sol.Y), ny)
+	chk.IntAssert(len(dom.Sol.Dydt), 0)
+	chk.IntAssert(len(dom.Sol.D2ydt2), 0)
+	chk.IntAssert(len(dom.Sol.Psi), 0)
+	chk.IntAssert(len(dom.Sol.Zet), 0)
+	chk.IntAssert(len(dom.Sol.Chi), 0)
+	chk.IntAssert(len(dom.Sol.L), nλ)
+	chk.IntAssert(len(dom.Sol.ΔY), ny)
 
 	// check linear solver arrays
-	utl.IntAssert(len(dom.Fb), nyb)
-	utl.IntAssert(len(dom.Wb), nyb)
+	chk.IntAssert(len(dom.Fb), nyb)
+	chk.IntAssert(len(dom.Wb), nyb)
 
 	// check umap
 	e := dom.Elems[0].(*Beam)
@@ -76,11 +66,11 @@ func Test_beam01(tst *testing.T) {
 	chk.Ints(tst, "umap", e.Umap, []int{0, 1, 2, 3, 4, 5})
 
 	// constraints
-	utl.IntAssert(len(dom.EssenBcs.Bcs), nλ)
+	chk.IntAssert(len(dom.EssenBcs.Bcs), nλ)
 	var ct_ux_eqs []int // constrained ux equations [sorted]
 	var ct_uy_eqs []int // constrained uy equations [sorted]
 	for _, c := range dom.EssenBcs.Bcs {
-		utl.IntAssert(len(c.Eqs), 1)
+		chk.IntAssert(len(c.Eqs), 1)
 		eq := c.Eqs[0]
 		io.Pforan("key=%v eq=%v\n", c.Key, eq)
 		switch c.Key {

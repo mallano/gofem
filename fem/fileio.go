@@ -8,9 +8,11 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
-	"io"
+	goio "io"
 	"os"
 	"path"
+
+	"github.com/cpmech/gosl/io"
 )
 
 // Encoder defines encoders; e.g. gob or json
@@ -24,7 +26,7 @@ type Decoder interface {
 }
 
 // GetEncoder returns a new encoder
-func GetEncoder(w io.Writer) Encoder {
+func GetEncoder(w goio.Writer) Encoder {
 	if Global.Sim.Data.Encoder == "json" {
 		return json.NewEncoder(w)
 	}
@@ -32,7 +34,7 @@ func GetEncoder(w io.Writer) Encoder {
 }
 
 // GetDecoder returns a new decoder
-func GetDecoder(r io.Reader) Decoder {
+func GetDecoder(r goio.Reader) Decoder {
 	if Global.Sim.Data.Encoder == "json" {
 		return json.NewDecoder(r)
 	}

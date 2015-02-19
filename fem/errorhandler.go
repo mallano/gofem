@@ -7,9 +7,9 @@ package fem
 import (
 	"log"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/mpi"
-	"github.com/cpmech/gosl/utl"
 )
 
 func LogErr(err error, msg string) (stop bool) {
@@ -35,8 +35,8 @@ func LogErrCond(condition bool, msg string, prm ...interface{}) (stop bool) {
 func Stop() bool {
 	if !Global.Distr {
 		if Global.WspcStop[Global.Rank] > 0 {
-			utl.CallerInfo(3)
-			utl.CallerInfo(2)
+			chk.CallerInfo(3)
+			chk.CallerInfo(2)
 			io.PfRed("simulation stopped due to errors. see log files\n")
 			return true
 		}
@@ -46,8 +46,8 @@ func Stop() bool {
 	for i := 0; i < Global.Nproc; i++ {
 		if Global.WspcStop[i] > 0 {
 			if Global.Root {
-				utl.CallerInfo(3)
-				utl.CallerInfo(2)
+				chk.CallerInfo(3)
+				chk.CallerInfo(2)
 				io.PfRed("simulation stopped due to errors. see log files\n")
 			}
 			return true

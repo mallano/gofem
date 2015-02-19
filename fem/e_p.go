@@ -501,7 +501,7 @@ func (o ElemP) add_fluxloads_to_rhs(fb []float64, sol *Solution) (ok bool) {
 // ramp implements the ramp function
 func (o *ElemP) ramp(x float64) float64 {
 	if o.Macaulay {
-		return utl.Ramp(x)
+		return fun.Ramp(x)
 	}
 	return fun.Sramp(x, o.βrmp)
 }
@@ -509,7 +509,7 @@ func (o *ElemP) ramp(x float64) float64 {
 // rampderiv returns the ramp function first derivative
 func (o *ElemP) rampderiv(x float64) float64 {
 	if o.Macaulay {
-		return utl.Heav(x)
+		return fun.Heav(x)
 	}
 	return fun.SrampD1(x, o.βrmp)
 }
