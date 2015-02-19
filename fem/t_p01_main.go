@@ -12,13 +12,11 @@ import (
 	"github.com/cpmech/gofem/fem"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/mpi"
-	"github.com/cpmech/gosl/utl"
 )
 
 func main() {
 
 	// catch errors
-	utl.Tsilent = false
 	var tst testing.T
 	defer func() {
 		if mpi.Rank() == 0 {
