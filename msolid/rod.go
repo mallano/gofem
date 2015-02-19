@@ -7,7 +7,7 @@ package msolid
 
 import (
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/io"
 )
 
 // RodModel defines the interface for rod models
@@ -37,7 +37,7 @@ func GetRodModel(simfnk, matname, modelname string, getnew bool) RodModel {
 	}
 
 	// search database
-	key := utl.Sf("%s_%s_%s", simfnk, matname, modelname)
+	key := io.Sf("%s_%s_%s", simfnk, matname, modelname)
 	if model, ok := _rodmodels[key]; ok {
 		return model
 	}

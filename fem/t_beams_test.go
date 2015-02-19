@@ -8,6 +8,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -22,7 +24,7 @@ func Test_beam01(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("beam01")
+	chk.PrintTitle("beam01")
 
 	// domain
 	if !Start("data/beam01.sim", true, !utl.Tsilent) {
@@ -48,8 +50,8 @@ func Test_beam01(tst *testing.T) {
 
 	// check equations
 	nids, eqs := get_nids_eqs(dom)
-	utl.CompareInts(tst, "nids", nids, []int{0, 1})
-	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 2, 3, 4, 5})
+	chk.Ints(tst, "nids", nids, []int{0, 1})
+	chk.Ints(tst, "eqs", eqs, []int{0, 1, 2, 3, 4, 5})
 
 	// check solution arrays
 	ny := 6
@@ -70,8 +72,8 @@ func Test_beam01(tst *testing.T) {
 
 	// check umap
 	e := dom.Elems[0].(*Beam)
-	utl.Pforan("e = %v\n", e.Umap)
-	utl.CompareInts(tst, "umap", e.Umap, []int{0, 1, 2, 3, 4, 5})
+	io.Pforan("e = %v\n", e.Umap)
+	chk.Ints(tst, "umap", e.Umap, []int{0, 1, 2, 3, 4, 5})
 
 	// constraints
 	utl.IntAssert(len(dom.EssenBcs.Bcs), nλ)
@@ -80,7 +82,7 @@ func Test_beam01(tst *testing.T) {
 	for _, c := range dom.EssenBcs.Bcs {
 		utl.IntAssert(len(c.Eqs), 1)
 		eq := c.Eqs[0]
-		utl.Pforan("key=%v eq=%v\n", c.Key, eq)
+		io.Pforan("key=%v eq=%v\n", c.Key, eq)
 		switch c.Key {
 		case "ux":
 			ct_ux_eqs = append(ct_ux_eqs, eq)
@@ -92,6 +94,6 @@ func Test_beam01(tst *testing.T) {
 	}
 	sort.Ints(ct_ux_eqs)
 	sort.Ints(ct_uy_eqs)
-	utl.CompareInts(tst, "constrained ux equations", ct_ux_eqs, []int{0})
-	utl.CompareInts(tst, "constrained uy equations", ct_uy_eqs, []int{1, 4})
+	chk.Ints(tst, "constrained ux equations", ct_ux_eqs, []int{0})
+	chk.Ints(tst, "constrained uy equations", ct_uy_eqs, []int{1, 4})
 }

@@ -7,8 +7,8 @@ package mreten
 import (
 	"math"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
 )
 
 // RefM1 implements a nonlinear liquid retention model based on the concept of references [1,2,3]
@@ -73,7 +73,7 @@ func (o *RefM1) Init(prms fun.Prms) (err error) {
 		case "pcr":
 			o.pcr = p.V
 		default:
-			return utl.Err("ref-m1: parameter named %q is incorrect\n", p.N)
+			return chk.Err("ref-m1: parameter named %q is incorrect\n", p.N)
 		}
 	}
 

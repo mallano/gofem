@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/cpmech/gofem/fem"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/mpi"
 	"github.com/cpmech/gosl/utl"
 )
@@ -22,10 +23,10 @@ func main() {
 	defer func() {
 		if mpi.Rank() == 0 {
 			if err := recover(); err != nil {
-				utl.PfRed("ERROR: %v\n", err)
+				io.PfRed("ERROR: %v\n", err)
 			}
 			if tst.Failed() {
-				utl.PfRed("test failed\n")
+				io.PfRed("test failed\n")
 			}
 		}
 		mpi.Stop(false)

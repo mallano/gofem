@@ -9,6 +9,7 @@ import (
 
 	"github.com/cpmech/gofem/mconduct"
 	"github.com/cpmech/gofem/mreten"
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
@@ -26,7 +27,7 @@ func Test_mdl01(tst *testing.T) {
 	doplot := false
 	//doplot := true
 	//utl.Tsilent = false
-	utl.TTitle("mdl01")
+	chk.PrintTitle("mdl01")
 
 	// info
 	simfnk := "mdl01"

@@ -8,26 +8,19 @@ import (
 	"math"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/num"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_shape01(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
 	//utl.Tsilent = false
-	utl.TTitle("Test shape01")
+	chk.PrintTitle("Test shape01")
 
 	for name, shape := range factory {
 
-		utl.Pfyel("--------------------------------- %-6s---------------------------------\n", name)
+		io.Pfyel("--------------------------------- %-6s---------------------------------\n", name)
 
 		// check S
 		tol := 1e-17
@@ -41,7 +34,7 @@ func Test_shape01(tst *testing.T) {
 				rst[i] = shape.NatCoords[i][n]
 			}
 			shape.Func(shape.S, shape.dSdR, rst[0], rst[1], rst[2], false)
-			utl.Pforan("S = %v\n", shape.S)
+			io.Pforan("S = %v\n", shape.S)
 			for m := 0; m < shape.Nverts; m++ {
 				if n == m {
 					errS += math.Abs(shape.S[m] - 1.0)
@@ -78,7 +71,7 @@ func Test_shape01(tst *testing.T) {
 					Sn = S_temp[n]
 					return
 				}, rst[i], h)
-				utl.Pfgrey2("  dS%ddR%d @ [% 4.1f % 4.1f % 4.1f] = %v (num: %v)\n", n, i, rst[0], rst[1], rst[2], shape.dSdR[n][i], dSndRi)
+				io.Pfgrey2("  dS%ddR%d @ [% 4.1f % 4.1f % 4.1f] = %v (num: %v)\n", n, i, rst[0], rst[1], rst[2], shape.dSdR[n][i], dSndRi)
 				tol2 := tol
 				if name == "tri15" && n == 11 && i == 1 {
 					tol2 = 1.0e-9
@@ -87,7 +80,7 @@ func Test_shape01(tst *testing.T) {
 					tst.Errorf("%s dS%ddR%d failed with err = %g\n", name, n, i, math.Abs(shape.dSdR[n][i]-dSndRi))
 					return
 				}
-				//utl.CheckScalar(tst, fmt.Sprintf("dS%ddR%d", n, i), tol2, dSdR[n][i], dSndRi)
+				//chk.Scalar(tst, fmt.Sprintf("dS%ddR%d", n, i), tol2, dSdR[n][i], dSndRi)
 			}
 		}
 
@@ -109,7 +102,7 @@ func Test_shape01(tst *testing.T) {
 					rst[i] = shape.NatCoords[i][n]
 				}
 				shape.Func(shape.S, shape.dSdR, rst[0], rst[1], rst[2], false)
-				utl.Pforan("S = %v\n", shape.S)
+				io.Pforan("S = %v\n", shape.S)
 				for m := range shape.FaceLocalV[k] {
 					if n == m {
 						errS += math.Abs(shape.S[m] - 1.0)
@@ -119,12 +112,12 @@ func Test_shape01(tst *testing.T) {
 				}
 			}
 		}
-		utl.Pforan("%g\n", errS)
+		io.Pforan("%g\n", errS)
 		if errS > tol {
 			tst.Errorf("%s failed with err = %g\n", name, errS)
 			return
 		}
 
-		utl.PfGreen("OK\n")
+		io.PfGreen("OK\n")
 	}
 }

@@ -10,6 +10,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
@@ -45,7 +47,7 @@ func Test_sg52a(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg52a")
+	chk.PrintTitle("sg52a")
 
 	// start simulation
 	if !Start("data/sg52.sim", true, !utl.Tsilent) {
@@ -80,8 +82,8 @@ func Test_sg52a(tst *testing.T) {
 
 	// check equations
 	nids, eqs := get_nids_eqs(dom)
-	utl.CompareInts(tst, "nids", nids, []int{1, 0, 3, 4, 2, 5, 6, 7, 8})
-	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17})
+	chk.Ints(tst, "nids", nids, []int{1, 0, 3, 4, 2, 5, 6, 7, 8})
+	chk.Ints(tst, "eqs", eqs, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17})
 
 	// check solution arrays
 	ny := 9 * 2
@@ -113,8 +115,8 @@ func Test_sg52a(tst *testing.T) {
 	}
 	for i, ele := range dom.Elems {
 		e := ele.(*ElemU)
-		utl.Pforan("e%d.umap = %v\n", e.Cell.Id, e.Umap)
-		utl.CompareInts(tst, "umap", e.Umap, umaps[i])
+		io.Pforan("e%d.umap = %v\n", e.Cell.Id, e.Umap)
+		chk.Ints(tst, "umap", e.Umap, umaps[i])
 	}
 
 	// constraints
@@ -124,7 +126,7 @@ func Test_sg52a(tst *testing.T) {
 	for _, c := range dom.EssenBcs.Bcs {
 		utl.IntAssert(len(c.Eqs), 1)
 		eq := c.Eqs[0]
-		utl.Pforan("key=%v eq=%v\n", c.Key, eq)
+		io.Pforan("key=%v eq=%v\n", c.Key, eq)
 		switch c.Key {
 		case "ux":
 			ct_ux_eqs = append(ct_ux_eqs, eq)
@@ -136,8 +138,8 @@ func Test_sg52a(tst *testing.T) {
 	}
 	sort.Ints(ct_ux_eqs)
 	sort.Ints(ct_uy_eqs)
-	utl.CompareInts(tst, "constrained ux equations", ct_ux_eqs, []int{2, 4, 12})
-	utl.CompareInts(tst, "constrained uy equations", ct_uy_eqs, []int{13, 15, 17})
+	chk.Ints(tst, "constrained ux equations", ct_ux_eqs, []int{2, 4, 12})
+	chk.Ints(tst, "constrained uy equations", ct_uy_eqs, []int{13, 15, 17})
 
 	// point loads
 	utl.IntAssert(len(dom.PtNatBcs.Bcs), 3)
@@ -160,7 +162,7 @@ func Test_sg52b(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg52b")
+	chk.PrintTitle("sg52b")
 
 	// run simulation
 	if !Start("data/sg52.sim", true, !utl.Tsilent) {
@@ -197,7 +199,7 @@ func Test_sg57(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg57")
+	chk.PrintTitle("sg57")
 
 	// run simulation
 	if !Start("data/sg57.sim", true, !utl.Tsilent) {
@@ -234,7 +236,7 @@ func Test_sg511(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg511")
+	chk.PrintTitle("sg511")
 
 	// run simulation
 	if !Start("data/sg511.sim", true, !utl.Tsilent) {
@@ -271,7 +273,7 @@ func Test_sg515(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg515")
+	chk.PrintTitle("sg515")
 
 	// run simulation
 	if !Start("data/sg515.sim", true, !utl.Tsilent) {
@@ -308,7 +310,7 @@ func Test_sg517(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg517")
+	chk.PrintTitle("sg517")
 
 	// run simulation
 	if !Start("data/sg517.sim", true, !utl.Tsilent) {
@@ -345,7 +347,7 @@ func Test_sg524(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg524")
+	chk.PrintTitle("sg524")
 
 	// run simulation
 	if !Start("data/sg524.sim", true, !utl.Tsilent) {
@@ -382,7 +384,7 @@ func Test_sg530(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg530")
+	chk.PrintTitle("sg530")
 
 	// run simulation
 	if !Start("data/sg530.sim", true, !utl.Tsilent) {
@@ -419,7 +421,7 @@ func Test_sg111(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg111")
+	chk.PrintTitle("sg111")
 
 	// run simulation
 	if !Start("data/sg111.sim", true, !utl.Tsilent) {
@@ -442,7 +444,7 @@ func Test_sg111(tst *testing.T) {
 
 		// read summary
 		sum := ReadSum()
-		utl.Pfyel("sum = %v\n", sum)
+		io.Pfyel("sum = %v\n", sum)
 
 		// allocate domain
 		d := NewDomain(Global.Sim.Regions[0])
@@ -501,7 +503,7 @@ func Test_sg114(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg114")
+	chk.PrintTitle("sg114")
 
 	// run simulation
 	if !Start("data/sg114.sim", true, !utl.Tsilent) {
@@ -524,7 +526,7 @@ func Test_sg114(tst *testing.T) {
 
 		// read summary
 		sum := ReadSum()
-		utl.Pfyel("sum = %v\n", sum)
+		io.Pfyel("sum = %v\n", sum)
 
 		// allocate domain
 		d := NewDomain(Global.Sim.Regions[0])
@@ -553,7 +555,7 @@ func Test_sg114(tst *testing.T) {
 		plt.Plot(t, uy, "'k*-', clip_on=0, label='gofem'")
 
 		// old results
-		b, err := utl.ReadFile("cmp/sg114gofemold.json")
+		b, err := io.ReadFile("cmp/sg114gofemold.json")
 		if err != nil {
 			tst.Errorf("cannot read comparison file\n")
 			return
@@ -569,7 +571,7 @@ func Test_sg114(tst *testing.T) {
 		plt.Plot(gofemold.Time, gofemold.Uy17, "'ro-', label='gofemOld'")
 
 		// mechsys results
-		_, res, err := utl.ReadTable("cmp/sg114mechsysN17.cmp")
+		_, res, err := io.ReadTable("cmp/sg114mechsysN17.cmp")
 		if err != nil {
 			tst.Errorf("cannot read mechsys comparison file\n")
 			return
@@ -593,7 +595,7 @@ func Test_sg1121(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("sg1121")
+	chk.PrintTitle("sg1121")
 
 	// run simulation
 	if !Start("data/sg1121.sim", true, !utl.Tsilent) {
@@ -644,7 +646,7 @@ func Test_sg1121(tst *testing.T) {
 		plt.Plot(t, uy, "'k*-', clip_on=0, label='gofem'")
 
 		// old results
-		b, err := utl.ReadFile("cmp/sg1121gofemold.json")
+		b, err := io.ReadFile("cmp/sg1121gofemold.json")
 		if err != nil {
 			tst.Errorf("cannot read comparison file\n")
 			return
@@ -660,7 +662,7 @@ func Test_sg1121(tst *testing.T) {
 		plt.Plot(gofemold.Time, gofemold.Uy30, "'ro-', label='gofemOld'")
 
 		// mechsys results
-		_, res, err := utl.ReadTable("cmp/sg1121mechsysN30.cmp")
+		_, res, err := io.ReadTable("cmp/sg1121mechsysN30.cmp")
 		if err != nil {
 			tst.Errorf("cannot read mechsys comparison file\n")
 			return

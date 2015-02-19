@@ -9,6 +9,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -44,7 +46,7 @@ func Test_spo751a(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("spo751a")
+	chk.PrintTitle("spo751a")
 
 	// start simulation
 	if !Start("data/spo751.sim", true, !utl.Tsilent) {
@@ -79,8 +81,8 @@ func Test_spo751a(tst *testing.T) {
 
 	// check equations
 	nids, eqs := get_nids_eqs(dom)
-	utl.CompareInts(tst, "nids", nids, []int{0, 5, 7, 2, 3, 6, 4, 1, 10, 12, 8, 11, 9, 15, 17, 13, 16, 14, 20, 22, 18, 21, 19})
-	utl.CompareInts(tst, "eqs", eqs, utl.IntRange(23*2))
+	chk.Ints(tst, "nids", nids, []int{0, 5, 7, 2, 3, 6, 4, 1, 10, 12, 8, 11, 9, 15, 17, 13, 16, 14, 20, 22, 18, 21, 19})
+	chk.Ints(tst, "eqs", eqs, utl.IntRange(23*2))
 
 	// check solution arrays
 	ny := 23 * 2
@@ -108,8 +110,8 @@ func Test_spo751a(tst *testing.T) {
 	}
 	for i, ele := range dom.Elems {
 		e := ele.(*ElemU)
-		utl.Pforan("e%d.umap = %v\n", e.Cell.Id, e.Umap)
-		utl.CompareInts(tst, "umap", e.Umap, umaps[i])
+		io.Pforan("e%d.umap = %v\n", e.Cell.Id, e.Umap)
+		chk.Ints(tst, "umap", e.Umap, umaps[i])
 	}
 
 	// constraints
@@ -121,7 +123,7 @@ func Test_spo751a(tst *testing.T) {
 	cα, sα := math.Cos(αrad), math.Sin(αrad)
 	for _, c := range dom.EssenBcs.Bcs {
 		utl.IntAssertLessThanOrEqualTo(1, len(c.Eqs)) // 1 ≤ neqs
-		utl.Pforan("c.Key=%s c.Eqs=%v\n", c.Key, c.Eqs)
+		io.Pforan("c.Key=%s c.Eqs=%v\n", c.Key, c.Eqs)
 		if len(c.Eqs) == 1 {
 			if c.Key == "uy" {
 				ct_uy_eqs = append(ct_uy_eqs, c.Eqs[0])
@@ -131,8 +133,8 @@ func Test_spo751a(tst *testing.T) {
 			if c.Key == "incsup" {
 				ct_incsup_xeqs = append(ct_incsup_xeqs, c.Eqs[0])
 				ct_incsup_yeqs = append(ct_incsup_yeqs, c.Eqs[1])
-				utl.CheckAnaNum(tst, "cos(α)", 1e-15, c.ValsA[0], cα, false)
-				utl.CheckAnaNum(tst, "sin(α)", 1e-15, c.ValsA[1], sα, false)
+				chk.AnaNum(tst, "cos(α)", 1e-15, c.ValsA[0], cα, false)
+				chk.AnaNum(tst, "sin(α)", 1e-15, c.ValsA[1], sα, false)
 				continue
 			}
 		}
@@ -141,9 +143,9 @@ func Test_spo751a(tst *testing.T) {
 	sort.Ints(ct_uy_eqs)
 	sort.Ints(ct_incsup_xeqs)
 	sort.Ints(ct_incsup_yeqs)
-	utl.CompareInts(tst, "constrained uy equations", ct_uy_eqs, []int{1, 3, 9, 17, 21, 27, 31, 37, 41})
-	utl.CompareInts(tst, "incsup x equations", ct_incsup_xeqs, []int{4, 6, 12, 18, 24, 28, 34, 38, 44})
-	utl.CompareInts(tst, "incsup y equations", ct_incsup_yeqs, []int{5, 7, 13, 19, 25, 29, 35, 39, 45})
+	chk.Ints(tst, "constrained uy equations", ct_uy_eqs, []int{1, 3, 9, 17, 21, 27, 31, 37, 41})
+	chk.Ints(tst, "incsup x equations", ct_incsup_xeqs, []int{4, 6, 12, 18, 24, 28, 34, 38, 44})
+	chk.Ints(tst, "incsup y equations", ct_incsup_yeqs, []int{5, 7, 13, 19, 25, 29, 35, 39, 45})
 }
 
 func Test_spo751b(tst *testing.T) {
@@ -157,7 +159,7 @@ func Test_spo751b(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("spo751b")
+	chk.PrintTitle("spo751b")
 
 	// run simulation
 	if !Start("data/spo751.sim", true, !utl.Tsilent) {

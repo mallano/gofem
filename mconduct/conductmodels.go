@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/io"
 )
 
 // Model defines liquid-gas conductivity models
@@ -40,7 +40,7 @@ func GetModel(simfnk, matname, modelname string, getnew bool) Model {
 	}
 
 	// search database
-	key := utl.Sf("%s_%s_%s", simfnk, matname, modelname)
+	key := io.Sf("%s_%s_%s", simfnk, matname, modelname)
 	if model, ok := _models[key]; ok {
 		return model
 	}

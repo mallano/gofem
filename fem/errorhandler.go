@@ -7,6 +7,7 @@ package fem
 import (
 	"log"
 
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/mpi"
 	"github.com/cpmech/gosl/utl"
 )
@@ -23,7 +24,7 @@ func LogErr(err error, msg string) (stop bool) {
 
 func LogErrCond(condition bool, msg string, prm ...interface{}) (stop bool) {
 	if condition {
-		fullmsg := "ERROR: " + utl.Sf(msg, prm...)
+		fullmsg := "ERROR: " + io.Sf(msg, prm...)
 		log.Printf(fullmsg)
 		Global.WspcStop[Global.Rank] = 1
 		return true
@@ -36,7 +37,7 @@ func Stop() bool {
 		if Global.WspcStop[Global.Rank] > 0 {
 			utl.CallerInfo(3)
 			utl.CallerInfo(2)
-			utl.PfRed("simulation stopped due to errors. see log files\n")
+			io.PfRed("simulation stopped due to errors. see log files\n")
 			return true
 		}
 		return false
@@ -47,7 +48,7 @@ func Stop() bool {
 			if Global.Root {
 				utl.CallerInfo(3)
 				utl.CallerInfo(2)
-				utl.PfRed("simulation stopped due to errors. see log files\n")
+				io.PfRed("simulation stopped due to errors. see log files\n")
 			}
 			return true
 		}

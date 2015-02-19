@@ -6,8 +6,8 @@
 package mporous
 
 import (
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
 )
 
 // LGcondM1 implements the liquid-gas conductivity model # 1
@@ -65,7 +65,7 @@ func (o *LGcondM1) Init(prms fun.Prms) (err error) {
 		case "betG":
 			o.βG = p.V
 		default:
-			return utl.Err("mporous.LGcondM1: parameter named %q is incorrect\n", p.N)
+			return chk.Err("mporous.LGcondM1: parameter named %q is incorrect\n", p.N)
 		}
 	}
 	o.klr.Init(fun.Prms{

@@ -12,7 +12,7 @@ import (
 
 	"github.com/cpmech/gofem/shp"
 
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/io"
 )
 
 // constants
@@ -87,7 +87,7 @@ func ReadMsh(dir, fn string) *Mesh {
 	var o Mesh
 
 	// read file
-	b, err := utl.ReadFile(filepath.Join(dir, fn))
+	b, err := io.ReadFile(filepath.Join(dir, fn))
 	if LogErr(err, "msh: cannot open mesh file "+dir+"/"+fn+"\n") {
 		return nil
 	}
@@ -206,12 +206,12 @@ func ReadMsh(dir, fn string) *Mesh {
 
 // String returns a JSON representation of *Vert
 func (o *Vert) String() string {
-	l := utl.Sf("{\"id\":%4d, \"tag\":%6d, \"c\":[", o.Id, o.Tag)
+	l := io.Sf("{\"id\":%4d, \"tag\":%6d, \"c\":[", o.Id, o.Tag)
 	for i, x := range o.C {
 		if i > 0 {
 			l += ", "
 		}
-		l += utl.Sf("%23.15e", x)
+		l += io.Sf("%23.15e", x)
 	}
 	l += "] }"
 	return l
@@ -219,19 +219,19 @@ func (o *Vert) String() string {
 
 // String returns a JSON representation of *Cell
 func (o *Cell) String() string {
-	l := utl.Sf("{\"id\":%d, \"tag\":%d, \"type\":%q, \"part\":%d, \"verts\":[", o.Id, o.Tag, o.Type, o.Part)
+	l := io.Sf("{\"id\":%d, \"tag\":%d, \"type\":%q, \"part\":%d, \"verts\":[", o.Id, o.Tag, o.Type, o.Part)
 	for i, x := range o.Verts {
 		if i > 0 {
 			l += ", "
 		}
-		l += utl.Sf("%d", x)
+		l += io.Sf("%d", x)
 	}
 	l += "], \"ftags\":["
 	for i, x := range o.FTags {
 		if i > 0 {
 			l += ", "
 		}
-		l += utl.Sf("%d", x)
+		l += io.Sf("%d", x)
 	}
 	l += "] }"
 	return l
@@ -244,14 +244,14 @@ func (o Mesh) String() string {
 		if i > 0 {
 			l += ",\n"
 		}
-		l += utl.Sf("    %v", x)
+		l += io.Sf("    %v", x)
 	}
 	l += "\n  ],\n  \"cells\" : [\n"
 	for i, x := range o.Cells {
 		if i > 0 {
 			l += ",\n"
 		}
-		l += utl.Sf("    %v", x)
+		l += io.Sf("    %v", x)
 	}
 	l += "\n  ]\n}"
 	return l

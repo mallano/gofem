@@ -7,6 +7,8 @@ package fem
 import (
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -21,7 +23,7 @@ func Test_fileio01(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("fileio01")
+	chk.PrintTitle("fileio01")
 
 	// start
 	if !Start("data/bh16.sim", true, !utl.Tsilent) {
@@ -40,7 +42,7 @@ func Test_fileio01(tst *testing.T) {
 	for i, _ := range domA.Sol.Y {
 		domA.Sol.Y[i] = float64(i)
 	}
-	utl.Pforan("domA.Sol.Y = %v\n", domA.Sol.Y)
+	io.Pforan("domA.Sol.Y = %v\n", domA.Sol.Y)
 
 	// write file
 	tidx := 123
@@ -48,7 +50,7 @@ func Test_fileio01(tst *testing.T) {
 		tst.Errorf("test failed")
 		return
 	}
-	utl.Pfblue2("file %v written\n", out_nod_path(tidx, Global.Rank))
+	io.Pfblue2("file %v written\n", out_nod_path(tidx, Global.Rank))
 
 	// domain B
 	domB := NewDomain(Global.Sim.Regions[0])
@@ -58,17 +60,17 @@ func Test_fileio01(tst *testing.T) {
 	if !domB.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("test failed")
 	}
-	utl.Pfpink("domB.Sol.Y (before) = %v\n", domB.Sol.Y)
+	io.Pfpink("domB.Sol.Y (before) = %v\n", domB.Sol.Y)
 
 	// read file
 	if !domB.ReadSol(tidx) {
 		tst.Errorf("test failed")
 		return
 	}
-	utl.Pfgreen("domB.Sol.Y (after) = %v\n", domB.Sol.Y)
+	io.Pfgreen("domB.Sol.Y (after) = %v\n", domB.Sol.Y)
 
 	// check
-	utl.CheckVector(tst, "Y", 1e-17, domA.Sol.Y, domB.Sol.Y)
-	utl.CheckVector(tst, "dy/dt", 1e-17, domA.Sol.Dydt, domB.Sol.Dydt)
-	utl.CheckVector(tst, "d²y/dt²", 1e-17, domA.Sol.D2ydt2, domB.Sol.D2ydt2)
+	chk.Vector(tst, "Y", 1e-17, domA.Sol.Y, domB.Sol.Y)
+	chk.Vector(tst, "dy/dt", 1e-17, domA.Sol.Dydt, domB.Sol.Dydt)
+	chk.Vector(tst, "d²y/dt²", 1e-17, domA.Sol.D2ydt2, domB.Sol.D2ydt2)
 }

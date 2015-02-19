@@ -7,6 +7,8 @@ package msolid
 import (
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -21,7 +23,7 @@ func Test_path01(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("path01")
+	chk.PrintTitle("path01")
 
 	ndim := 2
 	var pth Path
@@ -30,6 +32,6 @@ func Test_path01(tst *testing.T) {
 		tst.Errorf("test failed: %v\n", err)
 		return
 	}
-	utl.Pforan("pth = %+v\n", pth)
-	utl.CheckVector(tst, "sx", 1e-17, pth.Sx, []float64{1, 1, 1, 0})
+	io.Pforan("pth = %+v\n", pth)
+	chk.Vector(tst, "sx", 1e-17, pth.Sx, []float64{1, 1, 1, 0})
 }

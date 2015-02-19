@@ -8,8 +8,8 @@ import (
 	"math"
 	"strings"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
 )
 
 // BrooksCorey implements Books and Corey' model
@@ -37,7 +37,7 @@ func (o *BrooksCorey) Init(prms fun.Prms) (err error) {
 		case "slmin":
 			o.slmin = p.V
 		default:
-			return utl.Err("bc: parameter named %q is incorrect\n", p.N)
+			return chk.Err("bc: parameter named %q is incorrect\n", p.N)
 		}
 	}
 	return

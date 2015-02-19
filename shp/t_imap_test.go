@@ -8,22 +8,15 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_imap(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
 	//utl.Tsilent = false
-	utl.TTitle("Test imap")
+	chk.PrintTitle("Test imap")
 
 	for name, shape := range factory {
 		gndim := shape.Gndim
@@ -31,7 +24,7 @@ func Test_imap(tst *testing.T) {
 			continue
 		}
 
-		utl.Pfyel("--------------------------------- %-6s---------------------------------\n", name)
+		io.Pfyel("--------------------------------- %-6s---------------------------------\n", name)
 
 		// check inverse mapping
 		tol := 1e-14
@@ -47,8 +40,8 @@ func Test_imap(tst *testing.T) {
 		s := []float64{rand.Float64(), rand.Float64(), rand.Float64()} // scale factors
 		la.MatCopy(C, 1.0, shape.NatCoords)
 		_ = tol
-		utl.Pf("nverts:%v\n", nverts)
-		utl.Pf("gndim:%v\n", gndim)
+		io.Pf("nverts:%v\n", nverts)
+		io.Pf("gndim:%v\n", gndim)
 		for i := 0; i < gndim; i++ {
 			for j := 0; j < nverts; j++ {
 				C[i][j] *= s[i]
@@ -65,15 +58,15 @@ func Test_imap(tst *testing.T) {
 				x[i] = C[i][j]
 			}
 			err := shape.InvMap(r, x, C)
-			utl.Pf("r:%v\n", r)
+			io.Pf("r:%v\n", r)
 			_ = err
 			for i := 0; i < gndim; i++ {
 				R[i][j] = r[i]
 			}
 		}
 
-		utl.CheckMatrix(tst, "checking", tol, R, shape.NatCoords)
+		chk.Matrix(tst, "checking", tol, R, shape.NatCoords)
 
-		utl.PfGreen("OK\n")
+		io.PfGreen("OK\n")
 	}
 }

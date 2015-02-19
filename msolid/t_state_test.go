@@ -7,6 +7,8 @@ package msolid
 import (
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -21,14 +23,14 @@ func Test_state01(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("state01")
+	chk.PrintTitle("state01")
 
 	nsig, nalp, nphi, large := 4, 1, 3, false
 	state0 := NewState(nsig, nalp, nphi, large)
-	utl.Pforan("state0 = %+v\n", state0)
-	utl.CompareDbls(tst, "sig", state0.Sig, []float64{0, 0, 0, 0})
-	utl.CompareDbls(tst, "alp", state0.Alp, []float64{0})
-	utl.CompareDbls(tst, "phi", state0.Phi, []float64{0, 0, 0})
+	io.Pforan("state0 = %+v\n", state0)
+	chk.Vector(tst, "sig", state0.Sig, []float64{0, 0, 0, 0})
+	chk.Vector(tst, "alp", state0.Alp, []float64{0})
+	chk.Vector(tst, "phi", state0.Phi, []float64{0, 0, 0})
 
 	state0.Sig[0] = 10.0
 	state0.Sig[1] = 11.0
@@ -41,14 +43,14 @@ func Test_state01(tst *testing.T) {
 
 	state1 := NewState(nsig, nalp, nphi, large)
 	state1.Set(state0)
-	utl.Pforan("state1 = %+v\n", state1)
-	utl.CompareDbls(tst, "sig", state1.Sig, []float64{10, 11, 12, 13})
-	utl.CompareDbls(tst, "alp", state1.Alp, []float64{20})
-	utl.CompareDbls(tst, "phi", state1.Phi, []float64{30, 31, 32})
+	io.Pforan("state1 = %+v\n", state1)
+	chk.Vector(tst, "sig", state1.Sig, []float64{10, 11, 12, 13})
+	chk.Vector(tst, "alp", state1.Alp, []float64{20})
+	chk.Vector(tst, "phi", state1.Phi, []float64{30, 31, 32})
 
 	state2 := state1.GetCopy()
-	utl.Pforan("state2 = %+v\n", state2)
-	utl.CompareDbls(tst, "sig", state2.Sig, []float64{10, 11, 12, 13})
-	utl.CompareDbls(tst, "alp", state2.Alp, []float64{20})
-	utl.CompareDbls(tst, "phi", state2.Phi, []float64{30, 31, 32})
+	io.Pforan("state2 = %+v\n", state2)
+	chk.Vector(tst, "sig", state2.Sig, []float64{10, 11, 12, 13})
+	chk.Vector(tst, "alp", state2.Alp, []float64{20})
+	chk.Vector(tst, "phi", state2.Phi, []float64{30, 31, 32})
 }

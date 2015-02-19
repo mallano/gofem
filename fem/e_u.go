@@ -10,9 +10,9 @@ import (
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/tsr"
-	"github.com/cpmech/gosl/utl"
 )
 
 // ElemU represents a solid element with displacements u as primary variables
@@ -120,8 +120,8 @@ func init() {
 		o.Nu = o.Ndim * o.Cell.Shp.Nverts
 
 		// flag: use B matrix
-		if s_useB, found := utl.Keycode(edat.Extra, "useB"); found {
-			o.UseB = utl.Atob(s_useB)
+		if s_useB, found := io.Keycode(edat.Extra, "useB"); found {
+			o.UseB = io.Atob(s_useB)
 		}
 
 		if Global.Sim.Data.Axisym {
@@ -130,25 +130,25 @@ func init() {
 
 		// flag: thickess => plane-stress
 		o.Thickness = 1.0
-		if s_thick, found := utl.Keycode(edat.Extra, "thick"); found {
-			o.Thickness = utl.Atof(s_thick)
+		if s_thick, found := io.Keycode(edat.Extra, "thick"); found {
+			o.Thickness = io.Atof(s_thick)
 			if LogErrCond(!Global.Sim.Data.Pstress, "cannot specify 'thick' in element if Pstress=false in Global Data") {
 				return nil
 			}
 		}
 
 		// flag: debug
-		if s_debug, found := utl.Keycode(edat.Extra, "debug"); found {
-			o.Debug = utl.Atob(s_debug)
+		if s_debug, found := io.Keycode(edat.Extra, "debug"); found {
+			o.Debug = io.Atob(s_debug)
 		}
 
 		// integration points
 		var nip, nipf int
-		if s_nip, found := utl.Keycode(edat.Extra, "nip"); found {
-			nip = utl.Atoi(s_nip)
+		if s_nip, found := io.Keycode(edat.Extra, "nip"); found {
+			nip = io.Atoi(s_nip)
 		}
-		if s_nipf, found := utl.Keycode(edat.Extra, "nipf"); found {
-			nipf = utl.Atoi(s_nipf)
+		if s_nipf, found := io.Keycode(edat.Extra, "nipf"); found {
+			nipf = io.Atoi(s_nipf)
 		}
 		var err error
 		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)

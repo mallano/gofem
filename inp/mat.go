@@ -9,8 +9,9 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/io"
 )
 
 // Material holds material data
@@ -39,7 +40,7 @@ func ReadMat(dir, fn string) *MatDb {
 	var o MatDb
 
 	// read file
-	b, err := utl.ReadFile(filepath.Join(dir, fn))
+	b, err := io.ReadFile(filepath.Join(dir, fn))
 	if LogErr(err, "mat: cannot open materials file "+dir+"/"+fn+"\n") {
 		return nil
 	}
@@ -72,7 +73,7 @@ func (o MatDb) GroupGet(matname, key string) *Material {
 	if mat == nil {
 		return nil
 	}
-	if submatname, found := utl.Keycode(mat.Extra, key); found {
+	if submatname, found := io.Keycode(mat.Extra, key); found {
 		return o.Get(submatname)
 	}
 	return nil
@@ -82,29 +83,29 @@ func (o MatDb) GroupGet(matname, key string) *Material {
 func (o MatDb) GroupGet3(matname, key1, key2, key3 string) (m1, m2, m3 *Material, err error) {
 	mat := o.Get(matname)
 	if mat == nil {
-		err = utl.Err("cannot find material named %q", matname)
+		err = chk.Err("cannot find material named %q", matname)
 		return
 	}
-	if submat1, found := utl.Keycode(mat.Extra, key1); found {
+	if submat1, found := io.Keycode(mat.Extra, key1); found {
 		m1 = o.Get(submat1)
 	} else {
-		err = utl.Err("cannot find key %q in grouped material data %q", key1, mat.Extra)
+		err = chk.Err("cannot find key %q in grouped material data %q", key1, mat.Extra)
 		return
 	}
-	if submat2, found := utl.Keycode(mat.Extra, key2); found {
+	if submat2, found := io.Keycode(mat.Extra, key2); found {
 		m2 = o.Get(submat2)
 	} else {
-		err = utl.Err("cannot find key %q in grouped material data %q", key2, mat.Extra)
+		err = chk.Err("cannot find key %q in grouped material data %q", key2, mat.Extra)
 		return
 	}
-	if submat3, found := utl.Keycode(mat.Extra, key3); found {
+	if submat3, found := io.Keycode(mat.Extra, key3); found {
 		m3 = o.Get(submat3)
 	} else {
-		err = utl.Err("cannot find key %q in grouped material data %q", key3, mat.Extra)
+		err = chk.Err("cannot find key %q in grouped material data %q", key3, mat.Extra)
 		return
 	}
 	if m1 == nil || m2 == nil || m3 == nil {
-		err = utl.Err("material data in grouped materials cannot be parsed")
+		err = chk.Err("material data in grouped materials cannot be parsed")
 	}
 	return
 }
@@ -113,7 +114,7 @@ func (o MatDb) GroupGet3(matname, key1, key2, key3 string) (m1, m2, m3 *Material
 func (o *Material) String() string {
 	fun.G_extraindent = "  "
 	fun.G_openbrackets = false
-	return utl.Sf("    {\n      \"name\"  : %q,\n      \"desc\"  : %q,\n      \"model\" : %q,\n      \"prms\"  : [\n%v\n    }", o.Name, o.Desc, o.Model, o.Prms)
+	return io.Sf("    {\n      \"name\"  : %q,\n      \"desc\"  : %q,\n      \"model\" : %q,\n      \"prms\"  : [\n%v\n    }", o.Name, o.Desc, o.Model, o.Prms)
 }
 
 // String prints materials
@@ -123,7 +124,7 @@ func (o MatsData) String() string {
 		if i > 0 {
 			l += ",\n"
 		}
-		l += utl.Sf("%v", m)
+		l += io.Sf("%v", m)
 	}
 	l += "\n  ]"
 	return l
@@ -131,7 +132,7 @@ func (o MatsData) String() string {
 
 // String outputs all materials
 func (o MatDb) String() string {
-	return utl.Sf("{\n%v,\n%v\n}", o.Functions, o.Materials)
+	return io.Sf("{\n%v,\n%v\n}", o.Functions, o.Materials)
 }
 
 // MatfileOld2New converts an old mat file to new mat file format
@@ -153,16 +154,16 @@ func MatfileOld2New(dirout string, fnnew, fnold string, convertsymbols bool) {
 	var mats_old []oldmatdata
 
 	// read file
-	b, err := utl.ReadFile(fnold)
+	b, err := io.ReadFile(fnold)
 	if err != nil {
-		utl.PfRed("cannot open file: %v", err.Error())
+		io.PfRed("cannot open file: %v", err.Error())
 		return
 	}
 
 	// decode
 	err = json.Unmarshal(b, &mats_old)
 	if err != nil {
-		utl.PfRed("cannot unmarshal file: %v", err.Error())
+		io.PfRed("cannot unmarshal file: %v", err.Error())
 		return
 	}
 
@@ -196,10 +197,10 @@ func MatfileOld2New(dirout string, fnnew, fnold string, convertsymbols bool) {
 
 	// save file
 	if dirout == "" {
-		utl.WriteFileS(fnnew, mats_new.String())
+		io.WriteFileS(fnnew, mats_new.String())
 		return
 	}
-	utl.WriteFileSD(dirout, fnnew, mats_new.String())
+	io.WriteFileSD(dirout, fnnew, mats_new.String())
 }
 
 // MatfileNew2Old converts a new mat file to the old mat file format
@@ -207,9 +208,9 @@ func MatfileOld2New(dirout string, fnnew, fnold string, convertsymbols bool) {
 func MatfileNew2Old(dirout string, fnold, fnnew string, convertsymbols bool) {
 
 	// read file
-	b, err := utl.ReadFile(fnnew)
+	b, err := io.ReadFile(fnnew)
 	if err != nil {
-		utl.PfRed("cannot open file: %v", err.Error())
+		io.PfRed("cannot open file: %v", err.Error())
 		return
 	}
 
@@ -217,7 +218,7 @@ func MatfileNew2Old(dirout string, fnold, fnnew string, convertsymbols bool) {
 	var mats_new MatDb
 	err = json.Unmarshal(b, &mats_new)
 	if err != nil {
-		utl.PfRed("cannot unmarshal file: %v", err.Error())
+		io.PfRed("cannot unmarshal file: %v", err.Error())
 		return
 	}
 
@@ -264,10 +265,10 @@ func MatfileNew2Old(dirout string, fnold, fnnew string, convertsymbols bool) {
 
 	// save file
 	if dirout == "" {
-		utl.WriteFileS(fnold, string(buf))
+		io.WriteFileS(fnold, string(buf))
 		return
 	}
-	utl.WriteFileSD(dirout, fnold, string(buf))
+	io.WriteFileSD(dirout, fnold, string(buf))
 }
 
 // convert greek to ansi

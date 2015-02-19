@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/mpi"
-	"github.com/cpmech/gosl/utl"
 )
 
 // errFile holds a handle to errors logger file
@@ -23,7 +23,7 @@ func InitLogFile(dirout, fnamekey string) (err error) {
 	if mpi.IsOn() {
 		rank = mpi.Rank()
 	}
-	logFile, err := os.Create(utl.Sf("%s/%s_p%d.log", dirout, fnamekey, rank))
+	logFile, err := os.Create(io.Sf("%s/%s_p%d.log", dirout, fnamekey, rank))
 	if err != nil {
 		return
 	}
@@ -51,7 +51,7 @@ func LogErr(err error, msg string) (stop bool) {
 // LogErr logs error using condition (==true) to stop and returs stop flag
 func LogErrCond(condition bool, msg string, prm ...interface{}) (stop bool) {
 	if condition {
-		fullmsg := "ERROR: " + utl.Sf(msg, prm...)
+		fullmsg := "ERROR: " + io.Sf(msg, prm...)
 		log.Printf(fullmsg)
 		return true
 	}

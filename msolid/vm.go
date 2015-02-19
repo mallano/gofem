@@ -5,9 +5,9 @@
 package msolid
 
 import (
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/tsr"
-	"github.com/cpmech/gosl/utl"
 )
 
 // VonMises implements von Mises plasticity model
@@ -39,7 +39,7 @@ func (o *VonMises) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 			o.H = p.V
 		case "E", "nu", "l", "G", "K", "rho":
 		default:
-			return utl.Err("vm: parameter named %q is incorrect\n", p.N)
+			return chk.Err("vm: parameter named %q is incorrect\n", p.N)
 		}
 	}
 

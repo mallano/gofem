@@ -10,8 +10,9 @@ import (
 
 	"github.com/cpmech/gofem/mporous"
 	"github.com/cpmech/gofem/msolid"
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/num"
-	"github.com/cpmech/gosl/utl"
 )
 
 // T_iteration testing: iteration results
@@ -47,7 +48,7 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 	}
 
 	// read file
-	buf, err := utl.ReadFile(cmpfname)
+	buf, err := io.ReadFile(cmpfname)
 	LogErr(err, "TestingCompareResultsU: ReadFile failed")
 	if Stop() {
 		tst.Errorf("ReadFile failed\n")
@@ -69,7 +70,7 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 		// time index
 		tidx := idx + 1
 		if verbose {
-			utl.PfYel("\n\ntidx = %d . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n", tidx)
+			io.PfYel("\n\ntidx = %d . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .\n", tidx)
 		}
 
 		// load gofem results
@@ -79,13 +80,13 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 			return
 		}
 		if verbose {
-			utl.Pfyel("time = %v\n", d.Sol.T)
+			io.Pfyel("time = %v\n", d.Sol.T)
 		}
 
 		// check K matrices
 		if !skipK {
 			if verbose {
-				utl.Pfgreen(". . . checking K matrices . . .\n")
+				io.Pfgreen(". . . checking K matrices . . .\n")
 			}
 			for eid, Ksg := range cmp.Kmats {
 				if e, ok := d.Elems[eid].(*ElemU); ok {
@@ -93,7 +94,7 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 						tst.Errorf("AddToKb failed\n")
 						break
 					}
-					utl.CheckMatrix(tst, utl.Sf("K%d", eid), tolK, e.K, Ksg)
+					chk.Matrix(tst, io.Sf("K%d", eid), tolK, e.K, Ksg)
 				}
 			}
 			if Stop() {
@@ -103,43 +104,43 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 
 		// check displacements
 		if verbose {
-			utl.Pfgreen(". . . checking displacements . . .\n")
+			io.Pfgreen(". . . checking displacements . . .\n")
 		}
 		for nid, usg := range cmp.Disp {
 			ix := d.Vid2node[nid].Dofs[0].Eq
 			iy := d.Vid2node[nid].Dofs[1].Eq
-			utl.CheckAnaNum(tst, "ux", tolu, d.Sol.Y[ix], usg[0], verbose)
-			utl.CheckAnaNum(tst, "uy", tolu, d.Sol.Y[iy], usg[1], verbose)
+			chk.AnaNum(tst, "ux", tolu, d.Sol.Y[ix], usg[0], verbose)
+			chk.AnaNum(tst, "uy", tolu, d.Sol.Y[iy], usg[1], verbose)
 			if len(usg) == 3 {
 				iz := d.Vid2node[nid].Dofs[2].Eq
-				utl.CheckAnaNum(tst, "uz", tolu, d.Sol.Y[iz], usg[2], verbose)
+				chk.AnaNum(tst, "uz", tolu, d.Sol.Y[iz], usg[2], verbose)
 			}
 		}
 
 		// check stresses
 		if true {
 			if verbose {
-				utl.Pfgreen(". . . checking stresses . . .\n")
+				io.Pfgreen(". . . checking stresses . . .\n")
 			}
 			for eid, sig := range cmp.Sigmas {
 				if verbose {
-					utl.Pforan("eid = %d\n", eid)
+					io.Pforan("eid = %d\n", eid)
 				}
 				if e, ok := d.Cid2elem[eid].(*ElemU); ok {
 					for ip, val := range sig {
 						if verbose {
-							utl.Pfgrey2("ip = %d\n", ip)
+							io.Pfgrey2("ip = %d\n", ip)
 						}
 						σ := e.States[ip].Sig
 						if len(val) == 6 {
-							utl.CheckAnaNum(tst, "sx ", tols, σ[0], val[0], verbose)
-							utl.CheckAnaNum(tst, "sy ", tols, σ[1], val[1], verbose)
+							chk.AnaNum(tst, "sx ", tols, σ[0], val[0], verbose)
+							chk.AnaNum(tst, "sy ", tols, σ[1], val[1], verbose)
 						} else {
-							utl.CheckAnaNum(tst, "sx ", tols, σ[0], val[0], verbose)
-							utl.CheckAnaNum(tst, "sy ", tols, σ[1], val[1], verbose)
-							utl.CheckAnaNum(tst, "sxy", tols, σ[3]/SQ2, val[2], verbose)
+							chk.AnaNum(tst, "sx ", tols, σ[0], val[0], verbose)
+							chk.AnaNum(tst, "sy ", tols, σ[1], val[1], verbose)
+							chk.AnaNum(tst, "sxy", tols, σ[3]/SQ2, val[2], verbose)
 							if len(val) > 3 { // sx, sy, sxy, sz
-								utl.CheckAnaNum(tst, "sz ", tols, σ[2], val[3], verbose)
+								chk.AnaNum(tst, "sz ", tols, σ[2], val[3], verbose)
 							}
 						}
 					}
@@ -204,9 +205,9 @@ func TestingDefineDebugKb(tst *testing.T, eid int, tol float64, verb bool) {
 		for i := 0; i < d.Ny; i++ {
 			Yold[i] = d.Sol.Y[i] - d.Sol.ΔY[i]
 		}
-		//utl.Pforan("Yold = %v\n", Yold)
-		//utl.Pforan("Ynew = %v\n", d.Sol.Y)
-		//utl.Pforan("ΔY   = %v\n", d.Sol.ΔY)
+		//io.Pforan("Yold = %v\n", Yold)
+		//io.Pforan("Ynew = %v\n", d.Sol.Y)
+		//io.Pforan("ΔY   = %v\n", d.Sol.ΔY)
 		copy(ΔYbkp, d.Sol.ΔY)
 		defer func() {
 			restorefcn()
@@ -230,12 +231,12 @@ func TestingDefineDebugKb(tst *testing.T, eid int, tol float64, verb bool) {
 					return -Fbtmp[I]
 				}, d.Sol.Y[J])
 				if d.Sol.T > 0.7 {
-					//utl.AnaNum(utl.Sf("K%3d%3d", i, j), tol, K[i][j], dnum, verb)
-					utl.CheckAnaNum(tst, utl.Sf("K%3d%3d", i, j), tol, K[i][j], dnum, verb)
+					//chk.PrintAnaNum(io.Sf("K%3d%3d", i, j), tol, K[i][j], dnum, verb)
+					chk.AnaNum(tst, io.Sf("K%3d%3d", i, j), tol, K[i][j], dnum, verb)
 				}
 			}
 			//if i > 0 && d.Sol.T > 0.951 {
-			//utl.Panic("stop: firstIt=%v", firstIt)
+			//chk.Panic("stop: firstIt=%v", firstIt)
 			//}
 		}
 	}

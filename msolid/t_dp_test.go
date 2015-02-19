@@ -7,6 +7,7 @@ package msolid
 import (
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/utl"
 )
@@ -24,7 +25,7 @@ func Test_dp01(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("dp01")
+	chk.PrintTitle("dp01")
 
 	// allocate driver
 	ndim, pstress := 2, false

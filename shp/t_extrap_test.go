@@ -10,29 +10,22 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_extrap(tst *testing.T) {
 
-	prevTs := utl.Tsilent
-	defer func() {
-		utl.Tsilent = prevTs
-		if err := recover(); err != nil {
-			tst.Error("[1;31mERROR:", err, "[0m\n")
-		}
-	}()
-
 	//utl.Tsilent = false
-	utl.TTitle("Test extrapolation")
+	chk.PrintTitle("Test extrapolation")
 
 	GetIpNums := func(name string) []int {
 		var nums []int
 		for key, _ := range ipsfactory {
 			name_n := strings.Split(key, "_")
 			if name_n[0] == name {
-				nip := utl.Atoi(name_n[1])
+				nip := io.Atoi(name_n[1])
 				nums = append(nums, nip)
 			}
 		}
@@ -46,13 +39,13 @@ func Test_extrap(tst *testing.T) {
 			continue
 		}
 
-		utl.Pfyel("--------------------------------- %-6s---------------------------------\n", name)
+		io.Pfyel("--------------------------------- %-6s---------------------------------\n", name)
 
 		for _, nip := range GetIpNums(shape.Type) {
 			if nip <= 1 {
 				continue
 			}
-			utl.Pfblue("nip = %v\n", nip)
+			io.Pfblue("nip = %v\n", nip)
 			tol := 1.0e-13
 
 			// create a N vector with nodal values
@@ -69,7 +62,7 @@ func Test_extrap(tst *testing.T) {
 				}
 				N[i] = x + y + z + delta
 			}
-			utl.Pfblue("N    = %v\n", N)
+			io.Pfblue("N    = %v\n", N)
 
 			// calculate P vector with corresponding values at ips
 			key := name + "_" + strconv.Itoa(nip)
@@ -96,11 +89,11 @@ func Test_extrap(tst *testing.T) {
 			// Recalculate nodal values NN = E*P
 			NN := make([]float64, shape.Nverts)
 			la.MatVecMul(NN, 1.0, E, P)
-			utl.Pfblue("N ext= %v\n", NN)
+			io.Pfblue("N ext= %v\n", NN)
 
 			// Compare vectors N and NN
 			msg := name + "_" + strconv.Itoa(nip)
-			utl.CheckVector(tst, msg, tol, NN, N)
+			chk.Vector(tst, msg, tol, NN, N)
 		}
 
 	}

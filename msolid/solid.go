@@ -24,7 +24,7 @@ package msolid
 
 import (
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/io"
 )
 
 // Solid defines the interface for solid models
@@ -70,7 +70,7 @@ func GetModel(simfnk, matname, modelname string, getnew bool) Solid {
 	}
 
 	// search database
-	key := utl.Sf("%s_%s_%s", simfnk, matname, modelname)
+	key := io.Sf("%s_%s_%s", simfnk, matname, modelname)
 	if model, ok := _models[key]; ok {
 		return model
 	}

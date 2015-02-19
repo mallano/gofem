@@ -7,15 +7,15 @@ package inp
 
 import (
 	"encoding/json"
-	"io"
+	goio "io"
 	"log"
 	"math"
 	"os"
 	"path/filepath"
 
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/mpi"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Data holds global data for simulations
@@ -51,7 +51,7 @@ func (o *Data) SetDefault() {
 // PostProcess performs a post-processing of the just read json file
 func (o *Data) PostProcess(dir, fn string, erasefiles bool) {
 	o.FnameDir = os.ExpandEnv(dir)
-	o.FnameKey = utl.FnKey(fn)
+	o.FnameKey = io.FnKey(fn)
 	if o.DirOut == "" {
 		o.DirOut = "/tmp/gofem/" + o.FnameKey
 	}
@@ -60,8 +60,8 @@ func (o *Data) PostProcess(dir, fn string, erasefiles bool) {
 	}
 	os.MkdirAll(o.DirOut, 0777)
 	if erasefiles {
-		utl.RemoveAll(utl.Sf("%s/%s_*.gob", o.DirOut, o.FnameKey))
-		utl.RemoveAll(utl.Sf("%s/%s_*.json", o.DirOut, o.FnameKey))
+		io.RemoveAll(io.Sf("%s/%s_*.gob", o.DirOut, o.FnameKey))
+		io.RemoveAll(io.Sf("%s/%s_*.json", o.DirOut, o.FnameKey))
 	}
 }
 
@@ -264,9 +264,9 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 	var o Simulation
 
 	// read file
-	b, err := utl.ReadFile(filepath.Join(dir, fn))
+	b, err := io.ReadFile(filepath.Join(dir, fn))
 	if err != nil {
-		utl.PfRed("sim: cannot read simulation file %s/%s\n%v\n", dir, fn, err)
+		io.PfRed("sim: cannot read simulation file %s/%s\n%v\n", dir, fn, err)
 		return nil
 	}
 
@@ -278,7 +278,7 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 	// decode
 	err = json.Unmarshal(b, &o)
 	if err != nil {
-		utl.PfRed("sim: cannot unmarshal simulation file %s/%s\n%v\n", dir, fn, err)
+		io.PfRed("sim: cannot unmarshal simulation file %s/%s\n%v\n", dir, fn, err)
 		return nil
 	}
 
@@ -290,7 +290,7 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 	// init log file
 	err = InitLogFile(o.Data.DirOut, o.Data.FnameKey)
 	if err != nil {
-		utl.PfRed("sim: cannot create log file\n%v", err)
+		io.PfRed("sim: cannot create log file\n%v", err)
 		return nil
 	}
 
@@ -366,7 +366,7 @@ func (d *Region) Etag2data(etag int) *ElemData {
 }
 
 // GetInfo returns formatted information
-func (o *Simulation) GetInfo(w io.Writer) (err error) {
+func (o *Simulation) GetInfo(w goio.Writer) (err error) {
 	b, err := json.MarshalIndent(o, "", "  ")
 	if err != nil {
 		return err

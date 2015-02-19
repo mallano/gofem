@@ -7,9 +7,9 @@ package msolid
 import (
 	"math"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/tsr"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Ogden implements a linear elastic model
@@ -58,7 +58,7 @@ func (o *Ogden) Init(ndim int, pstress bool, prms fun.Prms) (err error) {
 		}
 	}
 	if len(o.Alp) != len(o.Mu) {
-		return utl.Err("number of alp must be equal to number of mu. %d != %d\n", len(o.Alp), len(o.Mu))
+		return chk.Err("number of alp must be equal to number of mu. %d != %d\n", len(o.Alp), len(o.Mu))
 	}
 
 	// auxiliary
@@ -86,7 +86,7 @@ func (o Ogden) InitIntVars() (s *State, err error) {
 func (o *Ogden) Update(s *State, F [][]float64) (err error) {
 
 	// TODO
-	return utl.Err("Ogden model is not implemented yet")
+	return chk.Err("Ogden model is not implemented yet")
 
 	// spectral decomposition
 	err = o.b_and_spectral_decomp(F)
@@ -115,7 +115,7 @@ func (o *Ogden) Update(s *State, F [][]float64) (err error) {
 func (o *Ogden) CalcA(A [][][][]float64, s *State, firstIt bool) (err error) {
 
 	// TODO
-	return utl.Err("Ogden model is not implemented yet")
+	return chk.Err("Ogden model is not implemented yet")
 
 	// spectral decomposition
 	err = o.b_and_spectral_decomp(s.F)

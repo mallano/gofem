@@ -27,6 +27,7 @@ import (
 	"github.com/cpmech/gofem/mporous"
 	"github.com/cpmech/gofem/msolid"
 	"github.com/cpmech/gofem/shp"
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/gm"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
@@ -176,7 +177,7 @@ func Apply() (err error) {
 	TseriesTimes = make([]float64, Sum.NumTidx)
 	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
 		if !Dom.In(tidx) {
-			return utl.Err("Domain.In failed. See log files\n")
+			return chk.Err("Domain.In failed. See log files\n")
 		}
 		TseriesTimes[tidx] = Dom.Sol.T
 		for i, dat := range TseriesData {

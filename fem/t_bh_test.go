@@ -8,6 +8,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -36,7 +38,7 @@ func Test_bh16a(tst *testing.T) {
 	}()
 
 	utl.Tsilent = false
-	utl.TTitle("bh16a")
+	chk.PrintTitle("bh16a")
 
 	// start simulation
 	if !Start("data/bh16.sim", true, !utl.Tsilent) {
@@ -71,8 +73,8 @@ func Test_bh16a(tst *testing.T) {
 
 	// check equations
 	nids, eqs := get_nids_eqs(dom)
-	utl.CompareInts(tst, "nids", nids, []int{0, 2, 3, 1, 4, 5})
-	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11})
+	chk.Ints(tst, "nids", nids, []int{0, 2, 3, 1, 4, 5})
+	chk.Ints(tst, "eqs", eqs, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11})
 
 	// check solution arrays
 	ny := 6 * 2
@@ -100,8 +102,8 @@ func Test_bh16a(tst *testing.T) {
 	}
 	for i, ele := range dom.Elems {
 		e := ele.(*ElemU)
-		utl.Pforan("e%d.umap = %v\n", e.Cell.Id, e.Umap)
-		utl.CompareInts(tst, "umap", e.Umap, umaps[i])
+		io.Pforan("e%d.umap = %v\n", e.Cell.Id, e.Umap)
+		chk.Ints(tst, "umap", e.Umap, umaps[i])
 	}
 
 	// constraints
@@ -111,7 +113,7 @@ func Test_bh16a(tst *testing.T) {
 	for _, c := range dom.EssenBcs.Bcs {
 		utl.IntAssert(len(c.Eqs), 1)
 		eq := c.Eqs[0]
-		utl.Pforan("key=%v eq=%v\n", c.Key, eq)
+		io.Pforan("key=%v eq=%v\n", c.Key, eq)
 		switch c.Key {
 		case "ux":
 			ct_ux_eqs = append(ct_ux_eqs, eq)
@@ -123,15 +125,15 @@ func Test_bh16a(tst *testing.T) {
 	}
 	sort.Ints(ct_ux_eqs)
 	sort.Ints(ct_uy_eqs)
-	utl.CompareInts(tst, "constrained ux equations", ct_ux_eqs, []int{0, 6})
-	utl.CompareInts(tst, "constrained uy equations", ct_uy_eqs, []int{1, 7})
+	chk.Ints(tst, "constrained ux equations", ct_ux_eqs, []int{0, 6})
+	chk.Ints(tst, "constrained uy equations", ct_uy_eqs, []int{1, 7})
 
 	// check ip data
 	for _, ele := range dom.Elems {
 		e := ele.(*ElemU)
 		labels, data := e.OutIpsData()
 		idx := utl.StrIndexSmall(labels, "sx")
-		utl.Pfyel("labels=%v  data=%v\n", labels, *data[0].Vals[idx])
+		io.Pfyel("labels=%v  data=%v\n", labels, *data[0].Vals[idx])
 	}
 }
 
@@ -146,7 +148,7 @@ func Test_bh16b(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("bh16b")
+	chk.PrintTitle("bh16b")
 
 	// run simulation
 	if !Start("data/bh16.sim", true, !utl.Tsilent) {
@@ -197,7 +199,7 @@ func Test_bh14(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("bh14")
+	chk.PrintTitle("bh14")
 
 	// run simulation
 	if !Start("data/bh14.sim", true, !utl.Tsilent) {

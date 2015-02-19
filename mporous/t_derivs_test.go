@@ -9,6 +9,8 @@ import (
 
 	"github.com/cpmech/gofem/mconduct"
 	"github.com/cpmech/gofem/mreten"
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
@@ -26,7 +28,7 @@ func Test_derivs01(tst *testing.T) {
 	doplot := false
 	//doplot := true
 	//utl.Tsilent = false
-	utl.TTitle("derivs01")
+	chk.PrintTitle("derivs01")
 
 	// info
 	simfnk := "derivs01"
@@ -69,7 +71,7 @@ func Test_derivs01(tst *testing.T) {
 	//P := []float64{10, 5, 20, 0}
 	P := []float64{5}
 	pth := GetPathCycle(pc0, P, np)
-	utl.Pforan("pth = %v\n", pth)
+	io.Pforan("pth = %v\n", pth)
 
 	// driver
 	var drv Driver

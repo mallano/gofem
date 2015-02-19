@@ -5,7 +5,8 @@
 package fem
 
 import (
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 
 	"github.com/cpmech/gofem/inp"
 )
@@ -86,7 +87,7 @@ func (o *DynCoefs) CalcBetas(Δt float64) (err error) {
 	// timestep
 	h := Δt
 	if h < o.hmin {
-		err = utl.Err(_dyncoefs_err5, o.hmin, h)
+		err = chk.Err(_dyncoefs_err5, o.hmin, h)
 		return
 	}
 
@@ -102,7 +103,7 @@ func (o *DynCoefs) CalcAlphas(Δt float64) (err error) {
 	// timestep
 	h := Δt
 	if h < o.hmin {
-		err = utl.Err(_dyncoefs_err6, o.hmin, h)
+		err = chk.Err(_dyncoefs_err6, o.hmin, h)
 		return
 	}
 
@@ -122,11 +123,11 @@ func (o *DynCoefs) CalcAlphas(Δt float64) (err error) {
 
 // Print prints coefficients
 func (o *DynCoefs) Print() {
-	utl.Pfgrey("θ=%v, θ1=%v, θ2=%v, α=%v\n", o.θ, o.θ1, o.θ2, o.α)
-	utl.Pfgrey("HHT=%v\n", o.HHT)
-	utl.Pfgrey("β1=%v, β2=%v\n", o.β1, o.β2)
-	utl.Pfgrey("α1=%v, α2=%v, α3=%v, α4=%v, α5=%v, α6=%v\n", o.α1, o.α2, o.α3, o.α4, o.α5, o.α6)
-	utl.Pfgrey("α7=%v, α8=%v\n", o.α7, o.α8)
+	io.Pfgrey("θ=%v, θ1=%v, θ2=%v, α=%v\n", o.θ, o.θ1, o.θ2, o.α)
+	io.Pfgrey("HHT=%v\n", o.HHT)
+	io.Pfgrey("β1=%v, β2=%v\n", o.β1, o.β2)
+	io.Pfgrey("α1=%v, α2=%v, α3=%v, α4=%v, α5=%v, α6=%v\n", o.α1, o.α2, o.α3, o.α4, o.α5, o.α6)
+	io.Pfgrey("α7=%v, α8=%v\n", o.α7, o.α8)
 }
 
 // error messages

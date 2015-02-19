@@ -8,6 +8,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -22,7 +24,7 @@ func Test_frees01(tst *testing.T) {
 	}()
 
 	utl.Tsilent = false
-	utl.TTitle("frees01")
+	chk.PrintTitle("frees01")
 
 	// start simulation
 	if !Start("data/frees01.sim", true, !utl.Tsilent) {
@@ -64,18 +66,18 @@ func Test_frees01(tst *testing.T) {
 		}
 	}
 	sort.Ints(seepeqs)
-	utl.Pforan("seepeqs = %v\n", seepeqs)
-	utl.CompareInts(tst, "seepeqs", seepeqs, []int{14, 16, 19, 30, 32, 43, 45, 56, 58, 69, 71})
+	io.Pforan("seepeqs = %v\n", seepeqs)
+	chk.Ints(tst, "seepeqs", seepeqs, []int{14, 16, 19, 30, 32, 43, 45, 56, 58, 69, 71})
 
 	// check Fmap
 	e2 := dom.Elems[2].(*ElemP)
-	utl.CompareInts(tst, "e2.Fmap", e2.Fmap, []int{14, 16, 19})
+	chk.Ints(tst, "e2.Fmap", e2.Fmap, []int{14, 16, 19})
 	e5 := dom.Elems[5].(*ElemP)
-	utl.CompareInts(tst, "e5.Fmap", e5.Fmap, []int{16, 30, 32})
+	chk.Ints(tst, "e5.Fmap", e5.Fmap, []int{16, 30, 32})
 	e8 := dom.Elems[8].(*ElemP)
-	utl.CompareInts(tst, "e8.Fmap", e8.Fmap, []int{30, 43, 45})
+	chk.Ints(tst, "e8.Fmap", e8.Fmap, []int{30, 43, 45})
 	e11 := dom.Elems[11].(*ElemP)
-	utl.CompareInts(tst, "e11.Fmap", e11.Fmap, []int{43, 56, 58})
+	chk.Ints(tst, "e11.Fmap", e11.Fmap, []int{43, 56, 58})
 	e14 := dom.Elems[14].(*ElemP)
-	utl.CompareInts(tst, "e14.Fmap", e14.Fmap, []int{56, 69, 71})
+	chk.Ints(tst, "e14.Fmap", e14.Fmap, []int{56, 69, 71})
 }

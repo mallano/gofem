@@ -7,7 +7,8 @@ package shp
 import (
 	"math"
 
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 )
 
 // Ipoint implements integration point data: natural coordinates and weight
@@ -20,10 +21,10 @@ var ipsfactory = make(map[string][]*Ipoint)
 
 // GetIps returns a set of integration points
 func GetIps(geoType string, nips int) (ips []*Ipoint, err error) {
-	key := utl.Sf("%s_%d", geoType, nips)
+	key := io.Sf("%s_%d", geoType, nips)
 	s, ok := ipsfactory[key]
 	if !ok {
-		return nil, utl.Err("cannot find integration point set for geometry type = %s and nips = %d\n", geoType, nips)
+		return nil, chk.Err("cannot find integration point set for geometry type = %s and nips = %d\n", geoType, nips)
 	}
 	return s, nil
 }

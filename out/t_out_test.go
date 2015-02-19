@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/cpmech/gofem/fem"
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
@@ -35,8 +37,8 @@ func onequa_check_u(tst *testing.T, t float64, u, x []float64, tol float64) {
 	ly := 1.0
 	ux := lx * εx * x[0] / lx
 	uy := ly * εy * x[1] / ly
-	utl.CheckScalar(tst, "ux", tol, u[0], ux)
-	utl.CheckScalar(tst, "uy", tol, u[1], uy)
+	chk.Scalar(tst, "ux", tol, u[0], ux)
+	chk.Scalar(tst, "uy", tol, u[1], uy)
 }
 
 func onequa_check_sig(tst *testing.T, t float64, σ, x []float64, tol float64) {
@@ -45,10 +47,10 @@ func onequa_check_sig(tst *testing.T, t float64, σ, x []float64, tol float64) {
 	σx, σy, σz, _, _ := onequa_solution(t)
 
 	// check stresses
-	utl.CheckScalar(tst, "σx ", tol, σ[0], σx)
-	utl.CheckScalar(tst, "σy ", tol, σ[1], σy)
-	utl.CheckScalar(tst, "σz ", tol, σ[2], σz)
-	utl.CheckScalar(tst, "σxy", tol, σ[3], 0)
+	chk.Scalar(tst, "σx ", tol, σ[0], σx)
+	chk.Scalar(tst, "σy ", tol, σ[1], σy)
+	chk.Scalar(tst, "σz ", tol, σ[2], σz)
+	chk.Scalar(tst, "σxy", tol, σ[3], 0)
 }
 
 func Test_out01(tst *testing.T) {
@@ -62,7 +64,7 @@ func Test_out01(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("out01")
+	chk.PrintTitle("out01")
 
 	// run FE simulation
 	if !fem.Start("data/onequa4.sim", true, !utl.Tsilent) {
@@ -102,7 +104,7 @@ func Test_out01(tst *testing.T) {
 	utl.IntAssert(len(TseriesKeys), 6)
 	utl.IntAssert(len(TseriesData), 6)
 	utl.IntAssert(len(TseriesKey2idx), 6)
-	utl.CompareStrs(tst, "TplotKeys", TseriesKeys, []string{"ux", "uy", "sx", "sy", "sz", "sxy"})
+	chk.Strings(tst, "TplotKeys", TseriesKeys, []string{"ux", "uy", "sx", "sy", "sz", "sxy"})
 	utl.IntAssert(TseriesKey2idx["ux"], 0)
 	utl.IntAssert(TseriesKey2idx["uy"], 1)
 	utl.IntAssert(TseriesKey2idx["sx"], 2)
@@ -134,9 +136,9 @@ func Test_out01(tst *testing.T) {
 	iux := TseriesKey2idx["ux"]
 	iuy := TseriesKey2idx["uy"]
 	for i, q := range TseriesData[iux].Qts {
-		utl.PfWhite("\nx=%g\n", q.X)
+		io.PfWhite("\nx=%g\n", q.X)
 		for j, t := range TseriesTimes {
-			utl.Pfyel("t=%g\n", t)
+			io.Pfyel("t=%g\n", t)
 			u := []float64{
 				TseriesRes[iux][i][j],
 				TseriesRes[iuy][i][j],
@@ -152,9 +154,9 @@ func Test_out01(tst *testing.T) {
 	isz := TseriesKey2idx["sz"]
 	isxy := TseriesKey2idx["sxy"]
 	for i, q := range TseriesData[isx].Qts {
-		utl.PfWhite("\nx=%g\n", q.X)
+		io.PfWhite("\nx=%g\n", q.X)
 		for j, t := range TseriesTimes {
-			utl.Pfyel("t=%g\n", t)
+			io.Pfyel("t=%g\n", t)
 			σ := []float64{
 				TseriesRes[isx][i][j],
 				TseriesRes[isy][i][j],
@@ -182,7 +184,7 @@ func Test_out02(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("out02")
+	chk.PrintTitle("out02")
 
 	// run FE simulation
 	if !fem.Start("data/twoqua4.sim", true, !utl.Tsilent) {
@@ -209,7 +211,7 @@ func Test_out02(tst *testing.T) {
 
 	// get second ip coordinates
 	xip := Ipoints[1].X
-	utl.Pfcyan("xip = %v\n", xip)
+	io.Pfcyan("xip = %v\n", xip)
 
 	// cells: commands for reading time-series
 	var cells Locator
@@ -230,7 +232,7 @@ func Test_out02(tst *testing.T) {
 	Tseries("sz", cells, nil)
 	Tseries("sxy", cells, nil)
 
-	utl.Pforan("keys = %v\n", TseriesKeys)
+	io.Pforan("keys = %v\n", TseriesKeys)
 
 	// check slices
 	nnod := 6
@@ -242,7 +244,7 @@ func Test_out02(tst *testing.T) {
 	utl.IntAssert(len(TseriesKeys), nkeys)
 	utl.IntAssert(len(TseriesData), nkeys)
 	utl.IntAssert(len(TseriesKey2idx), nkeys)
-	utl.CompareStrs(tst, "TplotKeys", TseriesKeys, []string{"ux", "uy", "sx", "sy", "sz", "sxy"})
+	chk.Strings(tst, "TplotKeys", TseriesKeys, []string{"ux", "uy", "sx", "sy", "sz", "sxy"})
 	utl.IntAssert(TseriesKey2idx["ux"], 0)
 	utl.IntAssert(TseriesKey2idx["uy"], 1)
 	utl.IntAssert(TseriesKey2idx["sx"], 2)
@@ -274,9 +276,9 @@ func Test_out02(tst *testing.T) {
 	iux := TseriesKey2idx["ux"]
 	iuy := TseriesKey2idx["uy"]
 	for i, q := range TseriesData[iux].Qts {
-		utl.PfWhite("\nx=%g\n", q.X)
+		io.PfWhite("\nx=%g\n", q.X)
 		for j, t := range TseriesTimes {
-			utl.Pfyel("t=%g\n", t)
+			io.Pfyel("t=%g\n", t)
 			u := []float64{
 				TseriesRes[iux][i][j],
 				TseriesRes[iuy][i][j],
@@ -292,9 +294,9 @@ func Test_out02(tst *testing.T) {
 	isz := TseriesKey2idx["sz"]
 	isxy := TseriesKey2idx["sxy"]
 	for i, q := range TseriesData[isx].Qts {
-		utl.PfWhite("\nx=%g\n", q.X)
+		io.PfWhite("\nx=%g\n", q.X)
 		for j, t := range TseriesTimes {
-			utl.Pfyel("t=%g\n", t)
+			io.Pfyel("t=%g\n", t)
 			σ := []float64{
 				TseriesRes[isx][i][j],
 				TseriesRes[isy][i][j],
@@ -323,7 +325,7 @@ func test_out03(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("out03")
+	chk.PrintTitle("out03")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
 	if !Start(datadir+"p01.sim", 0, 0) {
@@ -335,7 +337,7 @@ func test_out03(tst *testing.T) {
 	// get ip
 	n := len(Ipoints)
 	ip := Ipoints[n-1].X
-	utl.Pfcyan("ip = %v\n", ip)
+	io.Pfcyan("ip = %v\n", ip)
 
 	// commands for reading time-series
 	Tseries("pl", At{2.5, 0}, nil)
@@ -351,14 +353,14 @@ func test_out03(tst *testing.T) {
 	utl.IntAssert(len(TseriesKeys), 2)
 	utl.IntAssert(len(TseriesData), 2)
 	utl.IntAssert(len(TseriesKey2idx), 2)
-	utl.CompareStrs(tst, "TplotKeys", TseriesKeys, []string{"pl", "sl"})
+	chk.Strings(tst, "TplotKeys", TseriesKeys, []string{"pl", "sl"})
 	utl.IntAssert(TseriesKey2idx["pl"], 0)
 	utl.IntAssert(TseriesKey2idx["sl"], 1)
 
 	// check quantities
 	for i, dat := range TseriesData {
 		key := TseriesKeys[i]
-		utl.Pforan("key=%v => dat=\n%v\n", key, dat)
+		io.Pforan("key=%v => dat=\n%v\n", key, dat)
 		if key == "pl" {
 			utl.IntAssert(len(dat.Qts), 2)
 			utl.IntAssert(len(dat.Sty), 2)
@@ -382,7 +384,7 @@ func test_out04(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("out04")
+	chk.PrintTitle("out04")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
 	if !Start(datadir+"p01.sim", 0, 0) {
@@ -427,7 +429,7 @@ func test_out05(tst *testing.T) {
 	}()
 
 	utl.Tsilent = false
-	utl.TTitle("out05")
+	chk.PrintTitle("out05")
 
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
 	if !Start(datadir+"p02.sim", 0, 0) {
@@ -452,7 +454,7 @@ func test_out05(tst *testing.T) {
 	}
 
 	//e := Dom.Elems[3].(*fem.ElemP)
-	//utl.Pforan("sl @ ip = %v\n", e.States[3].Sl)
+	//io.Pforan("sl @ ip = %v\n", e.States[3].Sl)
 
 	// show figure
 	if !utl.Tsilent {

@@ -5,8 +5,9 @@
 package mporous
 
 import (
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/num"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Driver run simulations with models for porous media
@@ -90,7 +91,7 @@ func (o *Driver) Run(Pc []float64) (err error) {
 				res, pcNew = stmp.Sl, tmp
 				return
 			}, pcNew)
-			utl.AnaNum(utl.Sf("Ccb @ %.3f,%.4f", pcNew, o.Res[i].Sl), o.TolCcb, Ccb, dnum, o.VerD)
+			chk.PrintAnaNum(io.Sf("Ccb @ %.3f,%.4f", pcNew, o.Res[i].Sl), o.TolCcb, Ccb, dnum, o.VerD)
 
 			// check Ccd
 			Ccd, err = o.Mdl.Ccd(o.Res[i])
@@ -106,7 +107,7 @@ func (o *Driver) Run(Pc []float64) (err error) {
 				res, pcNew = Ccbtmp, tmp
 				return
 			}, pcNew)
-			utl.AnaNum(utl.Sf("Ccd @ %.3f,%.4f", pcNew, o.Res[i].Sl), o.TolCcd, Ccd, dnum, o.VerD)
+			chk.PrintAnaNum(io.Sf("Ccd @ %.3f,%.4f", pcNew, o.Res[i].Sl), o.TolCcd, Ccd, dnum, o.VerD)
 		}
 	}
 	return

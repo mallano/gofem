@@ -14,7 +14,9 @@ import (
 
 	"github.com/cpmech/gofem/mconduct"
 	"github.com/cpmech/gofem/mreten"
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -63,7 +65,7 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 
 	// conductivity and retention models
 	if cnd == nil || lrm == nil {
-		return utl.Err("mporous.Init: conductivity and liquid retention models must be non nil. cnd=%v, lrm=%v\n", cnd, lrm)
+		return chk.Err("mporous.Init: conductivity and liquid retention models must be non nil. cnd=%v, lrm=%v\n", cnd, lrm)
 	}
 	o.Cnd = cnd
 	o.Lrm = lrm
@@ -119,7 +121,7 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 			o.Pkg = p.V
 			kgx, kgy, kgz = p.V, p.V, p.V
 		default:
-			return utl.Err("mporous.Model: parameter named %q is incorrect\n", p.N)
+			return chk.Err("mporous.Model: parameter named %q is incorrect\n", p.N)
 		}
 	}
 
@@ -200,10 +202,10 @@ func (o Model) Update(s *State, Δpl, Δpg, divusNew float64) (err error) {
 	// check results upon exist
 	defer func() {
 		if pc < 0 && s.Sl < 1 {
-			err = utl.Err("inconsistent results: saturation must be equal to one when the capillary pressure is ineffective. pc = %g < 0 and sl = %g < 1 is incorrect", pc, s.Sl)
+			err = chk.Err("inconsistent results: saturation must be equal to one when the capillary pressure is ineffective. pc = %g < 0 and sl = %g < 1 is incorrect", pc, s.Sl)
 		}
 		if s.Sl < slmin {
-			err = utl.Err("inconsistent results: saturation must be greater than minimum saturation. sl = %g < %g is incorrect", s.Sl, slmin)
+			err = chk.Err("inconsistent results: saturation must be greater than minimum saturation. sl = %g < %g is incorrect", s.Sl, slmin)
 		}
 	}()
 
@@ -254,7 +256,7 @@ func (o Model) Update(s *State, Δpl, Δpg, divusNew float64) (err error) {
 
 	// message
 	if o.ShowR {
-		utl.PfYel("%6s%18s%18s%18s%18s%8s\n", "it", "Cc", "sl", "δsl", "r", "ex(r)")
+		io.PfYel("%6s%18s%18s%18s%18s%8s\n", "it", "Cc", "sl", "δsl", "r", "ex(r)")
 	}
 
 	// backward-Euler update
@@ -267,7 +269,7 @@ func (o Model) Update(s *State, Δpl, Δpg, divusNew float64) (err error) {
 		}
 		r = s.Sl - sl0 - Δpc*f
 		if o.ShowR {
-			utl.Pfyel("%6d%18.14f%18.14f%18.14f%18.10e%8d\n", it, f, s.Sl, δsl, r, utl.Expon(r))
+			io.Pfyel("%6d%18.14f%18.14f%18.14f%18.10e%8d\n", it, f, s.Sl, δsl, r, utl.Expon(r))
 		}
 		if math.Abs(r) < o.Itol {
 			break
@@ -279,19 +281,19 @@ func (o Model) Update(s *State, Δpl, Δpg, divusNew float64) (err error) {
 		δsl = -r / (1.0 - Δpc*J)
 		s.Sl += δsl
 		if math.IsNaN(s.Sl) {
-			return utl.Err("NaN found: Δpc=%v f=%v r=%v J=%v sl=%v\n", Δpc, f, r, J, s.Sl)
+			return chk.Err("NaN found: Δpc=%v f=%v r=%v J=%v sl=%v\n", Δpc, f, r, J, s.Sl)
 		}
 	}
 
 	// message
 	if o.ShowR {
-		utl.Pfgrey("  pc0=%.6f  sl0=%.6f  Δpl=%.6f  Δpg=%.6f  Δpc=%.6f\n", pc0, sl0, Δpl, Δpg, Δpc)
-		utl.Pfgrey("  converged with %d iterations\n", it)
+		io.Pfgrey("  pc0=%.6f  sl0=%.6f  Δpl=%.6f  Δpg=%.6f  Δpc=%.6f\n", pc0, sl0, Δpl, Δpg, Δpc)
+		io.Pfgrey("  converged with %d iterations\n", it)
 	}
 
 	// check convergence
 	if it == o.NmaxIt {
-		return utl.Err("saturation updated failed after %d iterations\n", it)
+		return chk.Err("saturation updated failed after %d iterations\n", it)
 	}
 	return
 }
@@ -358,7 +360,7 @@ func GetModel(simfnk, matname string, getnew bool) *Model {
 	}
 
 	// search database
-	key := utl.Sf("%s_%s", simfnk, matname)
+	key := io.Sf("%s_%s", simfnk, matname)
 	if model, ok := _models[key]; ok {
 		return model
 	}

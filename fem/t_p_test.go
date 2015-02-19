@@ -8,6 +8,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -56,7 +58,7 @@ func Test_p01a(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("p01a")
+	chk.PrintTitle("p01a")
 
 	// start simulation
 	if !Start("data/p01.sim", true, !utl.Tsilent) {
@@ -92,13 +94,13 @@ func Test_p01a(tst *testing.T) {
 
 	// check equations
 	nids, eqs := get_nids_eqs(dom)
-	utl.CompareInts(tst, "nids", nids, []int{
+	chk.Ints(tst, "nids", nids, []int{
 		0, 1, 3, 2, 10, 16, 11, 15, 23,
 		5, 4, 18, 12, 17, 24,
 		7, 6, 20, 13, 19, 25,
 		9, 8, 22, 14, 21, 26,
 	})
-	utl.CompareInts(tst, "eqs", eqs, utl.IntRange(27))
+	chk.Ints(tst, "eqs", eqs, utl.IntRange(27))
 
 	// check pmap
 	pmaps := [][]int{
@@ -109,8 +111,8 @@ func Test_p01a(tst *testing.T) {
 	}
 	for i, ele := range dom.Elems {
 		e := ele.(*ElemP)
-		utl.Pforan("e%d.pmap = %v\n", e.Cell.Id, e.Pmap)
-		utl.CompareInts(tst, "pmap", e.Pmap, pmaps[i])
+		io.Pforan("e%d.pmap = %v\n", e.Cell.Id, e.Pmap)
+		chk.Ints(tst, "pmap", e.Pmap, pmaps[i])
 	}
 
 	// constraints
@@ -119,7 +121,7 @@ func Test_p01a(tst *testing.T) {
 	for _, c := range dom.EssenBcs.Bcs {
 		utl.IntAssert(len(c.Eqs), 1)
 		eq := c.Eqs[0]
-		utl.Pforan("key=%v eq=%v\n", c.Key, eq)
+		io.Pforan("key=%v eq=%v\n", c.Key, eq)
 		switch c.Key {
 		case "pl":
 			ct_pl_eqs = append(ct_pl_eqs, eq)
@@ -128,25 +130,25 @@ func Test_p01a(tst *testing.T) {
 		}
 	}
 	sort.Ints(ct_pl_eqs)
-	utl.CompareInts(tst, "equations with pl prescribed", ct_pl_eqs, []int{0, 1, 4})
+	chk.Ints(tst, "equations with pl prescribed", ct_pl_eqs, []int{0, 1, 4})
 
 	// initial values @ nodes
-	utl.Pforan("initial values @ nodes\n")
+	io.Pforan("initial values @ nodes\n")
 	for _, nod := range dom.Nodes {
 		z := nod.Vert.C[1]
 		eq := nod.Dofs[0].Eq
-		utl.CheckScalar(tst, utl.Sf("pl @ %g", z), 1e-17, dom.Sol.Y[eq], 100-10*z)
+		chk.Scalar(tst, io.Sf("pl @ %g", z), 1e-17, dom.Sol.Y[eq], 100-10*z)
 	}
 
 	// intial values @ integration points
-	utl.Pforan("initial values @ integration points\n")
+	io.Pforan("initial values @ integration points\n")
 	for _, ele := range dom.Elems {
 		e := ele.(*ElemP)
 		for idx, ip := range e.IpsElem {
 			s := e.States[idx]
 			z := e.Cell.Shp.IpRealCoords(e.X, ip)[1]
-			utl.CheckScalar(tst, utl.Sf("sl @ %g", z), 1e-17, s.Sl, 1)
-			utl.CheckScalar(tst, utl.Sf("pl @ %g", z), 1e-13, s.Pl, 100-10*z)
+			chk.Scalar(tst, io.Sf("sl @ %g", z), 1e-17, s.Sl, 1)
+			chk.Scalar(tst, io.Sf("pl @ %g", z), 1e-13, s.Pl, 100-10*z)
 		}
 	}
 }
@@ -162,7 +164,7 @@ func Test_p01b(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("p01b")
+	chk.PrintTitle("p01b")
 
 	// run simulation
 	if !Start("data/p01.sim", true, !utl.Tsilent) {
@@ -191,7 +193,7 @@ func Test_p02(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("p02")
+	chk.PrintTitle("p02")
 
 	// run simulation
 	if !Start("data/p02.sim", true, !utl.Tsilent) {

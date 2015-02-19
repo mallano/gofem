@@ -7,7 +7,7 @@ package fem
 import (
 	"github.com/cpmech/gofem/inp"
 
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/io"
 )
 
 // Dof holds information about a degree-of-freedom == solution variable
@@ -18,7 +18,7 @@ type Dof struct {
 
 // String returns the string representation of this Dof
 func (o *Dof) String() string {
-	l := utl.Sf("{ \"Key\" : %s  \"Eq\" : %d } ", o.Key, o.Eq)
+	l := io.Sf("{ \"Key\" : %s  \"Eq\" : %d } ", o.Key, o.Eq)
 	return l
 }
 
@@ -36,7 +36,7 @@ func NewNode(v *inp.Vert) *Node {
 // String returns the string representation of this node
 func (o *Node) String() string {
 	l := "{ "
-	l += utl.Sf(" \"Id\" :  %d ", o.Vert.Id)
+	l += io.Sf(" \"Id\" :  %d ", o.Vert.Id)
 	for _, dof := range o.Dofs {
 		l += dof.String()
 	}

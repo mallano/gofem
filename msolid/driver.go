@@ -5,10 +5,11 @@
 package msolid
 
 import (
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/num"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Driver run simulations with constitutive models for solids
@@ -43,7 +44,7 @@ func (o *Driver) Init(simfnk, modelname string, ndim int, pstress bool, prms fun
 	getnew := false
 	o.model = GetModel(simfnk, "solidmat", modelname, getnew)
 	if o.model == nil {
-		return utl.Err("cannot get model named %q\n", modelname)
+		return chk.Err("cannot get model named %q\n", modelname)
 	}
 	err = o.model.Init(ndim, pstress, prms)
 	if err != nil {
@@ -67,13 +68,13 @@ func (o *Driver) Run(pth *Path) (err error) {
 	case SmallStrainUpdater:
 		eup = m
 	default:
-		return utl.Err("cannot handle large-deformation models yet\n")
+		return chk.Err("cannot handle large-deformation models yet\n")
 	}
 
 	// allocate results arrays
 	nr := 1 + (pth.Size()-1)*pth.Nincs
 	if nr < 2 {
-		return utl.Err(_driver_err04, pth.Size(), pth.Nincs)
+		return chk.Err(_driver_err04, pth.Size(), pth.Nincs)
 	}
 	o.Res = make([]*State, nr)
 	o.Eps = la.MatAlloc(nr, o.nsig)
@@ -130,7 +131,7 @@ func (o *Driver) Run(pth *Path) (err error) {
 				}
 				if err != nil {
 					if !o.Silent {
-						utl.Pfred(_driver_err01, err)
+						io.Pfred(_driver_err01, err)
 					}
 					return
 				}
@@ -153,7 +154,7 @@ func (o *Driver) Run(pth *Path) (err error) {
 				err = sml.Update(o.Res[k], o.Eps[k], Δε)
 				if err != nil {
 					if !o.Silent {
-						utl.Pfred(_driver_err02, err)
+						io.Pfred(_driver_err02, err)
 					}
 					return
 				}
@@ -170,13 +171,13 @@ func (o *Driver) Run(pth *Path) (err error) {
 					firstIt := false
 					err = sml.CalcD(o.D, o.Res[k], firstIt)
 					if err != nil {
-						return utl.Err(_driver_err03, err)
+						return chk.Err(_driver_err03, err)
 					}
 					copy(εold, o.Eps[k-1])
 					copy(εnew, o.Eps[k])
 					has_error := false
 					if o.VerD {
-						utl.Pf("\n")
+						io.Pf("\n")
 					}
 					for i := 0; i < o.nsig; i++ {
 						for j := 0; j < o.nsig; j++ {
@@ -190,14 +191,14 @@ func (o *Driver) Run(pth *Path) (err error) {
 								res, εnew[j] = stmp.Sig[i], tmp
 								return
 							}, εnew[j])
-							err := utl.AnaNum(utl.Sf("D[%d][%d]", i, j), o.TolD, o.D[i][j], dnum, o.VerD)
+							err := chk.PrintAnaNum(io.Sf("D[%d][%d]", i, j), o.TolD, o.D[i][j], dnum, o.VerD)
 							if err != nil {
 								has_error = true
 							}
 						}
 					}
 					if has_error {
-						return utl.Err(_driver_err03, "ana-num comparison failed\n")
+						return chk.Err(_driver_err03, "ana-num comparison failed\n")
 					}
 				}
 				k += 1

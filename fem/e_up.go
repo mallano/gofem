@@ -9,8 +9,8 @@ import (
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
-	"github.com/cpmech/gosl/utl"
 )
 
 // ElemUP represents an element for porous media based on the u-p formulation
@@ -47,8 +47,8 @@ func init() {
 
 		// lbb flag
 		lbb := true
-		if val, found := utl.Keycode(edat.Extra, "nolbb"); found {
-			lbb = !utl.Atob(val)
+		if val, found := io.Keycode(edat.Extra, "nolbb"); found {
+			lbb = !io.Atob(val)
 		}
 
 		// number of u and p nodes
@@ -91,8 +91,8 @@ func init() {
 
 		// flags
 		o.Lbb = true
-		if val, found := utl.Keycode(edat.Extra, "nolbb"); found {
-			o.Lbb = !utl.Atob(val)
+		if val, found := io.Keycode(edat.Extra, "nolbb"); found {
+			o.Lbb = !io.Atob(val)
 		}
 
 		// basis elements

@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"math"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/tsr"
 	"github.com/cpmech/gosl/utl"
 )
@@ -88,15 +90,15 @@ func (o *Path) SetPQstrain(ndim, nincs, niout int, K, G, p0 float64, DP, DQ []fl
 func (o *Path) ReadJson(ndim int, fname string) (err error) {
 
 	// read file
-	b, err := utl.ReadFile(fname)
+	b, err := io.ReadFile(fname)
 	if err != nil {
-		return utl.Err(_path_err11, fname, err)
+		return chk.Err(_path_err11, fname, err)
 	}
 
 	// decode
 	err = json.Unmarshal(b, o)
 	if err != nil {
-		return utl.Err(_path_err12, fname, err)
+		return chk.Err(_path_err12, fname, err)
 	}
 
 	// set additional information
@@ -111,7 +113,7 @@ func (o *Path) ReadTable(ndim, nincs, niout int, fname string, n int, mσ, mε f
 	o.Nincs, o.Niout = nincs, niout
 
 	// read data table
-	keys, d, err := utl.ReadTable(fname)
+	keys, d, err := io.ReadTable(fname)
 	if err != nil {
 		return
 	}
@@ -194,19 +196,19 @@ func (o *Path) init(ndim int) (err error) {
 
 	// check nS
 	if nSx != nSy || nSx != nSz {
-		return utl.Err(_path_err02, nSx, nSy, nSz)
+		return chk.Err(_path_err02, nSx, nSy, nSz)
 	}
 
 	// check for initial stresses
 	if nSx < 1 || nSy < 1 || nSz < 1 {
-		return utl.Err(_path_err03)
+		return chk.Err(_path_err03)
 	}
 
 	// unset hasS if only initial stress were given
 	if nSx == 1 {
 		hasS, allE = false, true
 		if !hasE {
-			return utl.Err(_path_err04)
+			return chk.Err(_path_err04)
 		}
 	}
 
@@ -217,24 +219,24 @@ func (o *Path) init(ndim int) (err error) {
 	}
 	if hasE {
 		if nEx != nEy || nEx != nEz {
-			return utl.Err(_path_err05, nEx, nEy, nEz)
+			return chk.Err(_path_err05, nEx, nEy, nEz)
 		}
 		o.size = nEx
 	}
 	if hasS && hasE {
 		if nEx != nSx || nEy != nSx || nEz != nSx {
-			return utl.Err(_path_err06)
+			return chk.Err(_path_err06)
 		}
 	}
 	if !allS && !allE {
 		if len(o.UseS) != nSx || len(o.UseE) != nSx {
-			return utl.Err(_path_err07, len(o.UseS), len(o.UseE), nSx)
+			return chk.Err(_path_err07, len(o.UseS), len(o.UseE), nSx)
 		}
 	}
 
 	// check size and Nincs
 	if o.size < 2 {
-		return utl.Err(_path_err08)
+		return chk.Err(_path_err08)
 	}
 	if o.Nincs < 1 {
 		o.Nincs = 1
@@ -282,19 +284,19 @@ func CalcΔεElast(Δε []float64, K, G float64, Δp, Δq float64, axsym bool) (
 		if math.Abs(c-1.0) > 1e-15 {
 			d := 3.0 * (4.0*c - 1.0)
 			if d < 0.0 {
-				return 0, 0, utl.Err("discriminant < 0:  c=%v  d=%v", c, d)
+				return 0, 0, chk.Err("discriminant < 0:  c=%v  d=%v", c, d)
 			}
 			α1 := (1.0 + 2.0*c + math.Sqrt(d)) / (2.0 - 2.0*c)
 			α2 := (1.0 + 2.0*c - math.Sqrt(d)) / (2.0 - 2.0*c)
 			α = α1
-			utl.Pfyel("d, α1, α2 = %v, %v, %v\n", d, α1, α2)
+			io.Pfyel("d, α1, α2 = %v, %v, %v\n", d, α1, α2)
 		}
-		utl.Pfyel("c, α = %v, %v\n", c, α)
+		io.Pfyel("c, α = %v, %v\n", c, α)
 		Δεy = Δεv / (1.0 + α)
 		Δεx = α * Δεy
 		Δεz = 0
 	}
-	//utl.Pfpink("Δp=%v, Δq=%v => Δεv=%v, Δεd=%v => Δεx=%v, Δεy=%v, Δεz=%v\n", Δp, Δq, Δεv, Δεd, Δεx, Δεy, Δεz)
+	//io.Pfpink("Δp=%v, Δq=%v => Δεv=%v, Δεd=%v => Δεx=%v, Δεy=%v, Δεz=%v\n", Δp, Δq, Δεv, Δεd, Δεx, Δεy, Δεz)
 	Δε[0] = Δεx
 	Δε[1] = Δεy
 	Δε[2] = Δεz
@@ -302,13 +304,13 @@ func CalcΔεElast(Δε []float64, K, G float64, Δp, Δq float64, axsym bool) (
 	Δεv_ := tsr.M_εv(Δε)
 	Δεd_ := tsr.M_εd(Δε)
 	if math.Abs(Δεv-Δεv_) > 1e-15 {
-		return 0, 0, utl.Err(_path_err09, Δεv, Δεv_)
+		return 0, 0, chk.Err(_path_err09, Δεv, Δεv_)
 	}
 	if Δεd < 0 {
 		Δεd_ = -Δεd_ // allow negative values
 	}
 	if math.Abs(Δεd-Δεd_) > 1e-15 {
-		return 0, 0, utl.Err(_path_err10, Δεd, Δεd_)
+		return 0, 0, chk.Err(_path_err10, Δεd, Δεd_)
 	}
 	return
 }

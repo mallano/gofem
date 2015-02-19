@@ -5,8 +5,8 @@
 package out
 
 import (
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Styles
@@ -15,7 +15,7 @@ type Styles []plt.LineData
 func GetDefaultStyles(qts Quantities) Styles {
 	sty := make([]plt.LineData, len(qts))
 	for i, q := range qts {
-		sty[i].Label = utl.Sf("x=%v", q.X)
+		sty[i].Label = io.Sf("x=%v", q.X)
 	}
 	return sty
 }

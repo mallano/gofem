@@ -7,6 +7,7 @@ package mreten
 import (
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
@@ -24,7 +25,7 @@ func Test_vg01(tst *testing.T) {
 	doplot := false
 	//doplot := true
 	//utl.Tsilent = false
-	utl.TTitle("vg01")
+	chk.PrintTitle("vg01")
 
 	mdl := GetModel("testsim", "mat1", "vg", false)
 	err := mdl.Init(mdl.GetPrms(true))

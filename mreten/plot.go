@@ -5,6 +5,7 @@
 package mreten
 
 import (
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
@@ -21,7 +22,7 @@ func Plot(mdl Model, pc0, sl0, pcf float64, npts int, args1, args2, label string
 			return
 		}
 	}
-	plt.Plot(Pc, Sl, utl.Sf("%s, label='%s', clip_on=0", args1, label))
+	plt.Plot(Pc, Sl, io.Sf("%s, label='%s', clip_on=0", args1, label))
 
 	// plot using Sl function
 	if m, ok := mdl.(Nonrate); ok {
@@ -30,7 +31,7 @@ func Plot(mdl Model, pc0, sl0, pcf float64, npts int, args1, args2, label string
 		for i, pc := range Pc {
 			Sl[i] = m.Sl(pc)
 		}
-		plt.Plot(Pc, Sl, utl.Sf("%s, label='%s_direct', clip_on=0", args2, label))
+		plt.Plot(Pc, Sl, io.Sf("%s, label='%s_direct', clip_on=0", args2, label))
 	}
 	return
 }

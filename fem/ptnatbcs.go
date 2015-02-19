@@ -6,7 +6,7 @@ package fem
 
 import (
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/io"
 )
 
 // PtNaturalBc holds information on point natural boundary conditions such as
@@ -63,7 +63,7 @@ func (o *PtNaturalBcs) List(t float64) (l string) {
 		if i > 0 {
 			l += " "
 		}
-		l += utl.Sf("[%s eq=%d f(%g)=%g x=%v]", bc.Key, bc.Eq, t, bc.Fcn.F(t, bc.X), bc.X)
+		l += io.Sf("[%s eq=%d f(%g)=%g x=%v]", bc.Key, bc.Eq, t, bc.Fcn.F(t, bc.X), bc.X)
 	}
 	return
 }

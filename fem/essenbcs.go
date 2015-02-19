@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/utl"
 )
@@ -160,8 +161,8 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 
 		// get data
 		var α float64
-		if val, found := utl.Keycode(extra, "alp"); found {
-			α = utl.Atof(val) * math.Pi / 180.0
+		if val, found := io.Keycode(extra, "alp"); found {
+			α = io.Atof(val) * math.Pi / 180.0
 		}
 		co, si := math.Cos(α), math.Sin(α)
 
@@ -191,8 +192,8 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 
 		// get γl
 		var γl float64
-		if val, found := utl.Keycode(extra, "gamL"); found {
-			γl = utl.Atof(val)
+		if val, found := io.Keycode(extra, "gamL"); found {
+			γl = io.Atof(val)
 		} else {
 			LogErrCond(true, "gamL (unit weight of liquid) must be provided when using H (hydraulic head) as essential boundary condition")
 			return false // problem
@@ -237,7 +238,7 @@ func (o *EssentialBcs) List(t float64) (l string) {
 		if i > 0 {
 			l += " "
 		}
-		l += utl.Sf("[%s eqs=%v f(%g)=%g]", bc.Key, bc.Eqs, t, bc.Fcn.F(t, nil))
+		l += io.Sf("[%s eqs=%v f(%g)=%g]", bc.Key, bc.Eqs, t, bc.Fcn.F(t, nil))
 	}
 	return
 }

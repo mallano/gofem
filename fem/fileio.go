@@ -11,8 +11,6 @@ import (
 	"io"
 	"os"
 	"path"
-
-	"github.com/cpmech/gosl/utl"
 )
 
 // Encoder defines encoders; e.g. gob or json
@@ -242,13 +240,13 @@ func ReadSum() *Summary {
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
 
 func out_nod_path(tidx, proc int) string {
-	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_nod_%010d.%s", Global.Sim.Data.FnameKey, proc, tidx, Global.Sim.Data.Encoder))
+	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_nod_%010d.%s", Global.Sim.Data.FnameKey, proc, tidx, Global.Sim.Data.Encoder))
 }
 
 func out_ele_path(tidx int) string {
-	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_ele_%010d.%s", Global.Sim.Data.FnameKey, Global.Rank, tidx, Global.Sim.Data.Encoder))
+	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_ele_%010d.%s", Global.Sim.Data.FnameKey, Global.Rank, tidx, Global.Sim.Data.Encoder))
 }
 
 func out_sum_path(proc int) string {
-	return path.Join(Global.Sim.Data.DirOut, utl.Sf("%s_p%d_sum.%s", Global.Sim.Data.FnameKey, proc, Global.Sim.Data.Encoder))
+	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_sum.%s", Global.Sim.Data.FnameKey, proc, Global.Sim.Data.Encoder))
 }

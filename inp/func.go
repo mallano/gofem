@@ -6,7 +6,7 @@ package inp
 
 import (
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
+	"github.com/cpmech/gosl/io"
 )
 
 // FuncData holds function definition
@@ -41,7 +41,7 @@ func (o FuncsData) Get(name string) fun.Func {
 func (o FuncData) String() string {
 	fun.G_extraindent = "  "
 	fun.G_openbrackets = false
-	return utl.Sf("    {\n      \"name\":%q, \"type\":%q, \"prms\" : [\n%v\n    }", o.Name, o.Type, o.Prms)
+	return io.Sf("    {\n      \"name\":%q, \"type\":%q, \"prms\" : [\n%v\n    }", o.Name, o.Type, o.Prms)
 }
 
 // String prints functions
@@ -54,7 +54,7 @@ func (o FuncsData) String() string {
 		if i > 0 {
 			l += ",\n"
 		}
-		l += utl.Sf("%v", f)
+		l += io.Sf("%v", f)
 	}
 	l += "\n  ]"
 	return l

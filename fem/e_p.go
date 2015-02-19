@@ -12,6 +12,7 @@ import (
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/utl"
 )
@@ -116,11 +117,11 @@ func init() {
 
 		// integration points
 		var nip, nipf int
-		if s_nip, found := utl.Keycode(edat.Extra, "nip"); found {
-			nip = utl.Atoi(s_nip)
+		if s_nip, found := io.Keycode(edat.Extra, "nip"); found {
+			nip = io.Atoi(s_nip)
 		}
-		if s_nipf, found := utl.Keycode(edat.Extra, "nipf"); found {
-			nipf = utl.Atoi(s_nipf)
+		if s_nipf, found := io.Keycode(edat.Extra, "nipf"); found {
+			nipf = io.Atoi(s_nipf)
 		}
 		var err error
 		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)
@@ -188,14 +189,14 @@ func init() {
 			}
 
 			// use macaulay function ?
-			if s_mac, found := utl.Keycode(edat.Extra, "mac"); found {
-				o.Macaulay = utl.Atob(s_mac)
+			if s_mac, found := io.Keycode(edat.Extra, "mac"); found {
+				o.Macaulay = io.Atob(s_mac)
 			}
 
 			// coefficient for smooth ramp function
 			o.βrmp = 70.0
-			if s_bet, found := utl.Keycode(edat.Extra, "bet"); found {
-				o.βrmp = utl.Atof(s_bet)
+			if s_bet, found := io.Keycode(edat.Extra, "bet"); found {
+				o.βrmp = io.Atof(s_bet)
 			}
 		}
 
@@ -502,7 +503,7 @@ func (o *ElemP) ramp(x float64) float64 {
 	if o.Macaulay {
 		return utl.Ramp(x)
 	}
-	return utl.Sramp(x, o.βrmp)
+	return fun.Sramp(x, o.βrmp)
 }
 
 // rampderiv returns the ramp function first derivative
@@ -510,5 +511,5 @@ func (o *ElemP) rampderiv(x float64) float64 {
 	if o.Macaulay {
 		return utl.Heav(x)
 	}
-	return utl.SrampD1(x, o.βrmp)
+	return fun.SrampD1(x, o.βrmp)
 }

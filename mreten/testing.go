@@ -8,6 +8,8 @@ import (
 	"math"
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/num"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
@@ -18,7 +20,7 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 
 	// nonrate model
 	nr_mdl, is_nonrate := mdl.(Nonrate)
-	utl.Pforan("is_nonrate = %v\n", is_nonrate)
+	io.Pforan("is_nonrate = %v\n", is_nonrate)
 
 	// for all pc stations
 	Pc := utl.LinSpace(pc0, pcf, npts)
@@ -46,7 +48,7 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 		wet := Pc[i]-Pc[i-1] < 0
 
 		// check Cc = dsl/dpc
-		utl.Pforan("\npc=%g, sl=%g, wetting=%v\n", Pc[i], Sl[i], wet)
+		io.Pforan("\npc=%g, sl=%g, wetting=%v\n", Pc[i], Sl[i], wet)
 		if is_nonrate {
 
 			// analytical Cc
@@ -60,7 +62,7 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 			Cc_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 				return nr_mdl.Sl(x)
 			}, Pc[i], 1e-3)
-			utl.CheckAnaNum(tst, "Cc = ∂sl/∂pc    ", tolCc, Cc_ana, Cc_num, verbose)
+			chk.AnaNum(tst, "Cc = ∂sl/∂pc    ", tolCc, Cc_ana, Cc_num, verbose)
 		}
 
 		// compute all derivatives
@@ -90,39 +92,39 @@ func Check(tst *testing.T, mdl Model, pc0, sl0, pcf float64, npts int, tolCc, to
 			Cctmp, _ := mdl.Cc(x, Sl[i], wet)
 			return Cctmp
 		}, Pc[i], 1e-3)
-		utl.CheckAnaNum(tst, "L  = ∂Cc/∂pc    ", tolD1a, L_ana_A, L_num, verbose)
+		chk.AnaNum(tst, "L  = ∂Cc/∂pc    ", tolD1a, L_ana_A, L_num, verbose)
 
 		// numerical Lx := ∂²Cc/∂pc²
 		Lx_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 			Ltmp, _, _, _, _, _ := mdl.Derivs(x, Sl[i], wet)
 			return Ltmp
 		}, Pc[i], 1e-3)
-		utl.CheckAnaNum(tst, "Lx = ∂²Cc/∂pc²  ", tolD2a, Lx_ana, Lx_num, verbose)
+		chk.AnaNum(tst, "Lx = ∂²Cc/∂pc²  ", tolD2a, Lx_ana, Lx_num, verbose)
 
 		// numerical J := ∂Cc/∂sl (version A)
 		J_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 			Ccval, _ := mdl.Cc(Pc[i], x, wet)
 			return Ccval
 		}, Sl[i], 1e-3)
-		utl.CheckAnaNum(tst, "J  = ∂Cc/∂sl    ", tolD1b, J_ana_A, J_num, verbose)
+		chk.AnaNum(tst, "J  = ∂Cc/∂sl    ", tolD1b, J_ana_A, J_num, verbose)
 
 		// numerical Jx := ∂²Cc/(∂pc ∂sl)
 		Jx_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 			Ltmp, _, _, _, _, _ := mdl.Derivs(Pc[i], x, wet)
 			return Ltmp
 		}, Sl[i], 1e-3)
-		utl.CheckAnaNum(tst, "Jx = ∂²Cc/∂pc∂sl", tolD2b, Jx_ana, Jx_num, verbose)
+		chk.AnaNum(tst, "Jx = ∂²Cc/∂pc∂sl", tolD2b, Jx_ana, Jx_num, verbose)
 
 		// numerical Jy := ∂²Cc/∂sl²
 		Jy_num, _ := num.DerivCentral(func(x float64, args ...interface{}) float64 {
 			Jtmp, _ := mdl.J(Pc[i], x, wet)
 			return Jtmp
 		}, Sl[i], 1e-3)
-		utl.CheckAnaNum(tst, "Jy = ∂²Cc/∂sl²  ", tolD2b, Jy_ana, Jy_num, verbose)
+		chk.AnaNum(tst, "Jy = ∂²Cc/∂sl²  ", tolD2b, Jy_ana, Jy_num, verbose)
 
 		// check A and B derivatives
-		utl.CheckScalar(tst, "L_A == L_B", 1e-17, L_ana_A, L_ana_B)
-		utl.CheckScalar(tst, "J_A == J_B", 1e-17, J_ana_A, J_ana_B)
+		chk.Scalar(tst, "L_A == L_B", 1e-17, L_ana_A, L_ana_B)
+		chk.Scalar(tst, "J_A == J_B", 1e-17, J_ana_A, J_ana_B)
 	}
 }
 

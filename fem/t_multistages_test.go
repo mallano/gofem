@@ -7,6 +7,8 @@ package fem
 import (
 	"testing"
 
+	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
@@ -31,7 +33,7 @@ func Test_fourlayers01(tst *testing.T) {
 	}()
 
 	//utl.Tsilent = false
-	utl.TTitle("fourlayers01")
+	chk.PrintTitle("fourlayers01")
 
 	if !Start("data/fourlayers.sim", true, !utl.Tsilent) {
 		tst.Errorf("test failed\n")
@@ -43,39 +45,39 @@ func Test_fourlayers01(tst *testing.T) {
 		return
 	}
 
-	utl.Pforan("stage # 0\n")
+	io.Pforan("stage # 0\n")
 	if !dom.SetStage(0, Global.Sim.Stages[0]) {
 		tst.Errorf("test failed\n")
 		return
 	}
 	nids, eqs := get_nids_eqs(dom)
-	utl.CompareInts(tst, "nids", nids, []int{1, 2, 14, 12, 0, 10})
-	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 12, 2, 3, 4, 5, 6, 7, 13, 8, 9, 10, 11})
+	chk.Ints(tst, "nids", nids, []int{1, 2, 14, 12, 0, 10})
+	chk.Ints(tst, "eqs", eqs, []int{0, 1, 12, 2, 3, 4, 5, 6, 7, 13, 8, 9, 10, 11})
 
-	utl.Pforan("stage # 1\n")
+	io.Pforan("stage # 1\n")
 	if !dom.SetStage(1, Global.Sim.Stages[1]) {
 		tst.Errorf("test failed\n")
 		return
 	}
 	nids, eqs = get_nids_eqs(dom)
-	utl.CompareInts(tst, "nids", nids, []int{10, 12, 9, 6, 1, 2, 14, 0, 8})
-	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 2, 3, 19, 4, 5, 20, 6, 7, 8, 9, 18, 10, 11, 12, 13, 14, 15, 16, 17})
+	chk.Ints(tst, "nids", nids, []int{10, 12, 9, 6, 1, 2, 14, 0, 8})
+	chk.Ints(tst, "eqs", eqs, []int{0, 1, 2, 3, 19, 4, 5, 20, 6, 7, 8, 9, 18, 10, 11, 12, 13, 14, 15, 16, 17})
 
-	utl.Pforan("stage # 2\n")
+	io.Pforan("stage # 2\n")
 	if !dom.SetStage(2, Global.Sim.Stages[2]) {
 		tst.Errorf("test failed\n")
 		return
 	}
 	nids, eqs = get_nids_eqs(dom)
-	utl.CompareInts(tst, "nids", nids, []int{10, 12, 9, 6, 1, 2, 14, 0, 7, 11, 8, 13})
-	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 2, 3, 25, 4, 5, 26, 6, 7, 8, 9, 24, 10, 11, 12, 13, 14, 15, 16, 17, 27, 18, 19, 20, 21, 22, 23})
+	chk.Ints(tst, "nids", nids, []int{10, 12, 9, 6, 1, 2, 14, 0, 7, 11, 8, 13})
+	chk.Ints(tst, "eqs", eqs, []int{0, 1, 2, 3, 25, 4, 5, 26, 6, 7, 8, 9, 24, 10, 11, 12, 13, 14, 15, 16, 17, 27, 18, 19, 20, 21, 22, 23})
 
-	utl.Pforan("stage # 3\n")
+	io.Pforan("stage # 3\n")
 	if !dom.SetStage(3, Global.Sim.Stages[3]) {
 		tst.Errorf("test failed\n")
 		return
 	}
 	nids, eqs = get_nids_eqs(dom)
-	utl.CompareInts(tst, "nids", nids, []int{7, 13, 5, 4, 10, 12, 9, 6, 1, 2, 14, 11, 3, 0, 8})
-	utl.CompareInts(tst, "eqs", eqs, []int{0, 1, 33, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 31, 12, 13, 32, 14, 15, 16, 17, 30, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29})
+	chk.Ints(tst, "nids", nids, []int{7, 13, 5, 4, 10, 12, 9, 6, 1, 2, 14, 11, 3, 0, 8})
+	chk.Ints(tst, "eqs", eqs, []int{0, 1, 33, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 31, 12, 13, 32, 14, 15, 16, 17, 30, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29})
 }

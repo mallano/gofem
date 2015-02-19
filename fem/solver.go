@@ -10,6 +10,7 @@ import (
 
 	"github.com/cpmech/gofem/inp"
 
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/mpi"
 	"github.com/cpmech/gosl/utl"
@@ -127,10 +128,10 @@ func Run() (runisok bool) {
 	if Global.Verbose {
 		cpu_time := time.Now()
 		defer func() {
-			utl.Pfblue2("cpu time = %v\n", time.Now().Sub(cpu_time))
+			io.Pfblue2("cpu time = %v\n", time.Now().Sub(cpu_time))
 		}()
 		defer func() {
-			utl.Pf("\nfinal time = %g\n", t)
+			io.Pf("\nfinal time = %g\n", t)
 		}()
 	}
 
@@ -194,7 +195,7 @@ func Run() (runisok bool) {
 				d.Sol.T = t
 			}
 			Δtout = DtOut.F(t, nil)
-			//utl.PfYel(">>>  t=%g  Δt=%g  t+Δt=%g  tf=%g  Δtout=%g\n", t, Δt, t+Δt, tf, Δtout)
+			//io.PfYel(">>>  t=%g  Δt=%g  t+Δt=%g  tf=%g  Δtout=%g\n", t, Δt, t+Δt, tf, Δtout)
 
 			// message
 			if Global.Verbose {
@@ -213,7 +214,7 @@ func Run() (runisok bool) {
 
 			// perform output
 			if t >= tout || lasttimestep {
-				//utl.Pfblue2("tout = %v\n", tout)
+				//io.Pfblue2("tout = %v\n", tout)
 				for _, d := range domains {
 					if !d.Out(tidx) {
 						break
@@ -224,7 +225,7 @@ func Run() (runisok bool) {
 				}
 				tout += Δtout
 				tidx += 1
-				//utl.Pforan(">>>  tout=%g  tidx=%d\n", tout, tidx)
+				//io.Pforan(">>>  tout=%g  tidx=%d\n", tout, tidx)
 			}
 		}
 	}
@@ -246,11 +247,11 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 	// message
 	if Global.Sim.Data.ShowR {
-		utl.Pfyel("\n%13s%4s%23s%23s\n", "t", "it", "largFb", "Lδu")
+		io.Pfyel("\n%13s%4s%23s%23s\n", "t", "it", "largFb", "Lδu")
 	}
 	defer func() {
 		if Global.Sim.Data.ShowR {
-			utl.Pf("%13.6e%4d%23.15e%23.15e\n", t, it, largFb, Lδu)
+			io.Pf("%13.6e%4d%23.15e%23.15e\n", t, it, largFb, Lδu)
 		}
 	}()
 
@@ -388,7 +389,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 		// message
 		if Global.Sim.Data.ShowR {
-			utl.Pf("%13.6e%4d%23.15e%23.15e\n", t, it, largFb, Lδu)
+			io.Pf("%13.6e%4d%23.15e%23.15e\n", t, it, largFb, Lδu)
 		}
 
 		// stop if converged on δu
@@ -399,7 +400,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 	// check if iterations diverged
 	if it == Global.Sim.Solver.NmaxIt {
-		utl.PfMag("max number of iterations reached: it = %d\n", it)
+		io.PfMag("max number of iterations reached: it = %d\n", it)
 		return
 	}
 

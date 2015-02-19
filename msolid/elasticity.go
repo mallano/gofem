@@ -5,10 +5,11 @@
 package msolid
 
 import (
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/tsr"
-	"github.com/cpmech/gosl/utl"
 )
 
 // KGcalculator defines calculators of elasticity coefficients K and G
@@ -59,10 +60,10 @@ func (o *SmallElasticity) Init(ndim int, pstress bool, prms fun.Prms) (err error
 		case "K":
 			o.K, has_K = p.V, true
 		}
-		if skgc, found := utl.Keycode(p.Extra, "kgc"); found {
+		if skgc, found := io.Keycode(p.Extra, "kgc"); found {
 			o.Kgc = GetKgc(skgc, prms)
 			if o.Kgc == nil {
-				return utl.Err("cannot find kgc model named %s", skgc)
+				return chk.Err("cannot find kgc model named %s", skgc)
 			}
 			err = o.Kgc.Init(prms)
 			if err != nil {
@@ -88,7 +89,7 @@ func (o *SmallElasticity) Init(ndim int, pstress bool, prms fun.Prms) (err error
 		o.G = Calc_G_from_Knu(o.K, o.Nu)
 		o.L = Calc_l_from_Knu(o.K, o.Nu)
 	default:
-		return utl.Err("combination of Elastic constants is incorrect. options are {E,nu}, {l,G}, {K,G} and {K,nu}\n")
+		return chk.Err("combination of Elastic constants is incorrect. options are {E,nu}, {l,G}, {K,G} and {K,nu}\n")
 	}
 	return
 }
@@ -123,10 +124,10 @@ func (o SmallElasticity) Update(s *State, ε []float64) (err error) {
 func (o SmallElasticity) CalcD(D [][]float64, s *State) (err error) {
 	if o.Pse {
 		if o.Nsig != 4 {
-			return utl.Err("for plane-stress analyses, D must be 4x4. nsig = %d is incorrect.\n", o.Nsig)
+			return chk.Err("for plane-stress analyses, D must be 4x4. nsig = %d is incorrect.\n", o.Nsig)
 		}
 		if o.Kgc != nil {
-			return utl.Err("plane-stress analysis does not work with nonlinear K and G\n")
+			return chk.Err("plane-stress analysis does not work with nonlinear K and G\n")
 		}
 		c := o.E / (1.0 - o.Nu*o.Nu)
 		la.MatFill(D, 0)

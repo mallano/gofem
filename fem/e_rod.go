@@ -10,8 +10,8 @@ import (
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Rod represents a structural rod element (for only axial loads)
@@ -122,8 +122,8 @@ func init() {
 
 		// integration points
 		var nip int
-		if s_nip, found := utl.Keycode(edat.Extra, "nip"); found {
-			nip = utl.Atoi(s_nip)
+		if s_nip, found := io.Keycode(edat.Extra, "nip"); found {
+			nip = io.Atoi(s_nip)
 		}
 		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)
 		if LogErr(err, "GetIps failed") {

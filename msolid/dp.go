@@ -5,9 +5,10 @@
 package msolid
 
 import (
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/tsr"
-	"github.com/cpmech/gosl/utl"
 )
 
 // DruckerPrager implements Drucker-Prager plasticity model
@@ -45,9 +46,9 @@ func (o *DruckerPrager) Init(ndim int, pstress bool, prms fun.Prms) (err error) 
 			o.H = p.V
 		case "E", "nu", "l", "G", "K", "rho":
 		case "c", "phi", "typ":
-			utl.Pfred("dp: warning: handling of 'c', 'phi' and 'typ' parameters is not implemented yet\n")
+			io.Pfred("dp: warning: handling of 'c', 'phi' and 'typ' parameters is not implemented yet\n")
 		default:
-			return utl.Err("dp: parameter named %q is incorrect\n", p.N)
+			return chk.Err("dp: parameter named %q is incorrect\n", p.N)
 		}
 	}
 

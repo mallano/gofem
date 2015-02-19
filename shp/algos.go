@@ -9,8 +9,8 @@ package shp
 import (
 	"math"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/la"
-	"github.com/cpmech/gosl/utl"
 )
 
 // constants
@@ -29,7 +29,7 @@ func (o *Shape) InvMap(r, y []float64, x [][]float64) (err error) {
 
 	// check
 	if o.Gndim == 1 {
-		return utl.Err("Inverse mapping is not implemented in 1D\n")
+		return chk.Err("Inverse mapping is not implemented in 1D\n")
 	}
 
 	var δRnorm float64

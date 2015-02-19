@@ -8,8 +8,8 @@ import (
 	"math"
 	"strings"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
 )
 
 // VanGen implements van Genuchten's model
@@ -42,7 +42,7 @@ func (o *VanGen) Init(prms fun.Prms) (err error) {
 		case "pcmin":
 			o.pcmin = p.V
 		default:
-			return utl.Err("vg: parameter named %q is incorrect\n", p.N)
+			return chk.Err("vg: parameter named %q is incorrect\n", p.N)
 		}
 	}
 	return

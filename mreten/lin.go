@@ -8,8 +8,8 @@ import (
 	"math"
 	"strings"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Lin implements a linear retetion model: sl(pc) := 1 - λ*pc
@@ -40,7 +40,7 @@ func (o *Lin) Init(prms fun.Prms) (err error) {
 		case "slmin":
 			o.slmin = p.V
 		default:
-			return utl.Err("lin: parameter named %q is incorrect\n", p.N)
+			return chk.Err("lin: parameter named %q is incorrect\n", p.N)
 		}
 	}
 	if o.λ < 1e-15 {

@@ -22,6 +22,14 @@ func init() {
 
 func Test_msh01(tst *testing.T) {
 
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
 	//utl.Tsilent = false
 	chk.PrintTitle("msh01")
 
@@ -40,6 +48,14 @@ func Test_msh01(tst *testing.T) {
 
 func Test_sim01(tst *testing.T) {
 
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
 	//utl.Tsilent = false
 	chk.PrintTitle("sim01")
 
@@ -55,6 +71,14 @@ func Test_sim01(tst *testing.T) {
 }
 
 func Test_mat01(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
 
 	//utl.Tsilent = false
 	chk.PrintTitle("mat01")
@@ -79,6 +103,14 @@ func Test_mat01(tst *testing.T) {
 
 func Test_mat02(tst *testing.T) {
 
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
+
 	//utl.Tsilent = false
 	chk.PrintTitle("mat02 (conversion)")
 
@@ -94,6 +126,14 @@ func Test_mat02(tst *testing.T) {
 }
 
 func Test_mat03(tst *testing.T) {
+
+	prevTs := utl.Tsilent
+	defer func() {
+		utl.Tsilent = prevTs
+		if err := recover(); err != nil {
+			tst.Error("[1;31mERROR:", err, "[0m\n")
+		}
+	}()
 
 	//utl.Tsilent = false
 	chk.PrintTitle("mat03 (inverse conversion)")
