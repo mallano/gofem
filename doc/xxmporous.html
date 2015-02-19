@@ -316,7 +316,7 @@ scratchpad for TPM calculations
 		
 			
 			
-			<h2 id="CalcLGS">func <a href="/src/target/tpm.go?s=2617:2693#L83">CalcLGS</a></h2>
+			<h2 id="CalcLGS">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/tpm.go?s=2617:2693#L83">CalcLGS</a></h2>
 			<pre>func CalcLGS(divus <a href="/pkg/builtin/#float64">float64</a>, sta *<a href="#State">State</a>, mdl *<a href="#Model">Model</a>, derivs <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 CalcLGS calculates TPM variables for models with liquid, gas and solid
@@ -328,7 +328,7 @@ CalcLGS calculates TPM variables for models with liquid, gas and solid
 		
 			
 			
-			<h2 id="GetLGcndPrms">func <a href="/src/target/cndm1.go?s=715:743#L24">GetLGcndPrms</a></h2>
+			<h2 id="GetLGcndPrms">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=715:743#L24">GetLGcndPrms</a></h2>
 			<pre>func GetLGcndPrms() <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 			<p>
 GetLGcndPrms gets (an example) of parameters
@@ -340,7 +340,7 @@ GetLGcndPrms gets (an example) of parameters
 		
 			
 			
-			<h2 id="GetPathCycle">func <a href="/src/target/path.go?s=372:433#L1">GetPathCycle</a></h2>
+			<h2 id="GetPathCycle">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/path.go?s=372:433#L1">GetPathCycle</a></h2>
 			<pre>func GetPathCycle(pc0 <a href="/pkg/builtin/#float64">float64</a>, P []<a href="/pkg/builtin/#float64">float64</a>, np <a href="/pkg/builtin/#int">int</a>) []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 GetPathCycle sets a path with cycles of drying-wetting
@@ -356,7 +356,7 @@ np    -- number of points in each branch
 		
 			
 			
-			<h2 id="LogModels">func <a href="/src/target/porous.go?s=9730:9746#L363">LogModels</a></h2>
+			<h2 id="LogModels">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=9730:9746#L363">LogModels</a></h2>
 			<pre>func LogModels()</pre>
 			<p>
 LogModels prints to log information on existent and allocated Models
@@ -369,7 +369,7 @@ LogModels prints to log information on existent and allocated Models
 		
 			
 			
-			<h2 id="Driver">type <a href="/src/target/driver.go?s=319:764#L3">Driver</a></h2>
+			<h2 id="Driver">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/driver.go?s=319:764#L3">Driver</a></h2>
 			<pre>type Driver struct {
 
     <span class="comment">// input</span>
@@ -403,7 +403,7 @@ Driver run simulations with models for porous media
 
 			
 				
-				<h3 id="Driver.Init">func (*Driver) <a href="/src/target/driver.go?s=793:838#L21">Init</a></h3>
+				<h3 id="Driver.Init">func (*Driver) <a href="https://github.com/cpmech/gofem/blob/master/mporous/driver.go?s=793:838#L21">Init</a></h3>
 				<pre>func (o *<a href="#Driver">Driver</a>) Init(mdl *<a href="#Model">Model</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises driver
@@ -414,7 +414,7 @@ Init initialises driver
 				
 			
 				
-				<h3 id="Driver.Run">func (*Driver) <a href="/src/target/driver.go?s=954:1000#L31">Run</a></h3>
+				<h3 id="Driver.Run">func (*Driver) <a href="https://github.com/cpmech/gofem/blob/master/mporous/driver.go?s=954:1000#L31">Run</a></h3>
 				<pre>func (o *<a href="#Driver">Driver</a>) Run(Pc []<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Run runs simulation
@@ -427,7 +427,7 @@ Run runs simulation
 		
 			
 			
-			<h2 id="LGcondM1">type <a href="/src/target/cndm1.go?s=415:665#L4">LGcondM1</a></h2>
+			<h2 id="LGcondM1">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=415:665#L4">LGcondM1</a></h2>
 			<pre>type LGcondM1 struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre>
@@ -448,7 +448,7 @@ LGcondM1 implements the liquid-gas conductivity model # 1
 
 			
 				
-				<h3 id="LGcondM1.DkgrDsg">func (LGcondM1) <a href="/src/target/cndm1.go?s=2148:2193#L92">DkgrDsg</a></h3>
+				<h3 id="LGcondM1.DkgrDsg">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=2148:2193#L92">DkgrDsg</a></h3>
 				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) DkgrDsg(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 DkgrDsl returns ∂kgr/∂sg
@@ -459,7 +459,7 @@ DkgrDsl returns ∂kgr/∂sg
 				
 			
 				
-				<h3 id="LGcondM1.DklrDsl">func (LGcondM1) <a href="/src/target/cndm1.go?s=2040:2085#L87">DklrDsl</a></h3>
+				<h3 id="LGcondM1.DklrDsl">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=2040:2085#L87">DklrDsl</a></h3>
 				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) DklrDsl(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 DklrDsl returns ∂klr/∂sl
@@ -470,7 +470,7 @@ DklrDsl returns ∂klr/∂sl
 				
 			
 				
-				<h3 id="LGcondM1.Init">func (*LGcondM1) <a href="/src/target/cndm1.go?s=1061:1111#L38">Init</a></h3>
+				<h3 id="LGcondM1.Init">func (*LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=1061:1111#L38">Init</a></h3>
 				<pre>func (o *<a href="#LGcondM1">LGcondM1</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises this structure
@@ -481,7 +481,7 @@ Init initialises this structure
 				
 			
 				
-				<h3 id="LGcondM1.Kgr">func (LGcondM1) <a href="/src/target/cndm1.go?s=1936:1977#L82">Kgr</a></h3>
+				<h3 id="LGcondM1.Kgr">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=1936:1977#L82">Kgr</a></h3>
 				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) Kgr(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 Kgr returns kgr
@@ -492,7 +492,7 @@ Kgr returns kgr
 				
 			
 				
-				<h3 id="LGcondM1.Klr">func (LGcondM1) <a href="/src/target/cndm1.go?s=1845:1886#L77">Klr</a></h3>
+				<h3 id="LGcondM1.Klr">func (LGcondM1) <a href="https://github.com/cpmech/gofem/blob/master/mporous/cndm1.go?s=1845:1886#L77">Klr</a></h3>
 				<pre>func (o <a href="#LGcondM1">LGcondM1</a>) Klr(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 Klr returns klr
@@ -505,7 +505,7 @@ Klr returns klr
 		
 			
 			
-			<h2 id="Model">type <a href="/src/target/porous.go?s=1302:2725#L15">Model</a></h2>
+			<h2 id="Model">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=1302:2725#L15">Model</a></h2>
 			<pre>type Model struct {
 
     <span class="comment">// constants</span>
@@ -558,7 +558,7 @@ Model holds material parameters for porous media
 
 			
 				
-				<h3 id="GetModel">func <a href="/src/target/porous.go?s=9291:9348#L343">GetModel</a></h3>
+				<h3 id="GetModel">func <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=9291:9348#L343">GetModel</a></h3>
 				<pre>func GetModel(simfnk, matname <a href="/pkg/builtin/#string">string</a>, getnew <a href="/pkg/builtin/#bool">bool</a>) *<a href="#Model">Model</a></pre>
 				<p>
 GetModel returns (existent or new) model for porous media
@@ -575,7 +575,7 @@ Note: returns nil on errors
 
 			
 				
-				<h3 id="Model.Ccb">func (Model) <a href="/src/target/porous.go?s=7987:8043#L291">Ccb</a></h3>
+				<h3 id="Model.Ccb">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=7987:8043#L291">Ccb</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) Ccb(s *<a href="#State">State</a>) (dsldpc <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Ccb (Cc-bar) returns dsl/dpc consistent with the update method
@@ -588,7 +588,7 @@ Ccb (Cc-bar) returns dsl/dpc consistent with the update method
 				
 			
 				
-				<h3 id="Model.Ccd">func (Model) <a href="/src/target/porous.go?s=8510:8566#L315">Ccd</a></h3>
+				<h3 id="Model.Ccd">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=8510:8566#L315">Ccd</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) Ccd(s *<a href="#State">State</a>) (dCcdpc <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Ccd (Cc-dash) returns dCc/dpc consistent with the update method
@@ -601,7 +601,7 @@ Ccd (Cc-dash) returns dCc/dpc consistent with the update method
 				
 			
 				
-				<h3 id="Model.GetPrms">func (Model) <a href="/src/target/porous.go?s=4362:4407#L133">GetPrms</a></h3>
+				<h3 id="Model.GetPrms">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=4362:4407#L133">GetPrms</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) GetPrms(example <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 				<p>
 GetPrms gets (an example) of parameters
@@ -612,7 +612,7 @@ GetPrms gets (an example) of parameters
 				
 			
 				
-				<h3 id="Model.Init">func (*Model) <a href="/src/target/porous.go?s=2762:2847#L52">Init</a></h3>
+				<h3 id="Model.Init">func (*Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=2762:2847#L52">Init</a></h3>
 				<pre>func (o *<a href="#Model">Model</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>, cnd <a href="/pkg/github.com/cpmech/gofem/mconduct/">mconduct</a>.<a href="/pkg/github.com/cpmech/gofem/mconduct/#Model">Model</a>, lrm <a href="/pkg/github.com/cpmech/gofem/mreten/">mreten</a>.<a href="/pkg/github.com/cpmech/gofem/mreten/#Model">Model</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises this structure
@@ -623,7 +623,7 @@ Init initialises this structure
 				
 			
 				
-				<h3 id="Model.NewState">func (Model) <a href="/src/target/porous.go?s=5157:5225#L162">NewState</a></h3>
+				<h3 id="Model.NewState">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=5157:5225#L162">NewState</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) NewState(pl, pg, divus <a href="/pkg/builtin/#float64">float64</a>) (s *<a href="#State">State</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 NewState creates and initialises a new state structure
@@ -636,7 +636,7 @@ NewState creates and initialises a new state structure
 				
 			
 				
-				<h3 id="Model.Update">func (Model) <a href="/src/target/porous.go?s=5485:5558#L181">Update</a></h3>
+				<h3 id="Model.Update">func (Model) <a href="https://github.com/cpmech/gofem/blob/master/mporous/porous.go?s=5485:5558#L181">Update</a></h3>
 				<pre>func (o <a href="#Model">Model</a>) Update(s *<a href="#State">State</a>, Δpl, Δpg, divusNew <a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Update updates state
@@ -649,7 +649,7 @@ Update updates state
 		
 			
 			
-			<h2 id="State">type <a href="/src/target/states.go?s=665:1123#L1">State</a></h2>
+			<h2 id="State">type <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=665:1123#L1">State</a></h2>
 			<pre>type State struct {
     Pl    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// pl: liquid pressure</span>
     Pg    <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// pg: gas pressure</span>
@@ -682,7 +682,7 @@ State holds state variables for porous media with liquid and gas
 
 			
 				
-				<h3 id="State.GetCopy">func (State) <a href="/src/target/states.go?s=1160:1191#L14">GetCopy</a></h3>
+				<h3 id="State.GetCopy">func (State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1160:1191#L14">GetCopy</a></h3>
 				<pre>func (o <a href="#State">State</a>) GetCopy() *<a href="#State">State</a></pre>
 				<p>
 GetCopy returns a copy of State
@@ -693,7 +693,7 @@ GetCopy returns a copy of State
 				
 			
 				
-				<h3 id="State.Lderivs">func (State) <a href="/src/target/states.go?s=1972:2047#L60">Lderivs</a></h3>
+				<h3 id="State.Lderivs">func (State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1972:2047#L60">Lderivs</a></h3>
 				<pre>func (o <a href="#State">State</a>) Lderivs(m *<a href="#Model">Model</a>) (Cpl, dCpldpl, dklrdpl <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Lderivs calculates derivatives for liquid-only simulations
@@ -705,7 +705,7 @@ see Eq. (A.1) of [2]
 				
 			
 				
-				<h3 id="State.Lvars">func (State) <a href="/src/target/states.go?s=1652:1707#L43">Lvars</a></h3>
+				<h3 id="State.Lvars">func (State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1652:1707#L43">Lvars</a></h3>
 				<pre>func (o <a href="#State">State</a>) Lvars(m *<a href="#Model">Model</a>) (Cpl <a href="/pkg/builtin/#float64">float64</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Lvars calculates variables for liquid-only simulations
@@ -717,7 +717,7 @@ see Eq. (7) of [2]
 				
 			
 				
-				<h3 id="State.Set">func (*State) <a href="/src/target/states.go?s=1340:1375#L29">Set</a></h3>
+				<h3 id="State.Set">func (*State) <a href="https://github.com/cpmech/gofem/blob/master/mporous/states.go?s=1340:1375#L29">Set</a></h3>
 				<pre>func (o *<a href="#State">State</a>) Set(another *<a href="#State">State</a>)</pre>
 				<p>
 Set sets this State with another State
