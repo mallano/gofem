@@ -54,11 +54,15 @@ func (o *State) Set(another *State) {
 
 // Lvars calculates variables for liquid-only simulations
 // see Eq. (7) of [2]
-func (o State) Lvars(m *Model) (Cpl float64, err error) {
+func (o State) Lvars(m *Model) (ρl, Cpl float64, err error) {
 
 	// n variables
 	ns := (1.0 - o.Divus) * o.Ns0
 	nf := 1.0 - ns
+	nl := nf * o.Sl
+
+	// ρ variables
+	ρl = nl * o.RhoL
 
 	// moduli
 	Ccb, err := m.Ccb(&o)
@@ -71,11 +75,15 @@ func (o State) Lvars(m *Model) (Cpl float64, err error) {
 
 // Lderivs calculates derivatives for liquid-only simulations
 // see Eq. (A.1) of [2]
-func (o State) Lderivs(m *Model) (Cpl, dCpldpl, dklrdpl float64, err error) {
+func (o State) Lderivs(m *Model) (ρl, Cpl, dCpldpl, dklrdpl float64, err error) {
 
 	// n variables
 	ns := (1.0 - o.Divus) * o.Ns0
 	nf := 1.0 - ns
+	nl := nf * o.Sl
+
+	// ρ variables
+	ρl = nl * o.RhoL
 
 	// moduli
 	Ccb, err := m.Ccb(&o)
