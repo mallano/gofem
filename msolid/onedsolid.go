@@ -12,22 +12,22 @@ import (
 	"github.com/cpmech/gosl/io"
 )
 
-// OnedModel defines the interface for 1D models
-type OnedModel interface {
-	Init(ndim int, prms fun.Prms) error             // initialises model
-	GetPrms() fun.Prms                              // gets (an example) of parameters
-	CalcD(s *OnedState, firstIt bool) float64       // computes D = dσ_new/dε_new consistent with StressUpdate
-	Update(s *OnedState, ε, Δε float64) (err error) // update state
-	InitIntVars() (*OnedState, error)               // initialises AND allocates internal (secondary) variables
+// OnedSolid defines the interface for 1D models
+type OnedSolid interface {
+	Init(ndim int, prms fun.Prms) error                // initialises model
+	GetPrms() fun.Prms                                 // gets (an example) of parameters
+	InitIntVars() (*OnedState, error)                  // initialises AND allocates internal (secondary) variables
+	Update(s *OnedState, ε, Δε float64) error          // update state
+	CalcD(s *OnedState, firstIt bool) (float64, error) // computes D = dσ_new/dε_new consistent with StressUpdate
 }
 
-// GetOnedModel returns (existent or new) 1D model
+// GetOnedSolid returns (existent or new) 1D model
 //  simfnk    -- unique simulation filename key
 //  matname   -- name of material
 //  modelname -- model name
 //  getnew    -- force a new allocation; i.e. do not use any model found in database
 //  Note: returns nil on errors
-func GetOnedModel(simfnk, matname, modelname string, getnew bool) OnedModel {
+func GetOnedSolid(simfnk, matname, modelname string, getnew bool) OnedSolid {
 
 	// get new model, regardless wheter it exists in database or not
 	if getnew {
@@ -69,7 +69,7 @@ func onedLogModels() {
 }
 
 // onedallocators holds all available oned models; modelname => allocator
-var onedallocators = map[string]func() OnedModel{}
+var onedallocators = map[string]func() OnedSolid{}
 
-// _models holds pre-allocated oned models (internal); key => OnedModel
-var _onedmodels = map[string]OnedModel{}
+// _models holds pre-allocated oned models (internal); key => OnedSolid
+var _onedmodels = map[string]OnedSolid{}

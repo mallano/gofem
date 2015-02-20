@@ -42,7 +42,7 @@ type Rod struct {
 	Umap []int // assembly map (location array/element equations)
 
 	// material model and internal variables
-	Model     msolid.OnedModel
+	Model     msolid.OnedSolid
 	States    []*msolid.OnedState
 	StatesBkp []*msolid.OnedState
 
@@ -103,7 +103,7 @@ func init() {
 			return nil
 		}
 		mdlname := matdata.Model
-		o.Model = msolid.GetOnedModel(Global.Sim.Data.FnameKey, matname, mdlname, false)
+		o.Model = msolid.GetOnedSolid(Global.Sim.Data.FnameKey, matname, mdlname, false)
 		if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
 			return nil
 		}
@@ -242,7 +242,10 @@ func (o Rod) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 					for j := 0; j < ndim; j++ {
 						r := i + m*ndim
 						c := j + n*ndim
-						E := o.Model.CalcD(o.States[idx], firstIt)
+						E, err := o.Model.CalcD(o.States[idx], firstIt)
+						if LogErr(err, "AddToKb") {
+							return
+						}
 						o.K[r][c] += coef * o.A * E * G[m] * G[n] * Jvec[i] * Jvec[j] / J
 						//if !steady {
 						//o.M[r][c] += o.ipe[idx][3] * o.ρ * o.A * o.gu.S[m] * o.gu.S[n] * o.gu.Jvec[i] * o.gu.Jvec[j] / o.gu.J
