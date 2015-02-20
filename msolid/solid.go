@@ -99,6 +99,7 @@ func LogModels() {
 		l += " " + key
 	}
 	log.Println(l)
+	onedLogModels()
 }
 
 // allocators holds all available solid models; modelname => allocator

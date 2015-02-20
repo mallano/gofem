@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package msolid implements models for solids based on continuum mechanics
 package msolid
 
 import (
@@ -50,6 +49,9 @@ func NewState(nsig, nalp, nphi int, large bool) *State {
 //  Note: 1) this and other states must have been pre-allocated with the same sizes
 //        2) this method does not check for errors
 func (o *State) Set(other *State) {
+	o.Dgam = other.Dgam
+	o.Loading = other.Loading
+	o.ApexReturn = other.ApexReturn
 	chk.IntAssert(len(o.Sig), len(other.Sig))
 	chk.IntAssert(len(o.Alp), len(other.Alp))
 	chk.IntAssert(len(o.Phi), len(other.Phi))
