@@ -12,9 +12,10 @@ import (
 	"github.com/cpmech/gosl/io"
 )
 
-func Test_frees01(tst *testing.T) {
+func Test_frees01a(tst *testing.T) {
 
-	chk.PrintTitle("frees01")
+	//verbose()
+	chk.PrintTitle("frees01a")
 
 	// start simulation
 	if !Start("data/frees01.sim", true, chk.Verbose) {
@@ -70,4 +71,25 @@ func Test_frees01(tst *testing.T) {
 	chk.Ints(tst, "e11.Fmap", e11.Fmap, []int{43, 56, 58})
 	e14 := dom.Elems[14].(*ElemP)
 	chk.Ints(tst, "e14.Fmap", e14.Fmap, []int{56, 69, 71})
+}
+
+func Test_frees01b(tst *testing.T) {
+
+	verbose()
+	chk.PrintTitle("frees01b")
+
+	// run simulation
+	if !Start("data/frees01.sim", true, chk.Verbose) {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// make sure to flush log
+	defer End()
+
+	// run simulation
+	if !Run() {
+		tst.Errorf("test failed\n")
+		return
+	}
 }

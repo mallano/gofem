@@ -23,6 +23,8 @@
 package msolid
 
 import (
+	"log"
+
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
 )
@@ -83,6 +85,20 @@ func GetModel(simfnk, matname, modelname string, getnew bool) Solid {
 	model := allocator()
 	_models[key] = model
 	return model
+}
+
+// LogModels prints to log information on existent and allocated Models
+func LogModels() {
+	l := "msolid: available:"
+	for name, _ := range allocators {
+		l += " " + name
+	}
+	log.Println(l)
+	l = "msolid: allocated:"
+	for key, _ := range _models {
+		l += " " + key
+	}
+	log.Println(l)
 }
 
 // allocators holds all available solid models; modelname => allocator

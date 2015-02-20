@@ -6,7 +6,7 @@
     { "name":"Hl", "type":"cte", "prms":[{"n":"c", "v":10}] },
     { "name":"Hr", "type":"rmp", "prms":[
       { "n":"ca", "v":10  },
-      { "n":"cb", "v":2   },
+      { "n":"cb", "v":10  },
       { "n":"ta", "v":0   },
       { "n":"tb", "v":1e3 }]
     },
@@ -16,7 +16,7 @@
     {
       "mshfile"   : "frees01.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"soil1", "type":"p" }
+        { "tag":-1, "mat":"porous1", "type":"p" }
       ]
     }
   ],
@@ -33,9 +33,9 @@
         { "tag":-1, "keys":["g"], "funcs":["grav"] }
       ],
       "control" : {
-        "tf"    : 1e3,
+        "tf"    : 10,
         "dt"    : 10,
-        "dtout" : 1000
+        "dtout" : 10
       }
     }
   ]

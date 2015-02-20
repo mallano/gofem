@@ -381,10 +381,11 @@ func GetModel(simfnk, matname string, getnew bool) *Model {
 
 // LogModels prints to log information on existent and allocated Models
 func LogModels() {
-	log.Printf("\nmporous: allocated models:")
+	l := "mporous: allocated:"
 	for key, _ := range _models {
-		log.Printf(" " + key)
+		l += " " + key
 	}
+	log.Println(l)
 }
 
 // _models holds pre-allocated models

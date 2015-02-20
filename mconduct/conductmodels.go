@@ -57,14 +57,16 @@ func GetModel(simfnk, matname, modelname string, getnew bool) Model {
 
 // LogModels prints to log information on existent and allocated Models
 func LogModels() {
-	log.Printf("mconduct: available models:")
+	l := "mconduct: available:"
 	for name, _ := range allocators {
-		log.Printf(" " + name)
+		l += " " + name
 	}
-	log.Printf("\nmconduct: allocated models:")
+	log.Println(l)
+	l = "mconduct: allocated:"
 	for key, _ := range _models {
-		log.Printf(" " + key)
+		l += " " + key
 	}
+	log.Println(l)
 }
 
 // allocators holds all available models

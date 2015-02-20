@@ -2,60 +2,43 @@
   "functions" : [],
   "materials" : [
     {
-      "name"  : "sld1",
-      "desc"  : "",
-      "model" : "lin-elast",
+      "name"  : "pm1",
+      "model" : "porous",
       "prms"  : [
-        {"n":"E",   "v":3000, "u":"kPa"},
-        {"n":"nu",  "v":0.3,  "u":"-"},
-        {"n":"rho", "v":2.7,  "u":"Mg/m3"}
+        {"n":"nf0",   "v":0.3,     "u":"-"},
+        {"n":"RhoL0", "v":1,       "u":"Mg/m3"},
+        {"n":"RhoS0", "v":2.7,     "u":"Mg/m3"},
+        {"n":"BulkL", "v":2.2e+06, "u":"kPa"},
+        {"n":"gref",  "v":10,      "u":"m/s2"},
+        {"n":"kl",    "v":1,       "u":"m/s"}
       ]
     },
     {
-      "name"  : "fld1",
-      "desc"  : "",
-      "model" : "fluid",
+      "name"  : "cnd1",
+      "model" : "m1",
       "prms"  : [
-        {"n":"nf",    "v":0.3,     "u":"-"},
-        {"n":"kl",    "v":1,       "u":"m/s"},
-        {"n":"kg",    "v":3e-07,   "u":"m/s"},
-        {"n":"alpL",  "v":0.001,   "u":"-"},
-        {"n":"lam0L", "v":0.001,   "u":"-"},
-        {"n":"lam1L", "v":3,       "u":"-"},
-        {"n":"betaL", "v":6,       "u":"-"},
-        {"n":"betaG", "v":4,       "u":"-"},
-        {"n":"gref",  "v":10,      "u":"m/s2"},
-        {"n":"RhoL",  "v":1,       "u":"Mg/m3"},
-        {"n":"RhoG",  "v":0.001,   "u":"Mg/m3"},
-        {"n":"Kl",    "v":2.2e+06, "u":"kPa"},
-        {"n":"RthG",  "v":1,       "u":"kPa"}
+        {"n":"lam0L", "v":0.001, "u":"-"},
+        {"n":"lam1L", "v":3,     "u":"-"},
+        {"n":"alpL",  "v":0.001, "u":"-"},
+        {"n":"betL",  "v":6,     "u":"-"}
       ]
     },
     {
       "name"  : "lrm1",
-      "desc"  : "",
-      "model" : "lrm-m1",
+      "model" : "ref-m1",
       "prms"  : [
-        {"n":"lamD",  "v":3    },
-        {"n":"lamW",  "v":5    },
+        {"n":"lamd",  "v":3    },
         {"n":"xrd",   "v":0.6  },
-        {"n":"xrw",   "v":0.6  },
         {"n":"yr",    "v":0.001},
-        {"n":"betD",  "v":3    },
-        {"n":"betW",  "v":3    },
-        {"n":"bet1",  "v":3    },
+        {"n":"betd",  "v":3    },
         {"n":"bet2",  "v":3    },
-        {"n":"alp",   "v":0.5  },
         {"n":"nowet", "v":1    }
       ]
     },
     {
-      "name"  : "soil1",
-      "desc"  : "",
+      "name"  : "porous1",
       "model" : "group",
-      "prms"  : [
-
-      ]
+      "extra" : "!l:lrm1 !c:cnd1 !p:pm1"
     }
   ]
 }

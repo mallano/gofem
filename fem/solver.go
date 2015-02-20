@@ -9,6 +9,10 @@ import (
 	"time"
 
 	"github.com/cpmech/gofem/inp"
+	"github.com/cpmech/gofem/mconduct"
+	"github.com/cpmech/gofem/mporous"
+	"github.com/cpmech/gofem/mreten"
+	"github.com/cpmech/gofem/msolid"
 
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
@@ -169,6 +173,12 @@ func Run() (runisok bool) {
 			return
 		}
 		tidx += 1
+
+		// log models
+		mconduct.LogModels()
+		mreten.LogModels()
+		mporous.LogModels()
+		msolid.LogModels()
 
 		// time loop
 		var Δt, Δtout float64

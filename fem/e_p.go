@@ -304,7 +304,7 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	}
 
 	// external 'fluxes'
-	return o.add_fluxloads_to_rhs(fb, sol)
+	return o.add_natbcs_to_rhs(fb, sol)
 }
 
 // AddToKb adds element K to global Jacobian matrix Kb
@@ -497,7 +497,20 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 }
 
 // add_fluxloads_to_rhs adds surfaces loads to rhs
-func (o ElemP) add_fluxloads_to_rhs(fb []float64, sol *Solution) (ok bool) {
+func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
+
+	// compute surface integral
+	for _, nbc := range o.NatBcs {
+		for _, ip := range o.IpsFace {
+			if LogErr(o.Cell.Shp.CalcAtFaceIp(o.X, ip, nbc.IdxFace), "add_natbcs_to_rhs") {
+				return
+			}
+			switch nbc.Key {
+			case "seepP", "seepH":
+				io.Pf("nbc = %v\n", nbc.Key)
+			}
+		}
+	}
 	return true
 }
 
