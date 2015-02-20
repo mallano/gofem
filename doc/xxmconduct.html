@@ -164,7 +164,7 @@ package mconduct implements models for liquid and gas conductivity in porous med
 		
 			
 			
-			<h2 id="LogModels">func <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=1680:1696#L49">LogModels</a></h2>
+			<h2 id="LogModels">func <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=1682:1698#L49">LogModels</a></h2>
 			<pre>func LogModels()</pre>
 			<p>
 LogModels prints to log information on existent and allocated Models
@@ -177,7 +177,7 @@ LogModels prints to log information on existent and allocated Models
 		
 			
 			
-			<h2 id="M1">type <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=320:564#L3">M1</a></h2>
+			<h2 id="M1">type <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=322:566#L3">M1</a></h2>
 			<pre>type M1 struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }</pre>
@@ -198,7 +198,7 @@ M1 implements the liquid-gas conductivity model # 1
 
 			
 				
-				<h3 id="M1.DkgrDsg">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=2120:2159#L96">DkgrDsg</a></h3>
+				<h3 id="M1.DkgrDsg">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=2122:2161#L96">DkgrDsg</a></h3>
 				<pre>func (o <a href="#M1">M1</a>) DkgrDsg(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 DkgrDsl returns ∂kgr/∂sg
@@ -209,7 +209,7 @@ DkgrDsl returns ∂kgr/∂sg
 				
 			
 				
-				<h3 id="M1.DklrDsl">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=2018:2057#L91">DklrDsl</a></h3>
+				<h3 id="M1.DklrDsl">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=2020:2059#L91">DklrDsl</a></h3>
 				<pre>func (o <a href="#M1">M1</a>) DklrDsl(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 DklrDsl returns ∂klr/∂sl
@@ -220,7 +220,7 @@ DklrDsl returns ∂klr/∂sl
 				
 			
 				
-				<h3 id="M1.GetPrms">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=702:744#L28">GetPrms</a></h3>
+				<h3 id="M1.GetPrms">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=704:746#L28">GetPrms</a></h3>
 				<pre>func (o <a href="#M1">M1</a>) GetPrms(example <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a></pre>
 				<p>
 GetPrms gets (an example) of parameters
@@ -231,7 +231,7 @@ GetPrms gets (an example) of parameters
 				
 			
 				
-				<h3 id="M1.Init">func (*M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=1062:1106#L42">Init</a></h3>
+				<h3 id="M1.Init">func (*M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=1064:1108#L42">Init</a></h3>
 				<pre>func (o *<a href="#M1">M1</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Init initialises this structure
@@ -242,7 +242,7 @@ Init initialises this structure
 				
 			
 				
-				<h3 id="M1.Kgr">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=1920:1955#L86">Kgr</a></h3>
+				<h3 id="M1.Kgr">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=1922:1957#L86">Kgr</a></h3>
 				<pre>func (o <a href="#M1">M1</a>) Kgr(sg <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 Kgr returns kgr
@@ -253,7 +253,7 @@ Kgr returns kgr
 				
 			
 				
-				<h3 id="M1.Klr">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=1835:1870#L81">Klr</a></h3>
+				<h3 id="M1.Klr">func (M1) <a href="https://github.com/cpmech/gofem/blob/master/mconduct/m1.go?s=1837:1872#L81">Klr</a></h3>
 				<pre>func (o <a href="#M1">M1</a>) Klr(sl <a href="/pkg/builtin/#float64">float64</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 				<p>
 Klr returns klr
@@ -266,7 +266,7 @@ Klr returns klr
 		
 			
 			
-			<h2 id="Model">type <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=406:794#L6">Model</a></h2>
+			<h2 id="Model">type <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=408:796#L6">Model</a></h2>
 			<pre>type Model interface {
     Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>) <a href="/pkg/builtin/#error">error</a>      <span class="comment">// Init initialises this structure</span>
     GetPrms(example <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a> <span class="comment">// gets (an example) of parameters</span>
@@ -290,7 +290,7 @@ Model defines liquid-gas conductivity models
 
 			
 				
-				<h3 id="GetModel">func <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=1080:1147#L21">GetModel</a></h3>
+				<h3 id="GetModel">func <a href="https://github.com/cpmech/gofem/blob/master/mconduct/conductmodels.go?s=1082:1149#L21">GetModel</a></h3>
 				<pre>func GetModel(simfnk, matname, modelname <a href="/pkg/builtin/#string">string</a>, getnew <a href="/pkg/builtin/#bool">bool</a>) <a href="#Model">Model</a></pre>
 				<p>
 GetModel returns (existent or new) conductivity model
@@ -321,7 +321,7 @@ Note: returns nil on errors
 <br /><br />
 <hr>
 <pre class="copyright">
-Copyright (c) 2015, Dorival Pedroso & Raul Durand
+Copyright (c) 2015, Dorival Pedroso and Raul Durand
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
