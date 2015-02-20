@@ -47,7 +47,7 @@ func (o RjointM1) GetPrms() fun.Prms {
 
 // InitIntVars initialises internal (secondary) variables
 func (o RjointM1) InitIntVars() (s *OnedState, err error) {
-	s = NewOnedState(1, 0) // 1: ωpb
+	s = NewOnedState(1, 2) // 1:{ωpb}  2:{qn1,qn2}
 	return
 }
 
