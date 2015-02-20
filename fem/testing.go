@@ -165,7 +165,7 @@ func TestingDefineDebugKb(tst *testing.T, eid int, tol float64, verb bool) {
 		ele := d.Elems[eid]
 		if e, ok := ele.(*ElemP); ok {
 			Ymap = e.Pmap
-			K = e.K
+			K = e.Kpp
 			nip := len(e.IpsElem)
 			p_StatesBkp = make([]*mporous.State, nip)
 			for i := 0; i < nip; i++ {

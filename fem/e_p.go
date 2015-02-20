@@ -5,6 +5,8 @@
 package fem
 
 import (
+	"math"
+
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/mconduct"
 	"github.com/cpmech/gofem/mporous"
@@ -52,15 +54,17 @@ type ElemP struct {
 	NatBcs []*NaturalBc // natural boundary conditions
 
 	// flux boundary conditions (qb == \bar{q})
-	ρlNod  []float64   // [nverts] ρl extrapolted to nodes => if has qb (flux)
-	CplNod [][]float64 // [nverts][nverts] Cpl extrapolted to nodes => if has qb (flux)
-	Emat   [][]float64 // [nverts][nips] extrapolator matrix
+	ρl_ex     []float64   // [nverts] ρl extrapolted to nodes => if has qb (flux)
+	dρldpl_ex [][]float64 // [nverts][nverts] Cpl extrapolted to nodes => if has qb (flux)
+	Emat      [][]float64 // [nverts][nips] extrapolator matrix
+	DoExtrap  bool        // do extrapolation of ρl and Cpl => for use with flux and seepage conditions
 
 	// seepage face (seepP or seepH)
+	Nf         int     // number of fl variables
 	HasSeep    bool    // indicates if this element has seepage faces
 	Vid2seepId []int   // [nverts] maps local vertex id to index in Fmap
-	SeepId2vid []int   // [nseep] maps seepage face variable id to local vertex id
-	Fmap       []int   // [nseep] map of "fl" variables (seepage face)
+	SeepId2vid []int   // [nf] maps seepage face variable id to local vertex id
+	Fmap       []int   // [nf] map of "fl" variables (seepage face)
 	Macaulay   bool    // use discrete ramp function instead of smooth ramp
 	βrmp       float64 // coefficient for Sramp
 	κ          float64 // κ coefficient to normalise equation for seepage face modelling
@@ -74,7 +78,10 @@ type ElemP struct {
 	gpl []float64   // [ndim] ∇pl: gradient of liquid pressure
 	ρwl []float64   // [ndim] ρl*wl: weighted liquid relative velocity
 	tmp []float64   // [ndim] temporary (auxiliary) vector
-	K   [][]float64 // [np][np] K := dRpl/dpl consistent tangent matrix
+	Kpp [][]float64 // [np][np] Kpp := dRpl/dpl consistent tangent matrix
+	Kpf [][]float64 // [np][nf] Kpf := dRpl/dfl consistent tangent matrix
+	Kfp [][]float64 // [nf][np] Kfp := dRfl/dpl consistent tangent matrix
+	Kff [][]float64 // [nf][nf] Kff := dRfl/dfl consistent tangent matrix
 }
 
 // initialisation ///////////////////////////////////////////////////////////////////////////////////
@@ -188,15 +195,15 @@ func init() {
 		o.gpl = make([]float64, o.Ndim)
 		o.ρwl = make([]float64, o.Ndim)
 		o.tmp = make([]float64, o.Ndim)
-		o.K = la.MatAlloc(o.Np, o.Np)
+		o.Kpp = la.MatAlloc(o.Np, o.Np)
 
 		// seepage face
-		nseep := len(o.Cell.SeepVerts)
-		if nseep > 0 {
+		o.Nf = len(o.Cell.SeepVerts)
+		if o.Nf > 0 {
 			o.HasSeep = true
 			o.SeepId2vid = utl.IntBoolMapSort(o.Cell.SeepVerts)
 			o.Vid2seepId = utl.IntVals(o.Cell.Shp.Nverts, -1)
-			o.Fmap = make([]int, nseep)
+			o.Fmap = make([]int, o.Nf)
 			for μ, m := range o.SeepId2vid {
 				o.Vid2seepId[m] = μ
 			}
@@ -207,7 +214,7 @@ func init() {
 			}
 
 			// coefficient for smooth ramp function
-			o.βrmp = 70.0
+			o.βrmp = math.Ln2 / 0.01
 			if s_bet, found := io.Keycode(edat.Extra, "bet"); found {
 				o.βrmp = io.Atof(s_bet)
 			}
@@ -217,6 +224,11 @@ func init() {
 			if s_kap, found := io.Keycode(edat.Extra, "kap"); found {
 				o.κ = io.Atof(s_kap)
 			}
+
+			// allocate coupling matrices
+			o.Kpf = la.MatAlloc(o.Np, o.Nf)
+			o.Kfp = la.MatAlloc(o.Nf, o.Np)
+			o.Kff = la.MatAlloc(o.Nf, o.Nf)
 		}
 
 		// return new element
@@ -254,12 +266,13 @@ func (o *ElemP) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok
 	if key == "qb" || key == "seepP" || key == "seepH" {
 		nv := o.Cell.Shp.Nverts
 		nip := len(o.IpsElem)
-		o.ρlNod = make([]float64, nv)
-		o.CplNod = la.MatAlloc(nv, nv)
+		o.ρl_ex = make([]float64, nv)
+		o.dρldpl_ex = la.MatAlloc(nv, nv)
 		o.Emat = la.MatAlloc(nv, nip)
-		//if LogErr(o.Cell.Shp.Extrapolator(o.Emat, o.IpsElem), "SetNatBcs") {
-		//return
-		//}
+		o.DoExtrap = true
+		if LogErr(o.Cell.Shp.Extrapolator(o.Emat, o.IpsElem), "SetNatBcs") {
+			return
+		}
 	}
 	return true
 }
@@ -287,10 +300,15 @@ func (o *ElemP) InterpStarVars(sol *Solution) (ok bool) {
 // AddToRhs adds -R to global residual vector fb
 func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
+	// clear variables
+	if o.DoExtrap {
+		la.VecFill(o.ρl_ex, 0)
+	}
+
 	// for each integration point
 	β1 := Global.DynCoefs.β1
 	nverts := o.Cell.Shp.Nverts
-	var coef, plt, klr, RhoL, Cpl float64
+	var coef, plt, klr, RhoL, ρl, Cpl float64
 	var err error
 	for idx, ip := range o.IpsElem {
 
@@ -304,13 +322,12 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		plt = β1*o.pl - o.ψl[idx]
 		klr = o.Mdl.Cnd.Klr(o.States[idx].Sl)
 		RhoL = o.States[idx].RhoL
-		Cpl, err = o.States[idx].Lvars(o.Mdl)
+		ρl, Cpl, err = o.States[idx].Lvars(o.Mdl)
 		if LogErr(err, "calc of tpm variables failed") {
 			return
 		}
 
-		// compute ρwl
-		// see Eq. (6) of [1]
+		// compute ρwl. see Eq. (6) of [1]
 		for i := 0; i < o.Ndim; i++ {
 			o.ρwl[i] = 0
 			for j := 0; j < o.Ndim; j++ {
@@ -318,32 +335,45 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 			}
 		}
 
-		// add negative of residual term to fb
-		// see Eqs. (12) and (17) of [1]
+		// add negative of residual term to fb. see Eqs. (12) and (17) of [1]
 		for m := 0; m < nverts; m++ {
 			r := o.Pmap[m]
 			fb[r] -= coef * S[m] * Cpl * plt
 			for i := 0; i < o.Ndim; i++ {
 				fb[r] += coef * G[m][i] * o.ρwl[i] // += coef * div(ρl*wl)
 			}
+			if o.DoExtrap { // Eq. (19)
+				o.ρl_ex[m] += o.Emat[m][idx] * ρl
+			}
 		}
 	}
 
-	// external 'fluxes'
-	return o.add_natbcs_to_rhs(fb, sol)
+	// contribution from natural boundary conditions
+	if len(o.NatBcs) > 0 {
+		return o.add_natbcs_to_rhs(fb, sol)
+	}
+	return true
 }
 
 // AddToKb adds element K to global Jacobian matrix Kb
 func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// clear matrices
-	la.MatFill(o.K, 0)
+	la.MatFill(o.Kpp, 0)
+	nverts := o.Cell.Shp.Nverts
+	if o.DoExtrap {
+		for i := 0; i < nverts; i++ {
+			o.ρl_ex[i] = 0
+			for j := 0; j < nverts; j++ {
+				o.dρldpl_ex[i][j] = 0
+			}
+		}
+	}
 
 	// for each integration point
 	Cl := o.Mdl.Cl
 	β1 := Global.DynCoefs.β1
-	nverts := o.Cell.Shp.Nverts
-	var coef, plt, klr, RhoL, Cpl, dCpldpl, dklrdpl float64
+	var coef, plt, klr, RhoL, ρl, Cpl, dCpldpl, dklrdpl float64
 	var err error
 	for idx, ip := range o.IpsElem {
 
@@ -357,32 +387,64 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 		plt = β1*o.pl - o.ψl[idx]
 		klr = o.Mdl.Cnd.Klr(o.States[idx].Sl)
 		RhoL = o.States[idx].RhoL
-		Cpl, dCpldpl, dklrdpl, err = o.States[idx].Lderivs(o.Mdl)
+		ρl, Cpl, dCpldpl, dklrdpl, err = o.States[idx].Lderivs(o.Mdl)
 		if LogErr(err, "calc of tpm derivatives failed") {
 			return
 		}
 
-		// K := dRpl/dpl
-		// see Eqs. (18), (A.2) and (A.3) of [1]
+		// Kpp := dRpl/dpl. see Eqs. (18), (A.2) and (A.3) of [1]
 		for n := 0; n < nverts; n++ {
 			for j := 0; j < o.Ndim; j++ {
 				o.tmp[j] = S[n]*dklrdpl*(RhoL*o.g[j]-o.gpl[j]) + klr*(S[n]*Cl*o.g[j]-G[n][j])
 			}
 			for m := 0; m < nverts; m++ {
-				o.K[m][n] += coef * S[m] * S[n] * (dCpldpl*plt + β1*Cpl)
+				o.Kpp[m][n] += coef * S[m] * S[n] * (dCpldpl*plt + β1*Cpl)
 				for i := 0; i < o.Ndim; i++ {
 					for j := 0; j < o.Ndim; j++ {
-						o.K[m][n] -= coef * G[m][i] * o.Mdl.Klsat[i][j] * o.tmp[j]
+						o.Kpp[m][n] -= coef * G[m][i] * o.Mdl.Klsat[i][j] * o.tmp[j]
 					}
 				}
+				if o.DoExtrap { // inner summation term in Eq. (22)
+					o.dρldpl_ex[m][n] += o.Emat[m][idx] * Cpl * S[n]
+				}
+			}
+			if o.DoExtrap { // Eq. (19)
+				o.ρl_ex[n] += o.Emat[n][idx] * ρl
 			}
 		}
 	}
 
-	// add to sparse matrix Kb
-	for i, I := range o.Pmap {
-		for j, J := range o.Pmap {
-			Kb.Put(I, J, o.K[i][j])
+	// add to Kb
+	if len(o.NatBcs) > 0 {
+
+		// contribution from natural boundary conditions
+		if !o.add_natbcs_to_jac(sol) {
+			return
+		}
+
+		// add to sparse matrix Kb
+		for i, I := range o.Pmap {
+			for j, J := range o.Pmap {
+				Kb.Put(I, J, o.Kpp[i][j])
+			}
+			for j, J := range o.Fmap {
+				Kb.Put(I, J, o.Kpf[i][j])
+				Kb.Put(J, I, o.Kfp[j][i])
+			}
+		}
+		for i, I := range o.Fmap {
+			for j, J := range o.Fmap {
+				Kb.Put(I, J, o.Kff[i][j])
+			}
+		}
+
+	} else {
+
+		// add to sparse matrix Kb
+		for i, I := range o.Pmap {
+			for j, J := range o.Pmap {
+				Kb.Put(I, J, o.Kpp[i][j])
+			}
 		}
 	}
 	return true
@@ -528,7 +590,7 @@ func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, z, pl, fl float64) {
 	iz := o.Ndim - 1 // index of z-coordinate (elevation)
 	for i, m := range o.Cell.Shp.FaceLocalV[fidx] {
 		μ := o.Vid2seepId[m]
-		ρl += Sf[i] * o.ρlNod[m]
+		ρl += Sf[i] * o.ρl_ex[m]
 		z += Sf[i] * o.X[iz][m]
 		pl += Sf[i] * sol.Y[o.Pmap[m]]
 		fl += Sf[i] * sol.Y[o.Fmap[μ]]
@@ -536,12 +598,28 @@ func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, z, pl, fl float64) {
 	return
 }
 
-// add_fluxloads_to_rhs adds surfaces loads to rhs
+// ramp implements the ramp function
+func (o *ElemP) ramp(x float64) float64 {
+	if o.Macaulay {
+		return fun.Ramp(x)
+	}
+	return fun.Sramp(x, o.βrmp)
+}
+
+// rampderiv returns the ramp function first derivative
+func (o *ElemP) rampD1(x float64) float64 {
+	if o.Macaulay {
+		return fun.Heav(x)
+	}
+	return fun.SrampD1(x, o.βrmp)
+}
+
+// add_natbcs_to_rhs adds natural boundary conditions to rhs
 func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 	// compute surface integral
 	var tmp float64
-	var ρl, z, pl, fl, plmax, g, rx, rf float64
+	var ρl, z, pl, fl, plmax, g, rmp, rx, rf float64
 	for _, nbc := range o.NatBcs {
 
 		// temporary value == function evaluation
@@ -571,14 +649,17 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 				}
 
 				// compute residuals
-				g = pl - plmax             // Eq. (24)
-				rx = ρl * o.ramp(fl+o.κ*g) // Eq. (30)
-				rf = fl - o.ramp(fl+o.κ*g) // Eq. (26)
-				io.Pfyel("g=%v fl=%v rpl=%v rfl=%v\n", g, fl, rx, rf)
+				g = pl - plmax // Eq. (24)
+				rmp = o.ramp(fl + o.κ*g)
+				rx = ρl * rmp // Eq. (30)
+				rf = fl - rmp // Eq. (26)
+				if math.Abs(g) < 1e-13 {
+					g = 0
+				}
 				for i, m := range o.Cell.Shp.FaceLocalV[iface] {
 					μ := o.Vid2seepId[m]
-					fb[m] -= ipf.W * Sf[i] * rx
-					fb[μ] -= ipf.W * Sf[i] * rf
+					fb[o.Pmap[m]] -= ipf.W * Sf[i] * rx
+					fb[o.Fmap[μ]] -= ipf.W * Sf[i] * rf
 				}
 			}
 		}
@@ -586,18 +667,78 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 	return true
 }
 
-// ramp implements the ramp function
-func (o *ElemP) ramp(x float64) float64 {
-	if o.Macaulay {
-		return fun.Ramp(x)
-	}
-	return fun.Sramp(x, o.βrmp)
-}
+// add_natbcs_to_jac adds contribution from natural boundary conditions to Jacobian
+func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
-// rampderiv returns the ramp function first derivative
-func (o *ElemP) rampderiv(x float64) float64 {
-	if o.Macaulay {
-		return fun.Heav(x)
+	// clear matrices
+	if o.HasSeep {
+		for i := 0; i < o.Np; i++ {
+			for j := 0; j < o.Nf; j++ {
+				o.Kpf[i][j] = 0
+				o.Kfp[j][i] = 0
+			}
+		}
+		la.MatFill(o.Kff, 0)
 	}
-	return fun.SrampD1(x, o.βrmp)
+
+	// compute surface integral
+	nverts := o.Cell.Shp.Nverts
+	var tmp float64
+	var ρl, z, pl, fl, plmax, g, rmp, rmpD float64
+	var drxdpl, drxdfl, drfdpl, drfdfl float64
+	for _, nbc := range o.NatBcs {
+
+		// temporary value == function evaluation
+		tmp = nbc.Fcn.F(sol.T, nil)
+
+		// loop over ips of face
+		for _, ipf := range o.IpsFace {
+
+			// interpolation functions and gradients @ face
+			iface := nbc.IdxFace
+			if LogErr(o.Cell.Shp.CalcAtFaceIp(o.X, ipf, iface), "add_natbcs_to_jac") {
+				return
+			}
+			Sf := o.Cell.Shp.Sf
+
+			// select natural boundary condition type
+			switch nbc.Key {
+			case "seepP", "seepH":
+
+				// variables extrapolated to face
+				ρl, z, pl, fl = o.fipvars(iface, sol)
+
+				// specified condition
+				plmax = tmp
+				if nbc.Key == "seepH" {
+					plmax = max(o.γl*(tmp-z), 0.0)
+				}
+
+				// compute derivatives
+				g = pl - plmax // Eq. (24)
+				rmp = o.ramp(fl + o.κ*g)
+				rmpD = o.rampD1(fl + o.κ*g)
+				drxdpl = ρl * o.κ * rmpD // first term in Eq. (A.4) (without Sn)
+				drxdfl = ρl * rmpD       // Eq. (A.5) (without Sn)
+				drfdpl = -o.κ * rmpD     // Eq. (A.6) (corrected with κ and without Sn)
+				drfdfl = 1.0 - rmpD      // Eq. (A.7) (without Sn)
+				for i, m := range o.Cell.Shp.FaceLocalV[iface] {
+					μ := o.Vid2seepId[m]
+					for j, n := range o.Cell.Shp.FaceLocalV[iface] {
+						ν := o.Vid2seepId[n]
+						o.Kpp[m][n] += ipf.W * Sf[i] * Sf[j] * drxdpl
+						o.Kpf[m][ν] += ipf.W * Sf[i] * Sf[j] * drxdfl
+						o.Kfp[μ][n] += ipf.W * Sf[i] * Sf[j] * drfdpl
+						o.Kff[μ][ν] += ipf.W * Sf[i] * Sf[j] * drfdfl
+					}
+					for n := 0; n < nverts; n++ { // Eqs. (18) and (22)
+						for l, r := range o.Cell.Shp.FaceLocalV[iface] {
+							o.Kpp[m][n] += ipf.W * Sf[i] * Sf[l] * o.dρldpl_ex[r][n] * rmp
+						}
+					}
+				}
+			}
+		}
+	}
+	return true
 }

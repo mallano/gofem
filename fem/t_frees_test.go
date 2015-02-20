@@ -75,8 +75,14 @@ func Test_frees01a(tst *testing.T) {
 
 func Test_frees01b(tst *testing.T) {
 
+	defer func() {
+		if err := recover(); err != nil {
+			tst.Error("[1;31mSome error has happened:[0m\n", err)
+		}
+	}()
+
 	verbose()
-	chk.PrintTitle("frees01b")
+	//chk.PrintTitle("frees01b")
 
 	// run simulation
 	if !Start("data/frees01.sim", true, chk.Verbose) {
