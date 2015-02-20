@@ -415,7 +415,7 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 	}
 
 	// add to Kb
-	if len(o.NatBcs) > 0 {
+	if o.HasSeep {
 
 		// contribution from natural boundary conditions
 		if !o.add_natbcs_to_jac(sol) {
