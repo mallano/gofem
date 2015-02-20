@@ -23,7 +23,7 @@
   "stages" : [
     {
       "desc" : "decrease water level @ right face",
-      "hydrostatic" : true,
+      "hydrost" : { "gamw":10 },
       "seepfaces" : [-11],
       "facebcs" : [
         { "tag":-13, "keys":["H"],     "funcs":["Hl"], "extra":"!gamL:10" },

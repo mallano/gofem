@@ -34,8 +34,9 @@ type ElemP struct {
 	IpsElem []*shp.Ipoint // integration points of element
 	IpsFace []*shp.Ipoint // integration points corresponding to faces
 
-	// material model and internal variables
-	Mdl *mporous.Model
+	// material model
+	Mdl *mporous.Model // model
+	γl  float64        // unit weight of liquid
 
 	// problem variables
 	Pmap []int // assembly map (location array/element equations)
@@ -50,13 +51,19 @@ type ElemP struct {
 	// natural boundary conditions
 	NatBcs []*NaturalBc // natural boundary conditions
 
-	// seepage face
+	// flux boundary conditions (qb == \bar{q})
+	ρlNod  []float64   // [nverts] ρl extrapolted to nodes => if has qb (flux)
+	CplNod [][]float64 // [nverts][nverts] Cpl extrapolted to nodes => if has qb (flux)
+	Emat   [][]float64 // [nverts][nips] extrapolator matrix
+
+	// seepage face (seepP or seepH)
 	HasSeep    bool    // indicates if this element has seepage faces
 	Vid2seepId []int   // [nverts] maps local vertex id to index in Fmap
 	SeepId2vid []int   // [nseep] maps seepage face variable id to local vertex id
 	Fmap       []int   // [nseep] map of "fl" variables (seepage face)
 	Macaulay   bool    // use discrete ramp function instead of smooth ramp
 	βrmp       float64 // coefficient for Sramp
+	κ          float64 // κ coefficient to normalise equation for seepage face modelling
 
 	// local starred variables
 	ψl []float64 // [nip] ψl* = β1.p + β2.dpdt
@@ -170,6 +177,9 @@ func init() {
 			return nil
 		}
 
+		// unit weight of liquid
+		o.γl = o.Mdl.RhoL0 * o.Mdl.Gref
+
 		// local starred variables
 		o.ψl = make([]float64, nip)
 
@@ -187,8 +197,8 @@ func init() {
 			o.SeepId2vid = utl.IntBoolMapSort(o.Cell.SeepVerts)
 			o.Vid2seepId = utl.IntVals(o.Cell.Shp.Nverts, -1)
 			o.Fmap = make([]int, nseep)
-			for i, m := range o.SeepId2vid {
-				o.Vid2seepId[m] = i
+			for μ, m := range o.SeepId2vid {
+				o.Vid2seepId[m] = μ
 			}
 
 			// use macaulay function ?
@@ -200,6 +210,12 @@ func init() {
 			o.βrmp = 70.0
 			if s_bet, found := io.Keycode(edat.Extra, "bet"); found {
 				o.βrmp = io.Atof(s_bet)
+			}
+
+			// κ coefficient
+			o.κ = 1.0
+			if s_kap, found := io.Keycode(edat.Extra, "kap"); found {
+				o.κ = io.Atof(s_kap)
 			}
 		}
 
@@ -235,6 +251,16 @@ func (o *ElemP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 // SetSurfLoads sets surface loads (natural boundary conditions)
 func (o *ElemP) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
+	if key == "qb" || key == "seepP" || key == "seepH" {
+		nv := o.Cell.Shp.Nverts
+		nip := len(o.IpsElem)
+		o.ρlNod = make([]float64, nv)
+		o.CplNod = la.MatAlloc(nv, nv)
+		o.Emat = la.MatAlloc(nv, nip)
+		//if LogErr(o.Cell.Shp.Extrapolator(o.Emat, o.IpsElem), "SetNatBcs") {
+		//return
+		//}
+	}
 	return true
 }
 
@@ -496,18 +522,64 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 	return true
 }
 
+// fipvars computes current values @ face integration points
+func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, z, pl, fl float64) {
+	Sf := o.Cell.Shp.Sf
+	iz := o.Ndim - 1 // index of z-coordinate (elevation)
+	for i, m := range o.Cell.Shp.FaceLocalV[fidx] {
+		μ := o.Vid2seepId[m]
+		ρl += Sf[i] * o.ρlNod[m]
+		z += Sf[i] * o.X[iz][m]
+		pl += Sf[i] * sol.Y[o.Pmap[m]]
+		fl += Sf[i] * sol.Y[o.Fmap[μ]]
+	}
+	return
+}
+
 // add_fluxloads_to_rhs adds surfaces loads to rhs
 func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 	// compute surface integral
+	var tmp float64
+	var ρl, z, pl, fl, plmax, g, rx, rf float64
 	for _, nbc := range o.NatBcs {
-		for _, ip := range o.IpsFace {
-			if LogErr(o.Cell.Shp.CalcAtFaceIp(o.X, ip, nbc.IdxFace), "add_natbcs_to_rhs") {
+
+		// temporary value == function evaluation
+		tmp = nbc.Fcn.F(sol.T, nil)
+
+		// loop over ips of face
+		for _, ipf := range o.IpsFace {
+
+			// interpolation functions and gradients @ face
+			iface := nbc.IdxFace
+			if LogErr(o.Cell.Shp.CalcAtFaceIp(o.X, ipf, iface), "add_natbcs_to_rhs") {
 				return
 			}
+			Sf := o.Cell.Shp.Sf
+
+			// select natural boundary condition type
 			switch nbc.Key {
 			case "seepP", "seepH":
-				io.Pf("nbc = %v\n", nbc.Key)
+
+				// variables extrapolated to face
+				ρl, z, pl, fl = o.fipvars(iface, sol)
+
+				// specified condition
+				plmax = tmp
+				if nbc.Key == "seepH" {
+					plmax = max(o.γl*(tmp-z), 0.0)
+				}
+
+				// compute residuals
+				g = pl - plmax             // Eq. (24)
+				rx = ρl * o.ramp(fl+o.κ*g) // Eq. (30)
+				rf = fl - o.ramp(fl+o.κ*g) // Eq. (26)
+				io.Pfyel("g=%v fl=%v rpl=%v rfl=%v\n", g, fl, rx, rf)
+				for i, m := range o.Cell.Shp.FaceLocalV[iface] {
+					μ := o.Vid2seepId[m]
+					fb[m] -= ipf.W * Sf[i] * rx
+					fb[μ] -= ipf.W * Sf[i] * rf
+				}
 			}
 		}
 	}
