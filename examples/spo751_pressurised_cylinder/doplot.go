@@ -6,21 +6,16 @@ package main
 
 import (
 	"github.com/cpmech/gofem/out"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
-	"github.com/cpmech/gosl/utl"
 )
 
 func main() {
-	//utl.Tsilent = false
-	defer func() {
-		if err := recover(); err != nil {
-			utl.Pf("[1;31mERROR: %v [0m\n", err)
-		}
-	}()
 
 	ok := out.Start("spo751.sim", 0, 0)
 	if !ok {
-		utl.Panic("Start failed")
+		io.PfRed("Start failed")
+		return
 	}
 	defer out.End()
 
@@ -30,7 +25,8 @@ func main() {
 	// apply commands
 	err := out.Apply()
 	if err != nil {
-		utl.Panic("test failed: %v\n", err)
+		io.PfRed("Apply failed: %v\n", err)
+		return
 	}
 
 	ux := out.TseriesRes[out.TseriesKey2idx["ux"]][0]
