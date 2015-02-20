@@ -42,9 +42,9 @@ type Rod struct {
 	Umap []int // assembly map (location array/element equations)
 
 	// material model and internal variables
-	Model     msolid.RodModel
-	States    []*msolid.State
-	StatesBkp []*msolid.State
+	Model     msolid.OnedModel
+	States    []*msolid.OnedState
+	StatesBkp []*msolid.OnedState
 
 	// scratchpad. computed @ each ip
 	grav []float64 // [ndim] gravity vector
@@ -103,7 +103,7 @@ func init() {
 			return nil
 		}
 		mdlname := matdata.Model
-		o.Model = msolid.GetRodModel(Global.Sim.Data.FnameKey, matname, mdlname, false)
+		o.Model = msolid.GetOnedModel(Global.Sim.Data.FnameKey, matname, mdlname, false)
 		if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
 			return nil
 		}
@@ -202,7 +202,7 @@ func (o Rod) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		for m := 0; m < nverts; m++ {
 			for i := 0; i < ndim; i++ {
 				r := o.Umap[i+m*ndim]
-				sig := o.States[idx].Sig[0]
+				sig := o.States[idx].Sig
 				fb[r] -= coef * o.A * sig * G[m] * Jvec[i] // +fi
 			}
 			//if o.hasg {
@@ -306,8 +306,8 @@ func (o *Rod) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok b
 // InitIvs reset (and fix) internal variables after primary variables have been changed
 func (o *Rod) InitIvs(sol *Solution) (ok bool) {
 	nip := len(o.IpsElem)
-	o.States = make([]*msolid.State, nip)
-	o.StatesBkp = make([]*msolid.State, nip)
+	o.States = make([]*msolid.OnedState, nip)
+	o.StatesBkp = make([]*msolid.OnedState, nip)
 	for i := 0; i < nip; i++ {
 		o.States[i], _ = o.Model.InitIntVars()
 		o.StatesBkp[i] = o.States[i].GetCopy()
