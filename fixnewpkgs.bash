@@ -60,9 +60,11 @@ fix_pkgs_simple() {
     echo "[1;32m>>> fixing $PKG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<[0m"
     cd $PKG
 
-    for f in t_*.go; do
-        sed -i -e 's/utl.IntAssert/chk.IntAssert/g'
-        goimports -w $f
+    for f in *.go; do
+        #sed -i -e 's/Copyright 2012 Dorival de Moraes Pedroso/Copyright 2015 Dorival Pedroso and Raul Durand/g' $f
+        #sed -i -e 's/Copyright 2012 Dorival Pedroso & Raul Durand/Copyright 2015 Dorival Pedroso and Raul Durand/g' $f
+        sed -i -e 's/Copyright 2015 Dorival Pedroso & Raul Durand/Copyright 2015 Dorival Pedroso and Raul Durand/g' $f
+        #goimports -w $f
     done
 
     cd $HERE
