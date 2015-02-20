@@ -16,51 +16,87 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-// Rjoint implements the rod-joint (interface/link) element for reinforced solids
+// Rjoint implements the rod-joint (interface/link) element for reinforced solids.
+//  The following convention is considered:
+//   n or N    -- means [N]odes
+//   p or P    -- means integratioin [P]oints
+//   nn or Nn  -- number of nodes
+//   np or Np  -- number of integration [P]points
+//   ndim      -- space dimension
+//   nsig      -- number of stress/strain components == 2 * ndim
+//   rod       -- means rod element
+//   rodH      -- rod shape structure
+//   rodNn     -- rod number of nodes
+//   rodNp     -- rod number of integration points
+//   rodS      -- rod shape functions
+//   sld       -- means solid element
+//   sldH      -- rod shape structure
+//   sldNn     -- solid number of nodes
+//   sldNp     -- solid number of integration points
+//   sldS      -- solid shape functions
+//   rodYn     -- rod's (real) coordinates of node
+//   rodYp     -- rod's (real) coordinates of integration point
+//   r or R    -- means natural coordinates in the solids' system
+//   z or Z    -- means natural coordinates in the rod's system
+//   s or S    -- parametric coordinate along rod
+//   rodRn     -- natural coordinates or rod's nodes w.r.t solid's system
+//   rodRp     -- natural coordinates of rod's integration point w.r.t to solid's system
+//   sldS_rodN -- solid shape functions evaluated at rod nodes
+//   sldS_rodP -- solid shape functions evaluated at rot integration points
+//  References:
+//   [1] R Durand, MM Farias, DM Pedroso. Modelling the strengthening of solids with
+//       incompatible line finite elements, Computers and Structures (2014). Submitted.
+//   [2] R Durand, MM Farias, DM Pedroso, Computing intersections between non-compatible
+//       curves and finite elements, Computational Mechanics (2014). Submitted.
+//   [3] R Durand, MM Farias. A local extrapolation method for finite elements,
+//       Advances in Engineering Software 67 (2014) 1-9.
+//       http://dx.doi.org/10.1016/j.advengsoft.2013.07.002
 type Rjoint struct {
 
 	// basic data
 	Edat *inp.ElemData // element data; stored in allocator to be used in Connect
 	Cell *inp.Cell     // cell
 	Ndim int           // space dimension
-	Ny   int           // total number of dofs == Nu_rod + Nu_solid
+	Ny   int           // total number of dofs == rod.Nu + sld.Nu
 
-	// supporting elements
+	// underlying elements
 	Rod *Rod   // rod element
 	Sld *ElemU // solid element
 
 	// integration points
-	IpsElem []*shp.Ipoint // [nip] integration points of element
+	IpsElem []*shp.Ipoint // [nip] integration points of (this) element
 
-	// material model and internal variables
-	Model msolid.RjointM1 // material model
+	// material model
+	Mdl msolid.RjointM1 // material model
 
 	// parameters
 	h  float64 // perimeter of rod element
 	k1 float64 // lateral stiffness
 	k2 float64 // lateral stiffness
 
-	// shape functions evaluations. nv == nverts
-	SslNo [][]float64 // [rodNv][sldNv] shape functions of solids @ nodes of line element
-	SslIp [][]float64 // [rodNip][sldNv] shape functions of solids @ ips of line element
+	// shape functions evaluations (see convention above)
+	sldS_rodN [][]float64 // [rodNn][sldNn] shape functions of solids @ [N]odes of rod element
 
 	// corotational system aligned with rod element
-	e0 [][]float64 // [nipRod][ndim] local directions at each ip of rod
-	e1 [][]float64 // [nipRod][ndim] local directions at each ip of rod
-	e2 [][]float64 // [nipRod][ndim] local directions at each ip of rod
+	e0 [][]float64 // [rodNp][ndim] local directions at each integration point of rod
+	e1 [][]float64 // [rodNp][ndim] local directions at each integration point of rod
+	e2 [][]float64 // [rodNp][ndim] local directions at each integration point of rod
 
 	// variables for Coulomb model
-	Coulomb bool            // uses Coulomb model
-	rsIp    [][]float64     // [rodNip][ndim] natural coordinates w.r.t the solids' system of ips of rod
-	σNo     [][]float64     // [sldNv][nsig] σ at nodes of solid
-	σIp     []float64       // [nsig] σ at ips of rod
-	DσNoDu  [][][][]float64 // [sldNv][nσ][sldNv][ndim] ∂σSldNod/∂uSldNod : derivatives of σ @ nodes of solid w.r.t displacements of solid
-	DσDun   [][]float64     // [nσ][ndim] ∂σSldIp/∂uSldNod : derivatives of σ @ ip of solid w.r.t displacements of solid
-	t1      []float64       // traction vectors for σc
-	t2      []float64       // traction vectors for σc
-	T1      [][]float64     // [nipRod][nσ] tensor (e1 dy e1)
-	T2      [][]float64     // [nipRod][nσ] tensor (e2 dy e2)
-	sldE    [][]float64     // [sldNv][sldNip]
+	Coulomb   bool        // use Coulomb model
+	sldEmat   [][]float64 // [sldNn][sldNp] solid's extrapolation matrix
+	sldSigN   [][]float64 // [sldNn][nsig] σ at nodes of solid (extrapolated using Emat)
+	rodRp     [][]float64 // [rodNp][ndim] natural coordinates of ips of rod w.r.t. solid's system
+	sldS_rodP [][]float64 // [rodNp][sldNn] shape functions of solids @ integration [P]oints of rod element
+
+	// scratchpad for Coulomb model. computed @ each ip
+	sldSigN_rodP []float64       // [nsig] σ of solid interpolated to ips of rod
+	t1           []float64       // [ndim] traction vectors for σc
+	t2           []float64       // [ndim] traction vectors for σc
+	T1           [][]float64     // [rodNp][nsig] tensor (e1 dy e1)
+	T2           [][]float64     // [rodNp][nsig] tensor (e2 dy e2)
+	DσNoDu       [][][][]float64 // [sldNn][nsig][sldNn][ndim] ∂σSldNod/∂uSldNod : derivatives of σ @ nodes of solid w.r.t displacements of solid
+	DσDun        [][]float64     // [nsig][ndim] ∂σSldIp/∂uSldNod : derivatives of σ @ ip of solid w.r.t displacements of solid
 
 	// problem variables
 	Ymap []int // assembly map (location array/element equations)
@@ -72,13 +108,13 @@ type Rjoint struct {
 	// scratchpad. computed @ each ip
 	Δw   []float64 // relative velocity
 	qb   []float64 // resultant traction vector 'holding' the rod @ ip
-	σc   float64
-	Δwb0 float64
-	Δwb1 float64
-	Δwb2 float64
-	τ    float64
-	qn1  float64
-	qn2  float64
+	σc   float64   // confining stress
+	Δwb0 float64   // increment of relative displacement along 0-direction
+	Δwb1 float64   // increment of relative displacement along 1-direction
+	Δwb2 float64   // increment of relative displacement along 2-direction
+	τ    float64   // shear stress along interface between rod and solid
+	qn1  float64   // orthogonal distributed loads acting on the perimeter of the rod along 1-direction
+	qn2  float64   // orthogonal distributed loads acting on the perimeter of the rod along 2-direction
 }
 
 // initialisation ///////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +176,7 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	}
 
 	// initialise model
-	o.Model.Init(matdata.Prms)
+	o.Mdl.Init(matdata.Prms)
 
 	// parameters
 	for _, p := range matdata.Prms {
@@ -159,101 +195,115 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	}
 
 	// auxiliary
-	rodNip := len(o.Rod.IpsElem)
-	sldNip := len(o.Sld.IpsElem)
-	rodH := o.Rod.Cell.Shp
-	sldH := o.Sld.Cell.Shp
-	rodS := rodH.S
-	sldS := sldH.S
-	rodNv := rodH.Nverts
-	sldNv := sldH.Nverts
+	ndim := o.Ndim
 	nsig := 2 * o.Ndim
 
+	// rod data
+	rodH := o.Rod.Cell.Shp
+	rodNp := len(o.Rod.IpsElem)
+	rodNn := rodH.Nverts
+
+	// solid data
+	sldH := o.Sld.Cell.Shp
+	sldS := sldH.S
+	sldNp := len(o.Sld.IpsElem)
+	sldNn := sldH.Nverts
+
 	// shape functions of solid @ nodes of rod
-	o.SslNo = la.MatAlloc(rodNv, sldNv)
-	yno := make([]float64, o.Ndim) // real coordinate of rod node
-	rls := make([]float64, 3)      // natural coordinates of node of rod w.r.t solid's natural system
-	for m := 0; m < rodNv; m++ {
-		for i := 0; i < o.Ndim; i++ {
-			yno[i] = o.Rod.X[i][m]
+	o.sldS_rodN = la.MatAlloc(rodNn, sldNn)
+	rodYn := make([]float64, ndim)
+	rodRn := make([]float64, 3)
+	for m := 0; m < rodNn; m++ {
+		for i := 0; i < ndim; i++ {
+			rodYn[i] = o.Rod.X[i][m]
 		}
-		sldH.InvMap(rls, yno, o.Sld.X)
-		sldH.CalcAtR(o.Sld.X, rls, false)
-		for n := 0; n < sldNv; n++ {
-			o.SslNo[m][n] = sldH.S[n]
+		if LogErr(sldH.InvMap(rodRn, rodYn, o.Sld.X), "inverse map failed") {
+			return
+		}
+		if LogErr(sldH.CalcAtR(o.Sld.X, rodRn, false), "shape functions calculation failed") {
+			return
+		}
+		for n := 0; n < sldNn; n++ {
+			o.sldS_rodN[m][n] = sldH.S[n]
 		}
 	}
 
 	// coulomb model => σc depends on p values of solid
 	if o.Coulomb {
 
-		// variables for σc
-		o.σNo = la.MatAlloc(sldNv, nsig)
-		o.σIp = make([]float64, nsig)
-		o.t1 = make([]float64, o.Ndim)
-		o.t2 = make([]float64, o.Ndim)
+		// allocate variables
+		o.sldEmat = la.MatAlloc(sldNn, sldNp)
+		o.sldSigN = la.MatAlloc(sldNn, nsig)
+		o.rodRp = la.MatAlloc(rodNp, 3)
+		o.sldS_rodP = la.MatAlloc(rodNp, sldNn)
 
 		// extrapolator matrix
-		o.sldE = la.MatAlloc(sldNv, sldNip)
-		if LogErr(sldH.Extrapolator(o.sldE, o.Sld.IpsElem), "Extrapolator of solid failed") {
+		if LogErr(sldH.Extrapolator(o.sldEmat, o.Sld.IpsElem), "Extrapolator of solid failed") {
 			return
 		}
 
 		// shape function of solid @ ips of rod
-		o.SslIp = la.MatAlloc(rodNip, sldNv)
-		o.rsIp = la.MatAlloc(rodNip, 3)
-		yip := make([]float64, o.Ndim) // real coordiantes of ip of rod
 		for idx, ip := range o.Rod.IpsElem {
-			rodH.CalcAtIp(o.Rod.X, ip, false)
-			for i := 0; i < o.Ndim; i++ {
-				yip[i] = 0
-				for m := 0; m < rodNv; m++ {
-					yip[i] += rodS[m] * o.Rod.X[i][m]
-				}
+			rodYp := rodH.IpRealCoords(o.Rod.X, ip)
+			if LogErr(sldH.InvMap(o.rodRp[idx], rodYp, o.Sld.X), "inverse map failed") {
+				return
 			}
-			sldH.InvMap(o.rsIp[idx], yip, o.Sld.X)
-			sldH.CalcAtR(o.Sld.X, o.rsIp[idx], false)
-			for n := 0; n < sldNv; n++ {
-				o.SslIp[idx][n] = sldS[n]
+			if LogErr(sldH.CalcAtR(o.Sld.X, o.rodRp[idx], false), "shape functions calculation failed") {
+				return
+			}
+			for n := 0; n < sldNn; n++ {
+				o.sldS_rodP[idx][n] = sldS[n]
 			}
 		}
 
-		// allocate derivatives of p @ node and ips of solid w.r.t diplacements of solid
-		o.DσNoDu = utl.Deep4alloc(sldNv, nsig, sldNv, o.Ndim)
-		o.DσDun = la.MatAlloc(nsig, o.Ndim)
-		o.T1 = la.MatAlloc(rodNip, nsig)
-		o.T2 = la.MatAlloc(rodNip, nsig)
+		// scratchpad for Coulomb model. computed @ each ip
+		o.sldSigN_rodP = make([]float64, nsig)
+		o.t1 = make([]float64, ndim)
+		o.t2 = make([]float64, ndim)
+		o.T1 = la.MatAlloc(rodNp, nsig)
+		o.T2 = la.MatAlloc(rodNp, nsig)
+		o.DσNoDu = utl.Deep4alloc(sldNn, nsig, sldNn, ndim)
+		o.DσDun = la.MatAlloc(nsig, ndim)
 	}
 
 	// joint direction @ ip[idx]; corotational system aligned with rod element
-	o.e0 = la.MatAlloc(rodNip, o.Ndim)
-	o.e1 = la.MatAlloc(rodNip, o.Ndim)
-	o.e2 = la.MatAlloc(rodNip, o.Ndim)
-	a := make([]float64, o.Ndim)
-	Q := la.MatAlloc(o.Ndim, o.Ndim)
-	for idx, ip := range o.Rod.IpsElem {
-		if LogErr(rodH.CalcAtIp(o.Rod.X, ip, true), "CalcAtIp of rod failed") {
+	o.e0 = la.MatAlloc(rodNp, ndim)
+	o.e1 = la.MatAlloc(rodNp, ndim)
+	o.e2 = la.MatAlloc(rodNp, ndim)
+	π := make([]float64, ndim) // Eq. (27)
+	Q := la.MatAlloc(ndim, ndim)
+	α := 666.0
+	J := rodH.J
+	Jvec := rodH.Jvec3d[:ndim]
+	for idx, ip := range o.IpsElem {
+		e0, e1, e2 := o.e0[idx], o.e1[idx], o.e2[idx]
+		if LogErr(rodH.CalcAtIp(o.Rod.X, ip, true), "shape functions calculation failed") {
 			return
 		}
-		la.VecCopy(a, 1.0, rodH.Jvec3d[:o.Ndim])
-		a[0] += 666.0
-		la.VecCopy(o.e0[idx], 1.0/rodH.J, rodH.Jvec3d[:o.Ndim]) // e0 := Jvec / J
-		la.MatSetDiag(Q, 1.0)
-		la.VecOuterAdd(Q, -1.0, o.e0[idx], o.e0[idx])
-		la.MatVecMul(o.e1[idx], 1.0, Q, a)
-		la.VecScale(o.e1[idx], 0, 1.0/la.VecNorm(o.e1[idx]), o.e1[idx])
-		if o.Ndim == 3 {
-			o.e2[idx][0] = o.e0[idx][1]*o.e1[idx][2] - o.e0[idx][2]*o.e1[idx][1]
-			o.e2[idx][1] = o.e0[idx][2]*o.e1[idx][0] - o.e0[idx][0]*o.e1[idx][2]
-			o.e2[idx][2] = o.e0[idx][0]*o.e1[idx][1] - o.e0[idx][1]*o.e1[idx][0]
+		π[0] = Jvec[0] + α
+		π[1] = Jvec[1]
+		e0[0] = Jvec[0] / J
+		e0[1] = Jvec[1] / J
+		if ndim == 3 {
+			π[2] = Jvec[2]
+			e0[2] = Jvec[2] / J
+		}
+		la.MatSetDiag(Q, 1)
+		la.VecOuterAdd(Q, -1, e0, e0) // Q := I - e0 dyad e0
+		la.MatVecMul(e1, 1, Q, π)     // Eq. (29) * norm(E1)
+		la.VecScale(e1, 0, 1.0/la.VecNorm(e1), e1)
+		if ndim == 3 {
+			e2[0] = e0[1]*e1[2] - e0[2]*e1[1]
+			e2[1] = e0[2]*e1[0] - e0[0]*e1[2]
+			e2[2] = e0[0]*e1[1] - e0[1]*e1[0]
 		}
 		if o.Coulomb {
 			e1_dy_e1 := tsr.Alloc2()
 			e2_dy_e2 := tsr.Alloc2()
-			for i := 0; i < o.Ndim; i++ {
-				for j := 0; j < o.Ndim; j++ {
-					e1_dy_e1[i][j] = o.e1[idx][i] * o.e1[idx][j]
-					e2_dy_e2[i][j] = o.e2[idx][i] * o.e2[idx][j]
+			for i := 0; i < ndim; i++ {
+				for j := 0; j < ndim; j++ {
+					e1_dy_e1[i][j] = e1[i] * e1[j]
+					e2_dy_e2[i][j] = e2[i] * e2[j]
 				}
 			}
 			tsr.Ten2Man(o.T1[idx], e1_dy_e1)
@@ -263,16 +313,16 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 
 	// full Usmap
 	o.Ymap = make([]int, o.Ny)
-	for m := 0; m < sldNv; m++ {
-		for i := 0; i < o.Ndim; i++ {
-			r := i + m*o.Ndim
+	for m := 0; m < sldNn; m++ {
+		for i := 0; i < ndim; i++ {
+			r := i + m*ndim
 			o.Ymap[r] = o.Sld.Umap[r]
 		}
 	}
 	start := o.Sld.Nu
-	for m := 0; m < rodNv; m++ {
-		for i := 0; i < o.Ndim; i++ {
-			r := i + m*o.Ndim
+	for m := 0; m < rodNn; m++ {
+		for i := 0; i < ndim; i++ {
+			r := i + m*ndim
 			o.Ymap[start+r] = o.Rod.Umap[r]
 		}
 	}
@@ -345,7 +395,7 @@ func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 			rlin = start + i + m*o.Ndim
 			for n := 0; n < sldNv; n++ {
 				rsld = o.Ymap[i+n*o.Ndim]
-				fb[rsld] += o.SslNo[m][n] //* o.Rus[rlin] // -fi  :  f = fC
+				fb[rsld] += o.sldS_rodN[m][n] //* o.Rus[rlin] // -fi  :  f = fC
 			}
 		}
 	}
@@ -434,7 +484,7 @@ func (o *Rjoint) ipvars(idx int, sol *Solution, delta bool) (ok bool) {
 		for i := 0; i < o.Ndim; i++ {
 			for n := 0; n < sldNv; n++ {
 				rsld = o.Sld.Umap[i+n*o.Ndim]
-				o.Δw[i] += rodS[m] * o.SslNo[m][n] * U[rsld]
+				o.Δw[i] += rodS[m] * o.sldS_rodN[m][n] * U[rsld]
 			}
 			rlin = o.Rod.Umap[i+m*o.Ndim]
 			o.Δw[i] -= rodS[m] * U[rlin]
@@ -458,9 +508,9 @@ func (o *Rjoint) ipvars(idx int, sol *Solution, delta bool) (ok bool) {
 
 		// calculate σIp
 		for j := 0; j < nsig; j++ {
-			o.σIp[j] = 0
+			o.sldSigN_rodP[j] = 0
 			for n := 0; n < sldNv; n++ {
-				o.σIp[j] += o.SslIp[idx][n] * o.σNo[n][j]
+				o.sldSigN_rodP[j] += o.sldS_rodP[idx][n] * o.sldSigN[n][j]
 			}
 		}
 
@@ -468,8 +518,8 @@ func (o *Rjoint) ipvars(idx int, sol *Solution, delta bool) (ok bool) {
 		for i := 0; i < o.Ndim; i++ {
 			o.t1[i], o.t2[i] = 0, 0
 			for j := 0; j < o.Ndim; j++ {
-				o.t1[i] += tsr.M2T(o.σIp, i, j) * o.e1[idx][j]
-				o.t2[i] += tsr.M2T(o.σIp, i, j) * o.e2[idx][j]
+				o.t1[i] += tsr.M2T(o.sldSigN_rodP, i, j) * o.e1[idx][j]
+				o.t2[i] += tsr.M2T(o.sldSigN_rodP, i, j) * o.e2[idx][j]
 			}
 		}
 
