@@ -43,9 +43,7 @@ type Rjoint struct {
 	IpsFace []*shp.Ipoint // integration points corresponding to faces
 
 	// material model and internal variables
-	Model    msolid.Solid // material model
-	MdlSmall msolid.Small // model specialisation for small strains
-	MdlLarge msolid.Large // model specialisation for large deformations
+	Model msolid.RjointM1 // material model
 
 	// internal variables
 	States    []*msolid.State
@@ -100,20 +98,9 @@ func init() {
 		if LogErrCond(matdata == nil, "Mdb.Get failed\n") {
 			return nil
 		}
-		mdlname := matdata.Model
 
-		// model
-		// TODO
-		if false {
-			o.Model = msolid.GetModel(Global.Sim.Data.FnameKey, matname, mdlname, false)
-			if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
-				return nil
-			}
-			err := o.Model.Init(o.Ndim, Global.Sim.Data.Pstress, matdata.Prms)
-			if LogErr(err, "Model.Init failed") {
-				return nil
-			}
-		}
+		// initialise model
+		o.Model.Init(matdata.Prms)
 
 		// parameters
 		for _, p := range matdata.Prms {
