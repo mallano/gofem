@@ -15,9 +15,9 @@ import (
 	"github.com/cpmech/gosl/la"
 )
 
-func Test_extrap(tst *testing.T) {
+func Test_extrapapolation(tst *testing.T) {
 
-	//utl.Tsilent = false
+	//verbose()
 	chk.PrintTitle("Test extrapolation")
 
 	GetIpNums := func(name string) []int {
@@ -84,7 +84,7 @@ func Test_extrap(tst *testing.T) {
 			E := la.MatAlloc(nverts, nip)
 
 			// Calculate extrapolator matrix
-			shape.Extrapolator(E, Xip)
+			shape.Extrapolator(E, ips)
 
 			// Recalculate nodal values NN = E*P
 			NN := make([]float64, shape.Nverts)
