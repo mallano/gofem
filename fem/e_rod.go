@@ -117,6 +117,8 @@ func init() {
 			switch p.N {
 			case "A":
 				o.A = p.V
+			case "rho":
+				o.Rho = p.V
 			}
 		}
 

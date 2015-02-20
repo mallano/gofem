@@ -158,41 +158,48 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		if info == nil {
 			return
 		}
-		chk.IntAssert(len(info.Dofs), len(c.Verts))
 
-		// store y and f information
-		for ykey, fkey := range info.Y2F {
-			o.F2Y[fkey] = ykey
-			o.YandC[ykey] = true
-		}
+		// for non-joint elements, add new DOFs
+		if !c.IsJoint {
+			chk.IntAssert(len(info.Dofs), len(c.Verts))
 
-		// t1 and t2 equations
-		for _, ykey := range info.T1vars {
-			o.Dof2Tnum[ykey] = 1
-		}
-		for _, ykey := range info.T2vars {
-			o.Dof2Tnum[ykey] = 2
-		}
-
-		// loop over nodes of this element
-		var eNdof int // number of DOFs of this elmeent
-		for j, v := range c.Verts {
-
-			// new or existent node
-			var nod *Node
-			if o.Vid2node[v] == nil {
-				nod = NewNode(o.Msh.Verts[v])
-				o.Vid2node[v] = nod
-				o.Nodes = append(o.Nodes, nod)
-			} else {
-				nod = o.Vid2node[v]
+			// store y and f information
+			for ykey, fkey := range info.Y2F {
+				o.F2Y[fkey] = ykey
+				o.YandC[ykey] = true
 			}
 
-			// set DOFs and equation numbers
-			for _, ukey := range info.Dofs[j] {
-				eq = nod.AddDofAndEq(ukey, eq)
-				eNdof += 1
+			// t1 and t2 equations
+			for _, ykey := range info.T1vars {
+				o.Dof2Tnum[ykey] = 1
 			}
+			for _, ykey := range info.T2vars {
+				o.Dof2Tnum[ykey] = 2
+			}
+
+			// loop over nodes of this element
+			var eNdof int // number of DOFs of this elmeent
+			for j, v := range c.Verts {
+
+				// new or existent node
+				var nod *Node
+				if o.Vid2node[v] == nil {
+					nod = NewNode(o.Msh.Verts[v])
+					o.Vid2node[v] = nod
+					o.Nodes = append(o.Nodes, nod)
+				} else {
+					nod = o.Vid2node[v]
+				}
+
+				// set DOFs and equation numbers
+				for _, ukey := range info.Dofs[j] {
+					eq = nod.AddDofAndEq(ukey, eq)
+					eNdof += 1
+				}
+			}
+
+			// number of non-zeros
+			o.NnzKb += eNdof * eNdof
 		}
 
 		// allocate element
@@ -222,9 +229,15 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			// subsets of elements
 			o.add_element_to_subsets(ele)
 		}
+	}
 
-		// number of non-zeros
-		o.NnzKb += eNdof * eNdof
+	// connect elements (e.g. Joints)
+	for _, e := range o.ElemConnect {
+		nnz, ok := e.Connect(o.Cid2elem)
+		if LogErrCond(!ok, "Connect failed") {
+			return
+		}
+		o.NnzKb += nnz
 	}
 
 	// logging
@@ -368,11 +381,6 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	// initialise internal variables
 	for _, e := range o.ElemIntvars {
 		e.InitIvs(o.Sol)
-	}
-
-	// connect elements
-	for _, e := range o.ElemConnect {
-		e.Connect(o.Elems, o.Cid2elem)
 	}
 
 	// logging

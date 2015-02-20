@@ -45,7 +45,7 @@ type Elem interface {
 
 // ElemConnector defines connector elements; elements that depend upon others
 type ElemConnector interface {
-	Connect(elems []Elem, cid2elem []Elem) (ok bool) // connect multiple elements; e.g.: connect rod/solid elements in Rjoints
+	Connect(cid2elem []Elem) (nnzK int, ok bool) // connect multiple elements; e.g.: connect rod/solid elements in Rjoints
 }
 
 // ElemIntvars defines elements with {z,q} internal variables

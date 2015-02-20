@@ -1,0 +1,31 @@
+{
+  "data" : {
+    "matfile" : "rjoint.mat",
+    "steady"  : true
+  },
+  "functions" : [
+    { "name":"load", "type":"cte", "prms":[{"n":"c", "v":-1}] }
+  ],
+  "regions" : [
+    {
+      "desc" : "curved line in 3D",
+      "mshfile" : "rjoint01.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"sld1", "type":"u",      "extra":"!nip:8" },
+        { "tag":-2, "mat":"lin1", "type":"rod",    "extra":"!nip:2" },
+        { "tag":-3, "mat":"jnt1", "type":"rjoint", "extra":"!nip:3 !sp1p2:1" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "nodebcs" : [
+        { "tag":-1, "keys":["ux","uy","uz"], "funcs":["zero","zero","zero"] }
+      ],
+      "facebcs" : [
+        { "tag":-20, "keys":["ux","uy","uz"], "funcs":["zero","zero","zero"] },
+        { "tag":-21, "keys":["qn"],           "funcs":["load"] }
+      ]
+    }
+  ]
+}

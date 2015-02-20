@@ -27,6 +27,8 @@ type Vert struct {
 
 // Cell holds cell data
 type Cell struct {
+
+	// input data
 	Id     int    // id
 	Tag    int    // tag
 	Geo    int    // geometry type (gemlab code)
@@ -38,11 +40,12 @@ type Cell struct {
 	JlinId int    // joint line id
 	JsldId int    // joint solid id
 
-	// specific problems data
-	SeepVerts map[int]bool // local vertices ids of vertices on seepage faces
-
 	// derived
 	Shp *shp.Shape // shape structure
+
+	// specific problems data
+	IsJoint   bool         // cell represents joint element
+	SeepVerts map[int]bool // local vertices ids of vertices on seepage faces
 }
 
 // CellFaceId structure
@@ -159,9 +162,6 @@ func ReadMsh(dir, fn string) *Mesh {
 	o.Part2cells = make(map[int][]*Cell)
 	for i, c := range o.Cells {
 
-		// shape
-		c.Shp = shp.Get(c.Type)
-
 		// check id and tag
 		if LogErrCond(c.Id != i, "msh: cells must be sequentially numbered. %d != %d\n", c.Id, i) {
 			return nil
@@ -181,7 +181,7 @@ func ReadMsh(dir, fn string) *Mesh {
 		}
 
 		// seam tags
-		if c.Shp.Gndim == 3 {
+		if o.Ndim == 3 {
 			for i, stag := range c.STags {
 				if stag < 0 {
 					pairs := o.SeamTag2cells[stag]
@@ -197,6 +197,17 @@ func ReadMsh(dir, fn string) *Mesh {
 		// partition => cells
 		cells = o.Part2cells[c.Part]
 		o.Part2cells[c.Part] = append(cells, c)
+
+		// get shape structure
+		switch c.Type {
+		case "joint":
+			c.IsJoint = true
+		default:
+			c.Shp = shp.Get(c.Type)
+			if LogErrCond(c.Shp == nil, "msh: cannot find shape type == %q\n", c.Type) {
+				return nil
+			}
+		}
 	}
 
 	// log

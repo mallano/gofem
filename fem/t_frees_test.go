@@ -81,7 +81,7 @@ func Test_frees01b(tst *testing.T) {
 		}
 	}()
 
-	verbose()
+	//verbose()
 	//chk.PrintTitle("frees01b")
 
 	// run simulation
