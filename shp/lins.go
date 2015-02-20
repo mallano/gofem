@@ -37,7 +37,7 @@ func init() {
 	}
 	lin3.init_scratchpad()
 	factory["lin3"] = &lin3
-	ipsfactory["lin3_0"] = ips_lin_2
+	ipsfactory["lin3_0"] = ips_lin_3
 	ipsfactory["lin3_2"] = ips_lin_2
 	ipsfactory["lin3_3"] = ips_lin_3
 
@@ -53,7 +53,7 @@ func init() {
 	}
 	lin4.init_scratchpad()
 	factory["lin4"] = &lin4
-	ipsfactory["lin4_0"] = ips_lin_2
+	ipsfactory["lin4_0"] = ips_lin_3
 	ipsfactory["lin4_2"] = ips_lin_2
 	ipsfactory["lin4_3"] = ips_lin_3
 	ipsfactory["lin4_5"] = ips_lin_5
