@@ -8,7 +8,7 @@ package ana
 import (
 	"testing"
 
-	"code.google.com/p/gosl/fun"
+	"github.com/cpmech/gosl/fun"
 
 	"github.com/cpmech/gosl/chk"
 )

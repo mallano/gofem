@@ -221,6 +221,12 @@ type HydroStData struct {
 	Unsat  bool    `json:"unsat"`  // consider unsaturated state with zwater < zmax
 }
 
+// IniStressData holds data for setting initial stresses
+type IniStressData struct {
+	Hom bool    `json:"hom"` // homogeneous stress distribution
+	Sig float64 `json:"sig"` // stress value to use in homogeneous distribution
+}
+
 // Stage holds stage data
 type Stage struct {
 
@@ -232,8 +238,9 @@ type Stage struct {
 	Load       string `json:"load"`       // load stage data (filename) from binary file
 
 	// specific problems data
-	HydroSt   *HydroStData `json:"hydrost"`   // hydrostatic data
-	SeepFaces []int        `json:"seepfaces"` // face tags corresponding to seepage faces
+	HydroSt   *HydroStData   `json:"hydrost"`   // hydrostatic data
+	SeepFaces []int          `json:"seepfaces"` // face tags corresponding to seepage faces
+	IniStress *IniStressData `json:"inistress"` // initial stress data
 
 	// conditions
 	EleConds []*EleCond `json:"eleconds"` // element conditions. ex: gravity or beam distributed loads
