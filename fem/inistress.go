@@ -35,11 +35,11 @@ func (o *Domain) SetIniStress(stg *inp.Stage) (ok bool) {
 				ivs := map[string][]float64{"sx": v, "sy": v, "sz": v}
 
 				// set element's states
-				if !e.SetIvs(ivs) {
-					break
+				if LogErrCond(!e.SetIvs(ivs), "homogeneous/isotropic: element's internal values setting failed") {
+					return
 				}
 			}
-			return
+			return true
 		}
 
 		// plane-strain state
@@ -58,11 +58,10 @@ func (o *Domain) SetIniStress(stg *inp.Stage) (ok bool) {
 			ivs := map[string][]float64{"sx": vx, "sy": vy, "sz": vz}
 
 			// set element's states
-			if !e.SetIvs(ivs) {
-				break
+			if LogErrCond(!e.SetIvs(ivs), "homogeneous/plane-strain: element's internal values setting failed") {
+				return
 			}
 		}
-
 	}
 	return true
 }

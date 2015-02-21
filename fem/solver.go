@@ -161,7 +161,7 @@ func Run() (runisok bool) {
 
 		// set stage
 		for _, d := range domains {
-			if !d.SetStage(stgidx, Global.Sim.Stages[stgidx]) {
+			if LogErrCond(!d.SetStage(stgidx, Global.Sim.Stages[stgidx]), "SetStage failed") {
 				break
 			}
 			d.Sol.T = t
