@@ -70,6 +70,9 @@ type Rjoint struct {
 	k1 float64 // lateral stiffness
 	k2 float64 // lateral stiffness
 
+	// optional data
+	Ncns bool // use non-consistent model
+
 	// shape functions evaluations (see convention above)
 	sldS_rodN [][]float64 // [rodNn][sldNn] shape functions of solids @ [N]odes of rod element
 
@@ -99,16 +102,15 @@ type Rjoint struct {
 	StatesBkp []*msolid.OnedState // [nip] backup internal states
 
 	// scratchpad. computed @ each ip
-	fC   []float64 // internal/contact forces vector
-	Δw   []float64 // relative velocity
-	qb   []float64 // resultant traction vector 'holding' the rod @ ip
-	σc   float64   // confining stress
-	Δwb0 float64   // increment of relative displacement along 0-direction
-	Δwb1 float64   // increment of relative displacement along 1-direction
-	Δwb2 float64   // increment of relative displacement along 2-direction
-	τ    float64   // shear stress along interface between rod and solid
-	qn1  float64   // orthogonal distributed loads acting on the perimeter of the rod along 1-direction
-	qn2  float64   // orthogonal distributed loads acting on the perimeter of the rod along 2-direction
+	Δw []float64 // [ndim] relative velocity
+	qb []float64 // [ndim] resultant traction vector 'holding' the rod @ ip
+	fC []float64 // [rodNu] internal/contact forces vector
+
+	// temporary Jacobian matrices. see Eq. (57)
+	Krr [][]float64 // [rodNu][rodNu] Eq. (58)
+	Krs [][]float64 // [rodNu][sldNu] Eq. (59)
+	Ksr [][]float64 // [sldNu][rodNu] Eq. (60)
+	Kss [][]float64 // [sldNu][sldNu] Eq. (61)
 }
 
 // initialisation ///////////////////////////////////////////////////////////////////////////////////
@@ -185,12 +187,14 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	rodH := o.Rod.Cell.Shp
 	rodNp := len(o.Rod.IpsElem)
 	rodNn := rodH.Nverts
+	rodNu := o.Rod.Nu
 
 	// solid data
 	sldH := o.Sld.Cell.Shp
 	sldS := sldH.S
 	sldNp := len(o.Sld.IpsElem)
 	sldNn := sldH.Nverts
+	sldNu := o.Sld.Nu
 
 	// shape functions of solid @ nodes of rod
 	o.sldS_rodN = la.MatAlloc(rodNn, sldNn)
@@ -270,10 +274,16 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	α := 666.0
 	Jvec := rodH.Jvec3d[:ndim]
 	for idx, ip := range o.Rod.IpsElem {
+
+		// auxiliary
 		e0, e1, e2 := o.e0[idx], o.e1[idx], o.e2[idx]
+
+		// interpolation functions and gradients
 		if LogErr(rodH.CalcAtIp(o.Rod.X, ip, true), "shape functions calculation failed") {
 			return
 		}
+
+		// compute basis vectors
 		J := rodH.J
 		π[0] = Jvec[0] + α
 		π[1] = Jvec[1]
@@ -292,6 +302,8 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 			e2[1] = e0[2]*e1[0] - e0[0]*e1[2]
 			e2[2] = e0[0]*e1[1] - e0[1]*e1[0]
 		}
+
+		// compute auxiliary tensors
 		if o.Coulomb {
 			e1_dy_e1 := tsr.Alloc2()
 			e2_dy_e2 := tsr.Alloc2()
@@ -307,9 +319,15 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	}
 
 	// scratchpad. computed @ each ip
-	o.fC = make([]float64, o.Rod.Nu)
 	o.Δw = make([]float64, ndim)
 	o.qb = make([]float64, ndim)
+	o.fC = make([]float64, rodNu)
+
+	// temporary Jacobian matrices. see Eq. (57)
+	o.Krr = la.MatAlloc(rodNu, rodNu)
+	o.Krs = la.MatAlloc(rodNu, sldNu)
+	o.Ksr = la.MatAlloc(sldNu, rodNu)
+	o.Kss = la.MatAlloc(sldNu, sldNu)
 
 	// debugging
 	//if true {
@@ -353,13 +371,9 @@ func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// auxiliary
 	ndim := o.Ndim
-
-	// rod data
 	rodH := o.Rod.Cell.Shp
 	rodS := rodH.S
 	rodNn := rodH.Nverts
-
-	// solid data
 	sldH := o.Sld.Cell.Shp
 	sldNn := sldH.Nverts
 
@@ -367,23 +381,26 @@ func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	la.VecFill(o.fC, 0)
 
 	// loop over rod's integration points
-	var coef float64
+	var coef, τ, qn1, qn2 float64
 	for idx, ip := range o.Rod.IpsElem {
 
+		// auxiliary
+		e0, e1, e2 := o.e0[idx], o.e1[idx], o.e2[idx]
+
 		// interpolation functions and gradients
-		if LogErr(o.Rod.Cell.Shp.CalcAtIp(o.Rod.X, ip, true), "ipvars") {
+		if LogErr(rodH.CalcAtIp(o.Rod.X, ip, true), "AddToRhs") {
 			return
 		}
 		coef = ip.W * rodH.J
 
 		// state variables
-		o.τ = o.States[idx].Sig
-		o.qn1 = o.States[idx].Phi[0]
-		o.qn2 = o.States[idx].Phi[1]
+		τ = o.States[idx].Sig
+		qn1 = o.States[idx].Phi[0]
+		qn2 = o.States[idx].Phi[1]
 
 		// fC vector. Eq. (34)
 		for i := 0; i < ndim; i++ {
-			o.qb[i] = o.τ*o.h*o.e0[idx][i] + o.qn1*o.e1[idx][i] + o.qn2*o.e2[idx][i]
+			o.qb[i] = τ*o.h*e0[i] + qn1*e1[i] + qn2*e2[i]
 			for m := 0; m < rodNn; m++ {
 				r := i + m*ndim
 				o.fC[r] += coef * rodS[m] * o.qb[i]
@@ -396,11 +413,11 @@ func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		for m := 0; m < rodNn; m++ {
 			r := i + m*ndim
 			I := o.Rod.Umap[r]
-			fb[I] += o.fC[r]
+			fb[I] += o.fC[r] // fb := - (fR == -fC Eq (35))
 			for n := 0; n < sldNn; n++ {
 				s := i + n*ndim
 				J := o.Sld.Umap[s]
-				fb[J] -= o.sldS_rodN[m][n] * o.fC[r]
+				fb[J] -= o.sldS_rodN[m][n] * o.fC[r] // fb := - (fS Eq (36))
 			}
 		}
 	}
@@ -409,12 +426,261 @@ func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 // adds element K to global Jacobian matrix Kb
 func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
+
+	// auxiliary
+	ndim := o.Ndim
+	nsig := 2 * o.Ndim
+	rodH := o.Rod.Cell.Shp
+	rodS := rodH.S
+	rodNn := rodH.Nverts
+	sldH := o.Sld.Cell.Shp
+	sldNn := sldH.Nverts
+
+	// compute DσNoDu
+	if o.Coulomb {
+
+		// clear deep4 structure
+		utl.Deep4set(o.DσNoDu, 0)
+
+		// loop over solid's integration points
+		for idx, ip := range o.Sld.IpsElem {
+
+			// interpolation functions, gradients and variables @ ip
+			if LogErr(sldH.CalcAtIp(o.Sld.X, ip, true), "AddToKb") {
+				return
+			}
+
+			// consistent tangent model matrix
+			if LogErr(o.Sld.MdlSmall.CalcD(o.Sld.D, o.Sld.States[idx], firstIt), "AddToKb") {
+				return
+			}
+
+			// extrapolate derivatives
+			for n := 0; n < sldNn; n++ {
+				DerivSig(o.DσDun, n, ndim, sldH.G, o.Sld.D)
+				for m := 0; m < sldNn; m++ {
+					for i := 0; i < nsig; i++ {
+						for j := 0; j < ndim; j++ {
+							o.DσNoDu[m][i][n][j] += o.sldEmat[m][idx] * o.DσDun[i][j]
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// debugging
+	//if true {
+	if false {
+		utl.PrintDeep4("DσNoDu", o.DσNoDu, "%20.10f")
+	}
+
+	// zero K matrices
+	for m := 0; m < rodNn; m++ {
+		for n := 0; n < rodNn; n++ {
+			o.Krr[m][n] = 0
+		}
+		for n := 0; n < sldNn; n++ {
+			o.Krs[m][n] = 0
+			o.Ksr[n][m] = 0
+		}
+	}
+	la.MatFill(o.Kss, 0)
+
+	// auxiliary
+	var coef float64
+	var DτDω, DτDσc, DσcDu_nj float64
+	var Dp1Du_nj, Dp2Du_nj float64
+	var Dwb0Du_nj, Dwb1Du_nj, Dwb2Du_nj float64
+	var DτDu_nj, DqbDu_nij float64
+	var Dwb0Dur_nj, Dwb1Dur_nj, Dwb2Dur_nj float64
+	var DqbDur_nij float64
+
+	// loop over rod's integration points
+	var err error
+	for idx, ip := range o.Rod.IpsElem {
+
+		// auxiliary
+		e0, e1, e2 := o.e0[idx], o.e1[idx], o.e2[idx]
+
+		// interpolation functions and gradients
+		if LogErr(rodH.CalcAtIp(o.Rod.X, ip, true), "AddToKb") {
+			return
+		}
+		coef = ip.W * rodH.J
+
+		// model derivatives
+		DτDω, DτDσc, err = o.Mdl.CalcD(o.States[idx], firstIt)
+		if LogErr(err, "AddToKb") {
+			return
+		}
+
+		// compute derivatives
+		for j := 0; j < ndim; j++ {
+
+			// Krr and Ksr; derivatives with respect to ur_nj
+			for n := 0; n < rodNn; n++ {
+
+				// ∂wb/∂ur Eq (A.4)
+				Dwb0Dur_nj = -rodS[n] * e0[j]
+				Dwb1Dur_nj = -rodS[n] * e1[j]
+				Dwb2Dur_nj = -rodS[n] * e2[j]
+
+				// compute ∂■/∂ur derivatives
+				c := j + n*ndim
+				for i := 0; i < ndim; i++ {
+
+					// ∂qb/∂ur Eq (A.2)
+					DqbDur_nij = o.h*e0[i]*(DτDω*Dwb0Dur_nj) + o.k1*e1[i]*Dwb1Dur_nj + o.k2*e2[i]*Dwb2Dur_nj
+
+					// Krr := ∂fr/∂ur Eq (58)
+					for m := 0; m < rodNn; m++ {
+						r := i + m*ndim
+						o.Krr[r][c] -= coef * rodS[m] * DqbDur_nij
+					}
+
+					//  Ksr := ∂fs/∂ur Eq (60)
+					for m := 0; m < sldNn; m++ {
+						r := i + m*ndim
+						for p := 0; p < rodNn; p++ {
+							o.Ksr[r][c] += coef * o.sldS_rodN[p][m] * rodS[p] * DqbDur_nij
+						}
+					}
+				}
+			}
+
+			// Krs and Kss
+			for n := 0; n < sldNn; n++ {
+
+				// ∂σc/∂us_nj
+				DσcDu_nj = 0
+				if o.Coulomb {
+
+					// Eqs (A.10) (A.11) and (A.12)
+					Dp1Du_nj, Dp2Du_nj = 0, 0
+					for m := 0; m < sldNn; m++ {
+						for i := 0; i < nsig; i++ {
+							Dp1Du_nj += o.sldS_rodP[idx][m] * o.T1[idx][i] * o.DσNoDu[m][i][n][j]
+							Dp2Du_nj += o.sldS_rodP[idx][m] * o.T2[idx][i] * o.DσNoDu[m][i][n][j]
+						}
+					}
+					DσcDu_nj = (Dp1Du_nj + Dp2Du_nj) / 2.0
+				}
+
+				// ∂wb/∂us Eq (A.5)
+				Dwb0Du_nj, Dwb1Du_nj, Dwb2Du_nj = 0, 0, 0
+				for m := 0; m < rodNn; m++ {
+					Dwb0Du_nj += rodS[m] * o.sldS_rodN[m][n] * e0[j]
+					Dwb1Du_nj += rodS[m] * o.sldS_rodN[m][n] * e1[j]
+					Dwb2Du_nj += rodS[m] * o.sldS_rodN[m][n] * e2[j]
+				}
+
+				// ∂τ/∂us_nj hightlighted term in Eq (A.3)
+				DτDu_nj = DτDω*Dwb0Du_nj + DτDσc*DσcDu_nj
+				if o.Ncns {
+					DτDu_nj = DτDω * Dwb0Du_nj
+				}
+
+				// compute ∂■/∂us derivatives
+				c := j + n*ndim
+				for i := 0; i < ndim; i++ {
+
+					// ∂qb/∂us Eq (A.3)
+					DqbDu_nij = o.h*e0[i]*DτDu_nj + o.k1*e1[i]*Dwb1Du_nj + o.k2*e2[i]*Dwb2Du_nj
+
+					// Krs := ∂fr/∂us Eq (59)
+					for m := 0; m < rodNn; m++ {
+						r := i + m*ndim
+						o.Krs[r][c] -= coef * rodS[m] * DqbDu_nij
+					}
+
+					// Kss := ∂fs/∂us Eq (61)
+					for m := 0; m < sldNn; m++ {
+						r := i + m*ndim
+						for p := 0; p < rodNn; p++ {
+							o.Kss[r][c] += coef * o.sldS_rodN[p][m] * rodS[p] * DqbDu_nij
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// debug
+	if true {
+		K := la.MatAlloc(o.Ny, o.Ny)
+		start := o.Sld.Nu
+		for i := 0; i < ndim; i++ {
+			for m := 0; m < sldNn; m++ {
+				r := i + m*ndim
+				for j := 0; j < ndim; j++ {
+					for n := 0; n < sldNn; n++ {
+						c := j + n*ndim
+						K[r][c] = o.Kss[r][c]
+					}
+					for n := 0; n < rodNn; n++ {
+						c := j + n*ndim
+						K[r][start+c] = o.Ksr[r][c]
+						K[start+c][r] = o.Krs[c][r]
+					}
+				}
+			}
+		}
+		for i := 0; i < ndim; i++ {
+			for m := 0; m < rodNn; m++ {
+				r := i + m*ndim
+				for j := 0; j < ndim; j++ {
+					for n := 0; n < rodNn; n++ {
+						c := j + n*ndim
+						K[start+r][start+c] = o.Krr[r][c]
+					}
+				}
+			}
+		}
+		//la.PrintMat("K", K, "%20.10f", false)
+		//panic("stop")
+	}
+
+	// add K to sparse matrix Kb
+	var r, c, I, J int
+	for i := 0; i < ndim; i++ {
+		for m := 0; m < rodNn; m++ {
+			r = i + m*ndim
+			I = o.Rod.Umap[r]
+			for j := 0; j < ndim; j++ {
+				for n := 0; n < rodNn; n++ {
+					c = j + n*ndim
+					J = o.Rod.Umap[c]
+					Kb.Put(I, J, o.Krr[r][c])
+				}
+				for n := 0; n < sldNn; n++ {
+					c = j + n*ndim
+					J = o.Sld.Umap[c]
+					Kb.Put(I, J, o.Krs[r][c])
+					Kb.Put(J, I, o.Ksr[c][r])
+				}
+			}
+		}
+		for m := 0; m < sldNn; m++ {
+			r = i + m*ndim
+			I = o.Sld.Umap[r]
+			for j := 0; j < ndim; j++ {
+				for n := 0; n < sldNn; n++ {
+					c = j + n*ndim
+					J = o.Sld.Umap[c]
+					Kb.Put(I, J, o.Kss[r][c])
+				}
+			}
+		}
+	}
 	return true
 }
 
 // Update perform (tangent) update
 func (o *Rjoint) Update(sol *Solution) (ok bool) {
 
+	var τ, qn1, qn2, σc float64
+	var Δwb0, Δwb1, Δwb2 float64
 	for idx, ip := range o.Rod.IpsElem {
 
 		// interpolation functions and gradients
@@ -455,27 +721,27 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 				o.Δw[i] -= rodS[m] * sol.ΔY[rlin]
 			}
 		}
-		o.Δwb0, o.Δwb1, o.Δwb2 = 0, 0, 0
+		Δwb0, Δwb1, Δwb2 = 0, 0, 0
 		for i := 0; i < o.Ndim; i++ {
-			o.Δwb0 += o.e0[idx][i] * o.Δw[i]
-			o.Δwb1 += o.e1[idx][i] * o.Δw[i]
-			o.Δwb2 += o.e2[idx][i] * o.Δw[i]
+			Δwb0 += o.e0[idx][i] * o.Δw[i]
+			Δwb1 += o.e1[idx][i] * o.Δw[i]
+			Δwb2 += o.e2[idx][i] * o.Δw[i]
 		}
 
 		// state variables
-		o.τ = o.States[idx].Sig
-		o.qn1 = o.States[idx].Phi[0]
-		o.qn2 = o.States[idx].Phi[1]
+		τ = o.States[idx].Sig
+		qn1 = o.States[idx].Phi[0]
+		qn2 = o.States[idx].Phi[1]
 
 		// debugging
 		if true {
-			io.Pf("\nτ=%g qn1=%g qn2=%g\n", o.τ, o.qn1, o.qn2)
+			io.Pf("\nτ=%g qn1=%g qn2=%g\n", τ, qn1, qn2)
 			io.Pf("Δw=%v\n", o.Δw)
-			io.Pf("Δwb0=%g Δwb1=%g Δwb2=%g\n", o.Δwb0, o.Δwb1, o.Δwb2)
+			io.Pf("Δwb0=%g Δwb1=%g Δwb2=%g\n", Δwb0, Δwb1, Δwb2)
 		}
 
 		// new confining stress
-		o.σc = 0.0
+		σc = 0.0
 		if o.Coulomb {
 
 			// calculate σIp
@@ -503,14 +769,14 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 			}
 
 			// σcNew
-			o.σc = -(p1 + p2) / 2.0
+			σc = -(p1 + p2) / 2.0
 
 			// debugging
 			if true {
 				io.Pf("\nsldSigN_rodP=%v\n", o.sldSigN_rodP)
 				io.Pf("t1=%v\n", o.t1)
 				io.Pf("t2=%v\n", o.t2)
-				io.Pf("σc=%v\n", o.σc)
+				io.Pf("σc=%v\n", σc)
 			}
 		}
 	}
@@ -529,7 +795,8 @@ func (o *Rjoint) InitIvs(sol *Solution) (ok bool) {
 		o.StatesBkp[i] = o.States[i].GetCopy()
 
 		// debug
-		if true {
+		//if true {
+		if false {
 			o.States[i].Sig = 33
 			o.States[i].Phi[0] = 0.1
 			o.States[i].Phi[1] = 0.2
