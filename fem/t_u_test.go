@@ -15,7 +15,7 @@ import (
 
 func Test_sigini01(tst *testing.T) {
 
-	verbose()
+	//verbose()
 	chk.PrintTitle("sigini01")
 
 	// start simulation
@@ -66,7 +66,7 @@ func Test_sigini01(tst *testing.T) {
 
 func Test_sigini02(tst *testing.T) {
 
-	verbose()
+	//verbose()
 	chk.PrintTitle("sigini02")
 
 	// start simulation
