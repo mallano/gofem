@@ -19,12 +19,12 @@ func Test_rjoint01a(tst *testing.T) {
 		}
 	}()
 
-	verbose()
+	//verbose()
 	chk.PrintTitle("rjoint01a")
 
 	// run simulation
 	if !Start("data/rjoint01a.sim", true, chk.Verbose) {
-		tst.Errorf("test failed\n")
+		tst.Errorf("Start failed\n")
 		return
 	}
 
@@ -33,7 +33,7 @@ func Test_rjoint01a(tst *testing.T) {
 
 	// run simulation
 	if !Run() {
-		tst.Errorf("test failed\n")
+		tst.Errorf("Run failed\n")
 		return
 	}
 }

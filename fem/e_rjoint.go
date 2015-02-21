@@ -17,31 +17,31 @@ import (
 
 // Rjoint implements the rod-joint (interface/link) element for reinforced solids.
 //  The following convention is considered:
-//   n or N    -- means [N]odes
-//   p or P    -- means integratioin [P]oints
-//   nn or Nn  -- number of nodes
-//   np or Np  -- number of integration [P]points
-//   ndim      -- space dimension
-//   nsig      -- number of stress/strain components == 2 * ndim
-//   rod       -- means rod element
-//   rodH      -- rod shape structure
-//   rodNn     -- rod number of nodes
-//   rodNp     -- rod number of integration points
-//   rodS      -- rod shape functions
-//   sld       -- means solid element
-//   sldH      -- rod shape structure
-//   sldNn     -- solid number of nodes
-//   sldNp     -- solid number of integration points
-//   sldS      -- solid shape functions
-//   rodYn     -- rod's (real) coordinates of node
-//   rodYp     -- rod's (real) coordinates of integration point
-//   r or R    -- means natural coordinates in the solids' system
-//   z or Z    -- means natural coordinates in the rod's system
-//   s or S    -- parametric coordinate along rod
-//   rodRn     -- natural coordinates or rod's nodes w.r.t solid's system
-//   rodRp     -- natural coordinates of rod's integration point w.r.t to solid's system
-//   sldS_rodN -- solid shape functions evaluated at rod nodes
-//   sldS_rodP -- solid shape functions evaluated at rot integration points
+//   n or N   -- means [N]odes
+//   p or P   -- means integratioin [P]oints
+//   nn or Nn -- number of nodes
+//   np or Np -- number of integration [P]points
+//   ndim     -- space dimension
+//   nsig     -- number of stress/strain components == 2 * ndim
+//   rod      -- means rod element
+//   rodH     -- rod shape structure
+//   rodNn    -- rod number of nodes
+//   rodNp    -- rod number of integration points
+//   rodS     -- rod shape functions
+//   sld      -- means solid element
+//   sldH     -- rod shape structure
+//   sldNn    -- solid number of nodes
+//   sldNp    -- solid number of integration points
+//   sldS     -- solid shape functions
+//   rodYn    -- rod's (real) coordinates of node
+//   rodYp    -- rod's (real) coordinates of integration point
+//   r or R   -- means natural coordinates in the solids' system
+//   z or Z   -- means natural coordinates in the rod's system
+//   s or S   -- parametric coordinate along rod
+//   rodRn    -- natural coordinates or rod's nodes w.r.t solid's system
+//   rodRp    -- natural coordinates of rod's integration point w.r.t to solid's system
+//   Nmat     -- solid shape functions evaluated at rod nodes
+//   Pmat     -- solid shape functions evaluated at rod integration points
 //  References:
 //   [1] R Durand, MM Farias, DM Pedroso. Modelling the strengthening of solids with
 //       incompatible line finite elements, Computers and Structures (2014). Submitted.
@@ -58,59 +58,56 @@ type Rjoint struct {
 	Ndim int           // space dimension
 	Ny   int           // total number of dofs == rod.Nu + sld.Nu
 
-	// underlying elements
-	Rod *Rod   // rod element
-	Sld *ElemU // solid element
-
-	// material model
+	// essential
+	Rod *Rod            // rod element
+	Sld *ElemU          // solid element
 	Mdl msolid.RjointM1 // material model
 
 	// parameters
-	h  float64 // perimeter of rod element
-	k1 float64 // lateral stiffness
-	k2 float64 // lateral stiffness
+	h  float64 // perimeter of rod element; Eq (34)
+	k1 float64 // lateral stiffness; Eq (37)
+	k2 float64 // lateral stiffness; Eq (37)
 
 	// optional data
 	Ncns bool // use non-consistent model
 
-	// shape functions evaluations (see convention above)
-	sldS_rodN [][]float64 // [rodNn][sldNn] shape functions of solids @ [N]odes of rod element
+	// shape functions evaluations and extrapolator matrices
+	Nmat [][]float64 // [sldNn][rodNn] shape functions of solids @ [N]odes of rod element
+	Pmat [][]float64 // [sldNn][rodNp] shape functions of solids @ integration [P]oints of rod element (for Coulomb model)
+	Emat [][]float64 // [sldNn][sldNp] solid's extrapolation matrix (for Coulomb model)
+
+	// variables for Coulomb model
+	Coulomb bool            // use Coulomb model
+	rodRp   [][]float64     // [rodNp][ndim] natural coordinates of ips of rod w.r.t. solid's system
+	σNo     [][]float64     // [nneSld][nsig] σ at nodes of solid
+	σIp     []float64       // [nsig] σ at ips of rod
+	t1      []float64       // [ndim] traction vectors for σc
+	t2      []float64       // [ndim] traction vectors for σc
+	T1      [][]float64     // [rodNp][nsig] tensor (e1 dy e1)
+	T2      [][]float64     // [rodNp][nsig] tensor (e2 dy e2)
+	DσNoDu  [][][][]float64 // [sldNn][nsig][sldNn][ndim] ∂σSldNod/∂uSldNod : derivatives of σ @ nodes of solid w.r.t displacements of solid
+	DσDun   [][]float64     // [nsig][ndim] ∂σIp/∂us : derivatives of σ @ ip of solid w.r.t displacements of solid
 
 	// corotational system aligned with rod element
 	e0 [][]float64 // [rodNp][ndim] local directions at each integration point of rod
 	e1 [][]float64 // [rodNp][ndim] local directions at each integration point of rod
 	e2 [][]float64 // [rodNp][ndim] local directions at each integration point of rod
 
-	// variables for Coulomb model
-	Coulomb   bool        // use Coulomb model
-	sldEmat   [][]float64 // [sldNn][sldNp] solid's extrapolation matrix
-	sldSigN   [][]float64 // [sldNn][nsig] σ at nodes of solid (extrapolated using Emat)
-	rodRp     [][]float64 // [rodNp][ndim] natural coordinates of ips of rod w.r.t. solid's system
-	sldS_rodP [][]float64 // [rodNp][sldNn] shape functions of solids @ integration [P]oints of rod element
-
-	// scratchpad for Coulomb model. computed @ each ip
-	sldSigN_rodP []float64       // [nsig] σ of solid interpolated to ips of rod
-	t1           []float64       // [ndim] traction vectors for σc
-	t2           []float64       // [ndim] traction vectors for σc
-	T1           [][]float64     // [rodNp][nsig] tensor (e1 dy e1)
-	T2           [][]float64     // [rodNp][nsig] tensor (e2 dy e2)
-	DσNoDu       [][][][]float64 // [sldNn][nsig][sldNn][ndim] ∂σSldNod/∂uSldNod : derivatives of σ @ nodes of solid w.r.t displacements of solid
-	DσDun        [][]float64     // [nsig][ndim] ∂σSldIp/∂uSldNod : derivatives of σ @ ip of solid w.r.t displacements of solid
-
-	// internal variables
-	States    []*msolid.OnedState // [nip] internal states
-	StatesBkp []*msolid.OnedState // [nip] backup internal states
-
-	// scratchpad. computed @ each ip
-	Δw []float64 // [ndim] relative velocity
-	qb []float64 // [ndim] resultant traction vector 'holding' the rod @ ip
-	fC []float64 // [rodNu] internal/contact forces vector
+	// auxiliary variables
+	ΔuC [][]float64 // [rodNn][ndim] relative displ. increment of solid @ nodes of rod; Eq (30)
+	Δw  []float64   // [ndim] relative velocity; Eq (32)
+	qb  []float64   // [ndim] resultant traction vector 'holding' the rod @ ip; Eq (34)
+	fC  []float64   // [rodNu] internal/contact forces vector; Eq (34)
 
 	// temporary Jacobian matrices. see Eq. (57)
 	Krr [][]float64 // [rodNu][rodNu] Eq. (58)
 	Krs [][]float64 // [rodNu][sldNu] Eq. (59)
 	Ksr [][]float64 // [sldNu][rodNu] Eq. (60)
 	Kss [][]float64 // [sldNu][sldNu] Eq. (61)
+
+	// internal values
+	States    []*msolid.OnedState // [nip] internal states
+	StatesBkp []*msolid.OnedState // [nip] backup internal states
 }
 
 // initialisation ///////////////////////////////////////////////////////////////////////////////////
@@ -197,7 +194,7 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	sldNu := o.Sld.Nu
 
 	// shape functions of solid @ nodes of rod
-	o.sldS_rodN = la.MatAlloc(rodNn, sldNn)
+	o.Nmat = la.MatAlloc(sldNn, rodNn)
 	rodYn := make([]float64, ndim)
 	rodRn := make([]float64, 3)
 	for m := 0; m < rodNn; m++ {
@@ -211,27 +208,28 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 			return
 		}
 		for n := 0; n < sldNn; n++ {
-			o.sldS_rodN[m][n] = sldH.S[n]
+			o.Nmat[n][m] = sldH.S[n]
 		}
-	}
-
-	// debugging
-	//if true {
-	if false {
-		io.Pf("sldS_rodN = %v\n", o.sldS_rodN)
 	}
 
 	// coulomb model => σc depends on p values of solid
 	if o.Coulomb {
 
 		// allocate variables
-		o.sldEmat = la.MatAlloc(sldNn, sldNp)
-		o.sldSigN = la.MatAlloc(sldNn, nsig)
+		o.Pmat = la.MatAlloc(sldNn, rodNp)
+		o.Emat = la.MatAlloc(sldNn, sldNp)
 		o.rodRp = la.MatAlloc(rodNp, 3)
-		o.sldS_rodP = la.MatAlloc(rodNp, sldNn)
+		o.σNo = la.MatAlloc(sldNn, nsig)
+		o.σIp = make([]float64, nsig)
+		o.t1 = make([]float64, ndim)
+		o.t2 = make([]float64, ndim)
+		o.T1 = la.MatAlloc(rodNp, nsig)
+		o.T2 = la.MatAlloc(rodNp, nsig)
+		o.DσNoDu = utl.Deep4alloc(sldNn, nsig, sldNn, ndim)
+		o.DσDun = la.MatAlloc(nsig, ndim)
 
 		// extrapolator matrix
-		if LogErr(sldH.Extrapolator(o.sldEmat, o.Sld.IpsElem), "Extrapolator of solid failed") {
+		if LogErr(sldH.Extrapolator(o.Emat, o.Sld.IpsElem), "Extrapolator of solid failed") {
 			return
 		}
 
@@ -245,24 +243,9 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 				return
 			}
 			for n := 0; n < sldNn; n++ {
-				o.sldS_rodP[idx][n] = sldS[n]
+				o.Pmat[n][idx] = sldS[n]
 			}
 		}
-
-		// scratchpad for Coulomb model. computed @ each ip
-		o.sldSigN_rodP = make([]float64, nsig)
-		o.t1 = make([]float64, ndim)
-		o.t2 = make([]float64, ndim)
-		o.T1 = la.MatAlloc(rodNp, nsig)
-		o.T2 = la.MatAlloc(rodNp, nsig)
-		o.DσNoDu = utl.Deep4alloc(sldNn, nsig, sldNn, ndim)
-		o.DσDun = la.MatAlloc(nsig, ndim)
-	}
-
-	// debugging
-	//if true {
-	if false {
-		io.Pf("\nsldS_rodP = %v\n", o.sldS_rodP)
 	}
 
 	// joint direction @ ip[idx]; corotational system aligned with rod element
@@ -318,7 +301,8 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 		}
 	}
 
-	// scratchpad. computed @ each ip
+	// auxiliary variables
+	o.ΔuC = la.MatAlloc(rodNn, ndim)
 	o.Δw = make([]float64, ndim)
 	o.qb = make([]float64, ndim)
 	o.fC = make([]float64, rodNu)
@@ -332,12 +316,30 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	// debugging
 	//if true {
 	if false {
-		io.Pf("\ne0 = %v\n", o.e0)
-		io.Pf("e1 = %v\n", o.e1)
-		io.Pf("e2 = %v\n", o.e2)
-		io.Pf("\nT1 = %v\n", o.T1)
-		io.Pf("T2 = %v\n", o.T2)
-		panic("stop")
+		io.Pf("Nmat =\n")
+		for i := 0; i < sldNn; i++ {
+			for j := 0; j < rodNn; j++ {
+				io.Pf("%g ", o.Nmat[i][j])
+			}
+			io.Pf("\n")
+		}
+		io.Pf("\nPmat =\n")
+		for i := 0; i < sldNn; i++ {
+			for j := 0; j < rodNp; j++ {
+				io.Pf("%g ", o.Pmat[i][j])
+			}
+			io.Pf("\n")
+		}
+		io.Pf("\n")
+		la.PrintMat("e0", o.e0, "%20.13f", false)
+		io.Pf("\n")
+		la.PrintMat("e1", o.e1, "%20.13f", false)
+		io.Pf("\n")
+		la.PrintMat("e2", o.e2, "%20.13f", false)
+		io.Pf("\n")
+		la.PrintMat("T1", o.T1, "%20.13f", false)
+		io.Pf("\n")
+		la.PrintMat("T2", o.T2, "%20.13f", false)
 	}
 
 	// success
@@ -417,7 +419,7 @@ func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 			for n := 0; n < sldNn; n++ {
 				s := i + n*ndim
 				J := o.Sld.Umap[s]
-				fb[J] -= o.sldS_rodN[m][n] * o.fC[r] // fb := - (fS Eq (36))
+				fb[J] -= o.Nmat[n][m] * o.fC[r] // fb := - (fS Eq (36))
 			}
 		}
 	}
@@ -461,7 +463,7 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 				for m := 0; m < sldNn; m++ {
 					for i := 0; i < nsig; i++ {
 						for j := 0; j < ndim; j++ {
-							o.DσNoDu[m][i][n][j] += o.sldEmat[m][idx] * o.DσDun[i][j]
+							o.DσNoDu[m][i][n][j] += o.Emat[m][idx] * o.DσDun[i][j]
 						}
 					}
 				}
@@ -543,7 +545,7 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 					for m := 0; m < sldNn; m++ {
 						r := i + m*ndim
 						for p := 0; p < rodNn; p++ {
-							o.Ksr[r][c] += coef * o.sldS_rodN[p][m] * rodS[p] * DqbDur_nij
+							o.Ksr[r][c] += coef * o.Nmat[m][p] * rodS[p] * DqbDur_nij
 						}
 					}
 				}
@@ -560,8 +562,8 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 					Dp1Du_nj, Dp2Du_nj = 0, 0
 					for m := 0; m < sldNn; m++ {
 						for i := 0; i < nsig; i++ {
-							Dp1Du_nj += o.sldS_rodP[idx][m] * o.T1[idx][i] * o.DσNoDu[m][i][n][j]
-							Dp2Du_nj += o.sldS_rodP[idx][m] * o.T2[idx][i] * o.DσNoDu[m][i][n][j]
+							Dp1Du_nj += o.Pmat[m][idx] * o.T1[idx][i] * o.DσNoDu[m][i][n][j]
+							Dp2Du_nj += o.Pmat[m][idx] * o.T2[idx][i] * o.DσNoDu[m][i][n][j]
 						}
 					}
 					DσcDu_nj = (Dp1Du_nj + Dp2Du_nj) / 2.0
@@ -570,9 +572,9 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 				// ∂wb/∂us Eq (A.5)
 				Dwb0Du_nj, Dwb1Du_nj, Dwb2Du_nj = 0, 0, 0
 				for m := 0; m < rodNn; m++ {
-					Dwb0Du_nj += rodS[m] * o.sldS_rodN[m][n] * e0[j]
-					Dwb1Du_nj += rodS[m] * o.sldS_rodN[m][n] * e1[j]
-					Dwb2Du_nj += rodS[m] * o.sldS_rodN[m][n] * e2[j]
+					Dwb0Du_nj += rodS[m] * o.Nmat[n][m] * e0[j]
+					Dwb1Du_nj += rodS[m] * o.Nmat[n][m] * e1[j]
+					Dwb2Du_nj += rodS[m] * o.Nmat[n][m] * e2[j]
 				}
 
 				// ∂τ/∂us_nj hightlighted term in Eq (A.3)
@@ -598,7 +600,7 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 					for m := 0; m < sldNn; m++ {
 						r := i + m*ndim
 						for p := 0; p < rodNn; p++ {
-							o.Kss[r][c] += coef * o.sldS_rodN[p][m] * rodS[p] * DqbDu_nij
+							o.Kss[r][c] += coef * o.Nmat[m][p] * rodS[p] * DqbDu_nij
 						}
 					}
 				}
@@ -638,7 +640,6 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 			}
 		}
 		//la.PrintMat("K", K, "%20.10f", false)
-		//panic("stop")
 	}
 
 	// add K to sparse matrix Kb
@@ -679,65 +680,89 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 // Update perform (tangent) update
 func (o *Rjoint) Update(sol *Solution) (ok bool) {
 
-	var τ, qn1, qn2, σc float64
-	var Δwb0, Δwb1, Δwb2 float64
+	// auxiliary
+	ndim := o.Ndim
+	nsig := 2 * o.Ndim
+
+	// rod data
+	rodH := o.Rod.Cell.Shp
+	rodS := rodH.S
+	//rodNp := len(o.Rod.IpsElem)
+	rodNn := rodH.Nverts
+
+	// solid data
+	sldH := o.Sld.Cell.Shp
+	//sldS := sldH.S
+	//sldNp := len(o.Sld.IpsElem)
+	sldNn := sldH.Nverts
+
+	// extrapolate stresses at integration points of solid element to its nodes
+	if o.Coulomb {
+		la.MatFill(o.σNo, 0)
+		for idx, _ := range o.Sld.IpsElem {
+			σ := o.Sld.States[idx].Sig
+			for i := 0; i < nsig; i++ {
+				for m := 0; m < sldNn; m++ {
+					o.σNo[m][i] += o.Emat[m][idx] * σ[i]
+				}
+			}
+		}
+		// debug
+		//la.PrintMat("σNo", o.σNo, "%20.13f", false)
+	}
+
+	// interpolate Δu of solid to find ΔuC @ rod node; Eq (30)
+	var r, I int
+	for m := 0; m < rodNn; m++ {
+		for i := 0; i < ndim; i++ {
+			o.ΔuC[m][i] = 0
+			for n := 0; n < sldNn; n++ {
+				r = i + n*ndim
+				I = o.Sld.Umap[r]
+				o.ΔuC[m][i] += o.Nmat[n][m] * sol.ΔY[I] // Eq (30)
+			}
+		}
+	}
+
+	// loop over ips of rod
+	var Δwb0, Δwb1, Δwb2, σc float64
 	for idx, ip := range o.Rod.IpsElem {
 
+		// auxiliary
+		e0, e1, e2 := o.e0[idx], o.e1[idx], o.e2[idx]
+
 		// interpolation functions and gradients
-		if LogErr(o.Rod.Cell.Shp.CalcAtIp(o.Rod.X, ip, true), "ipvars") {
+		if LogErr(rodH.CalcAtIp(o.Rod.X, ip, true), "Update") {
 			return
 		}
 
-		io.Pforan("here = %v\n", 1)
-
-		// auxiliary
-		//ndim := o.Ndim
-		nsig := 2 * o.Ndim
-
-		// rod data
-		rodH := o.Rod.Cell.Shp
-		rodS := rodH.S
-		//rodNp := len(o.Rod.IpsElem)
-		rodNn := rodH.Nverts
-
-		// solid data
-		sldH := o.Sld.Cell.Shp
-		//sldS := sldH.S
-		//sldNp := len(o.Sld.IpsElem)
-		sldNn := sldH.Nverts
-
-		// relative displacement
-		var rlin, rsld int
-		for i := 0; i < o.Ndim; i++ {
+		// interpolated relative displacements @ ip of join; Eqs (31) and (32)
+		for i := 0; i < ndim; i++ {
 			o.Δw[i] = 0
-		}
-		for m := 0; m < rodNn; m++ {
-			for i := 0; i < o.Ndim; i++ {
-				for n := 0; n < sldNn; n++ {
-					rsld = o.Sld.Umap[i+n*o.Ndim]
-					o.Δw[i] += rodS[m] * o.sldS_rodN[m][n] * sol.ΔY[rsld]
-				}
-				rlin = o.Rod.Umap[i+m*o.Ndim]
-				o.Δw[i] -= rodS[m] * sol.ΔY[rlin]
+			for m := 0; m < rodNn; m++ {
+				r = i + m*ndim
+				I = o.Rod.Umap[r]
+				o.Δw[i] += rodS[m] * (o.ΔuC[m][i] - sol.ΔY[I]) // Eq (31) and (32)
 			}
 		}
+
+		// relative displacents in the coratational system
 		Δwb0, Δwb1, Δwb2 = 0, 0, 0
-		for i := 0; i < o.Ndim; i++ {
-			Δwb0 += o.e0[idx][i] * o.Δw[i]
-			Δwb1 += o.e1[idx][i] * o.Δw[i]
-			Δwb2 += o.e2[idx][i] * o.Δw[i]
+		for i := 0; i < ndim; i++ {
+			Δwb0 += e0[i] * o.Δw[i]
+			Δwb1 += e1[i] * o.Δw[i]
+			Δwb2 += e2[i] * o.Δw[i]
 		}
 
-		// state variables
-		τ = o.States[idx].Sig
-		qn1 = o.States[idx].Phi[0]
-		qn2 = o.States[idx].Phi[1]
-
 		// debugging
-		if true {
-			io.Pf("\nτ=%g qn1=%g qn2=%g\n", τ, qn1, qn2)
-			io.Pf("Δw=%v\n", o.Δw)
-			io.Pf("Δwb0=%g Δwb1=%g Δwb2=%g\n", Δwb0, Δwb1, Δwb2)
+		//if true {
+		if false {
+			τ := o.States[idx].Sig
+			qn1 := o.States[idx].Phi[0]
+			qn2 := o.States[idx].Phi[1]
+			io.Pf("\nBEFORE: τ=%20.13f qn1=%20.13f qn2=%20.13f\n", τ, qn1, qn2)
+			la.PrintVec("Δw", o.Δw, "%20.13f", false)
+			io.Pf("Δwb0=%20.13f Δwb1=%20.13f Δwb2=%20.13f\n", Δwb0, Δwb1, Δwb2)
 		}
 
 		// new confining stress
@@ -746,39 +771,57 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 
 			// calculate σIp
 			for j := 0; j < nsig; j++ {
-				o.sldSigN_rodP[j] = 0
+				o.σIp[j] = 0
 				for n := 0; n < sldNn; n++ {
-					o.sldSigN_rodP[j] += o.sldS_rodP[idx][n] * o.sldSigN[n][j]
+					o.σIp[j] += o.Pmat[n][idx] * o.σNo[n][j]
 				}
 			}
 
 			// calculate t1 and t2
-			for i := 0; i < o.Ndim; i++ {
+			for i := 0; i < ndim; i++ {
 				o.t1[i], o.t2[i] = 0, 0
-				for j := 0; j < o.Ndim; j++ {
-					o.t1[i] += tsr.M2T(o.sldSigN_rodP, i, j) * o.e1[idx][j]
-					o.t2[i] += tsr.M2T(o.sldSigN_rodP, i, j) * o.e2[idx][j]
+				for j := 0; j < ndim; j++ {
+					o.t1[i] += tsr.M2T(o.σIp, i, j) * e1[j]
+					o.t2[i] += tsr.M2T(o.σIp, i, j) * e2[j]
 				}
 			}
 
 			// calculate p1, p2 and σcNew
 			p1, p2 := 0.0, 0.0
-			for i := 0; i < o.Ndim; i++ {
-				p1 += o.t1[i] * o.e1[idx][i]
-				p2 += o.t2[i] * o.e2[idx][i]
+			for i := 0; i < ndim; i++ {
+				p1 += o.t1[i] * e1[i]
+				p2 += o.t2[i] * e2[i]
 			}
 
 			// σcNew
 			σc = -(p1 + p2) / 2.0
 
 			// debugging
-			if true {
-				io.Pf("\nsldSigN_rodP=%v\n", o.sldSigN_rodP)
-				io.Pf("t1=%v\n", o.t1)
-				io.Pf("t2=%v\n", o.t2)
-				io.Pf("σc=%v\n", σc)
+			//if true {
+			if false {
+				la.PrintVec("σIp", o.σIp, "%20.13f", false)
+				io.Pf("t1=%20.13f\n", o.t1)
+				io.Pf("t2=%20.13f\n", o.t2)
+				io.Pf("σc=%20.13f\n", σc)
 			}
 		}
+
+		// update model
+		if LogErr(o.Mdl.Update(o.States[idx], σc, Δwb0), "Update") {
+			return
+		}
+		o.States[idx].Phi[0] += o.k1 * Δwb1 // qn1
+		o.States[idx].Phi[1] += o.k2 * Δwb2 // qn2
+
+		// debugging
+		//if true {
+		if false {
+			τ := o.States[idx].Sig
+			qn1 := o.States[idx].Phi[0]
+			qn2 := o.States[idx].Phi[1]
+			io.Pf("\nAFTER: τ=%20.13f qn1=%20.13f qn2=%20.13f\n", τ, qn1, qn2)
+		}
+
 	}
 	return true
 }
