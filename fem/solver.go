@@ -40,6 +40,9 @@ var Global struct {
 
 	// for debugging
 	DebugKb func(d *Domain, firstIt bool)
+
+	// options
+	LogBcs bool // log essential and ptnatural boundary conditions
 }
 
 // End must be called and the end to flush log file

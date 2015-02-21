@@ -4,7 +4,11 @@
 
 package fem
 
-import "github.com/cpmech/gofem/inp"
+import (
+	"log"
+
+	"github.com/cpmech/gofem/inp"
+)
 
 // SetHydroSt sets the initial state to a hydrostatic condition
 func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
@@ -38,5 +42,8 @@ func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
 			o.Sol.Y[dof.Eq] = pl
 		}
 	}
+
+	// success
+	log.Printf("dom: initial hydrostatic state set with zmax=%g zwater=%g γw=%g", zmax, zwater, hst.GamW)
 	return true
 }

@@ -5,6 +5,8 @@
 package fem
 
 import (
+	"log"
+
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gosl/utl"
 )
@@ -39,28 +41,33 @@ func (o *Domain) SetIniStress(stg *inp.Stage) (ok bool) {
 					return
 				}
 			}
+			log.Printf("dom: initial homogeneous/isotropic state set with σ0 = %g", dat.S0)
 			return true
 		}
 
 		// plane-strain state
-		sz := dat.Nu * (dat.Sh + dat.Sv)
-		for _, e := range o.ElemIntvars {
+		if dat.Psa {
+			sz := dat.Nu * (dat.Sh + dat.Sv)
+			for _, e := range o.ElemIntvars {
 
-			// get element's integration points data
-			ele := e.(Elem)
-			_, d := ele.OutIpsData()
-			nip := len(d)
+				// get element's integration points data
+				ele := e.(Elem)
+				_, d := ele.OutIpsData()
+				nip := len(d)
 
-			// build map with plane-strain and homogeneus state
-			vx := utl.DblVals(nip, dat.Sh)
-			vy := utl.DblVals(nip, dat.Sv)
-			vz := utl.DblVals(nip, sz)
-			ivs := map[string][]float64{"sx": vx, "sy": vy, "sz": vz}
+				// build map with plane-strain and homogeneus state
+				vx := utl.DblVals(nip, dat.Sh)
+				vy := utl.DblVals(nip, dat.Sv)
+				vz := utl.DblVals(nip, sz)
+				ivs := map[string][]float64{"sx": vx, "sy": vy, "sz": vz}
 
-			// set element's states
-			if LogErrCond(!e.SetIvs(ivs), "homogeneous/plane-strain: element's internal values setting failed") {
-				return
+				// set element's states
+				if LogErrCond(!e.SetIvs(ivs), "homogeneous/plane-strain: element's internal values setting failed") {
+					return
+				}
 			}
+			log.Printf("dom: initial homogeneous/plane-strain state set with sx=%g sy=%g sz=%g", dat.Sh, dat.Sv, sz)
+			return true
 		}
 	}
 	return true
