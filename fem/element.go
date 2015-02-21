@@ -50,10 +50,10 @@ type ElemConnector interface {
 
 // ElemIntvars defines elements with {z,q} internal variables
 type ElemIntvars interface {
-	InitIvs(sol *Solution) (ok bool)             // reset (and fix) internal variables after primary variables have been changed
-	SetIvs(zvars map[string][]float64) (ok bool) // set secondary variables; e.g. during initialisation via files
-	BackupIvs() (ok bool)                        // create copy of internal variables
-	RestoreIvs() (ok bool)                       // restore internal variables from copies
+	InitIvs(sol *Solution) (ok bool)           // reset (and fix) internal variables after primary variables have been changed
+	SetIvs(ivs map[string][]float64) (ok bool) // set secondary variables; e.g. during initialisation via files
+	BackupIvs() (ok bool)                      // create copy of internal variables
+	RestoreIvs() (ok bool)                     // restore internal variables from copies
 }
 
 // Info holds all information required to set a simulation stage

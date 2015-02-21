@@ -43,12 +43,13 @@ type ElemU struct {
 	MdlSmall msolid.Small // model specialisation for small strains
 	MdlLarge msolid.Large // model specialisation for large deformations
 
+	// internal variables
+	Sig0      [][]float64     // [nip][nsig] initial stresses
+	States    []*msolid.State // [nip] states
+	StatesBkp []*msolid.State // [nip] backup states
+
 	// problem variables
 	Umap []int // assembly map (location array/element equations)
-
-	// internal variables
-	States    []*msolid.State
-	StatesBkp []*msolid.State
 
 	// natural boundary conditions
 	NatBcs []*NaturalBc
@@ -425,6 +426,7 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 func (o *ElemU) Update(sol *Solution) (ok bool) {
 
 	// for each integration point
+	var σ0 []float64
 	nverts := o.Cell.Shp.Nverts
 	for idx, _ := range o.IpsElem {
 
@@ -448,7 +450,10 @@ func (o *ElemU) Update(sol *Solution) (ok bool) {
 		}
 
 		// call model update => update stresses
-		if LogErr(o.MdlSmall.Update(o.States[idx], o.ε, o.Δε), "Update") {
+		if len(o.Sig0) > 0 {
+			σ0 = o.Sig0[idx]
+		}
+		if LogErr(o.MdlSmall.Update(o.States[idx], σ0, o.ε, o.Δε), "Update") {
 			return
 		}
 	}
@@ -470,7 +475,13 @@ func (o *ElemU) InitIvs(sol *Solution) (ok bool) {
 }
 
 // SetIvs set secondary variables; e.g. during initialisation via files
-func (o *ElemU) SetIvs(zvars map[string][]float64) (ok bool) {
+func (o *ElemU) SetIvs(ivs map[string][]float64) (ok bool) {
+	nip := len(o.IpsElem)
+	o.Sig0 = Ivs2sigmas(nip, o.Ndim, ivs)
+	for i := 0; i < nip; i++ {
+		copy(o.States[i].Sig, o.Sig0[i])
+		copy(o.StatesBkp[i].Sig, o.Sig0[i])
+	}
 	return true
 }
 

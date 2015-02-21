@@ -225,7 +225,11 @@ type HydroStData struct {
 type IniStressData struct {
 	Hom bool    `json:"hom"` // homogeneous stress distribution
 	Iso bool    `json:"iso"` // isotropic state
-	Sig float64 `json:"sig"` // stress value to use in homogeneous and isotropic distribution
+	Psa bool    `json:"psa"` // plane-strain state
+	S0  float64 `json:"s0"`  // Iso => stress value to use in homogeneous and isotropic distribution
+	Sh  float64 `json:"sh"`  // Psa => horizontal stress
+	Sv  float64 `json""sv"`  // Psa => vertical stress
+	Nu  float64 `json:"nu"`  // Psa => Poisson's coefficient for plane-strain state
 }
 
 // Stage holds stage data

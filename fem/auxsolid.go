@@ -189,3 +189,31 @@ func IpBmatrix_sparse(B *la.Triplet, ndim, nne int, G [][]float64, axisym bool, 
 		B.Put(3, 1+i*2, G[i][0]/SQ2)
 	}
 }
+
+// Ivs2sigmas converts ivs map to a matrix with σ values [nip][nsig]
+func Ivs2sigmas(nip, ndim int, ivs map[string][]float64) (σ [][]float64) {
+	σ = la.MatAlloc(nip, 2*ndim)
+	for key, vals := range ivs {
+		for i := 0; i < nip; i++ {
+			switch key {
+			case "sx":
+				σ[i][0] = vals[i]
+			case "sy":
+				σ[i][1] = vals[i]
+			case "sz":
+				σ[i][2] = vals[i]
+			case "sxy":
+				σ[i][3] = vals[i]
+			case "syz":
+				if ndim == 3 {
+					σ[i][4] = vals[i]
+				}
+			case "szx":
+				if ndim == 3 {
+					σ[i][5] = vals[i]
+				}
+			}
+		}
+	}
+	return
+}

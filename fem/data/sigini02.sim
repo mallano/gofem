@@ -6,8 +6,10 @@
     "showR"   : true
   },
   "functions" : [
-    { "name":"qn0H", "type":"cte", "prms":[{"n":"c", "v":-50 }] },
-    { "name":"qn0V", "type":"cte", "prms":[{"n":"c", "v":-100 }] }
+    { "name":"qn0H", "type":"cte", "prms":[{"n":"c", "v":-20 }] },
+    { "name":"qn0V", "type":"cte", "prms":[{"n":"c", "v":-20 }] },
+    { "name":"qnH",  "type":"cte", "prms":[{"n":"c", "v":-50 }] },
+    { "name":"qnV",  "type":"cte", "prms":[{"n":"c", "v":-100}] }
   ],
   "regions" : [
     {
@@ -20,12 +22,12 @@
   "stages" : [
     {
       "desc" : "apply load",
-      "inistress" : { "hom":true, "psa":true, "sh":-50, "sv":-100, "nu":0.25 },
+      "inistress" : { "hom":true, "psa":true, "sh":-20, "sv":-20, "nu":0.25 },
       "facebcs" : [
         { "tag":-10, "keys":["uy"], "funcs":["zero"] },
         { "tag":-13, "keys":["ux"], "funcs":["zero"] },
-        { "tag":-11, "keys":["qn0"], "funcs":["qn0H"] },
-        { "tag":-12, "keys":["qn0"], "funcs":["qn0V"] }
+        { "tag":-11, "keys":["qn0","qn"], "funcs":["qn0H","qnH"] },
+        { "tag":-12, "keys":["qn0","qn"], "funcs":["qn0V","qnV"] }
       ]
     }
   ]

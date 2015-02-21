@@ -10,6 +10,7 @@ import (
 	"github.com/cpmech/gofem/ana"
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 )
 
 func Test_sigini01(tst *testing.T) {
@@ -37,6 +38,57 @@ func Test_sigini01(tst *testing.T) {
 		return
 	}
 
+	// check displacements
+	tolu := 1e-16
+	for _, n := range d.Nodes {
+		eqx := n.GetEq("ux")
+		eqy := n.GetEq("uy")
+		u := []float64{d.Sol.Y[eqx], d.Sol.Y[eqy]}
+		chk.Vector(tst, "u", tolu, u, nil)
+	}
+
+	// analytical solution
+	qnV, qnH := -100.0, -50.0
+	ν := 0.25
+	σx, σy := qnH, qnV
+	σz := ν * (σx + σy)
+	σref := []float64{σx, σy, σz, 0}
+
+	// check stresses
+	e := d.Elems[0].(*ElemU)
+	tols := 1e-13
+	for idx, _ := range e.IpsElem {
+		σ := e.States[idx].Sig
+		io.Pforan("σ = %v\n", σ)
+		chk.Vector(tst, "σ", tols, σ, σref)
+	}
+}
+
+func Test_sigini02(tst *testing.T) {
+
+	verbose()
+	chk.PrintTitle("sigini02")
+
+	// start simulation
+	if !Start("data/sigini02.sim", true, chk.Verbose) {
+		tst.Errorf("test failed\n")
+		return
+	}
+	defer End()
+
+	// run simulation
+	if !Run() {
+		tst.Errorf("test failed\n")
+		return
+	}
+
+	// allocate domain
+	d := NewDomain(Global.Sim.Regions[0])
+	if !d.SetStage(0, Global.Sim.Stages[0]) {
+		tst.Errorf("SetStage failed\n")
+		return
+	}
+
 	// read results
 	sum := ReadSum()
 	d.In(sum.NumTidx - 1)
@@ -44,6 +96,8 @@ func Test_sigini01(tst *testing.T) {
 	// solution
 	var sol ana.CteStressPstrain
 	sol.Init(fun.Prms{
+		&fun.Prm{N: "qnH0", V: -20},
+		&fun.Prm{N: "qnV0", V: -20},
 		&fun.Prm{N: "qnH", V: -50},
 		&fun.Prm{N: "qnV", V: -100},
 	})
@@ -64,6 +118,7 @@ func Test_sigini01(tst *testing.T) {
 	for idx, ip := range e.IpsElem {
 		x := e.Cell.Shp.IpRealCoords(e.X, ip)
 		σ := e.States[idx].Sig
+		io.Pforan("σ = %v\n", σ)
 		sol.CheckStress(tst, t, σ, x, tols)
 	}
 }

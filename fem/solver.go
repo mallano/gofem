@@ -278,6 +278,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 			return
 		}
 
+		// debug
+		//la.PrintVec("fb", d.Fb, "%13.10f ", false)
+
 		// join all fb
 		if Global.Distr {
 			mpi.AllReduceSum(d.Fb, d.Wb) // this must be done here because there might be nodes sharing boundary conditions
@@ -349,6 +352,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		if Stop() {
 			return
 		}
+
+		// debug
+		//la.PrintVec("wb", d.Wb, "%13.10f ", false)
 
 		// update primary variables (y)
 		for i := 0; i < d.Ny; i++ {
