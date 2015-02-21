@@ -67,9 +67,10 @@ func Get(geoType string) *Shape {
 
 // IpRealCoords returns the real coordinates (y) of an integration point
 func (o *Shape) IpRealCoords(x [][]float64, ip *Ipoint) (y []float64) {
-	y = make([]float64, o.Gndim)
+	ndim := len(x)
+	y = make([]float64, ndim)
 	o.Func(o.S, o.dSdR, ip.R, ip.S, ip.T, false)
-	for i := 0; i < o.Gndim; i++ {
+	for i := 0; i < ndim; i++ {
 		for m := 0; m < o.Nverts; m++ {
 			y[i] += o.S[m] * x[i][m]
 		}
