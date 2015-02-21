@@ -155,7 +155,7 @@ func init() {
 		// materials
 		matname := edat.Mat
 		cndmat, lrmmat, pormat, err := Global.Mdb.GroupGet3(matname, "c", "l", "p")
-		if LogErr(err, "Mdb.GroupGet3 failed") {
+		if LogErr(err, io.Sf("materials database failed on getting %q group\n", matname)) {
 			return nil
 		}
 

@@ -98,11 +98,12 @@ func init() {
 		o.Nu = ndof * o.Ndim
 
 		// parameters
-		mat := Global.Mdb.Get(edat.Mat)
-		if LogErrCond(mat == nil, "Mdb.Get failed\n") {
+		matname := edat.Mat
+		matdata := Global.Mdb.Get(edat.Mat)
+		if LogErrCond(matdata == nil, "materials database failed on getting %q material\n", matname) {
 			return nil
 		}
-		for _, p := range mat.Prms {
+		for _, p := range matdata.Prms {
 			switch p.N {
 			case "E":
 				o.E = p.V

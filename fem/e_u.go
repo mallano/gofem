@@ -166,7 +166,7 @@ func init() {
 		// material model name
 		matname := edat.Mat
 		matdata := Global.Mdb.Get(matname)
-		if LogErrCond(matdata == nil, "Mdb.Get failed\n") {
+		if LogErrCond(matdata == nil, "materials database failed on getting %q material\n", matname) {
 			return nil
 		}
 		mdlname := matdata.Model

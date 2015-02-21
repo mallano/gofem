@@ -29,7 +29,7 @@ func main() {
 
 	// message
 	io.PfWhite("\nGofem v3 -- Go Finite Element Method\n\n")
-	io.Pf("Copyright 2015 Dorival Pedroso & Raul Durand. All rights reserved.\n")
+	io.Pf("Copyright 2015 Dorival Pedroso and Raul Durand. All rights reserved.\n")
 	io.Pf("Use of this source code is governed by a BSD-style\n")
 	io.Pf("license that can be found in the LICENSE file.\n\n")
 

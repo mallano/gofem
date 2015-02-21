@@ -41,12 +41,12 @@ func ReadMat(dir, fn string) *MatDb {
 
 	// read file
 	b, err := io.ReadFile(filepath.Join(dir, fn))
-	if LogErr(err, "mat: cannot open materials file "+dir+"/"+fn+"\n") {
+	if LogErr(err, "mat: cannot open materials file "+dir+"/"+fn) {
 		return nil
 	}
 
 	// decode
-	if LogErr(json.Unmarshal(b, &o), "mat: cannot unmarshal materials file "+fn+"\n") {
+	if LogErr(json.Unmarshal(b, &o), "mat: cannot unmarshal materials file "+fn) {
 		return nil
 	}
 
@@ -274,24 +274,24 @@ func MatfileNew2Old(dirout string, fnold, fnnew string, convertsymbols bool) {
 // convert greek to ansi
 var conversiontable = map[string]string{
 	"α":   "alp",
-	"αl":  "alpL",
+	"αl":  "alpl",
 	"β":   "bet",
-	"βl":  "betaL",
-	"βg":  "betaG",
-	"βd":  "betD",
-	"βw":  "betW",
+	"βl":  "betl",
+	"βg":  "betg",
+	"βd":  "betd",
+	"βw":  "betw",
 	"β1":  "bet1",
 	"β2":  "bet2",
 	"ν":   "nu",
 	"φ":   "phi",
 	"λ":   "lam",
-	"λd":  "lamD",
-	"λw":  "lamW",
-	"λ0l": "lam0L",
-	"λ1l": "lam1L",
-	"λ0g": "lam0G",
-	"λ1g": "lam1G",
-	"ρ":   "Rho",
+	"λd":  "lamd",
+	"λw":  "lamw",
+	"λ0l": "lam0l",
+	"λ1l": "lam1l",
+	"λ0g": "lam0g",
+	"λ1g": "lam1g",
+	"ρ":   "rho",
 	"ρL":  "RhoL",
 	"ρG":  "RhoG",
 	"ρS":  "RhoS",
