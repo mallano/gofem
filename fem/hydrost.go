@@ -7,12 +7,12 @@ package fem
 import "github.com/cpmech/gofem/inp"
 
 // SetHydroSt sets the initial state to a hydrostatic condition
-func (o *Domain) SetHydroSt(stg *inp.Stage) {
+func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
 
 	// check for hydrost data
 	hst := stg.HydroSt
 	if hst == nil {
-		return
+		return true
 	}
 
 	// max elevation and water level
@@ -38,4 +38,5 @@ func (o *Domain) SetHydroSt(stg *inp.Stage) {
 			o.Sol.Y[dof.Eq] = pl
 		}
 	}
+	return true
 }

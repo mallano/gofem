@@ -375,12 +375,17 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		o.Sol.Chi = make([]float64, o.Ny)
 	}
 
-	// set initial values
-	o.SetHydroSt(stg)
-
 	// initialise internal variables
 	for _, e := range o.ElemIntvars {
 		e.InitIvs(o.Sol)
+	}
+
+	// set initial values
+	if !o.SetHydroSt(stg) {
+		return
+	}
+	if !o.SetIniStress(stg) {
+		return
 	}
 
 	// logging

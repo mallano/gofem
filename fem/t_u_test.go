@@ -9,6 +9,7 @@ import (
 
 	"github.com/cpmech/gofem/ana"
 	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/fun"
 )
 
 func Test_sigini01(tst *testing.T) {
@@ -42,11 +43,14 @@ func Test_sigini01(tst *testing.T) {
 
 	// solution
 	var sol ana.CteStressPstrain
-	sol.Init(nil)
+	sol.Init(fun.Prms{
+		&fun.Prm{N: "qnH", V: -50},
+		&fun.Prm{N: "qnV", V: -100},
+	})
 
 	// check displacements
 	t := d.Sol.T
-	tolu := 1e-17
+	tolu := 1e-16
 	for _, n := range d.Nodes {
 		eqx := n.GetEq("ux")
 		eqy := n.GetEq("uy")
@@ -56,7 +60,7 @@ func Test_sigini01(tst *testing.T) {
 
 	// check stresses
 	e := d.Elems[0].(*ElemU)
-	tols := 1e-14
+	tols := 1e-13
 	for idx, ip := range e.IpsElem {
 		x := e.Cell.Shp.IpRealCoords(e.X, ip)
 		σ := e.States[idx].Sig

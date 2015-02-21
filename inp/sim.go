@@ -224,7 +224,8 @@ type HydroStData struct {
 // IniStressData holds data for setting initial stresses
 type IniStressData struct {
 	Hom bool    `json:"hom"` // homogeneous stress distribution
-	Sig float64 `json:"sig"` // stress value to use in homogeneous distribution
+	Iso bool    `json:"iso"` // isotropic state
+	Sig float64 `json:"sig"` // stress value to use in homogeneous and isotropic distribution
 }
 
 // Stage holds stage data

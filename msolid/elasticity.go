@@ -103,8 +103,13 @@ func (o SmallElasticity) GetPrms() fun.Prms {
 }
 
 // Update computes new stresses for new strains ε
-func (o SmallElasticity) Update(s *State, ε []float64) (err error) {
+func (o SmallElasticity) Update(s *State, σ0, ε []float64) (err error) {
 	σ := s.Sig
+	defer func() {
+		for i := 0; i < len(σ0); i++ {
+			σ[i] += σ0[i]
+		}
+	}()
 	if o.Pse {
 		c := o.E / (1.0 - o.Nu*o.Nu)
 		σ[0] = c * (ε[0] + o.Nu*ε[1])

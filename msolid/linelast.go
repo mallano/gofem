@@ -33,8 +33,8 @@ func (o LinElast) InitIntVars() (s *State, err error) {
 }
 
 // Update updates stresses for given strains
-func (o LinElast) Update(s *State, ε, Δε []float64) (err error) {
-	return o.SmallElasticity.Update(s, ε)
+func (o LinElast) Update(s *State, σ0, ε, Δε []float64) (err error) {
+	return o.SmallElasticity.Update(s, σ0, ε)
 }
 
 // CalcD computes D = dσ_new/dε_new consistent with StressUpdate

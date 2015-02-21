@@ -74,7 +74,7 @@ func (o DruckerPrager) InitIntVars() (s *State, err error) {
 }
 
 // Update updates stresses for given strains
-func (o *DruckerPrager) Update(s *State, ε, Δε []float64) (err error) {
+func (o *DruckerPrager) Update(s *State, σ0, ε, Δε []float64) (err error) {
 
 	// set flags
 	s.Loading = false    // => not elastoplastic
