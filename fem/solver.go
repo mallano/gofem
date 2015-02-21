@@ -6,7 +6,6 @@ package fem
 
 import (
 	"path/filepath"
-	"time"
 
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/mconduct"
@@ -129,12 +128,12 @@ func Run() (runisok bool) {
 
 	// message
 	if Global.Verbose {
-		cpu_time := time.Now()
+		//cpu_time := time.Now()
 		defer func() {
-			io.Pfblue2("cpu time   = %v\n", time.Now().Sub(cpu_time))
+			//io.Pfblue2("cpu time   = %v\n", time.Now().Sub(cpu_time))
 		}()
 		defer func() {
-			io.Pfcyan("\nfinal time = %g\n", t)
+			//io.Pfcyan("\nfinal time = %g\n", t)
 		}()
 	}
 
@@ -210,7 +209,7 @@ func Run() (runisok bool) {
 			if Global.Verbose {
 				//time.Sleep(100000000)
 				if !Global.Sim.Data.ShowR {
-					io.Pf("time       = %g\r", t)
+					//io.Pf("time       = %g\r", t)
 				}
 			}
 
@@ -282,6 +281,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		if Global.Distr {
 			mpi.AllReduceSum(d.Fb, d.Wb) // this must be done here because there might be nodes sharing boundary conditions
 		}
+
+		la.PrintVec("fb", d.Fb, "%13.10f ", false)
+		panic("stop")
 
 		// point natural boundary conditions; e.g. concentrated loads
 		d.PtNatBcs.AddToRhs(d.Fb, t)

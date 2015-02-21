@@ -94,14 +94,12 @@ type Rjoint struct {
 	DσNoDu       [][][][]float64 // [sldNn][nsig][sldNn][ndim] ∂σSldNod/∂uSldNod : derivatives of σ @ nodes of solid w.r.t displacements of solid
 	DσDun        [][]float64     // [nsig][ndim] ∂σSldIp/∂uSldNod : derivatives of σ @ ip of solid w.r.t displacements of solid
 
-	// problem variables
-	Ymap []int // assembly map (location array/element equations)
-
 	// internal variables
 	States    []*msolid.OnedState // [nip] internal states
 	StatesBkp []*msolid.OnedState // [nip] backup internal states
 
 	// scratchpad. computed @ each ip
+	fC   []float64 // internal/contact forces vector
 	Δw   []float64 // relative velocity
 	qb   []float64 // resultant traction vector 'holding' the rod @ ip
 	σc   float64   // confining stress
@@ -214,7 +212,8 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	}
 
 	// debugging
-	if true {
+	//if true {
+	if false {
 		io.Pf("sldS_rodN = %v\n", o.sldS_rodN)
 	}
 
@@ -235,7 +234,6 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 		// shape function of solid @ ips of rod
 		for idx, ip := range o.Rod.IpsElem {
 			rodYp := rodH.IpRealCoords(o.Rod.X, ip)
-			io.Pforan("rodYp = %v\n", rodYp)
 			if LogErr(sldH.InvMap(o.rodRp[idx], rodYp, o.Sld.X), "inverse map failed") {
 				return
 			}
@@ -258,7 +256,8 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	}
 
 	// debugging
-	if true {
+	//if true {
+	if false {
 		io.Pf("\nsldS_rodP = %v\n", o.sldS_rodP)
 	}
 
@@ -307,28 +306,14 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 		}
 	}
 
-	// full Usmap
-	o.Ymap = make([]int, o.Ny)
-	for m := 0; m < sldNn; m++ {
-		for i := 0; i < ndim; i++ {
-			r := i + m*ndim
-			o.Ymap[r] = o.Sld.Umap[r]
-		}
-	}
-	start := o.Sld.Nu
-	for m := 0; m < rodNn; m++ {
-		for i := 0; i < ndim; i++ {
-			r := i + m*ndim
-			o.Ymap[start+r] = o.Rod.Umap[r]
-		}
-	}
-
 	// scratchpad. computed @ each ip
-	o.Δw = make([]float64, o.Ndim)
-	o.qb = make([]float64, o.Ndim)
+	o.fC = make([]float64, o.Rod.Nu)
+	o.Δw = make([]float64, ndim)
+	o.qb = make([]float64, ndim)
 
 	// debugging
-	if true {
+	//if true {
+	if false {
 		io.Pf("\ne0 = %v\n", o.e0)
 		io.Pf("e1 = %v\n", o.e1)
 		io.Pf("e2 = %v\n", o.e2)
@@ -367,41 +352,55 @@ func (o *Rjoint) InterpStarVars(sol *Solution) (ok bool) {
 func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// auxiliary
-	rodH := o.Rod.Cell.Shp
-	sldH := o.Sld.Cell.Shp
-	rodS := rodH.S
-	rodNv := rodH.Nverts
-	sldNv := sldH.Nverts
+	ndim := o.Ndim
 
-	start := o.Sld.Nu
+	// rod data
+	rodH := o.Rod.Cell.Shp
+	rodS := rodH.S
+	rodNn := rodH.Nverts
+
+	// solid data
+	sldH := o.Sld.Cell.Shp
+	sldNn := sldH.Nverts
+
+	// internal forces vector
+	la.VecFill(o.fC, 0)
+
+	// loop over rod's integration points
 	var coef float64
-	var rsld, rlin int
 	for idx, ip := range o.Rod.IpsElem {
-		rodH.CalcAtIp(o.Rod.X, ip, true)
+
+		// interpolation functions and gradients
+		if LogErr(o.Rod.Cell.Shp.CalcAtIp(o.Rod.X, ip, true), "ipvars") {
+			return
+		}
+		coef = ip.W * rodH.J
 
 		// state variables
 		o.τ = o.States[idx].Sig
 		o.qn1 = o.States[idx].Phi[0]
 		o.qn2 = o.States[idx].Phi[1]
 
-		for i := 0; i < o.Ndim; i++ {
+		// fC vector. Eq. (34)
+		for i := 0; i < ndim; i++ {
 			o.qb[i] = o.τ*o.h*o.e0[idx][i] + o.qn1*o.e1[idx][i] + o.qn2*o.e2[idx][i]
-		}
-		coef = ip.W * rodH.J
-		for m := 0; m < rodNv; m++ {
-			for i := 0; i < o.Ndim; i++ {
-				rlin = o.Ymap[start+i+m*o.Ndim]
-				fb[rlin] += coef * rodS[m] * o.qb[i] // -fi  :  fR = -fC
+			for m := 0; m < rodNn; m++ {
+				r := i + m*ndim
+				o.fC[r] += coef * rodS[m] * o.qb[i]
 			}
 		}
 	}
 
-	for m := 0; m < rodNv; m++ {
-		for i := 0; i < o.Ndim; i++ {
-			rlin = start + i + m*o.Ndim
-			for n := 0; n < sldNv; n++ {
-				rsld = o.Ymap[i+n*o.Ndim]
-				fb[rsld] += o.sldS_rodN[m][n] //* o.Rus[rlin] // -fi  :  f = fC
+	// fb = -Resid;  fR = -fC  and  fS = Nmat*fC  =>  fb := {fC, -Nmat*fC}
+	for i := 0; i < ndim; i++ {
+		for m := 0; m < rodNn; m++ {
+			r := i + m*ndim
+			I := o.Rod.Umap[r]
+			fb[I] += o.fC[r]
+			for n := 0; n < sldNn; n++ {
+				s := i + n*ndim
+				J := o.Sld.Umap[s]
+				fb[J] -= o.sldS_rodN[m][n] * o.fC[r]
 			}
 		}
 	}
@@ -415,6 +414,106 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 
 // Update perform (tangent) update
 func (o *Rjoint) Update(sol *Solution) (ok bool) {
+
+	for idx, ip := range o.Rod.IpsElem {
+
+		// interpolation functions and gradients
+		if LogErr(o.Rod.Cell.Shp.CalcAtIp(o.Rod.X, ip, true), "ipvars") {
+			return
+		}
+
+		io.Pforan("here = %v\n", 1)
+
+		// auxiliary
+		//ndim := o.Ndim
+		nsig := 2 * o.Ndim
+
+		// rod data
+		rodH := o.Rod.Cell.Shp
+		rodS := rodH.S
+		//rodNp := len(o.Rod.IpsElem)
+		rodNn := rodH.Nverts
+
+		// solid data
+		sldH := o.Sld.Cell.Shp
+		//sldS := sldH.S
+		//sldNp := len(o.Sld.IpsElem)
+		sldNn := sldH.Nverts
+
+		// relative displacement
+		var rlin, rsld int
+		for i := 0; i < o.Ndim; i++ {
+			o.Δw[i] = 0
+		}
+		for m := 0; m < rodNn; m++ {
+			for i := 0; i < o.Ndim; i++ {
+				for n := 0; n < sldNn; n++ {
+					rsld = o.Sld.Umap[i+n*o.Ndim]
+					o.Δw[i] += rodS[m] * o.sldS_rodN[m][n] * sol.ΔY[rsld]
+				}
+				rlin = o.Rod.Umap[i+m*o.Ndim]
+				o.Δw[i] -= rodS[m] * sol.ΔY[rlin]
+			}
+		}
+		o.Δwb0, o.Δwb1, o.Δwb2 = 0, 0, 0
+		for i := 0; i < o.Ndim; i++ {
+			o.Δwb0 += o.e0[idx][i] * o.Δw[i]
+			o.Δwb1 += o.e1[idx][i] * o.Δw[i]
+			o.Δwb2 += o.e2[idx][i] * o.Δw[i]
+		}
+
+		// state variables
+		o.τ = o.States[idx].Sig
+		o.qn1 = o.States[idx].Phi[0]
+		o.qn2 = o.States[idx].Phi[1]
+
+		// debugging
+		if true {
+			io.Pf("\nτ=%g qn1=%g qn2=%g\n", o.τ, o.qn1, o.qn2)
+			io.Pf("Δw=%v\n", o.Δw)
+			io.Pf("Δwb0=%g Δwb1=%g Δwb2=%g\n", o.Δwb0, o.Δwb1, o.Δwb2)
+		}
+
+		// new confining stress
+		o.σc = 0.0
+		if o.Coulomb {
+
+			// calculate σIp
+			for j := 0; j < nsig; j++ {
+				o.sldSigN_rodP[j] = 0
+				for n := 0; n < sldNn; n++ {
+					o.sldSigN_rodP[j] += o.sldS_rodP[idx][n] * o.sldSigN[n][j]
+				}
+			}
+
+			// calculate t1 and t2
+			for i := 0; i < o.Ndim; i++ {
+				o.t1[i], o.t2[i] = 0, 0
+				for j := 0; j < o.Ndim; j++ {
+					o.t1[i] += tsr.M2T(o.sldSigN_rodP, i, j) * o.e1[idx][j]
+					o.t2[i] += tsr.M2T(o.sldSigN_rodP, i, j) * o.e2[idx][j]
+				}
+			}
+
+			// calculate p1, p2 and σcNew
+			p1, p2 := 0.0, 0.0
+			for i := 0; i < o.Ndim; i++ {
+				p1 += o.t1[i] * o.e1[idx][i]
+				p2 += o.t2[i] * o.e2[idx][i]
+			}
+
+			// σcNew
+			o.σc = -(p1 + p2) / 2.0
+
+			// debugging
+			if true {
+				io.Pf("\nsldSigN_rodP=%v\n", o.sldSigN_rodP)
+				io.Pf("t1=%v\n", o.t1)
+				io.Pf("t2=%v\n", o.t2)
+				io.Pf("σc=%v\n", o.σc)
+			}
+		}
+	}
 	return true
 }
 
@@ -422,6 +521,20 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 
 // InitIvs reset (and fix) internal variables after primary variables have been changed
 func (o *Rjoint) InitIvs(sol *Solution) (ok bool) {
+	nip := len(o.Rod.IpsElem)
+	o.States = make([]*msolid.OnedState, nip)
+	o.StatesBkp = make([]*msolid.OnedState, nip)
+	for i := 0; i < nip; i++ {
+		o.States[i], _ = o.Mdl.InitIntVars()
+		o.StatesBkp[i] = o.States[i].GetCopy()
+
+		// debug
+		if true {
+			o.States[i].Sig = 33
+			o.States[i].Phi[0] = 0.1
+			o.States[i].Phi[1] = 0.2
+		}
+	}
 	return true
 }
 
@@ -432,11 +545,17 @@ func (o *Rjoint) SetIvs(zvars map[string][]float64) (ok bool) {
 
 // BackupIvs create copy of internal variables
 func (o *Rjoint) BackupIvs() (ok bool) {
+	for i, s := range o.StatesBkp {
+		s.Set(o.States[i])
+	}
 	return true
 }
 
 // RestoreIvs restore internal variables from copies
 func (o *Rjoint) RestoreIvs() (ok bool) {
+	for i, s := range o.States {
+		s.Set(o.StatesBkp[i])
+	}
 	return true
 }
 
@@ -444,100 +563,15 @@ func (o *Rjoint) RestoreIvs() (ok bool) {
 
 // Encode encodes internal variables
 func (o Rjoint) Encode(enc Encoder) (ok bool) {
-	return true
+	return !LogErr(enc.Encode(o.States), "Encode")
 }
 
 // Decode decodes internal variables
 func (o Rjoint) Decode(dec Decoder) (ok bool) {
-	return true
+	return !LogErr(dec.Decode(&o.States), "Decode")
 }
 
 // OutIpsData returns data from all integration points for output
 func (o Rjoint) OutIpsData() (labels []string, data []*OutIpData) {
 	return
-}
-
-// auxiliary ////////////////////////////////////////////////////////////////////////////////////////
-
-// ipvars computes current values @ integration points. idx == index of integration point
-func (o *Rjoint) ipvars(idx int, sol *Solution, delta bool) (ok bool) {
-
-	// interpolation functions and gradients
-	if LogErr(o.Rod.Cell.Shp.CalcAtIp(o.Rod.X, o.Rod.IpsElem[idx], true), "ipvars") {
-		return
-	}
-
-	// auxiliary
-	rodH := o.Rod.Cell.Shp
-	sldH := o.Sld.Cell.Shp
-	rodS := rodH.S
-	rodNv := rodH.Nverts
-	sldNv := sldH.Nverts
-	nsig := 2 * o.Ndim
-
-	// displacements or increments of displacements
-	U := sol.Y
-	if delta {
-		U = sol.ΔY
-	}
-
-	// relative displacement
-	var rlin, rsld int
-	for i := 0; i < o.Ndim; i++ {
-		o.Δw[i] = 0
-	}
-	for m := 0; m < rodNv; m++ {
-		for i := 0; i < o.Ndim; i++ {
-			for n := 0; n < sldNv; n++ {
-				rsld = o.Sld.Umap[i+n*o.Ndim]
-				o.Δw[i] += rodS[m] * o.sldS_rodN[m][n] * U[rsld]
-			}
-			rlin = o.Rod.Umap[i+m*o.Ndim]
-			o.Δw[i] -= rodS[m] * U[rlin]
-		}
-	}
-	o.Δwb0, o.Δwb1, o.Δwb2 = 0, 0, 0
-	for i := 0; i < o.Ndim; i++ {
-		o.Δwb0 += o.e0[idx][i] * o.Δw[i]
-		o.Δwb1 += o.e1[idx][i] * o.Δw[i]
-		o.Δwb2 += o.e2[idx][i] * o.Δw[i]
-	}
-
-	// state variables
-	o.τ = o.States[idx].Sig
-	o.qn1 = o.States[idx].Phi[0]
-	o.qn2 = o.States[idx].Phi[1]
-
-	// new confining stress
-	o.σc = 0.0
-	if o.Coulomb {
-
-		// calculate σIp
-		for j := 0; j < nsig; j++ {
-			o.sldSigN_rodP[j] = 0
-			for n := 0; n < sldNv; n++ {
-				o.sldSigN_rodP[j] += o.sldS_rodP[idx][n] * o.sldSigN[n][j]
-			}
-		}
-
-		// calculate t1 and t2
-		for i := 0; i < o.Ndim; i++ {
-			o.t1[i], o.t2[i] = 0, 0
-			for j := 0; j < o.Ndim; j++ {
-				o.t1[i] += tsr.M2T(o.sldSigN_rodP, i, j) * o.e1[idx][j]
-				o.t2[i] += tsr.M2T(o.sldSigN_rodP, i, j) * o.e2[idx][j]
-			}
-		}
-
-		// calculate p1, p2 and σcNew
-		p1, p2 := 0.0, 0.0
-		for i := 0; i < o.Ndim; i++ {
-			p1 += o.t1[i] * o.e1[idx][i]
-			p2 += o.t2[i] * o.e2[idx][i]
-		}
-
-		// σcNew
-		o.σc = -(p1 + p2) / 2.0
-	}
-	return true
 }

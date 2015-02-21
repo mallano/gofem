@@ -15,7 +15,7 @@ func Test_rjoint01a(tst *testing.T) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			io.PfRed("ERROR: %v\n", err)
+			io.Pf("ERROR: %v\n", err)
 		}
 	}()
 
