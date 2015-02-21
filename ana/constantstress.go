@@ -27,12 +27,17 @@ import (
 //        △  △  △  △  △
 //             lx
 type CteStressPstrain struct {
-	qnV float64 // vertical distributed load
-	qnH float64 // horizontal distributed load
-	E   float64 // Young's modulus
-	ν   float64 // Poisson's coefficient
-	lx  float64 // x-length
-	ly  float64 // y-length
+	qnV0 float64 // initial vertical distributed load
+	qnH0 float64 // initial horizontal distributed load
+	qnV  float64 // vertical distributed load
+	qnH  float64 // horizontal distributed load
+	E    float64 // Young's modulus
+	ν    float64 // Poisson's coefficient
+	lx   float64 // x-length
+	ly   float64 // y-length
+
+	// derived
+	σx0, σy0, σz0 float64
 }
 
 // Init initialises this structure
@@ -49,6 +54,10 @@ func (o *CteStressPstrain) Init(prms fun.Prms) {
 	// parameters
 	for _, p := range prms {
 		switch p.N {
+		case "qnV0":
+			o.qnV0 = p.V
+		case "qnH0":
+			o.qnH0 = p.V
 		case "qnV":
 			o.qnV = p.V
 		case "qnH":
@@ -63,15 +72,23 @@ func (o *CteStressPstrain) Init(prms fun.Prms) {
 			o.ly = p.V
 		}
 	}
+
+	// derived
+	o.σx0 = o.qnH0
+	o.σy0 = o.qnV0
+	o.σz0 = o.ν * (o.σx0 + o.σy0)
 }
 
 // Solution computes solution
 func (o CteStressPstrain) Solution(t float64) (σx, σy, σz, εx, εy float64) {
-	σx = o.qnH * t
-	σy = o.qnV * t
-	σz = o.ν * (σx + σy)
-	εx = (σx - o.ν*(σy+σz)) / o.E
-	εy = (σy - o.ν*(σz+σx)) / o.E
+	dσx := o.qnH * t
+	dσy := o.qnV * t
+	dσz := o.ν * (dσx + dσy)
+	σx = o.σx0 + dσx
+	σy = o.σy0 + dσy
+	σz = o.σz0 + dσz
+	εx = (dσx - o.ν*(dσy+dσz)) / o.E
+	εy = (dσy - o.ν*(dσz+dσx)) / o.E
 	return
 }
 
