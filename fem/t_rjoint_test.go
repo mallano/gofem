@@ -8,9 +8,16 @@ import (
 	"testing"
 
 	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 )
 
 func Test_rjoint01a(tst *testing.T) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			io.PfRed("ERROR: %v\n", err)
+		}
+	}()
 
 	verbose()
 	chk.PrintTitle("rjoint01a")

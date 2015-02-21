@@ -7,7 +7,6 @@ package fem
 import (
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/msolid"
-	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
@@ -62,9 +61,6 @@ type Rjoint struct {
 	// underlying elements
 	Rod *Rod   // rod element
 	Sld *ElemU // solid element
-
-	// integration points
-	IpsElem []*shp.Ipoint // [nip] integration points of (this) element
 
 	// material model
 	Mdl msolid.RjointM1 // material model
@@ -157,17 +153,6 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	// total number of dofs
 	o.Ny = o.Rod.Nu + o.Sld.Nu
 
-	// integration points; based on Shape of rod element
-	var err error
-	var nip int
-	if s_nip, found := io.Keycode(o.Edat.Extra, "nip"); found {
-		nip = io.Atoi(s_nip)
-	}
-	o.IpsElem, err = shp.GetIps(o.Rod.Cell.Shp.Type, nip)
-	if LogErr(err, "GetIps failed element") {
-		return
-	}
-
 	// material model name
 	matname := o.Edat.Mat
 	matdata := Global.Mdb.Get(matname)
@@ -228,6 +213,11 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 		}
 	}
 
+	// debugging
+	if true {
+		io.Pf("sldS_rodN = %v\n", o.sldS_rodN)
+	}
+
 	// coulomb model => σc depends on p values of solid
 	if o.Coulomb {
 
@@ -245,6 +235,7 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 		// shape function of solid @ ips of rod
 		for idx, ip := range o.Rod.IpsElem {
 			rodYp := rodH.IpRealCoords(o.Rod.X, ip)
+			io.Pforan("rodYp = %v\n", rodYp)
 			if LogErr(sldH.InvMap(o.rodRp[idx], rodYp, o.Sld.X), "inverse map failed") {
 				return
 			}
@@ -266,6 +257,11 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 		o.DσDun = la.MatAlloc(nsig, ndim)
 	}
 
+	// debugging
+	if true {
+		io.Pf("\nsldS_rodP = %v\n", o.sldS_rodP)
+	}
+
 	// joint direction @ ip[idx]; corotational system aligned with rod element
 	o.e0 = la.MatAlloc(rodNp, ndim)
 	o.e1 = la.MatAlloc(rodNp, ndim)
@@ -273,13 +269,13 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	π := make([]float64, ndim) // Eq. (27)
 	Q := la.MatAlloc(ndim, ndim)
 	α := 666.0
-	J := rodH.J
 	Jvec := rodH.Jvec3d[:ndim]
-	for idx, ip := range o.IpsElem {
+	for idx, ip := range o.Rod.IpsElem {
 		e0, e1, e2 := o.e0[idx], o.e1[idx], o.e2[idx]
 		if LogErr(rodH.CalcAtIp(o.Rod.X, ip, true), "shape functions calculation failed") {
 			return
 		}
+		J := rodH.J
 		π[0] = Jvec[0] + α
 		π[1] = Jvec[1]
 		e0[0] = Jvec[0] / J
@@ -331,6 +327,16 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	o.Δw = make([]float64, o.Ndim)
 	o.qb = make([]float64, o.Ndim)
 
+	// debugging
+	if true {
+		io.Pf("\ne0 = %v\n", o.e0)
+		io.Pf("e1 = %v\n", o.e1)
+		io.Pf("e2 = %v\n", o.e2)
+		io.Pf("\nT1 = %v\n", o.T1)
+		io.Pf("T2 = %v\n", o.T2)
+		panic("stop")
+	}
+
 	// success
 	return o.Ny * o.Ny, true
 }
@@ -370,7 +376,7 @@ func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	start := o.Sld.Nu
 	var coef float64
 	var rsld, rlin int
-	for idx, ip := range o.IpsElem {
+	for idx, ip := range o.Rod.IpsElem {
 		rodH.CalcAtIp(o.Rod.X, ip, true)
 
 		// state variables
@@ -457,7 +463,7 @@ func (o Rjoint) OutIpsData() (labels []string, data []*OutIpData) {
 func (o *Rjoint) ipvars(idx int, sol *Solution, delta bool) (ok bool) {
 
 	// interpolation functions and gradients
-	if LogErr(o.Rod.Cell.Shp.CalcAtIp(o.Rod.X, o.IpsElem[idx], true), "ipvars") {
+	if LogErr(o.Rod.Cell.Shp.CalcAtIp(o.Rod.X, o.Rod.IpsElem[idx], true), "ipvars") {
 		return
 	}
 
