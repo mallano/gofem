@@ -97,12 +97,12 @@ func LoadResults(times []float64) {
 	}
 }
 
-// Get gets a time series corresponding to a given label
+// GetX gets a time series corresponding to a given label
 //  tidx -- the time-output-index if label corresponds to a set of points;
 //          thus the resulting slice is a spatial series @ time T[tidx].
 //          If label corresponts to a single point, a time series is returned
 //          and tidx is ignored.
-func Get(key, label string, tidx int) []float64 {
+func GetX(key, label string, tidx int) []float64 {
 	if tidx < 0 {
 		tidx = I[len(I)-1]
 	}

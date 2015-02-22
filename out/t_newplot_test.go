@@ -10,11 +10,11 @@ import (
 	"github.com/cpmech/gosl/chk"
 )
 
-func Test_plot(tst *testing.T) {
+func Test_plot01(tst *testing.T) {
 
 	verbose()
 
-	chk.PrintTitle("plot")
+	chk.PrintTitle("plot01")
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
 
 	Read(datadir+"p02.sim", 0, 0)

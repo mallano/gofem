@@ -10,7 +10,6 @@ import (
 	"github.com/cpmech/gofem/fem"
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/gm"
-	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
 	"github.com/cpmech/gosl/utl"
 )
@@ -19,11 +18,8 @@ import (
 var (
 
 	// FEM data
-	Dom     *fem.Domain  // domain
-	NodBins gm.Bins      // bins for nodes
-	IpBins  gm.Bins      // bins for nodes
-	Ips     []*IpDat     // data at ips
-	Sum     *fem.Summary // summary of results
+	Ips    []*IpDat // data at ips
+	IpBins gm.Bins  // bins for nodes
 
 	// containers
 	TrkPts     []*PointTracker  // tracking individual points
@@ -36,15 +32,7 @@ var (
 	SubplotCols int            // number of cols in figure
 	Tserie      []float64
 	CSubplot    *SubPlotData // current subplot
-
-	// constants
-	TolC float64 // tolerance for bins
 )
-
-// initialise constants
-func init() {
-	TolC = 1.e-8
-}
 
 // IpDat saves data from ips
 type IpDat struct {
@@ -67,8 +55,8 @@ type PointTracker struct {
 	X    []float64            // coordinates
 }
 
-// Along defines a selection along line
-type Along struct {
+// AlongLine defines a selection along line
+type AlongLine struct {
 	A []float64 // first point on line
 	B []float64 // second point on line
 }
@@ -77,7 +65,7 @@ type Along struct {
 type PointsTracker struct {
 	Tag      string                 // point id
 	IdOrTags []int                  // id or tags
-	Along    Along                  // along line definition
+	Along    AlongLine              // along line definition
 	NodePts  []int                  // container for nodes
 	IpPts    []int                  // container for integration points
 	Keys     []string               // keys
@@ -472,19 +460,24 @@ func Read(simfnpath string, stageIdx, regionIdx int) {
 
 	// add integration points to slice of ips and to bins
 	for _, ele := range Dom.Elems {
-		labels, data := ele.OutIpsData()
-
+		data := ele.OutIpsData()
 		for _, ipd := range data {
 			id := len(Ips)
-			Ips = append(Ips, &IpDat{labels, ipd.X, ipd.Vals})
+			var labels []string
+			var values []*float64
+			for key, val := range ipd.V {
+				labels = append(labels, key)
+				values = append(values, val)
+			}
+			Ips = append(Ips, &IpDat{labels, ipd.X, values})
 			IpBins.Append(ipd.X, id)
 		}
 	}
 }
 
 func Apply() {
-	io.Pforan("Sum.NumTidx = %v\n", Sum.NumTidx)
-	for tidx := 0; tidx < Sum.NumTidx; tidx++ {
+	ntidx := len(Sum.Times)
+	for tidx := 0; tidx < ntidx; tidx++ {
 		Tserie = append(Tserie, float64(tidx))
 		if !Dom.In(tidx) {
 			chk.Panic("Domain.In failed. See log files\n")
@@ -497,7 +490,8 @@ func Apply() {
 			if tp.NodeId > 0 {
 				id := tp.NodeId
 				node := Dom.Nodes[id]
-				keys := node.GetKeys()
+				//keys := node.GetKeys()
+				keys := []string{} // TODO
 				for _, key := range keys {
 					dof := node.GetDof(key)
 					utl.StrDblsMapAppend(&tp.Data, key, Dom.Sol.Y[dof.Eq])
@@ -522,7 +516,8 @@ func Apply() {
 			if len(tps.NodePts) > 0 {
 				for j, id := range tps.NodePts {
 					node := Dom.Nodes[id]
-					keys := node.GetKeys()
+					//keys := node.GetKeys() // TODO
+					keys := []string{}
 					for _, key := range keys {
 						dof := node.GetDof(key)
 						tps.Data = append(tps.Data, make(map[string][]float64)) // important

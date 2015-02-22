@@ -12,17 +12,17 @@ import (
 	"github.com/cpmech/gosl/io"
 )
 
+// constants
+var (
+	TolC = 1e-8 // tolerance to compare x-y-z coordinates
+	TolT = 1e-3 // tolerance to compare times
+	Ndiv = 20   // bins n-division
+)
+
 // Global variables
 var (
 
-	// constants
-	TolC     float64 // tolerance to compare x-y-z coordinates
-	TolT     float64 // tolerance to compare times
-	Ndiv     int     // bins n-division
-	SubpNrow int     // override subplot configuration parameters
-	SubpNcol int     // override subplot configuration parameters
-
-	// data
+	// data set by Start
 	Sum     *fem.Summary     // summary of results
 	Dom     *fem.Domain      // FE domain
 	Ipoints []*fem.OutIpData // all integration points
@@ -30,13 +30,10 @@ var (
 	NodBins gm.Bins          // bins for nodes
 	IpsBins gm.Bins          // bins for integration points
 
-	// results
+	// results loaded by LoadResults
 	R ResultsMap // maps labels => points
 	I []int      // selected output indices
 	T []float64  // selected output times
-
-	// suplot data
-	Spd map[string][]int // [nkeys] subplot data
 )
 
 // End must be called and the end to flush log file
@@ -50,13 +47,6 @@ func End() {
 
 // Start starts handling of results given a simulation input file
 func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
-
-	// constants
-	TolC = 1e-8
-	TolT = 1e-3
-	Ndiv = 20
-	SubpNrow = 0
-	SubpNcol = 0
 
 	// start FE global structure
 	erasefiles := false
@@ -83,7 +73,6 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 	R = make(map[string]Points)
 	I = make([]int, 0)
 	T = make([]float64, 0)
-	Spd = make(map[string][]int)
 
 	// bins
 	m := Dom.Msh
