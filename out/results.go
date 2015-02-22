@@ -67,7 +67,7 @@ func LoadResults(times []float64) {
 			chk.Panic("cannot load results into domain; please check log file")
 		}
 
-		// for each quantity
+		// for each point
 		for _, pts := range R {
 			for _, p := range pts {
 
@@ -140,11 +140,13 @@ func GetCoords(label string) []float64 {
 
 // GetDist returns the distance from a reference point on the given line with selected points
 // if they contain a given key
+//  key -- use any to get coordinates of points with any key such as "ux", "pl", etc.
 func GetDist(key, label string) (dist []float64) {
+	any := key == "any"
 	if pts, ok := R[label]; ok {
 		for _, p := range pts {
 			for k, _ := range p.Vals {
-				if k == key {
+				if k == key || any {
 					dist = append(dist, p.Dist)
 					break
 				}
@@ -157,11 +159,13 @@ func GetDist(key, label string) (dist []float64) {
 }
 
 // GetXYZ returns the x-y-z coordinates of selected points that have a specified key
+//  key -- use any to get coordinates of points with any key such as "ux", "pl", etc.
 func GetXYZ(key, label string) (x, y, z []float64) {
+	any := key == "any"
 	if pts, ok := R[label]; ok {
 		for _, p := range pts {
 			for k, _ := range p.Vals {
-				if k == key {
+				if k == key || any {
 					x = append(x, p.X[0])
 					y = append(y, p.X[1])
 					if len(p.X) == 3 {

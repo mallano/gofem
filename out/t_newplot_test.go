@@ -12,31 +12,41 @@ import (
 
 func Test_plot01(tst *testing.T) {
 
-	//verbose()
+	// finalise analysis process and catch errors
+	defer End()
+
+	// test title
+	verbose()
 	chk.PrintTitle("plot01")
+
+	// start analysis process
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
-	Read(datadir+"p02.sim", 0, 0)
+	Start(datadir+"p02.sim", 0, 0)
 
-	SetPoint(1, "A")
-	SetPointAt([]float64{0, 1}, "B")
-	SetAlong([]float64{0, 0}, []float64{0, 10}, "left")
+	// define entities
+	Define("A", N{1})
+	Define("B", At{0, 1})
+	Define("left", Along{{0, 0}, {0, 10}})
 
-	Apply()
+	// load results
+	LoadResults(nil)
 
-	plA := Get("pl", "A")
+	plA := GetRes("pl", "A", 0)
 
-	SetTitle("My fancy plot")
-	Plot("t", "pl", "B", "'b.-'", "")
-	Plot("t", plA, "A", "'r.-'", "")
+	Splot("liquid pressure")
+	Plt("t", "pl", "B", "'b.-'", -1)
+	Plt("t", plA, "A", "'r.-'", -1)
 
-	Subplot()
-	Plot("pl", "pl", "A", "'ko-'", "")
+	Splot("")
+	Plt("pl", "pl", "A", "'ko-'", -1)
 
-	Subplot()
-	Plot("pl", "y", "left", "'bo-'", "")
+	Splot("")
+	Plt("pl", "y", "left", "'bo-'", 0)
+	Plt("pl", "y", "left", "'bo-'", -1)
 
-	Subplot()
-	Plot("y", "pl", "left", "'bo-'", "")
+	Splot("")
+	Plt("y", "pl", "left", "'bo-'", 0)
+	Plt("y", "pl", "left", "'bo-'", -1)
 
-	//Show()
+	Draw("", "", true)
 }

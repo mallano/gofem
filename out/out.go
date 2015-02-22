@@ -34,6 +34,10 @@ var (
 	R ResultsMap // maps labels => points
 	I []int      // selected output indices
 	T []float64  // selected output times
+
+	// subplots
+	Splots []*SplotDat // all subplots
+	Csplot *SplotDat   // current subplot
 )
 
 // End must be called and the end to flush log file
@@ -73,6 +77,7 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 	R = make(map[string]Points)
 	I = make([]int, 0)
 	T = make([]float64, 0)
+	Splots = make([]*SplotDat, 0)
 
 	// bins
 	m := Dom.Msh

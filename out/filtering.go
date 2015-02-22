@@ -90,6 +90,7 @@ func (o N) Locate() (res Points) {
 
 // Locate finds points
 func (o P) Locate() (res Points) {
+	var A []float64 // reference point
 	ncells := len(o)
 	for i := 0; i < ncells; i++ {
 		if len(o[i]) != 2 {
@@ -103,18 +104,24 @@ func (o P) Locate() (res Points) {
 				cid := c.Id
 				idx := o[i][1]
 				ipid := Cid2ips[cid][idx]
-				q := get_ip_point(ipid, nil)
+				q := get_ip_point(ipid, A)
 				if q != nil {
 					res = append(res, q)
+					if A == nil {
+						A = q.X
+					}
 				}
 			}
 		} else {
 			cid := idortag
 			idx := o[i][1]
 			ipid := Cid2ips[cid][idx]
-			q := get_ip_point(ipid, nil)
+			q := get_ip_point(ipid, A)
 			if q != nil {
 				res = append(res, q)
+				if A == nil {
+					A = q.X
+				}
 			}
 		}
 	}
