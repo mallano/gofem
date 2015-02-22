@@ -316,30 +316,7 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	// debugging
 	//if true {
 	if false {
-		io.Pf("Nmat =\n")
-		for i := 0; i < sldNn; i++ {
-			for j := 0; j < rodNn; j++ {
-				io.Pf("%g ", o.Nmat[i][j])
-			}
-			io.Pf("\n")
-		}
-		io.Pf("\nPmat =\n")
-		for i := 0; i < sldNn; i++ {
-			for j := 0; j < rodNp; j++ {
-				io.Pf("%g ", o.Pmat[i][j])
-			}
-			io.Pf("\n")
-		}
-		io.Pf("\n")
-		la.PrintMat("e0", o.e0, "%20.13f", false)
-		io.Pf("\n")
-		la.PrintMat("e1", o.e1, "%20.13f", false)
-		io.Pf("\n")
-		la.PrintMat("e2", o.e2, "%20.13f", false)
-		io.Pf("\n")
-		la.PrintMat("T1", o.T1, "%20.13f", false)
-		io.Pf("\n")
-		la.PrintMat("T2", o.T2, "%20.13f", false)
+		o.debug_print_init()
 	}
 
 	// success
@@ -478,20 +455,15 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 	}
 
 	// zero K matrices
-	la.MatFill(o.Krr, 0)
-	la.MatFill(o.Krs, 0)
-	la.MatFill(o.Ksr, 0)
-	/*
-		for m := 0; m < rodNn; m++ {
-			for n := 0; n < rodNn; n++ {
-				o.Krr[m][n] = 0
-			}
-			for n := 0; n < sldNn; n++ {
-				o.Krs[m][n] = 0
-				o.Ksr[n][m] = 0
-			}
+	for i, _ := range o.Rod.Umap {
+		for j, _ := range o.Rod.Umap {
+			o.Krr[i][j] = 0
 		}
-	*/
+		for j, _ := range o.Sld.Umap {
+			o.Krs[i][j] = 0
+			o.Ksr[j][i] = 0
+		}
+	}
 	la.MatFill(o.Kss, 0)
 
 	// auxiliary
@@ -616,68 +588,22 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 	// debug
 	//if true {
 	if false {
-		K := la.MatAlloc(o.Ny, o.Ny)
-		start := o.Sld.Nu
-		for i := 0; i < ndim; i++ {
-			for m := 0; m < sldNn; m++ {
-				r := i + m*ndim
-				for j := 0; j < ndim; j++ {
-					for n := 0; n < sldNn; n++ {
-						c := j + n*ndim
-						K[r][c] = o.Kss[r][c]
-					}
-					for n := 0; n < rodNn; n++ {
-						c := j + n*ndim
-						K[r][start+c] = o.Ksr[r][c]
-						K[start+c][r] = o.Krs[c][r]
-					}
-				}
-			}
-		}
-		for i := 0; i < ndim; i++ {
-			for m := 0; m < rodNn; m++ {
-				r := i + m*ndim
-				for j := 0; j < ndim; j++ {
-					for n := 0; n < rodNn; n++ {
-						c := j + n*ndim
-						K[start+r][start+c] = o.Krr[r][c]
-					}
-				}
-			}
-		}
-		la.PrintMat("K", K, "%20.10f", false)
+		o.debug_print_K()
 	}
 
 	// add K to sparse matrix Kb
-	var r, c, I, J int
-	for i := 0; i < ndim; i++ {
-		for m := 0; m < rodNn; m++ {
-			r = i + m*ndim
-			I = o.Rod.Umap[r]
-			for j := 0; j < ndim; j++ {
-				for n := 0; n < rodNn; n++ {
-					c = j + n*ndim
-					J = o.Rod.Umap[c]
-					Kb.Put(I, J, o.Krr[r][c])
-				}
-				for n := 0; n < sldNn; n++ {
-					c = j + n*ndim
-					J = o.Sld.Umap[c]
-					Kb.Put(I, J, o.Krs[r][c])
-					Kb.Put(J, I, o.Ksr[c][r])
-				}
-			}
+	for i, I := range o.Rod.Umap {
+		for j, J := range o.Rod.Umap {
+			Kb.Put(I, J, o.Krr[i][j])
 		}
-		for m := 0; m < sldNn; m++ {
-			r = i + m*ndim
-			I = o.Sld.Umap[r]
-			for j := 0; j < ndim; j++ {
-				for n := 0; n < sldNn; n++ {
-					c = j + n*ndim
-					J = o.Sld.Umap[c]
-					Kb.Put(I, J, o.Kss[r][c])
-				}
-			}
+		for j, J := range o.Sld.Umap {
+			Kb.Put(I, J, o.Krs[i][j])
+			Kb.Put(J, I, o.Ksr[j][i])
+		}
+	}
+	for i, I := range o.Sld.Umap {
+		for j, J := range o.Sld.Umap {
+			Kb.Put(I, J, o.Kss[i][j])
 		}
 	}
 	return true
@@ -689,17 +615,10 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 	// auxiliary
 	ndim := o.Ndim
 	nsig := 2 * o.Ndim
-
-	// rod data
 	rodH := o.Rod.Cell.Shp
 	rodS := rodH.S
-	//rodNp := len(o.Rod.IpsElem)
 	rodNn := rodH.Nverts
-
-	// solid data
 	sldH := o.Sld.Cell.Shp
-	//sldS := sldH.S
-	//sldNp := len(o.Sld.IpsElem)
 	sldNn := sldH.Nverts
 
 	// extrapolate stresses at integration points of solid element to its nodes
@@ -713,8 +632,6 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 				}
 			}
 		}
-		// debug
-		//la.PrintMat("σNo", o.σNo, "%20.13f", false)
 	}
 
 	// interpolate Δu of solid to find ΔuC @ rod node; Eq (30)
@@ -760,17 +677,6 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 			Δwb2 += e2[i] * o.Δw[i]
 		}
 
-		// debugging
-		//if true {
-		if false {
-			τ := o.States[idx].Sig
-			qn1 := o.States[idx].Phi[0]
-			qn2 := o.States[idx].Phi[1]
-			io.Pf("\nBEFORE: τ=%20.13f qn1=%20.13f qn2=%20.13f\n", τ, qn1, qn2)
-			la.PrintVec("Δw", o.Δw, "%20.13f", false)
-			io.Pf("Δwb0=%20.13f Δwb1=%20.13f Δwb2=%20.13f\n", Δwb0, Δwb1, Δwb2)
-		}
-
 		// new confining stress
 		σc = 0.0
 		if o.Coulomb {
@@ -801,15 +707,6 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 
 			// σcNew
 			σc = -(p1 + p2) / 2.0
-
-			// debugging
-			//if true {
-			if false {
-				la.PrintVec("σIp", o.σIp, "%20.13f", false)
-				io.Pf("t1=%20.13f\n", o.t1)
-				io.Pf("t2=%20.13f\n", o.t2)
-				io.Pf("σc=%20.13f\n", σc)
-			}
 		}
 
 		// update model
@@ -822,12 +719,8 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 		// debugging
 		//if true {
 		if false {
-			τ := o.States[idx].Sig
-			qn1 := o.States[idx].Phi[0]
-			qn2 := o.States[idx].Phi[1]
-			io.Pf("\nAFTER: τ=%20.10f qn1=%20.10f qn2=%20.10f\n", τ, qn1, qn2)
+			o.debug_update(idx, Δwb0, Δwb1, Δwb2, σc)
 		}
-
 	}
 	return true
 }
@@ -842,14 +735,6 @@ func (o *Rjoint) InitIvs(sol *Solution) (ok bool) {
 	for i := 0; i < nip; i++ {
 		o.States[i], _ = o.Mdl.InitIntVars()
 		o.StatesBkp[i] = o.States[i].GetCopy()
-
-		// debug
-		//if true {
-		if false {
-			o.States[i].Sig = 33
-			o.States[i].Phi[0] = 0.1
-			o.States[i].Phi[1] = 0.2
-		}
 	}
 	return true
 }
@@ -890,4 +775,83 @@ func (o Rjoint) Decode(dec Decoder) (ok bool) {
 // OutIpsData returns data from all integration points for output
 func (o Rjoint) OutIpsData() (labels []string, data []*OutIpData) {
 	return
+}
+
+// debugging ////////////////////////////////////////////////////////////////////////////////////////
+
+func (o Rjoint) debug_print_init() {
+	sldNn := o.Sld.Cell.Shp.Nverts
+	rodNn := o.Rod.Cell.Shp.Nverts
+	rodNp := len(o.Rod.IpsElem)
+	io.Pf("Nmat =\n")
+	for i := 0; i < sldNn; i++ {
+		for j := 0; j < rodNn; j++ {
+			io.Pf("%g ", o.Nmat[i][j])
+		}
+		io.Pf("\n")
+	}
+	io.Pf("\nPmat =\n")
+	for i := 0; i < sldNn; i++ {
+		for j := 0; j < rodNp; j++ {
+			io.Pf("%g ", o.Pmat[i][j])
+		}
+		io.Pf("\n")
+	}
+	io.Pf("\n")
+	la.PrintMat("e0", o.e0, "%20.13f", false)
+	io.Pf("\n")
+	la.PrintMat("e1", o.e1, "%20.13f", false)
+	io.Pf("\n")
+	la.PrintMat("e2", o.e2, "%20.13f", false)
+	io.Pf("\n")
+	la.PrintMat("T1", o.T1, "%20.13f", false)
+	io.Pf("\n")
+	la.PrintMat("T2", o.T2, "%20.13f", false)
+}
+
+func (o Rjoint) debug_print_K() {
+	ndim := o.Ndim
+	sldNn := o.Sld.Cell.Shp.Nverts
+	rodNn := o.Rod.Cell.Shp.Nverts
+	K := la.MatAlloc(o.Ny, o.Ny)
+	start := o.Sld.Nu
+	for i := 0; i < ndim; i++ {
+		for m := 0; m < sldNn; m++ {
+			r := i + m*ndim
+			for j := 0; j < ndim; j++ {
+				for n := 0; n < sldNn; n++ {
+					c := j + n*ndim
+					K[r][c] = o.Kss[r][c]
+				}
+				for n := 0; n < rodNn; n++ {
+					c := j + n*ndim
+					K[r][start+c] = o.Ksr[r][c]
+					K[start+c][r] = o.Krs[c][r]
+				}
+			}
+		}
+	}
+	for i := 0; i < ndim; i++ {
+		for m := 0; m < rodNn; m++ {
+			r := i + m*ndim
+			for j := 0; j < ndim; j++ {
+				for n := 0; n < rodNn; n++ {
+					c := j + n*ndim
+					K[start+r][start+c] = o.Krr[r][c]
+				}
+			}
+		}
+	}
+	la.PrintMat("K", K, "%20.10f", false)
+}
+
+func (o Rjoint) debug_update(idx int, Δwb0, Δwb1, Δwb2, σc float64) {
+	τ := o.States[idx].Sig
+	qn1 := o.States[idx].Phi[0]
+	qn2 := o.States[idx].Phi[1]
+	la.PrintVec("Δw", o.Δw, "%13.10f", false)
+	io.Pf("Δwb0=%13.10f Δwb1=%13.10f Δwb2=%13.10f\n", Δwb0, Δwb1, Δwb2)
+	la.PrintVec("σIp", o.σIp, "%13.10f", false)
+	io.Pf("σc=%13.10f t1=%13.10f t2=%13.10f\n", σc, o.t1, o.t2)
+	io.Pf("τ=%13.10f qn1=%13.10f qn2=%13.10f\n", τ, qn1, qn2)
 }

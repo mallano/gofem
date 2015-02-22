@@ -283,11 +283,6 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 			return
 		}
 
-		// debug
-		if Global.DoDebug {
-			la.PrintVec("fb", d.Fb, "%13.10f ", false)
-		}
-
 		// join all fb
 		if Global.Distr {
 			mpi.AllReduceSum(d.Fb, d.Wb) // this must be done here because there might be nodes sharing boundary conditions
@@ -298,6 +293,11 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 		// essential boundary conditioins; e.g. constraints
 		d.EssenBcs.AddToRhs(d.Fb, d.Sol)
+
+		// debug
+		if Global.DoDebug {
+			la.PrintVec("fb", d.Fb[:d.Ny], "%13.10f ", false)
+		}
 
 		// find largest absolute component of fb
 		largFb = la.VecLargest(d.Fb, 1)
@@ -362,7 +362,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 		// debug
 		if Global.DoDebug {
-			la.PrintVec("wb", d.Wb, "%13.10f ", false)
+			la.PrintVec("wb", d.Wb[:d.Ny], "%13.10f ", false)
 		}
 
 		// update primary variables (y)
