@@ -1,0 +1,61 @@
+{
+  "data" : {
+    "matfile" : "materials.mat",
+    "steady" : true,
+    "showr" : true,
+    "dodebug" : false
+  },
+  "solver" : {
+    "nmaxit" : 20
+  },
+  "functions" : [
+    { "name":"load", "type":"lin", "prms":[{"n":"m", "v":1.4}] },
+    { "name":"qini", "type":"cte", "prms":[{"n":"c", "v":-100}] },
+    { "name":"dt_",   "type":"pts", "prms":[
+        {"n":"t0", "v":0.00}, {"n":"y0", "v":0.20},
+        {"n":"t1", "v":0.20}, {"n":"y1", "v":0.20},
+        {"n":"t2", "v":0.40}, {"n":"y2", "v":0.20}
+    ] },
+    { "name":"dt",   "type":"pts", "prms":[
+        {"n":"t0", "v":0.00}, {"n":"y0", "v":0.20},
+        {"n":"t1", "v":0.20}, {"n":"y1", "v":0.20},
+        {"n":"t2", "v":0.40}, {"n":"y2", "v":0.20},
+        {"n":"t3", "v":0.60}, {"n":"y3", "v":0.20},
+        {"n":"t4", "v":0.80}, {"n":"y4", "v":0.10},
+        {"n":"t5", "v":0.90}, {"n":"y5", "v":0.08},
+        {"n":"t6", "v":0.98}, {"n":"y6", "v":0.02},
+        {"n":"t7", "v":1.00}, {"n":"y7", "v":0.00}
+    ] }
+  ],
+  "regions" : [
+    {
+      "mshfile" : "msh/o2.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"ex 6: solid elastic", "type":"u",   "extra":"!nip:27" },
+        { "tag":-2, "mat":"ex 6: rod elastic",   "type":"rod", "extra":"!nip:3" },
+        { "tag":-3, "mat":"ex 6: link plastic",  "type":"rjoint" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc" : "apply load",
+      "inistress" : { "hom":true, "iso":true, "s0":-100 },
+      "nodebcs" : [
+        { "tag":-66, "keys":["fy"], "funcs":["load"] }
+      ],
+      "facebcs" : [
+        { "tag":-10, "keys":["ux"],  "funcs":["zero"] },
+        { "tag":-21, "keys":["uy"],  "funcs":["zero"] },
+        { "tag":-30, "keys":["uz"],  "funcs":["zero"] },
+        { "tag":-11, "keys":["qn0"], "funcs":["qini"] },
+        { "tag":-20, "keys":["qn0"], "funcs":["qini"] },
+        { "tag":-31, "keys":["qn0"], "funcs":["qini"] }
+      ],
+      "control" : {
+        "tf" : 1.0,
+        "dtfcn" : "dt"
+      }
+    }
+  ]
+}

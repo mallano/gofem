@@ -1,0 +1,121 @@
+{
+  "functions" : [],
+  "materials" : [
+    {
+      "name"  : "ex 5: solid elastic",
+      "desc"  : "",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",   "v":2.8e+07, "u":"kPa"},
+        {"n":"nu",  "v":0.25,    "u":"-"},
+        {"n":"rho", "v":2.4,     "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "ex 5: rod elastic",
+      "desc"  : "",
+      "model" : "oned-elast",
+      "prms"  : [
+        {"n":"E",   "v":2.1e+08},
+        {"n":"A",   "v":0.001  },
+        {"n":"rho", "v":7      }
+      ]
+    },
+    {
+      "name"  : "ex 5: link elastic",
+      "desc"  : "",
+      "model" : "rjoint-m1",
+      "prms"  : [
+        {"n":"ks",    "v":1e+09, "u":"kPa"},
+        {"n":"k1",    "v":1e+09, "u":"kPa"},
+        {"n":"k2",    "v":1e+09, "u":"kPa"},
+        {"n":"tauy0", "v":200,   "u":"kPa"},
+        {"n":"kh",    "v":0,     "u":"kPa"},
+        {"n":"mu",    "v":0.5,   "u":"-"},
+        {"n":"h",     "v":0.2,   "u":"m"}
+      ]
+    },
+    {
+      "name"  : "ex 6: solid elastic",
+      "desc"  : "",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",   "v":1000},
+        {"n":"nu",  "v":0.25},
+        {"n":"rho", "v":1   }
+      ]
+    },
+    {
+      "name"  : "ex 6: rod elastic",
+      "desc"  : "",
+      "model" : "oned-elast",
+      "prms"  : [
+        {"n":"E",   "v":2000 },
+        {"n":"A",   "v":0.005},
+        {"n":"rho", "v":1    }
+      ]
+    },
+    {
+      "name"  : "ex 6: link plastic",
+      "desc"  : "",
+      "model" : "rjoint-m1",
+      "prms"  : [
+        {"n":"ks",    "v":10000},
+        {"n":"k1",    "v":10000},
+        {"n":"k2",    "v":10000},
+        {"n":"tauy0", "v":20   },
+        {"n":"kh",    "v":0    },
+        {"n":"mu",    "v":0.5  },
+        {"n":"h",     "v":0.05 }
+      ]
+    },
+    {
+      "name"  : "ex 7: solid elastic",
+      "desc"  : "",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",   "v":2.8e+07, "u":"kPa"},
+        {"n":"nu",  "v":0.2,     "u":"-"},
+        {"n":"rho", "v":2.4,     "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "ex 7: solid plastic",
+      "desc"  : "",
+      "model" : "drucker-prager",
+      "prms"  : [
+        {"n":"E",   "v":2.8e+07, "u":"kPa"},
+        {"n":"nu",  "v":0.2,     "u":"-"},
+        {"n":"kap", "v":2000,    "u":"kPa"},
+        {"n":"alp", "v":0.45,    "u":"-"},
+        {"n":"typ", "v":0,       "u":"-"},
+        {"n":"H",   "v":0,       "u":"kPa"},
+        {"n":"rho", "v":2.4,     "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "ex 7: rod elastic",
+      "desc"  : "",
+      "model" : "oned-elast",
+      "prms"  : [
+        {"n":"E",   "v":2.1e+08},
+        {"n":"A",   "v":0.001  },
+        {"n":"rho", "v":7      }
+      ]
+    },
+    {
+      "name"  : "ex 7: link elastic",
+      "desc"  : "",
+      "model" : "rjoint-m1",
+      "prms"  : [
+        {"n":"ks",    "v":1e+07, "u":"kPa"},
+        {"n":"k1",    "v":1e+07, "u":"kPa"},
+        {"n":"k2",    "v":1e+07, "u":"kPa"},
+        {"n":"tauy0", "v":10000, "u":"kPa"},
+        {"n":"kh",    "v":0,     "u":"kPa"},
+        {"n":"mu",    "v":1.192, "u":"-"},
+        {"n":"h",     "v":0.05,  "u":"m"}
+      ]
+    }
+  ]
+}
