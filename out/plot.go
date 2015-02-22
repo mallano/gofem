@@ -15,54 +15,59 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
+// global data
 var (
-	// Fem data
-	Dom     *fem.Domain
+
+	// FEM data
+	Dom     *fem.Domain  // domain
 	NodBins gm.Bins      // bins for nodes
 	IpBins  gm.Bins      // bins for nodes
 	Ips     []*IpDat     // data at ips
 	Sum     *fem.Summary // summary of results
 
-	// Data containers
-	TrkPts     []*PointTracker
-	TrkListPts []*PointsTracker
+	// containers
+	TrkPts     []*PointTracker  // tracking individual points
+	TrkListPts []*PointsTracker // tracking collection of points
 
-	// Data for all subplots
-	Subplots    []*SubPlotData
-	ConfigFunc  func()
-	SubplotRows int
-	SubplotCols int
+	// subplots
+	Subplots    []*SubPlotData // all subplots
+	ConfigFunc  func()         // configuration function
+	SubplotRows int            // number of rows in figure
+	SubplotCols int            // number of cols in figure
 	Tserie      []float64
+	CSubplot    *SubPlotData // current subplot
 
-	// Data for current subplot
-	CSubplot *SubPlotData
-
-	// Bins tolerance
-	TolC float64
+	// constants
+	TolC float64 // tolerance for bins
 )
 
+// initialise constants
 func init() {
 	TolC = 1.e-8
 }
 
-// Struct to save data from ips
+// IpDat saves data from ips
 type IpDat struct {
-	Labels []string
-	X      []float64
-	Data   []*float64
+	Labels []string   // labels
+	X      []float64  // coordinates
+	Data   []*float64 // element's state connections
 }
 
 // PointTracker saves information for one tracked point along time
 type PointTracker struct {
-	Tag    string // ID
-	NodeId int
-	IpId   int
 
+	// essential
+	Tag    string // point tag
+	NodeId int    // point id
+	IpId   int    // integration point id
+
+	// derived
 	Keys []string
 	Data map[string][]float64 // [nkey][ntimes]
 	X    []float64            // coordinates
 }
 
+// Along defines a selection along line
 type Along struct {
 	A []float64 // first point on line
 	B []float64 // second point on line
@@ -70,12 +75,12 @@ type Along struct {
 
 // PointsTracker saves information for a group of tracked points along time
 type PointsTracker struct {
-	Tag      string // ID
-	IdOrTags []int
-	Along    Along
-	NodePts  []int
-	IpPts    []int
-	Keys     []string
+	Tag      string                 // point id
+	IdOrTags []int                  // id or tags
+	Along    Along                  // along line definition
+	NodePts  []int                  // container for nodes
+	IpPts    []int                  // container for integration points
+	Keys     []string               // keys
 	Data     []map[string][]float64 // [npoints][nkey][ntimes]
 	X        [][]float64            // [npoints][dir] slice of coordinates
 }
