@@ -24,12 +24,20 @@ func main() {
 	out.LoadResults([]float64{0.2, 0.4, 0.6, 0.8, 0.9, 0.98, 1})
 
 	// distances along rod
-	dist := out.GetDist("uy", "rod")
+	d := out.GetDist("uy", "rod")
+	_, y, _ := out.GetXYZ("uy", "rod")
 
-	// get results
+	// for selected times
 	for i, _ := range out.I {
-		uy := out.GetX("uy", "rod", i)
-		plt.Plot(dist, uy, "")
+		uy := out.GetRes("uy", "rod", i)
+
+		// plot uy along d
+		plt.Subplot(2, 1, 1)
+		plt.Plot(d, uy, "")
+
+		// plot uy along y
+		plt.Subplot(2, 1, 2)
+		plt.Plot(y, uy, "")
 	}
 
 	// plot

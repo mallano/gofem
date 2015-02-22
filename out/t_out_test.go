@@ -100,9 +100,9 @@ func Test_out01(tst *testing.T) {
 		}
 	}
 
-	// check GetX
-	uxC := GetX("ux", "C", 0)
-	uxR := GetX("ux", "right side", -1)
+	// check GetRes
+	uxC := GetRes("ux", "C", 0)
+	uxR := GetRes("ux", "right side", -1)
 	io.Pforan("uxC = %v\n", uxC)
 	io.Pforan("uxR = %v\n", uxR)
 	chk.IntAssert(len(uxC), 2)
@@ -120,8 +120,8 @@ func Test_out01(tst *testing.T) {
 	tolu := 1e-15
 	for _, l := range nlabels {
 		x := GetCoords(l)
-		ux := GetX("ux", l, 0)
-		uy := GetX("uy", l, 0)
+		ux := GetRes("ux", l, 0)
+		uy := GetRes("uy", l, 0)
 		io.Pforan("ux=%v uy=%v\n", ux, uy)
 		for j, t := range T {
 			io.Pfyel("t=%g\n", t)
@@ -133,10 +133,10 @@ func Test_out01(tst *testing.T) {
 	tolσ := 1e-14
 	for _, l := range plabels {
 		x := GetCoords(l)
-		sx := GetX("sx", l, 0)
-		sy := GetX("sy", l, 0)
-		sz := GetX("sz", l, 0)
-		sxy := GetX("sxy", l, 0)
+		sx := GetRes("sx", l, 0)
+		sy := GetRes("sy", l, 0)
+		sz := GetRes("sz", l, 0)
+		sxy := GetRes("sxy", l, 0)
 		for j, t := range T {
 			io.Pfyel("t=%g\n", t)
 			sol.CheckStress(tst, t, []float64{sx[j], sy[j], sz[j], sxy[j]}, x, tolσ)
@@ -185,8 +185,8 @@ func Test_out02(tst *testing.T) {
 	// check displacements
 	tolu := 1e-15
 	x := GetCoords("A")
-	ux := GetX("ux", "A", 0)
-	uy := GetX("uy", "A", 0)
+	ux := GetRes("ux", "A", 0)
+	uy := GetRes("uy", "A", 0)
 	io.Pforan("ux=%v uy=%v\n", ux, uy)
 	for j, t := range T {
 		io.Pfyel("t=%g\n", t)

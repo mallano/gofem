@@ -97,10 +97,10 @@ func LoadResults(times []float64) {
 	}
 }
 
-// GetX gets a time series corresponding to a given label
+// GetRes gets results as a time or space series corresponding to a given label or set of points.
 //  idxI -- index in I slice corresponding to selected output time; use -1 for the last item.
 //          If label defines a single point, the whole time series is returned and idxI is ignored.
-func GetX(key, label string, idxI int) []float64 {
+func GetRes(key, label string, idxI int) []float64 {
 	if idxI < 0 {
 		idxI = len(I) - 1
 	}
@@ -140,19 +140,39 @@ func GetCoords(label string) []float64 {
 
 // GetDist returns the distance from a reference point on the given line with selected points
 // if they contain a given key
-func GetDist(key, label string) []float64 {
+func GetDist(key, label string) (dist []float64) {
 	if pts, ok := R[label]; ok {
-		var res []float64
 		for _, p := range pts {
 			for k, _ := range p.Vals {
 				if k == key {
-					res = append(res, p.Dist)
+					dist = append(dist, p.Dist)
 					break
 				}
 			}
 		}
-		return res
+		return
 	}
 	chk.Panic("cannot get distance with key %q and label %q", key, label)
-	return nil
+	return
+}
+
+// GetXYZ returns the x-y-z coordinates of selected points that have a specified key
+func GetXYZ(key, label string) (x, y, z []float64) {
+	if pts, ok := R[label]; ok {
+		for _, p := range pts {
+			for k, _ := range p.Vals {
+				if k == key {
+					x = append(x, p.X[0])
+					y = append(y, p.X[1])
+					if len(p.X) == 3 {
+						z = append(z, p.X[2])
+					}
+					break
+				}
+			}
+		}
+		return
+	}
+	chk.Panic("cannot get x-y-z coordinates with key %q and label %q", key, label)
+	return
 }
