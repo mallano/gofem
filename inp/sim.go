@@ -31,6 +31,7 @@ type Data struct {
 	Steady  bool `json:"steady"`  // steady simulation
 	Pstress bool `json:"pstress"` // plane-stress
 	Axisym  bool `json:"axisym"`  // axisymmetric
+	DoDebug bool `json:"dodebug"` // activate debugging
 
 	// options
 	React bool `json:"react"` // indicates whether or not reaction forces must be computed

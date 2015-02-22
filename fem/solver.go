@@ -39,7 +39,8 @@ var Global struct {
 	DynCoefs *DynCoefs // dynamic coefficients
 
 	// for debugging
-	DebugKb func(d *Domain, firstIt bool)
+	DoDebug bool                          // debug flag
+	DebugKb func(d *Domain, firstIt bool) // debug Kb callback function
 
 	// options
 	LogBcs bool // log essential and ptnatural boundary conditions
@@ -84,6 +85,7 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	if Stop() {
 		return
 	}
+	Global.DoDebug = Global.Sim.Data.DoDebug
 
 	// fix show residual flag
 	if !Global.Root {
@@ -131,7 +133,7 @@ func Run() (runisok bool) {
 	tidx := 0
 
 	// message
-	if Global.Verbose {
+	if Global.Verbose && !Global.DoDebug {
 		cpu_time := time.Now()
 		defer func() {
 			io.Pfblue2("cpu time   = %v\n", time.Now().Sub(cpu_time))
@@ -282,7 +284,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		}
 
 		// debug
-		//la.PrintVec("fb", d.Fb, "%13.10f ", false)
+		if Global.DoDebug {
+			la.PrintVec("fb", d.Fb, "%13.10f ", false)
+		}
 
 		// join all fb
 		if Global.Distr {
@@ -357,7 +361,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		}
 
 		// debug
-		//la.PrintVec("wb", d.Wb, "%13.10f ", false)
+		if Global.DoDebug {
+			la.PrintVec("wb", d.Wb, "%13.10f ", false)
+		}
 
 		// update primary variables (y)
 		for i := 0; i < d.Ny; i++ {
