@@ -87,3 +87,12 @@ func (o *Node) GetEq(ukey string) (eqNumber int) {
 	}
 	return -1
 }
+
+// GetKeys returns a slice of keys from all dofs
+func (o *Node) GetKeys() []string {
+	keys := []string{}
+	for _, dof := range o.Dofs {
+		keys = append(keys, dof.Key)
+	}
+	return keys
+}
