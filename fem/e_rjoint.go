@@ -478,15 +478,20 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 	}
 
 	// zero K matrices
-	for m := 0; m < rodNn; m++ {
-		for n := 0; n < rodNn; n++ {
-			o.Krr[m][n] = 0
+	la.MatFill(o.Krr, 0)
+	la.MatFill(o.Krs, 0)
+	la.MatFill(o.Ksr, 0)
+	/*
+		for m := 0; m < rodNn; m++ {
+			for n := 0; n < rodNn; n++ {
+				o.Krr[m][n] = 0
+			}
+			for n := 0; n < sldNn; n++ {
+				o.Krs[m][n] = 0
+				o.Ksr[n][m] = 0
+			}
 		}
-		for n := 0; n < sldNn; n++ {
-			o.Krs[m][n] = 0
-			o.Ksr[n][m] = 0
-		}
-	}
+	*/
 	la.MatFill(o.Kss, 0)
 
 	// auxiliary
@@ -609,7 +614,8 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 	}
 
 	// debug
-	if true {
+	//if true {
+	if false {
 		K := la.MatAlloc(o.Ny, o.Ny)
 		start := o.Sld.Nu
 		for i := 0; i < ndim; i++ {
@@ -639,7 +645,7 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 				}
 			}
 		}
-		//la.PrintMat("K", K, "%20.10f", false)
+		la.PrintMat("K", K, "%20.10f", false)
 	}
 
 	// add K to sparse matrix Kb
@@ -819,7 +825,7 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 			τ := o.States[idx].Sig
 			qn1 := o.States[idx].Phi[0]
 			qn2 := o.States[idx].Phi[1]
-			io.Pf("\nAFTER: τ=%20.13f qn1=%20.13f qn2=%20.13f\n", τ, qn1, qn2)
+			io.Pf("\nAFTER: τ=%20.10f qn1=%20.10f qn2=%20.10f\n", τ, qn1, qn2)
 		}
 
 	}

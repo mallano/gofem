@@ -308,6 +308,8 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		if !o.ipvars(idx, sol) {
 			return
 		}
+
+		// auxiliary
 		coef := o.Cell.Shp.J * ip.W * o.Thickness
 		S := o.Cell.Shp.S
 		G := o.Cell.Shp.G
@@ -376,7 +378,7 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 			return
 		}
 
-		// coefficients
+		// auxiliary
 		coef := o.Cell.Shp.J * ip.W * o.Thickness
 		S := o.Cell.Shp.S
 		G := o.Cell.Shp.G

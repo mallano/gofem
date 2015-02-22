@@ -186,8 +186,6 @@ func (o *Rod) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 // adds -R to global residual vector fb
 func (o Rod) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
-	fi := make([]float64, o.Nu)
-
 	// for each integration point
 	nverts := o.Cell.Shp.Nverts
 	ndim := o.Ndim
@@ -197,24 +195,21 @@ func (o Rod) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		if !o.ipvars(idx, sol) {
 			return
 		}
-		coef := ip.W
-		G := o.Cell.Shp.Gvec
-		Jvec := o.Cell.Shp.Jvec3d
-		σ := o.States[idx].Sig
-		//io.Pf("A=%13f σ=%13.10f coef=%13.10f Jvec=%13.10f\n", o.A, σ, coef, Jvec)
 
+		// auxiliary
+		coef := ip.W
+		Jvec := o.Cell.Shp.Jvec3d
+		G := o.Cell.Shp.Gvec
+		σ := o.States[idx].Sig
+
+		// update fb with internal forces
 		for m := 0; m < nverts; m++ {
 			for i := 0; i < ndim; i++ {
 				r := o.Umap[i+m*ndim]
-				fb[r] -= coef * o.A * σ * G[m] * Jvec[i]        // -fi
-				fi[i+m*ndim] += coef * o.A * σ * G[m] * Jvec[i] // +fi
+				fb[r] -= coef * o.A * σ * G[m] * Jvec[i] // -fi
 			}
-			//if o.hasg {
-			//o.Rus[o.nd-1 + m*o.nd] -= o.coef * gcmp * o.gu.S[m] // +fx
-			//}
 		}
 	}
-	//la.PrintVec("rod: fi", fi, "%13.10f", false)
 	return true
 }
 
@@ -235,10 +230,11 @@ func (o Rod) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 			return
 		}
 
+		// auxiliary
 		coef := ip.W
+		Jvec := o.Cell.Shp.Jvec3d
 		G := o.Cell.Shp.Gvec
 		J := o.Cell.Shp.J
-		Jvec := o.Cell.Shp.Jvec3d
 
 		// add contribution to consistent tangent matrix
 		for m := 0; m < nverts; m++ {
@@ -252,9 +248,6 @@ func (o Rod) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 							return
 						}
 						o.K[r][c] += coef * o.A * E * G[m] * G[n] * Jvec[i] * Jvec[j] / J
-						//if !steady {
-						//o.M[r][c] += o.ipe[idx][3] * o.ρ * o.A * o.gu.S[m] * o.gu.S[n] * o.gu.Jvec[i] * o.gu.Jvec[j] / o.gu.J
-						//}
 					}
 				}
 			}
@@ -282,9 +275,11 @@ func (o *Rod) Update(sol *Solution) (ok bool) {
 		if !o.ipvars(idx, sol) {
 			return
 		}
+
+		// auxiliary
+		Jvec := o.Cell.Shp.Jvec3d
 		G := o.Cell.Shp.Gvec
 		J := o.Cell.Shp.J
-		Jvec := o.Cell.Shp.Jvec3d
 
 		// compute strains
 		Δε := 0.0
@@ -299,7 +294,6 @@ func (o *Rod) Update(sol *Solution) (ok bool) {
 		if LogErr(o.Model.Update(o.States[idx], 0.0, Δε), "Update") {
 			return
 		}
-		//io.Pf("G=%13.10f J=%13.10f Jvec=%13.10f Δε=%13.10f σ=%13.10f\n", G, J, Jvec, Δε, o.States[idx].Sig)
 	}
 	return true
 }
