@@ -227,7 +227,7 @@ func (o ElemUP) Decode(dec Decoder) (ok bool) {
 }
 
 // OutIpsData returns data from all integration points for output
-func (o ElemUP) OutIpsData() (labels []string, data []*OutIpData) {
+func (o ElemUP) OutIpsData() (data []*OutIpData) {
 	return
 }
 

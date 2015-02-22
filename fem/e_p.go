@@ -547,13 +547,12 @@ func (o ElemP) Decode(dec Decoder) (ok bool) {
 }
 
 // OutIpsData returns data from all integration points for output
-func (o ElemP) OutIpsData() (labels []string, data []*OutIpData) {
-	labels = []string{"sl"}
+func (o ElemP) OutIpsData() (data []*OutIpData) {
 	for idx, ip := range o.IpsElem {
 		s := o.States[idx]
-		vals := []*float64{&s.Sl}
 		x := o.Cell.Shp.IpRealCoords(o.X, ip)
-		data = append(data, &OutIpData{vals, x})
+		v := map[string]*float64{"sl": &s.Sl}
+		data = append(data, &OutIpData{x, v})
 	}
 	return
 }

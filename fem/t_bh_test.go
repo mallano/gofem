@@ -10,25 +10,25 @@ import (
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/utl"
 )
 
 func Test_bh16a(tst *testing.T) {
 
 	/*  solid bracket with thickness = 0.25
-	*
-	*          1     -10                connectivity:
-	*   (-100) o'-,__                    eid :  verts
-	*          |     '-,__ 3   -10         0 : 0, 2, 3
-	*          |        ,'o-,__            1 : 3, 1, 0
-	*          |  1   ,'  |    '-,__ 5     2 : 2, 4, 5
-	*          |    ,'    |  3   ,-'o      3 : 5, 3, 2
-	*          |  ,'  0   |   ,-'   |
-	*          |,'        |,-'   2  |   constraints:
-	*   (-100) o----------o---------o    -100 : fixed on x and y
-	*          0          2         4
+	 *
+	 *          1     -10                connectivity:
+	 *   (-100) o'-,__                    eid :  verts
+	 *          |     '-,__ 3   -10         0 : 0, 2, 3
+	 *          |        ,'o-,__            1 : 3, 1, 0
+	 *          |  1   ,'  |    '-,__ 5     2 : 2, 4, 5
+	 *          |    ,'    |  3   ,-'o      3 : 5, 3, 2
+	 *          |  ,'  0   |   ,-'   |
+	 *          |,'        |,-'   2  |   constraints:
+	 *   (-100) o----------o---------o    -100 : fixed on x and y
+	 *          0          2         4
 	 */
 
+	//verbose()
 	chk.PrintTitle("bh16a")
 
 	// start simulation
@@ -122,9 +122,13 @@ func Test_bh16a(tst *testing.T) {
 	// check ip data
 	for _, ele := range dom.Elems {
 		e := ele.(*ElemU)
-		labels, data := e.OutIpsData()
-		idx := utl.StrIndexSmall(labels, "sx")
-		io.Pfyel("labels=%v  data=%v\n", labels, *data[0].Vals[idx])
+		d := e.OutIpsData()
+		chk.IntAssert(len(d), 1)
+		vals := d[0].V
+		chk.IntAssert(len(vals), 4)
+		for key, val := range vals {
+			io.Pfyel("key=%v => val=%v\n", key, *val)
+		}
 	}
 }
 

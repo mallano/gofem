@@ -351,7 +351,7 @@ func (o Rod) Decode(dec Decoder) (ok bool) {
 }
 
 // OutIpsData returns data from all integration points for output
-func (o Rod) OutIpsData() (labels []string, data []*OutIpData) {
+func (o Rod) OutIpsData() (data []*OutIpData) {
 	return
 }
 

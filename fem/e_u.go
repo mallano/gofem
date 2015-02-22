@@ -516,19 +516,16 @@ func (o ElemU) Decode(dec Decoder) (ok bool) {
 }
 
 // OutIpsData returns data from all integration points for output
-func (o ElemU) OutIpsData() (labels []string, data []*OutIpData) {
-	labels = []string{"sx", "sy", "sz", "sxy"}
-	if o.Ndim == 3 {
-		labels = append(labels, "syz", "szx")
-	}
+func (o ElemU) OutIpsData() (data []*OutIpData) {
+	sigmas := StressKeys(o.Ndim)
 	for idx, ip := range o.IpsElem {
 		s := o.States[idx]
-		vals := []*float64{&s.Sig[0], &s.Sig[1], &s.Sig[2], &s.Sig[3]}
-		if o.Ndim == 3 {
-			vals = append(vals, &s.Sig[4], &s.Sig[5])
-		}
 		x := o.Cell.Shp.IpRealCoords(o.X, ip)
-		data = append(data, &OutIpData{vals, x})
+		v := make(map[string]*float64)
+		for i, key := range sigmas {
+			v[key] = &s.Sig[i]
+		}
+		data = append(data, &OutIpData{x, v})
 	}
 	return
 }

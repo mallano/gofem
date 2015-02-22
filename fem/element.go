@@ -13,8 +13,8 @@ import (
 
 // OutIpData is an auxiliary structure to transfer data from integration points (IP) to output routines.
 type OutIpData struct {
-	Vals []*float64
-	X    []float64
+	X []float64           // coordinates
+	V map[string]*float64 // maps label (e.g. "sx") to pointer to value
 }
 
 // Elem defines what elements must calculate
@@ -40,7 +40,7 @@ type Elem interface {
 	Decode(dec Decoder) (ok bool) // decodes internal variables
 
 	// output
-	OutIpsData() (labels []string, data []*OutIpData) // returns data from all integration points for output
+	OutIpsData() (data []*OutIpData) // returns data from all integration points for output
 }
 
 // ElemConnector defines connector elements; elements that depend upon others

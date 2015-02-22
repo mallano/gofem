@@ -217,3 +217,10 @@ func Ivs2sigmas(nip, ndim int, ivs map[string][]float64) (σ [][]float64) {
 	}
 	return
 }
+
+func StressKeys(ndim int) []string {
+	if ndim == 2 {
+		return []string{"sx", "sy", "sz", "sxy"}
+	}
+	return []string{"sx", "sy", "sz", "sxy", "syz", "szx"}
+}

@@ -29,7 +29,7 @@ func (o *Domain) SetIniStress(stg *inp.Stage) (ok bool) {
 
 				// get element's integration points data
 				ele := e.(Elem)
-				_, d := ele.OutIpsData()
+				d := ele.OutIpsData()
 				nip := len(d)
 
 				// build map with isotropic and homogeneus state
@@ -52,7 +52,7 @@ func (o *Domain) SetIniStress(stg *inp.Stage) (ok bool) {
 
 				// get element's integration points data
 				ele := e.(Elem)
-				_, d := ele.OutIpsData()
+				d := ele.OutIpsData()
 				nip := len(d)
 
 				// build map with plane-strain and homogeneus state

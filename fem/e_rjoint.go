@@ -773,7 +773,7 @@ func (o Rjoint) Decode(dec Decoder) (ok bool) {
 }
 
 // OutIpsData returns data from all integration points for output
-func (o Rjoint) OutIpsData() (labels []string, data []*OutIpData) {
+func (o Rjoint) OutIpsData() (data []*OutIpData) {
 	return
 }
 

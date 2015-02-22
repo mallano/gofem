@@ -344,6 +344,6 @@ func (o Beam) Decode(dec Decoder) (ok bool) {
 }
 
 // OutIpsData returns data from all integration points for output
-func (o Beam) OutIpsData() (labels []string, data []*OutIpData) {
+func (o Beam) OutIpsData() (data []*OutIpData) {
 	return
 }
