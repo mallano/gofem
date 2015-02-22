@@ -282,6 +282,7 @@ var conversiontable = map[string]string{
 	"βw":  "betw",
 	"β1":  "bet1",
 	"β2":  "bet2",
+	"μ":   "mu",
 	"ν":   "nu",
 	"φ":   "phi",
 	"λ":   "lam",
@@ -291,11 +292,12 @@ var conversiontable = map[string]string{
 	"λ1l": "lam1l",
 	"λ0g": "lam0g",
 	"λ1g": "lam1g",
-	"ρ":   "rho",
 	"ρL":  "RhoL",
 	"ρG":  "RhoG",
-	"ρS":  "RhoS",
+	"ρ":   "rho",
+	"ρS":  "rho",
 	"RΘg": "RthG",
+	"τy0": "tauy0",
 }
 
 var invertedconversiontable = map[string]string{
