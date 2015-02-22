@@ -98,13 +98,11 @@ func LoadResults(times []float64) {
 }
 
 // GetX gets a time series corresponding to a given label
-//  tidx -- the time-output-index if label corresponds to a set of points;
-//          thus the resulting slice is a spatial series @ time T[tidx].
-//          If label corresponts to a single point, a time series is returned
-//          and tidx is ignored.
-func GetX(key, label string, tidx int) []float64 {
-	if tidx < 0 {
-		tidx = I[len(I)-1]
+//  idxI -- index in I slice corresponding to selected output time; use -1 for the last item.
+//          If label defines a single point, the whole time series is returned and idxI is ignored.
+func GetX(key, label string, idxI int) []float64 {
+	if idxI < 0 {
+		idxI = len(I) - 1
 	}
 	if pts, ok := R[label]; ok {
 		if len(pts) == 1 {
@@ -114,11 +112,11 @@ func GetX(key, label string, tidx int) []float64 {
 				}
 			}
 		} else {
-			res := make([]float64, len(pts))
-			for i, p := range pts {
+			var res []float64
+			for _, p := range pts {
 				for k, v := range p.Vals {
 					if k == key {
-						res[i] = v[tidx]
+						res = append(res, v[idxI])
 					}
 				}
 			}
@@ -141,14 +139,20 @@ func GetCoords(label string) []float64 {
 }
 
 // GetDist returns the distance from a reference point on the given line with selected points
-func GetDist(label string) []float64 {
+// if they contain a given key
+func GetDist(key, label string) []float64 {
 	if pts, ok := R[label]; ok {
-		res := make([]float64, len(pts))
-		for i, p := range pts {
-			res[i] = p.Dist
+		var res []float64
+		for _, p := range pts {
+			for k, _ := range p.Vals {
+				if k == key {
+					res = append(res, p.Dist)
+					break
+				}
+			}
 		}
 		return res
 	}
-	chk.Panic("cannot get distance with label %q", label)
+	chk.Panic("cannot get distance with key %q and label %q", key, label)
 	return nil
 }

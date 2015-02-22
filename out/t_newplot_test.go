@@ -12,11 +12,9 @@ import (
 
 func Test_plot01(tst *testing.T) {
 
-	verbose()
-
+	//verbose()
 	chk.PrintTitle("plot01")
 	datadir := "$GOPATH/src/github.com/cpmech/gofem/fem/data/"
-
 	Read(datadir+"p02.sim", 0, 0)
 
 	SetPoint(1, "A")
@@ -26,9 +24,6 @@ func Test_plot01(tst *testing.T) {
 	Apply()
 
 	plA := Get("pl", "A")
-	//io.Pforan("plA = %v\n", plA)
-
-	//os.Exit(0)
 
 	SetTitle("My fancy plot")
 	Plot("t", "pl", "B", "'b.-'", "")
@@ -43,6 +38,5 @@ func Test_plot01(tst *testing.T) {
 	Subplot()
 	Plot("y", "pl", "left", "'bo-'", "")
 
-	Show()
-
+	//Show()
 }

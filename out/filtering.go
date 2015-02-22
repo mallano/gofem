@@ -4,6 +4,8 @@
 
 package out
 
+import "sort"
+
 // PointLocator defines interface for locating space positions
 type Locator interface {
 	Locate() Points
@@ -33,22 +35,22 @@ type AlongY []float64
 // AlongZ implements LineLocator
 type AlongZ []float64
 
-// AtPoint returns quantity at point
+// Locate finds points
 func (o At) Locate() Points {
 
-	// node quantity
+	// node
 	id := NodBins.Find(o)
 	if id >= 0 {
-		q := get_nod_point(id, 0)
+		q := get_nod_point(id, nil)
 		if q != nil {
 			return Points{q}
 		}
 	}
 
-	// integration point quantity
+	// integration point
 	id = IpsBins.Find(o)
 	if id >= 0 {
-		q := get_ip_point(id, 0)
+		q := get_ip_point(id, nil)
 		if q != nil {
 			return Points{q}
 		}
@@ -56,30 +58,37 @@ func (o At) Locate() Points {
 	return nil
 }
 
-// AtPoint returns quantity at point
+// Locate finds points
 func (o N) Locate() (res Points) {
+	var A []float64 // reference point
 	for _, idortag := range o {
 		if idortag < 0 {
 			tag := idortag
 			verts := Dom.Msh.VertTag2verts[tag]
 			for _, v := range verts {
-				q := get_nod_point(v.Id, 0)
+				q := get_nod_point(v.Id, A)
 				if q != nil {
 					res = append(res, q)
+					if A == nil {
+						A = q.X
+					}
 				}
 			}
 		} else {
 			id := idortag
-			q := get_nod_point(id, 0)
+			q := get_nod_point(id, A)
 			if q != nil {
 				res = append(res, q)
+				if A == nil {
+					A = q.X
+				}
 			}
 		}
 	}
 	return
 }
 
-// AtPoint returns quantity at point
+// Locate finds points
 func (o P) Locate() (res Points) {
 	ncells := len(o)
 	for i := 0; i < ncells; i++ {
@@ -94,7 +103,7 @@ func (o P) Locate() (res Points) {
 				cid := c.Id
 				idx := o[i][1]
 				ipid := Cid2ips[cid][idx]
-				q := get_ip_point(ipid, 0)
+				q := get_ip_point(ipid, nil)
 				if q != nil {
 					res = append(res, q)
 				}
@@ -103,7 +112,7 @@ func (o P) Locate() (res Points) {
 			cid := idortag
 			idx := o[i][1]
 			ipid := Cid2ips[cid][idx]
-			q := get_ip_point(ipid, 0)
+			q := get_ip_point(ipid, nil)
 			if q != nil {
 				res = append(res, q)
 			}
@@ -112,7 +121,7 @@ func (o P) Locate() (res Points) {
 	return
 }
 
-// Along returns quantity along line
+// Along finds points
 func (o Along) Locate() (res Points) {
 
 	// check if there are two points
@@ -125,7 +134,7 @@ func (o Along) Locate() (res Points) {
 	// node quantities
 	ids := NodBins.FindAlongLine(A, B, TolC)
 	for _, id := range ids {
-		q := get_nod_point(id, 0)
+		q := get_nod_point(id, A)
 		if q != nil {
 			res = append(res, q)
 		}
@@ -134,11 +143,12 @@ func (o Along) Locate() (res Points) {
 	// integration point quantitites
 	ids = IpsBins.FindAlongLine(A, B, TolC)
 	for _, id := range ids {
-		q := get_ip_point(id, 0)
+		q := get_ip_point(id, A)
 		if q != nil {
 			res = append(res, q)
 		}
 	}
+	sort.Sort(res)
 	return
 }
 

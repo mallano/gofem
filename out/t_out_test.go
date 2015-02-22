@@ -38,7 +38,7 @@ func Test_out01(tst *testing.T) {
 	Define("A B C D", N{0, 1, 2, 3})
 	Define("a b c d", P{{0, 0}, {0, 1}, {-1, 2}, {-1, 3}})
 	Define("!right side", Along{{1, 0}, {1, 1}})
-	//io.Pfcyan("Entities = %v\n", R)
+	io.Pfcyan("Entities = %v\n", R)
 
 	// check slices
 	nnod := 4

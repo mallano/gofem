@@ -4,6 +4,8 @@
 
 package out
 
+import "math"
+
 // Point holds information about one specific node xor one integration point
 type Point struct {
 	Nid  int                  // node id; -1 => not node
@@ -31,18 +33,34 @@ func (o Points) Less(i, j int) bool {
 	return o[i].Dist < o[j].Dist
 }
 
-func get_nod_point(nid int, dist float64) *Point {
+func get_nod_point(nid int, A []float64) *Point {
 	nod := Dom.Nodes[nid]
 	if nod != nil {
+		var dist float64
+		if A != nil {
+			dist = dist_point_point(nod.Vert.C, A)
+		}
 		return &Point{nid, -1, nod.Vert.C, dist, make(map[string][]float64)}
 	}
 	return nil
 }
 
-func get_ip_point(ipid int, dist float64) *Point {
+func get_ip_point(ipid int, A []float64) *Point {
 	ip := Ipoints[ipid]
 	if ip != nil {
+		var dist float64
+		if A != nil {
+			dist = dist_point_point(ip.X, A)
+		}
 		return &Point{-1, ipid, ip.X, dist, make(map[string][]float64)}
 	}
 	return nil
+}
+
+// dist_point_point returns the distance between two points
+func dist_point_point(a, b []float64) float64 {
+	if len(a) == 2 {
+		return math.Sqrt((a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]))
+	}
+	return math.Sqrt((a[0]-b[0])*(a[0]-b[0]) + (a[1]-b[1])*(a[1]-b[1]) + (a[2]-b[2])*(a[2]-b[2]))
 }
