@@ -490,8 +490,7 @@ func Apply() {
 			if tp.NodeId > 0 {
 				id := tp.NodeId
 				node := Dom.Nodes[id]
-				//keys := node.GetKeys()
-				keys := []string{} // TODO
+				keys := node.GetKeys()
 				for _, key := range keys {
 					dof := node.GetDof(key)
 					utl.StrDblsMapAppend(&tp.Data, key, Dom.Sol.Y[dof.Eq])
@@ -516,8 +515,7 @@ func Apply() {
 			if len(tps.NodePts) > 0 {
 				for j, id := range tps.NodePts {
 					node := Dom.Nodes[id]
-					//keys := node.GetKeys() // TODO
-					keys := []string{}
+					keys := node.GetKeys()
 					for _, key := range keys {
 						dof := node.GetDof(key)
 						tps.Data = append(tps.Data, make(map[string][]float64)) // important
