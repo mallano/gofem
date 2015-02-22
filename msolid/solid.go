@@ -96,7 +96,7 @@ func LogModels() {
 	log.Println(l)
 	l = "msolid: allocated:"
 	for key, _ := range _models {
-		l += " " + key
+		l += " " + io.Sf("%q", key)
 	}
 	log.Println(l)
 	onedLogModels()

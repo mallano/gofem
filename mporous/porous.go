@@ -383,7 +383,7 @@ func GetModel(simfnk, matname string, getnew bool) *Model {
 func LogModels() {
 	l := "mporous: allocated:"
 	for key, _ := range _models {
-		l += " " + key
+		l += " " + io.Sf("%q", key)
 	}
 	log.Println(l)
 }
