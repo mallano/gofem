@@ -186,59 +186,6 @@ func (o *Domain) In(tidx int) (ok bool) {
 	return o.ReadSol(tidx)
 }
 
-// Summary records summary of outputs
-type Summary struct {
-	TidxIni []int // [nstg] first stage's time-output-index
-	NumTidx int   // number of tidx
-}
-
-// SaveSums saves summary to disc
-func SaveSum(sum *Summary) (ok bool) {
-
-	// skip if not root
-	if !Global.Root {
-		return true
-	}
-
-	// buffer and encoder
-	var buf bytes.Buffer
-	enc := GetEncoder(&buf)
-
-	// encode summary
-	if LogErr(enc.Encode(sum), "SaveSum") {
-		return
-	}
-
-	// save file
-	fil, err := os.Create(out_sum_path(Global.Rank))
-	if LogErr(err, "SaveSum") {
-		return
-	}
-	defer fil.Close()
-	fil.Write(buf.Bytes())
-	return true
-}
-
-// ReadSum reads summary back
-func ReadSum() *Summary {
-
-	// open file
-	fil, err := os.Open(out_sum_path(0)) // read always from proc # 0
-	if LogErr(err, "ReadSum") {
-		return nil
-	}
-	defer fil.Close()
-
-	// decode summary
-	var sum Summary
-	dec := GetDecoder(fil)
-	err = dec.Decode(&sum)
-	if LogErr(err, "ReadSum") {
-		return nil
-	}
-	return &sum
-}
-
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
 
 func out_nod_path(tidx, proc int) string {
@@ -247,8 +194,4 @@ func out_nod_path(tidx, proc int) string {
 
 func out_ele_path(tidx int) string {
 	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_ele_%010d.%s", Global.Sim.Data.FnameKey, Global.Rank, tidx, Global.Sim.Data.Encoder))
-}
-
-func out_sum_path(proc int) string {
-	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_sum.%s", Global.Sim.Data.FnameKey, proc, Global.Sim.Data.Encoder))
 }

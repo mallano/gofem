@@ -334,6 +334,7 @@ func Test_sg530(tst *testing.T) {
 
 func Test_sg111(tst *testing.T) {
 
+	//verbose()
 	chk.PrintTitle("sg111")
 
 	// run simulation
@@ -357,7 +358,6 @@ func Test_sg111(tst *testing.T) {
 
 		// read summary
 		sum := ReadSum()
-		io.Pfyel("sum = %v\n", sum)
 
 		// allocate domain
 		d := NewDomain(Global.Sim.Regions[0])
@@ -371,19 +371,23 @@ func Test_sg111(tst *testing.T) {
 		didx := 1
 
 		// gofem
-		t := make([]float64, sum.NumTidx)
-		uy := make([]float64, sum.NumTidx)
-		for tidx := 0; tidx < sum.NumTidx; tidx++ {
+		ntout := len(sum.Times)
+		uy := make([]float64, ntout)
+		for tidx := 0; tidx < ntout; tidx++ {
 			if !d.ReadSol(tidx) {
-				tst.Errorf("test failed:\n")
+				tst.Errorf("cannot read solution\n")
 				return
 			}
 			nod := d.Nodes[nidx]
 			eq := nod.Dofs[didx].Eq
-			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
+			// check
+			if math.Abs(d.Sol.T-sum.Times[tidx]) > 1e-14 {
+				tst.Errorf("output times do not match time in solution array")
+				return
+			}
 		}
-		plt.Plot(t, uy, "'ro-', clip_on=0, label='gofem'")
+		plt.Plot(sum.Times, uy, "'ro-', clip_on=0, label='gofem'")
 
 		// analytical solution
 		ta := 1.0
@@ -407,6 +411,7 @@ func Test_sg111(tst *testing.T) {
 
 func Test_sg114(tst *testing.T) {
 
+	//verbose()
 	chk.PrintTitle("sg114")
 
 	// run simulation
@@ -430,7 +435,6 @@ func Test_sg114(tst *testing.T) {
 
 		// read summary
 		sum := ReadSum()
-		io.Pfyel("sum = %v\n", sum)
 
 		// allocate domain
 		d := NewDomain(Global.Sim.Regions[0])
@@ -444,19 +448,23 @@ func Test_sg114(tst *testing.T) {
 		didx := 1
 
 		// new results
-		t := make([]float64, sum.NumTidx)
-		uy := make([]float64, sum.NumTidx)
-		for tidx := 0; tidx < sum.NumTidx; tidx++ {
+		ntout := len(sum.Times)
+		uy := make([]float64, ntout)
+		for tidx := 0; tidx < ntout; tidx++ {
 			if !d.ReadSol(tidx) {
 				tst.Errorf("test failed:\n")
 				return
 			}
 			nod := d.Nodes[nidx]
 			eq := nod.Dofs[didx].Eq
-			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
+			// check
+			if math.Abs(d.Sol.T-sum.Times[tidx]) > 1e-14 {
+				tst.Errorf("output times do not match time in solution array")
+				return
+			}
 		}
-		plt.Plot(t, uy, "'k*-', clip_on=0, label='gofem'")
+		plt.Plot(sum.Times, uy, "'k*-', clip_on=0, label='gofem'")
 
 		// old results
 		b, err := io.ReadFile("cmp/sg114gofemold.json")
@@ -527,19 +535,23 @@ func Test_sg1121(tst *testing.T) {
 		didx := 1
 
 		// new results
-		t := make([]float64, sum.NumTidx)
-		uy := make([]float64, sum.NumTidx)
-		for tidx := 0; tidx < sum.NumTidx; tidx++ {
+		ntout := len(sum.Times)
+		uy := make([]float64, ntout)
+		for tidx := 0; tidx < ntout; tidx++ {
 			if !d.ReadSol(tidx) {
 				tst.Errorf("test failed:\n")
 				return
 			}
 			nod := d.Nodes[nidx]
 			eq := nod.Dofs[didx].Eq
-			t[tidx] = d.Sol.T
 			uy[tidx] = d.Sol.Y[eq]
+			// check
+			if math.Abs(d.Sol.T-sum.Times[tidx]) > 1e-14 {
+				tst.Errorf("output times do not match time in solution array")
+				return
+			}
 		}
-		plt.Plot(t, uy, "'k*-', clip_on=0, label='gofem'")
+		plt.Plot(sum.Times, uy, "'k*-', clip_on=0, label='gofem'")
 
 		// old results
 		b, err := io.ReadFile("cmp/sg1121gofemold.json")

@@ -136,19 +136,16 @@ func Run() (runisok bool) {
 	if Global.Verbose && !Global.DoDebug {
 		cpu_time := time.Now()
 		defer func() {
-			io.Pfblue2("cpu time   = %v\n", time.Now().Sub(cpu_time))
-		}()
-		defer func() {
 			io.Pfcyan("\nfinal time = %g\n", t)
+			io.Pfblue2("cpu time   = %v\n", time.Now().Sub(cpu_time))
 		}()
 	}
 
-	// summary
-	nstg := len(Global.Sim.Stages)
+	// summary of outputs; e.g. with output times
 	var sum Summary
-	sum.TidxIni = make([]int, nstg)
+	sum.Times = []float64{t}
+	sum.StgTidx = make([]int, len(Global.Sim.Stages))
 	defer func() {
-		sum.NumTidx = tidx
 		SaveSum(&sum)
 	}()
 
@@ -156,7 +153,7 @@ func Run() (runisok bool) {
 	for stgidx, stg := range Global.Sim.Stages {
 
 		// summary
-		sum.TidxIni[stgidx] = tidx
+		sum.StgTidx[stgidx] = tidx
 
 		// time incrementers
 		Dt := stg.Control.DtFunc
@@ -209,13 +206,11 @@ func Run() (runisok bool) {
 				d.Sol.T = t
 			}
 			Δtout = DtOut.F(t, nil)
-			//io.PfYel(">>>  t=%g  Δt=%g  t+Δt=%g  tf=%g  Δtout=%g\n", t, Δt, t+Δt, tf, Δtout)
 
 			// message
 			if Global.Verbose {
-				//time.Sleep(100000000)
 				if !Global.Sim.Data.ShowR {
-					//io.Pf("time       = %g\r", t)
+					io.Pf("time       = %g\r", t)
 				}
 			}
 
@@ -228,7 +223,7 @@ func Run() (runisok bool) {
 
 			// perform output
 			if t >= tout || lasttimestep {
-				//io.Pfblue2("tout = %v\n", tout)
+				sum.Times = append(sum.Times, t)
 				for _, d := range domains {
 					if !d.Out(tidx) {
 						break
@@ -239,7 +234,6 @@ func Run() (runisok bool) {
 				}
 				tout += Δtout
 				tidx += 1
-				//io.Pforan(">>>  tout=%g  tidx=%d\n", tout, tidx)
 			}
 		}
 	}
