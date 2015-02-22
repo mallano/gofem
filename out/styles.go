@@ -12,7 +12,7 @@ import (
 // Styles
 type Styles []plt.LineData
 
-func GetDefaultStyles(qts Quantities) Styles {
+func GetDefaultStyles(qts Points) Styles {
 	sty := make([]plt.LineData, len(qts))
 	for i, q := range qts {
 		sty[i].Label = io.Sf("x=%v", q.X)
