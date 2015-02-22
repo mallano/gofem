@@ -10,7 +10,6 @@ import (
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/gm"
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/plt"
 )
 
 // Global variables
@@ -124,53 +123,4 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 
 	// success
 	return true
-}
-
-// Show shows plot
-//  extra -- is a function to carry out extra configurations
-func Show(extra func()) {
-	plot_all()
-	if extra != nil {
-		extra()
-	}
-	plt.Show()
-	return
-}
-
-// Save saves plot
-func Save(dirout, filename string, extra func()) (err error) {
-	plot_all()
-	if extra != nil {
-		extra()
-	}
-	plt.SaveD(dirout, filename)
-	return
-}
-
-// plot_all plots all results
-func plot_all() {
-	plt.Reset()
-	/*
-		nplots := len(TseriesRes)
-		nrow, ncol := utl.BestSquare(nplots)
-		if SubpNrow > 0 {
-			nrow = SubpNrow
-		}
-		if SubpNcol > 0 {
-			ncol = SubpNcol
-		}
-		Spd = make(map[string][]int)
-		for i := 0; i < nplots; i++ {
-			key := TseriesKeys[i]
-			Spd[key] = []int{nrow, ncol, i + 1}
-			plt.Subplot(nrow, ncol, i+1)
-			for j, Y := range TseriesRes[i] {
-				sty := TseriesData[i].Sty[j]
-				args := sty.GetArgs("clip_on=0")
-				plt.Plot(TseriesTimes, Y, args)
-			}
-			plt.Gll(GetTexLabel("time", ""), GetTexLabel(key, ""), "")
-		}
-	*/
-	return
 }
