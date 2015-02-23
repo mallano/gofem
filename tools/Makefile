@@ -2,9 +2,11 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-all:    ConvertGofemMat
-.PHONY: ConvertGofemMat
+all: GenVtu ConvertGofemMat
+.PHONY: GenVtu ConvertGofemMat
 
 ConvertGofemMat: ConvertGofemMat.go
-	go build ConvertGofemMat.go
-	mv ConvertGofemMat $(GOPATH)/bin/
+	go build -o /tmp/gofem/ConvertGofemMat ConvertGofemMat.go && mv /tmp/gofem/ConvertGofemMat $(GOPATH)/bin/
+
+GenVtu: GenVtu.go
+	go build -o /tmp/gofem/GenVtu GenVtu.go && mv /tmp/gofem/GenVtu $(GOPATH)/bin/

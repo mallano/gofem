@@ -16,31 +16,20 @@ import (
 	"github.com/cpmech/gofem/shp"
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/utl"
 )
 
 const IP_TAG_INI = 70000
 
 var (
-	// buffers
-	b_points_ge bytes.Buffer // points/general
-	b_points_pl bytes.Buffer // points for "pl" file
-	b_points_pg bytes.Buffer // points for "pg" file
-	b_cells_ge  bytes.Buffer // cells/general
-	b_cells_pl  bytes.Buffer // cells for "pl" file
-	b_cells_pg  bytes.Buffer // cells for "pg" file
-	b_pvd_ge    bytes.Buffer // pvd file/general
-	b_pvd_pl    bytes.Buffer // pvd file for "pl" keys
-	b_pvd_pg    bytes.Buffer // pvd file for "pg" keys
-
-	// aliases
+	ndim  int         // space dimension
 	verts []*inp.Vert // all vertices
 	cells []*inp.Cell // all cells
 	nodes []*fem.Node // active/allocated nodes
-	elems []Elem      // active/allocated elements
+	elems []fem.Elem  // active/allocated elements
 
-	// flags
-	withips bool // output integration points
+	dirout  string // directory for output
+	fnkey   string // filename key
+	withips bool   // output integration points
 )
 
 func main() {
@@ -59,17 +48,22 @@ func main() {
 		simfn = flag.Arg(0)
 	}
 	if len(flag.Args()) > 1 {
-		withips = utl.Atob(flag.Arg(1))
+		withips = io.Atob(flag.Arg(1))
 	}
 	if len(flag.Args()) > 2 {
-		stgidx = utl.Atoi(flag.Arg(2))
+		stgidx = io.Atoi(flag.Arg(2))
+	}
+
+	// check extension
+	if io.FnExt(simfn) == "" {
+		simfn += ".sim"
 	}
 
 	// print input data
 	io.Pf("\nInput data\n")
 	io.Pf("==========\n")
 	io.Pf("  simfn   = %20s // simulation filename\n", simfn)
-	io.Pf("  withips = %20s // with integration points\n", withips)
+	io.Pf("  withips = %20v // with integration points\n", withips)
 	io.Pf("  stgidx  = %20v // stage index\n", stgidx)
 	io.Pf("\n")
 
@@ -84,6 +78,45 @@ func main() {
 	// start analysis process
 	out.Start(simfn, stgidx, 0)
 
+	// global variables
+	ndim = out.Dom.Msh.Ndim
+	verts = out.Dom.Msh.Verts
+	cells = out.Dom.Msh.Cells
+	nodes = out.Dom.Nodes
+	elems = out.Dom.Elems
+	dirout = fem.Global.Sim.Data.DirOut
+	fnkey = fem.Global.Sim.Data.FnameKey
+
+	// check for "pl" and "pg" variables
+	_, has_pl := out.Dom.YandC["pl"]
+	_, has_pg := out.Dom.YandC["pg"]
+	//_, has_ux := out.Dom.YandC["ux"]
+
+	// buffers for general scalars
+	b_top_ge := new(bytes.Buffer) // points/general
+	b_pvd_ge := new(bytes.Buffer) // pvd file/general
+
+	// buffers for "pl"
+	var b_top_pl *bytes.Buffer // points for "pl" file
+	var b_pvd_pl *bytes.Buffer // pvd file for "pl" keys
+	if has_pl {
+		b_top_pl = new(bytes.Buffer)
+		b_pvd_pl = new(bytes.Buffer)
+	}
+
+	// buffers for "pg"
+	var b_top_pg *bytes.Buffer // points for "pg" file
+	var b_pvd_pg *bytes.Buffer // pvd file for "pg" keys
+	if has_pg {
+		b_top_pg = new(bytes.Buffer)
+		b_pvd_pg = new(bytes.Buffer)
+	}
+
+	// headers
+	pvd_header(b_pvd_ge)
+	pvd_header(b_pvd_pl)
+	pvd_header(b_pvd_pg)
+
 	// process results
 	for tidx, t := range out.Sum.Times {
 
@@ -92,209 +125,137 @@ func main() {
 			chk.Panic("cannot load results into domain; please check log file")
 		}
 
-		// check for "pl" and "pg" variables
-		_, has_pl := out.Dom.YandC["pl"]
-		_, has_pg := out.Dom.YandC["pg"]
-		_, has_ux := out.Dom.YandC["ux"]
-
-		// reset buffers
-		//b_points_ge.Reset()
-		//b_points_pl.Reset()
-		//b_points_pg.Reset()
-		//b_cells_ge.Reset()
-		//b_cells_pl.Reset()
-		//b_cells_pg.Reset()
-		//b_pvd_ge.Reset()
-		//b_pvd_pl.Reset()
-		//b_pvd_pg.Reset()
-
 		// generate topology
 		if tidx == 0 {
-			topology(b_points_ge, b_cells_ge)
-			if has_pl {
-				topology(b_points_pl, b_cells_pl)
-			}
-			if has_pg {
-				topology(b_points_pg, b_cells_pg)
-			}
+			topology(b_top_ge)
+			topology(b_top_pl)
+			topology(b_top_pg)
 		}
 
-		// header
-		var hdr bytes.Buffer
-		header(&hdr)
-
-		// open points-data section
-		var dat, dat_pl, dat_pg bytes.Buffer
-		open_pdata(&dat)
+		var b_dat_ge, b_dat_pl, b_dat_pg *bytes.Buffer
+		b_dat_ge = new(bytes.Buffer)
 		if has_pl {
-			open_pdata(&dat_pl)
+			b_dat_pl = new(bytes.Buffer)
 		}
 		if has_pg {
-			open_pdata(&dat_pg)
+			b_dat_pg = new(bytes.Buffer)
 		}
 
-		// points-data: displacements
-		if has_ux {
-			//pdata_vector(&dat, "", "u", func(n int) int { return r.N[n].Ux_start }, g.M.Ndim, r.N, false, r.A2e, withips, false, r.E)
-		}
+		// vtu
+		vtu_write(b_top_ge, b_dat_ge, tidx, "")
+		vtu_write(b_top_pl, b_dat_pl, tidx, "_pl")
+		vtu_write(b_top_pg, b_dat_pg, tidx, "_pg")
 
-		// points-data: pressure
-		if has_pl {
-			pdata_scalar(&dat_pl, "", "pl")
-		}
-		if has_pg {
-			pdata_scalar(&dat_pg, "", "pg")
-		}
-
-		// points-data: general scalars
-		for _, key := range out.Dom.YandC {
-			if _, isnongen := nongeneral[key]; !isnongen {
-				io.Ffpink("scalar field = %v\n", key)
-				pdata_scalar(&dat, "", key)
-			}
-		}
-
-		// points-data: @ integration points
-		if withips {
-			if _, ok := allKeys["rwlx"]; ok {
-				pdata_vector(&dat, "ip_", "rwl", nil, g.M.Ndim, r.N, true, r.A2e, withips, true, r.E)
-			}
-			ak := utl.StrBoolMapSort(allKeys)
-			for _, key := range ak {
-				if key != "rwlx" && key != "rwly" && key != "rwlz" {
-					pdata_scalar(&dat, "ip_", key, r.N, r.A2e, withips, true, r.E)
-				}
-			}
-		}
-
-		// close points-data section
-		close_pdata(&dat, &dat_p, r.Lbb)
-
-		// cells-data section
-		gen_cells_data(&dat, g.M, r.A2e, withips, r.E)
-
-		// footer
-		var foo bytes.Buffer
-		vtu_footer(&foo)
-
-		// write vtu file
-		utl.WriteFile(io.Sf("vtufiles/%s_%06d.vtu", fnk, outidx), &hdr, &b_points_ge, &b_cells_ge, &dat, &foo)
-		if r.Lbb {
-			utl.WriteFile(io.Sf("vtufiles/%s_%06d_p.vtu", fnk, outidx), &hdr, &b_points_p, &b_cells_p, &dat_p, &foo)
-			haslbb = true
-		}
-
-		// b_pvd_ge line
-		b_pvd_line(&b_pvd_ge, &b_pvd_pl, r.Lbb, time, fnk, outidx)
-
-		// next outidx
-		outidx += 1
-		return false
+		// pvd
+		pvd_line(b_pvd_ge, tidx, t, "")
+		pvd_line(b_pvd_pl, tidx, t, "_pl")
+		pvd_line(b_pvd_pg, tidx, t, "_pg")
 	}
 
-	// write b_pvd_ge file
-	b_pvd_footer(&b_pvd_ge, &b_pvd_pl, haslbb)
-	utl.WriteFileV(io.Sf("vtufiles/%s.b_pvd_ge", fnk), &b_pvd_ge)
-	if haslbb {
-		utl.WriteFileV(io.Sf("vtufiles/%s_p.b_pvd_ge", fnk), &b_pvd_pl)
-	}
+	// write pvd file
+	pvd_write(b_pvd_ge, "")
+	pvd_write(b_pvd_pl, "_pl")
+	pvd_write(b_pvd_pg, "_pg")
 }
 
 // headers and footers ///////////////////////////////////////////////////////////////////////////////
 
-func b_pvd_header(b_pvd_ge *bytes.Buffer) {
-	io.Ff(b_pvd_ge, "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\">\n<Collection>\n")
+func pvd_header(buf *bytes.Buffer) {
+	if buf == nil {
+		return
+	}
+	io.Ff(buf, "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\">\n<Collection>\n")
 }
 
-func b_pvd_line(b_pvd_ge *bytes.Buffer, time float64, fnk string, outidx int) {
-	io.Ff(b_pvd_ge, "<DataSet timestep=\"%23.15e\" file=\"%s_%06d.vtu\" />\n", time, fnk, outidx)
+func pvd_line(buf *bytes.Buffer, tidx int, time float64, suffix string) {
+	if buf == nil {
+		return
+	}
+	io.Ff(buf, "<DataSet timestep=\"%23.15e\" file=\"%s_%06d%s.vtu\" />\n", time, fnkey, tidx, suffix)
 }
 
-func b_pvd_footer(b_pvd_ge *bytes.Buffer) {
-	io.Ff(b_pvd_ge, "</Collection>\n</VTKFile>")
+func pvd_write(buf *bytes.Buffer, suffix string) {
+	if buf == nil {
+		return
+	}
+	io.Ff(buf, "</Collection>\n</VTKFile>")
+	io.WriteFileV(io.Sf("%s/%s%s.pvd", dirout, fnkey, suffix), buf)
 }
 
-func vtu_header(hdr *bytes.Buffer, nv, nc int) {
-	io.Ff(hdr, "<?xml version=\"1.0\"?>\n<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n<UnstructuredGrid>\n")
-	io.Ff(hdr, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nv, nc)
+func vtu_write(top, dat *bytes.Buffer, tidx int, suffix string) {
+	if top == nil || dat == nil {
+		return
+	}
+	nv := len(nodes)
+	nc := len(elems)
+	if withips {
+		nc += len(out.Ipoints)
+	}
+	var hdr, foo bytes.Buffer
+	io.Ff(&hdr, "<?xml version=\"1.0\"?>\n<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n<UnstructuredGrid>\n")
+	io.Ff(&hdr, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nv, nc)
+	io.Ff(&foo, "</Piece>\n</UnstructuredGrid>\n</VTKFile>\n")
+	io.WriteFile(io.Sf("%s/%s_%06d%s.vtu", dirout, fnkey, tidx, suffix), &hdr, top, dat, &foo)
 }
 
-func vtu_footer(foo *bytes.Buffer) {
-	io.Ff(foo, "</Piece>\n</UnstructuredGrid>\n</VTKFile>\n")
-}
+// topology ////////////////////////////////////////////////////////////////////////////////////////
 
-// topology //////////////////////////////////////////////////////////////////////////////////////////
-
-func topology(b_points_ge, b_cells_ge *bytes.Buffer, withips bool) (totalNips int) {
-
-	// auxiliary
-	msh := out.Dom.Msh
-	verts := msh.Verts
-	cells := msh.Cells
-	elems := out.Dom.Elems
+func topology(buf *bytes.Buffer) {
+	if buf == nil {
+		return
+	}
 
 	// all nodes coordinates
-	io.Ff(b_points_ge, "<Points>\n<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n")
+	io.Ff(buf, "<Points>\n<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n")
 	for _, v := range verts {
 		if ndim == 2 {
-			io.Ff(b_points_ge, "%23.15e %23.15e 0 ", v.C[0], v.C[1])
+			io.Ff(buf, "%23.15e %23.15e 0 ", v.C[0], v.C[1])
 		} else {
-			io.Ff(b_points_ge, "%23.15e %23.15e %23.15e ", v.C[0], v.C[1], v.C[2])
+			io.Ff(buf, "%23.15e %23.15e %23.15e ", v.C[0], v.C[1], v.C[2])
 		}
 	}
 	if withips {
-		for _, e := range elems {
-			ipids := out.Cid2ips[e.Id()]
-			for _, ipid := range ipids {
-				ip := out.Ipoints[ipid]
-				if ndim == 2 {
-					io.Ff(b_points_ge, "%23.15e %23.15e 0 ", ip.X[0], ip.X[1])
-				} else {
-					io.Ff(b_points_ge, "%23.15e %23.15e %23.15e ", ip.X[0], ip.X[1], ip.X[2])
-				}
-				totalNips += 1
+		for _, p := range out.Ipoints {
+			if ndim == 2 {
+				io.Ff(buf, "%23.15e %23.15e 0 ", p.X[0], p.X[1])
+			} else {
+				io.Ff(buf, "%23.15e %23.15e %23.15e ", p.X[0], p.X[1], p.X[2])
 			}
 		}
 	}
-	io.Ff(b_points_ge, "\n</DataArray>\n</Points>\n")
+	io.Ff(buf, "\n</DataArray>\n</Points>\n")
 
 	// connectivity of active elements
-	io.Ff(b_cells_ge, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n")
+	io.Ff(buf, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n")
 	for _, e := range elems {
 		for _, n := range cells[e.Id()].Verts {
-			io.Ff(b_cells_ge, "%d ", n)
+			io.Ff(buf, "%d ", n)
 		}
 	}
 	if withips {
 		npt := len(verts)
-		for _, e := range elems {
-			ipids := out.Cid2ips[e.Id()]
-			for range ipids {
-				io.Ff(b_cells_ge, "%d ", npt)
-				npt += 1
-			}
+		for range out.Ipoints {
+			io.Ff(buf, "%d ", npt)
+			npt += 1
 		}
 	}
 
 	// offsets of active elements
-	io.Ff(b_cells_ge, "\n</DataArray>\n<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n")
+	io.Ff(buf, "\n</DataArray>\n<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n")
 	var offset int
 	for _, e := range elems {
 		offset += len(cells[e.Id()].Verts)
-		io.Ff(b_cells_ge, "%d ", offset)
+		io.Ff(buf, "%d ", offset)
 	}
 	if withips {
-		for _, e := range elems {
-			ipids := out.Cid2ips[e.Id()]
-			for range ipids {
-				offset += 1
-				io.Ff(b_cells_ge, "%d ", offset)
-			}
+		for range out.Ipoints {
+			offset += 1
+			io.Ff(buf, "%d ", offset)
 		}
 	}
 
 	// types of active elements
-	io.Ff(b_cells_ge, "\n</DataArray>\n<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n")
+	io.Ff(buf, "\n</DataArray>\n<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n")
 	for _, e := range elems {
 		c := cells[e.Id()]
 		vtk := c.Shp.VtkCode
@@ -306,303 +267,13 @@ func topology(b_points_ge, b_cells_ge *bytes.Buffer, withips bool) (totalNips in
 				chk.Panic("cannot handle cell type %q", c.Type)
 			}
 		}
-		io.Ff(b_cells_ge, "%d ", vtk)
+		io.Ff(buf, "%d ", vtk)
 	}
 	if withips {
-		for _, e := range elems {
-			ipids := out.Cid2ips[e.Id()]
-			for range ipids {
-				io.Ff(b_cells_ge, "%d ", shp.VTK_VERTEX)
-			}
+		for range out.Ipoints {
+			io.Ff(buf, "%d ", shp.VTK_VERTEX)
 		}
 	}
-	io.Ff(b_cells_ge, "\n</DataArray>\n</Cells>\n")
+	io.Ff(buf, "\n</DataArray>\n</Cells>\n")
 	return
 }
-
-/*
-func topology_p(b_points_ge, b_cells_ge *bytes.Buffer, msh *inp.Mesh, elems []int) {
-
-	// all nodes coordinates
-	io.Ff(b_points_ge, "<Points>\n<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n")
-	for n, _ := range verts {
-		if ndim == 2 {
-			io.Ff(b_points_ge, "%23.15e %23.15e 0 ", verts[n].C[0], verts[n].C[1])
-		} else {
-			io.Ff(b_points_ge, "%23.15e %23.15e %23.15e ", verts[n].C[0], verts[n].C[1], verts[n].C[2])
-		}
-	}
-	io.Ff(b_points_ge, "\n</DataArray>\n</Points>\n")
-
-	// connectivity of active elements; but only getting LBB nodes
-	io.Ff(b_cells_ge, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n")
-	for _, e := range elems {
-		for i := 0; i < inp.Geo2nvc[inp.Geo2geob[cells[e].Geo]]; i++ {
-			io.Ff(b_cells_ge, "%d ", cells[e].Verts[i])
-		}
-	}
-
-	// offsets of active elements
-	io.Ff(b_cells_ge, "\n</DataArray>\n<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n")
-	var offset int
-	for _, e := range elems {
-		offset += inp.Geo2nvc[inp.Geo2geob[cells[e].Geo]]
-		io.Ff(b_cells_ge, "%d ", offset)
-	}
-
-	// types of active elements
-	io.Ff(b_cells_ge, "\n</DataArray>\n<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n")
-	for _, e := range elems {
-		io.Ff(b_cells_ge, "%d ", inp.Geo2vtk[inp.Geo2geob[cells[e].Geo]])
-	}
-	io.Ff(b_cells_ge, "\n</DataArray>\n</Cells>\n")
-	return
-}
-*/
-
-// points data ///////////////////////////////////////////////////////////////////////////////////////
-
-func open_pdata(dat *bytes.Buffer) {
-	io.Ff(dat, "<PointData Scalars=\"TheScalars\">\n")
-}
-
-func close_pdata(dat *bytes.Buffer) {
-	io.Ff(dat, "</PointData>\n")
-}
-
-/*
-func pdata_scalar(dat *bytes.Buffer, prefix, key string, withips, skipNodes bool) {
-
-	// auxiliary
-	msh := out.Dom.Msh
-	verts := msh.Verts
-	cells := msh.Cells
-	nodes := out.Dom.Vid2node
-	elems := out.Dom.Elems
-
-	// solution, dof-key (ukey) and number of time derivatives
-	ukey, nderiv := out.ParseKey(key)
-	Y := out.Dom.Sol.Y
-	switch nderiv {
-	case 2:
-		Y = out.Dom.Sol.D2ydt2
-	case 1:
-		Y = out.Dom.Sol.Dydt
-	}
-
-	io.Ff(dat, "<DataArray type=\"Float64\" Name=\"%s%s\" NumberOfComponents=\"1\" format=\"ascii\">\n", prefix, key)
-
-	// loop over nodes
-	for _, n := range nodes {
-		l := "0 "
-		if n != nil && !skipNodes { // active and not to skip
-			eq := n.GetEq(ukey)
-			if eq >= 0 {
-				l = io.Sf("%23.15e ", Y[eq])
-			}
-		}
-		io.Ff(dat, "l")
-	}
-
-	// loop over integration points
-	if withips {
-		for _, e := range elems {
-			ipids := out.Cid2ips[e.Id()]
-			if len(ipids) > 0 {
-				if v, ok := out.Ipoints[ipids[0]].V[key]; ok {
-					io.Ff(dat, "%23.15e ", *v)
-				}
-			} else {
-				for i := 0; i < len(E[e].IpsC); i++ {
-					io.Ff(dat, "0 ")
-				}
-			}
-		}
-	}
-	io.Ff(dat, "\n</DataArray>\n")
-}
-*/
-
-/*
-func pdata_vector(dat *bytes.Buffer, prefix, key string, start func(n int) int, ndim int, nodes []out.Node, is_extrap bool, withips, skipNodes bool, E []out.Elem) {
-	io.Ff(dat, "<DataArray type=\"Float64\" Name=\"%s%s\" NumberOfComponents=\"3\" format=\"ascii\">\n", prefix, key)
-	v := []float64{0, 0, 0}
-	for n, _ := range nodes {
-		if skipNodes {
-			io.Ff(dat, "0 0 0  ")
-			continue
-		}
-		if nodes[n].Active {
-			for i := 0; i < ndim; i++ {
-				v[i] = nodes[n].Vals[start(n)+i]
-				if is_extrap {
-					v[i] /= nodes[n].Count[start(n)+i]
-				}
-			}
-		}
-		io.Ff(dat, "%23.15e %23.15e %23.15e  ", v[0], v[1], v[2])
-	}
-	if withips {
-		if key == "rwl" {
-			if ndim == 2 {
-				for _, e := range elems {
-					i0, has0 := E[e].Key2idx["rwlx"]
-					i1, has1 := E[e].Key2idx["rwly"]
-					if has0 && has1 {
-						for i := 0; i < len(E[e].IpsC); i++ {
-							io.Ff(dat, "%23.15e %23.15e 0  ", E[e].Vals[i][i0], E[e].Vals[i][i1])
-						}
-					} else {
-						for i := 0; i < len(E[e].IpsC); i++ {
-							io.Ff(dat, "0 0 0  ")
-						}
-					}
-				}
-			} else {
-				for _, e := range elems {
-					i0, has0 := E[e].Key2idx["rwlx"]
-					i1, has1 := E[e].Key2idx["rwly"]
-					i2, has2 := E[e].Key2idx["rwlz"]
-					if has0 && has1 && has2 {
-						for i := 0; i < len(E[e].IpsC); i++ {
-							io.Ff(dat, "%23.15e %23.15e %23.15e  ", E[e].Vals[i][i0], E[e].Vals[i][i1], E[e].Vals[i][i2])
-						}
-					} else {
-						for i := 0; i < len(E[e].IpsC); i++ {
-							io.Ff(dat, "0 0 0  ")
-						}
-					}
-				}
-			}
-		} else {
-			for _, e := range elems {
-				for i := 0; i < len(E[e].IpsC); i++ {
-					io.Ff(dat, "0 0 0  ")
-				}
-			}
-		}
-	}
-	io.Ff(dat, "\n</DataArray>\n")
-}
-*/
-
-/*
-func pdata_tensor(dat *bytes.Buffer, prefix, key string, start func(n int) int, ndim int, nodes []out.Node, is_extrap bool, withips, skipNodes bool, E []out.Elem) {
-	io.Ff(dat, "<DataArray type=\"Float64\" Name=\"%s%s\" NumberOfComponents=\"6\" format=\"ascii\">\n", prefix, key)
-	v := []float64{0, 0, 0, 0, 0, 0}
-	for n, _ := range nodes {
-		if skipNodes {
-			io.Ff(dat, "0 0 0 0 0 0  ")
-			continue
-		}
-		if nodes[n].Active {
-			for i := 0; i < 2*ndim; i++ {
-				v[i] = nodes[n].Vals[start(n)+i]
-				if is_extrap {
-					v[i] /= nodes[n].Count[start(n)+i]
-				}
-			}
-		}
-		io.Ff(dat, "%23.15e %23.15e %23.15e %23.15e %23.15e %23.15e  ", v[0], v[1], v[2], v[3], v[4], v[5])
-	}
-	if withips {
-		if key == "sE" {
-			if ndim == 2 {
-				for _, e := range elems {
-					i0, has0 := E[e].Key2idx["sxE"]
-					i1, has1 := E[e].Key2idx["syE"]
-					i2, has2 := E[e].Key2idx["szE"]
-					i3, has3 := E[e].Key2idx["sxyE"]
-					if has0 && has1 && has2 && has3 {
-						for i := 0; i < len(E[e].IpsC); i++ {
-							io.Ff(dat, "%23.15e %23.15e %23.15e %23.15e 0 0  ", E[e].Vals[i][i0], E[e].Vals[i][i1], E[e].Vals[i][i2], E[e].Vals[i][i3])
-						}
-					} else {
-						for i := 0; i < len(E[e].IpsC); i++ {
-							io.Ff(dat, "0 0 0 0 0 0  ")
-						}
-					}
-				}
-			} else {
-				for _, e := range elems {
-					i0, has0 := E[e].Key2idx["sxE"]
-					i1, has1 := E[e].Key2idx["syE"]
-					i2, has2 := E[e].Key2idx["szE"]
-					i3, has3 := E[e].Key2idx["sxyE"]
-					i4, has4 := E[e].Key2idx["syzE"]
-					i5, has5 := E[e].Key2idx["szxE"]
-					if has0 && has1 && has2 && has3 && has4 && has5 {
-						for i := 0; i < len(E[e].IpsC); i++ {
-							io.Ff(dat, "%23.15e %23.15e %23.15e %23.15e %23.15e %23.15e  ", E[e].Vals[i][i0], E[e].Vals[i][i1], E[e].Vals[i][i2], E[e].Vals[i][i3], E[e].Vals[i][i4], E[e].Vals[i][i5])
-						}
-					} else {
-						for i := 0; i < len(E[e].IpsC); i++ {
-							io.Ff(dat, "0 0 0 0 0 0  ")
-						}
-					}
-				}
-			}
-		} else {
-			for _, e := range elems {
-				for i := 0; i < len(E[e].IpsC); i++ {
-					io.Ff(dat, "0 0 0 0 0 0  ")
-				}
-			}
-		}
-	}
-	io.Ff(dat, "\n</DataArray>\n")
-}
-*/
-
-// cells data ////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-func gen_cells_data(dat *bytes.Buffer, msh *inp.Mesh, withips bool, E []out.Elem) {
-	// cells positive tags and geo types
-	io.Ff(dat, "<CellData Scalars=\"TheScalars\">\n")
-	io.Ff(dat, "<DataArray type=\"Float64\" Name=\"tag\" NumberOfComponents=\"1\" format=\"ascii\">\n")
-	for _, e := range elems {
-		ptag := 0
-		if cells[e].Tag < 0 {
-			ptag = -cells[e].Tag
-		}
-		io.Ff(dat, "%d ", ptag)
-	}
-	if withips {
-		for _, e := range elems {
-			for i := 0; i < len(E[e].IpsC); i++ {
-				ptag := 0
-				if cells[e].Tag < 0 {
-					ptag = -cells[e].Tag
-				}
-				io.Ff(dat, "%d ", IP_TAG_INI+ptag)
-			}
-		}
-	}
-	io.Ff(dat, "\n</DataArray>\n<DataArray type=\"Float64\" Name=\"geo\" NumberOfComponents=\"1\" format=\"ascii\">\n")
-	for _, e := range elems {
-		io.Ff(dat, "%d ", cells[e].Geo)
-	}
-	if withips {
-		for _, e := range elems {
-			for i := 0; i < len(E[e].IpsC); i++ {
-				io.Ff(dat, "-1 ")
-			}
-		}
-	}
-	io.Ff(dat, "\n</DataArray>\n<DataArray type=\"Float64\" Name=\"eid\" NumberOfComponents=\"1\" format=\"ascii\">\n")
-	for _, e := range elems {
-		io.Ff(dat, "%d ", cells[e].Id)
-	}
-	if withips {
-		ncl := len(cells)
-		for _, e := range elems {
-			for i := 0; i < len(E[e].IpsC); i++ {
-				io.Ff(dat, "%d ", ncl)
-				ncl += 1
-			}
-		}
-	}
-	io.Ff(dat, "\n</DataArray>\n</CellData>\n")
-}
-*/
