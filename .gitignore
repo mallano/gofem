@@ -30,6 +30,7 @@ t_*_main
 # temporary files
 inp/results
 fem/results
+*.eps
 *.vtu
 *.pvd
 *.goa
