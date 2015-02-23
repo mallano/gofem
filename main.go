@@ -42,6 +42,11 @@ func main() {
 		chk.Panic("Please, provide a filename. Ex.: cylinder.sim")
 	}
 
+	// check extension
+	if io.FnExt(fnamepath) == "" {
+		fnamepath += ".sim"
+	}
+
 	// other options
 	erasefiles := true
 	verbose := true
