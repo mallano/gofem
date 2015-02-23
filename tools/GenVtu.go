@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"flag"
 
+	"github.com/cpmech/gofem/fem"
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/out"
 	"github.com/cpmech/gofem/shp"
@@ -18,7 +19,29 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-const IP_TAG0 = 70000
+const IP_TAG_INI = 70000
+
+var (
+	// buffers
+	b_points_ge bytes.Buffer // points/general
+	b_points_pl bytes.Buffer // points for "pl" file
+	b_points_pg bytes.Buffer // points for "pg" file
+	b_cells_ge  bytes.Buffer // cells/general
+	b_cells_pl  bytes.Buffer // cells for "pl" file
+	b_cells_pg  bytes.Buffer // cells for "pg" file
+	b_pvd_ge    bytes.Buffer // pvd file/general
+	b_pvd_pl    bytes.Buffer // pvd file for "pl" keys
+	b_pvd_pg    bytes.Buffer // pvd file for "pg" keys
+
+	// aliases
+	verts []*inp.Vert // all vertices
+	cells []*inp.Cell // all cells
+	nodes []*fem.Node // active/allocated nodes
+	elems []Elem      // active/allocated elements
+
+	// flags
+	withips bool // output integration points
+)
 
 func main() {
 
@@ -27,7 +50,8 @@ func main() {
 
 	// input data
 	simfn := "data/twoqua4.sim"
-	withIps := false
+	withips = true
+	stgidx := 0
 
 	// parse flags
 	flag.Parse()
@@ -35,90 +59,110 @@ func main() {
 		simfn = flag.Arg(0)
 	}
 	if len(flag.Args()) > 1 {
-		withIps = utl.Atob(flag.Arg(1))
+		withips = utl.Atob(flag.Arg(1))
+	}
+	if len(flag.Args()) > 2 {
+		stgidx = utl.Atoi(flag.Arg(2))
 	}
 
 	// print input data
 	io.Pf("\nInput data\n")
 	io.Pf("==========\n")
-	io.Pf("  matOld   = %20s // old material filename\n", matOld)
-	io.Pf("  matNew   = %20s // new material filename\n", matNew)
-	io.Pf("  convSymb = %20v // do convert symbols\n", convSymb)
+	io.Pf("  simfn   = %20s // simulation filename\n", simfn)
+	io.Pf("  withips = %20s // with integration points\n", withips)
+	io.Pf("  stgidx  = %20v // stage index\n", stgidx)
 	io.Pf("\n")
 
+	// build map of non-general keys
+	nongeneral := fem.GetIsEssenKeyMap()
+	nongeneral["ux"] = true
+	nongeneral["uy"] = true
+	nongeneral["uz"] = true
+	nongeneral["pl"] = true
+	nongeneral["pg"] = true
+
 	// start analysis process
-	out.Start(simfn, 0, 0)
-
-	// filename key
-	fnk := utl.FnKey(simfn)
-
-	// buffers
-	var pts, cls bytes.Buffer            // points and cells buffers
-	var pts_pl, cls_pl bytes.Buffer      // points and cells for "pl" file
-	var pts_pg, cls_pg bytes.Buffer      // points and cells for "pg" file
-	var pvd, pvd_pl, pvd_pg bytes.Buffer // pvd files
-
-	// total number of integration points
-	var nipsAll int
+	out.Start(simfn, stgidx, 0)
 
 	// process results
-	outidx := 0
 	for tidx, t := range out.Sum.Times {
+
+		// input results into domain
+		if !out.Dom.In(tidx) {
+			chk.Panic("cannot load results into domain; please check log file")
+		}
+
+		// check for "pl" and "pg" variables
+		_, has_pl := out.Dom.YandC["pl"]
+		_, has_pg := out.Dom.YandC["pg"]
+		_, has_ux := out.Dom.YandC["ux"]
+
+		// reset buffers
+		//b_points_ge.Reset()
+		//b_points_pl.Reset()
+		//b_points_pg.Reset()
+		//b_cells_ge.Reset()
+		//b_cells_pl.Reset()
+		//b_cells_pg.Reset()
+		//b_pvd_ge.Reset()
+		//b_pvd_pl.Reset()
+		//b_pvd_pg.Reset()
 
 		// generate topology
 		if tidx == 0 {
-			pts.Reset()
-			cls.Reset()
-			nipsAll = topology(&pts, &cls, g.M, r.A2e, withIps, r.E)
-			if r.Lbb {
-				pts_p.Reset()
-				cls_p.Reset()
-				topology_lbb(&pts_p, &cls_p, g.M, r.A2e)
+			topology(b_points_ge, b_cells_ge)
+			if has_pl {
+				topology(b_points_pl, b_cells_pl)
+			}
+			if has_pg {
+				topology(b_points_pg, b_cells_pg)
 			}
 		}
 
 		// header
 		var hdr bytes.Buffer
-		vtu_header(&hdr, g.Nv+nipsAll, len(r.A2e)+nipsAll)
+		header(&hdr)
 
 		// open points-data section
-		var dat, dat_p bytes.Buffer
-		open_pdata(&dat, &dat_p, r.Lbb)
+		var dat, dat_pl, dat_pg bytes.Buffer
+		open_pdata(&dat)
+		if has_pl {
+			open_pdata(&dat_pl)
+		}
+		if has_pg {
+			open_pdata(&dat_pg)
+		}
 
 		// points-data: displacements
-		if r.Has_ux {
-			pdata_vector(&dat, "", "u", func(n int) int { return r.N[n].Ux_start }, g.M.Ndim, r.N, false, r.A2e, withIps, false, r.E)
+		if has_ux {
+			//pdata_vector(&dat, "", "u", func(n int) int { return r.N[n].Ux_start }, g.M.Ndim, r.N, false, r.A2e, withips, false, r.E)
 		}
 
 		// points-data: pressure
-		if r.Lbb {
-			pdata_scalar(&dat_p, "", "pl", r.N, r.A2e, withIps, false, r.E)
+		if has_pl {
+			pdata_scalar(&dat_pl, "", "pl")
+		}
+		if has_pg {
+			pdata_scalar(&dat_pg, "", "pg")
 		}
 
-		// points-data: scalars
-		for _, key := range r.ScalarKeys {
-			if r.Lbb && key == "pl" {
-				continue
+		// points-data: general scalars
+		for _, key := range out.Dom.YandC {
+			if _, isnongen := nongeneral[key]; !isnongen {
+				io.Ffpink("scalar field = %v\n", key)
+				pdata_scalar(&dat, "", key)
 			}
-			//io.Ffpink("scalar field = %v\n", key)
-			pdata_scalar(&dat, "", key, r.N, r.A2e, withIps, false, r.E)
 		}
 
 		// points-data: @ integration points
-		if withIps {
-			allKeys := make(map[string]bool)
-			for _, e := range r.A2e {
-				for _, key := range r.E[e].Keys {
-					allKeys[key] = true
-				}
-			}
+		if withips {
 			if _, ok := allKeys["rwlx"]; ok {
-				pdata_vector(&dat, "ip_", "rwl", nil, g.M.Ndim, r.N, true, r.A2e, withIps, true, r.E)
+				pdata_vector(&dat, "ip_", "rwl", nil, g.M.Ndim, r.N, true, r.A2e, withips, true, r.E)
 			}
 			ak := utl.StrBoolMapSort(allKeys)
 			for _, key := range ak {
 				if key != "rwlx" && key != "rwly" && key != "rwlz" {
-					pdata_scalar(&dat, "ip_", key, r.N, r.A2e, withIps, true, r.E)
+					pdata_scalar(&dat, "ip_", key, r.N, r.A2e, withips, true, r.E)
 				}
 			}
 		}
@@ -127,47 +171,47 @@ func main() {
 		close_pdata(&dat, &dat_p, r.Lbb)
 
 		// cells-data section
-		gen_cells_data(&dat, g.M, r.A2e, withIps, r.E)
+		gen_cells_data(&dat, g.M, r.A2e, withips, r.E)
 
 		// footer
 		var foo bytes.Buffer
 		vtu_footer(&foo)
 
 		// write vtu file
-		utl.WriteFile(io.Sf("vtufiles/%s_%06d.vtu", fnk, outidx), &hdr, &pts, &cls, &dat, &foo)
+		utl.WriteFile(io.Sf("vtufiles/%s_%06d.vtu", fnk, outidx), &hdr, &b_points_ge, &b_cells_ge, &dat, &foo)
 		if r.Lbb {
-			utl.WriteFile(io.Sf("vtufiles/%s_%06d_p.vtu", fnk, outidx), &hdr, &pts_p, &cls_p, &dat_p, &foo)
+			utl.WriteFile(io.Sf("vtufiles/%s_%06d_p.vtu", fnk, outidx), &hdr, &b_points_p, &b_cells_p, &dat_p, &foo)
 			haslbb = true
 		}
 
-		// pvd line
-		pvd_line(&pvd, &pvd_pl, r.Lbb, time, fnk, outidx)
+		// b_pvd_ge line
+		b_pvd_line(&b_pvd_ge, &b_pvd_pl, r.Lbb, time, fnk, outidx)
 
 		// next outidx
 		outidx += 1
 		return false
 	}
 
-	// write pvd file
-	pvd_footer(&pvd, &pvd_pl, haslbb)
-	utl.WriteFileV(io.Sf("vtufiles/%s.pvd", fnk), &pvd)
+	// write b_pvd_ge file
+	b_pvd_footer(&b_pvd_ge, &b_pvd_pl, haslbb)
+	utl.WriteFileV(io.Sf("vtufiles/%s.b_pvd_ge", fnk), &b_pvd_ge)
 	if haslbb {
-		utl.WriteFileV(io.Sf("vtufiles/%s_p.pvd", fnk), &pvd_pl)
+		utl.WriteFileV(io.Sf("vtufiles/%s_p.b_pvd_ge", fnk), &b_pvd_pl)
 	}
 }
 
 // headers and footers ///////////////////////////////////////////////////////////////////////////////
 
-func pvd_header(pvd *bytes.Buffer) {
-	io.Ff(pvd, "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\">\n<Collection>\n")
+func b_pvd_header(b_pvd_ge *bytes.Buffer) {
+	io.Ff(b_pvd_ge, "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"LittleEndian\">\n<Collection>\n")
 }
 
-func pvd_line(pvd *bytes.Buffer, time float64, fnk string, outidx int) {
-	io.Ff(pvd, "<DataSet timestep=\"%23.15e\" file=\"%s_%06d.vtu\" />\n", time, fnk, outidx)
+func b_pvd_line(b_pvd_ge *bytes.Buffer, time float64, fnk string, outidx int) {
+	io.Ff(b_pvd_ge, "<DataSet timestep=\"%23.15e\" file=\"%s_%06d.vtu\" />\n", time, fnk, outidx)
 }
 
-func pvd_footer(pvd *bytes.Buffer) {
-	io.Ff(pvd, "</Collection>\n</VTKFile>")
+func b_pvd_footer(b_pvd_ge *bytes.Buffer) {
+	io.Ff(b_pvd_ge, "</Collection>\n</VTKFile>")
 }
 
 func vtu_header(hdr *bytes.Buffer, nv, nc int) {
@@ -181,7 +225,7 @@ func vtu_footer(foo *bytes.Buffer) {
 
 // topology //////////////////////////////////////////////////////////////////////////////////////////
 
-func topology(pts, cls *bytes.Buffer, withIps bool) (totalNips int) {
+func topology(b_points_ge, b_cells_ge *bytes.Buffer, withips bool) (totalNips int) {
 
 	// auxiliary
 	msh := out.Dom.Msh
@@ -190,67 +234,67 @@ func topology(pts, cls *bytes.Buffer, withIps bool) (totalNips int) {
 	elems := out.Dom.Elems
 
 	// all nodes coordinates
-	io.Ff(pts, "<Points>\n<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n")
+	io.Ff(b_points_ge, "<Points>\n<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n")
 	for _, v := range verts {
 		if ndim == 2 {
-			io.Ff(pts, "%23.15e %23.15e 0 ", v.C[0], v.C[1])
+			io.Ff(b_points_ge, "%23.15e %23.15e 0 ", v.C[0], v.C[1])
 		} else {
-			io.Ff(pts, "%23.15e %23.15e %23.15e ", v.C[0], v.C[1], v.C[2])
+			io.Ff(b_points_ge, "%23.15e %23.15e %23.15e ", v.C[0], v.C[1], v.C[2])
 		}
 	}
-	if withIps {
+	if withips {
 		for _, e := range elems {
 			ipids := out.Cid2ips[e.Id()]
 			for _, ipid := range ipids {
 				ip := out.Ipoints[ipid]
 				if ndim == 2 {
-					io.Ff(pts, "%23.15e %23.15e 0 ", ip.X[0], ip.X[1])
+					io.Ff(b_points_ge, "%23.15e %23.15e 0 ", ip.X[0], ip.X[1])
 				} else {
-					io.Ff(pts, "%23.15e %23.15e %23.15e ", ip.X[0], ip.X[1], ip.X[2])
+					io.Ff(b_points_ge, "%23.15e %23.15e %23.15e ", ip.X[0], ip.X[1], ip.X[2])
 				}
 				totalNips += 1
 			}
 		}
 	}
-	io.Ff(pts, "\n</DataArray>\n</Points>\n")
+	io.Ff(b_points_ge, "\n</DataArray>\n</Points>\n")
 
 	// connectivity of active elements
-	io.Ff(cls, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n")
+	io.Ff(b_cells_ge, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n")
 	for _, e := range elems {
 		for _, n := range cells[e.Id()].Verts {
-			io.Ff(cls, "%d ", n)
+			io.Ff(b_cells_ge, "%d ", n)
 		}
 	}
-	if withIps {
+	if withips {
 		npt := len(verts)
 		for _, e := range elems {
 			ipids := out.Cid2ips[e.Id()]
 			for range ipids {
-				io.Ff(cls, "%d ", npt)
+				io.Ff(b_cells_ge, "%d ", npt)
 				npt += 1
 			}
 		}
 	}
 
 	// offsets of active elements
-	io.Ff(cls, "\n</DataArray>\n<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n")
+	io.Ff(b_cells_ge, "\n</DataArray>\n<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n")
 	var offset int
 	for _, e := range elems {
 		offset += len(cells[e.Id()].Verts)
-		io.Ff(cls, "%d ", offset)
+		io.Ff(b_cells_ge, "%d ", offset)
 	}
-	if withIps {
+	if withips {
 		for _, e := range elems {
 			ipids := out.Cid2ips[e.Id()]
 			for range ipids {
 				offset += 1
-				io.Ff(cls, "%d ", offset)
+				io.Ff(b_cells_ge, "%d ", offset)
 			}
 		}
 	}
 
 	// types of active elements
-	io.Ff(cls, "\n</DataArray>\n<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n")
+	io.Ff(b_cells_ge, "\n</DataArray>\n<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n")
 	for _, e := range elems {
 		c := cells[e.Id()]
 		vtk := c.Shp.VtkCode
@@ -262,19 +306,59 @@ func topology(pts, cls *bytes.Buffer, withIps bool) (totalNips int) {
 				chk.Panic("cannot handle cell type %q", c.Type)
 			}
 		}
-		io.Ff(cls, "%d ", vtk)
+		io.Ff(b_cells_ge, "%d ", vtk)
 	}
-	if withIps {
+	if withips {
 		for _, e := range elems {
 			ipids := out.Cid2ips[e.Id()]
 			for range ipids {
-				io.Ff(cls, "%d ", shp.VTK_VERTEX)
+				io.Ff(b_cells_ge, "%d ", shp.VTK_VERTEX)
 			}
 		}
 	}
-	io.Ff(cls, "\n</DataArray>\n</Cells>\n")
+	io.Ff(b_cells_ge, "\n</DataArray>\n</Cells>\n")
 	return
 }
+
+/*
+func topology_p(b_points_ge, b_cells_ge *bytes.Buffer, msh *inp.Mesh, elems []int) {
+
+	// all nodes coordinates
+	io.Ff(b_points_ge, "<Points>\n<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n")
+	for n, _ := range verts {
+		if ndim == 2 {
+			io.Ff(b_points_ge, "%23.15e %23.15e 0 ", verts[n].C[0], verts[n].C[1])
+		} else {
+			io.Ff(b_points_ge, "%23.15e %23.15e %23.15e ", verts[n].C[0], verts[n].C[1], verts[n].C[2])
+		}
+	}
+	io.Ff(b_points_ge, "\n</DataArray>\n</Points>\n")
+
+	// connectivity of active elements; but only getting LBB nodes
+	io.Ff(b_cells_ge, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n")
+	for _, e := range elems {
+		for i := 0; i < inp.Geo2nvc[inp.Geo2geob[cells[e].Geo]]; i++ {
+			io.Ff(b_cells_ge, "%d ", cells[e].Verts[i])
+		}
+	}
+
+	// offsets of active elements
+	io.Ff(b_cells_ge, "\n</DataArray>\n<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n")
+	var offset int
+	for _, e := range elems {
+		offset += inp.Geo2nvc[inp.Geo2geob[cells[e].Geo]]
+		io.Ff(b_cells_ge, "%d ", offset)
+	}
+
+	// types of active elements
+	io.Ff(b_cells_ge, "\n</DataArray>\n<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n")
+	for _, e := range elems {
+		io.Ff(b_cells_ge, "%d ", inp.Geo2vtk[inp.Geo2geob[cells[e].Geo]])
+	}
+	io.Ff(b_cells_ge, "\n</DataArray>\n</Cells>\n")
+	return
+}
+*/
 
 // points data ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -286,7 +370,8 @@ func close_pdata(dat *bytes.Buffer) {
 	io.Ff(dat, "</PointData>\n")
 }
 
-func pdata_scalar(dat *bytes.Buffer, prefix, key string, withIps, skipNodes bool) {
+/*
+func pdata_scalar(dat *bytes.Buffer, prefix, key string, withips, skipNodes bool) {
 
 	// auxiliary
 	msh := out.Dom.Msh
@@ -320,7 +405,7 @@ func pdata_scalar(dat *bytes.Buffer, prefix, key string, withIps, skipNodes bool
 	}
 
 	// loop over integration points
-	if withIps {
+	if withips {
 		for _, e := range elems {
 			ipids := out.Cid2ips[e.Id()]
 			if len(ipids) > 0 {
@@ -336,8 +421,10 @@ func pdata_scalar(dat *bytes.Buffer, prefix, key string, withIps, skipNodes bool
 	}
 	io.Ff(dat, "\n</DataArray>\n")
 }
+*/
 
-func pdata_vector(dat *bytes.Buffer, prefix, key string, start func(n int) int, ndim int, nodes []out.Node, is_extrap bool, withIps, skipNodes bool, E []out.Elem) {
+/*
+func pdata_vector(dat *bytes.Buffer, prefix, key string, start func(n int) int, ndim int, nodes []out.Node, is_extrap bool, withips, skipNodes bool, E []out.Elem) {
 	io.Ff(dat, "<DataArray type=\"Float64\" Name=\"%s%s\" NumberOfComponents=\"3\" format=\"ascii\">\n", prefix, key)
 	v := []float64{0, 0, 0}
 	for n, _ := range nodes {
@@ -355,7 +442,7 @@ func pdata_vector(dat *bytes.Buffer, prefix, key string, start func(n int) int, 
 		}
 		io.Ff(dat, "%23.15e %23.15e %23.15e  ", v[0], v[1], v[2])
 	}
-	if withIps {
+	if withips {
 		if key == "rwl" {
 			if ndim == 2 {
 				for _, e := range elems {
@@ -397,8 +484,10 @@ func pdata_vector(dat *bytes.Buffer, prefix, key string, start func(n int) int, 
 	}
 	io.Ff(dat, "\n</DataArray>\n")
 }
+*/
 
-func pdata_tensor(dat *bytes.Buffer, prefix, key string, start func(n int) int, ndim int, nodes []out.Node, is_extrap bool, withIps, skipNodes bool, E []out.Elem) {
+/*
+func pdata_tensor(dat *bytes.Buffer, prefix, key string, start func(n int) int, ndim int, nodes []out.Node, is_extrap bool, withips, skipNodes bool, E []out.Elem) {
 	io.Ff(dat, "<DataArray type=\"Float64\" Name=\"%s%s\" NumberOfComponents=\"6\" format=\"ascii\">\n", prefix, key)
 	v := []float64{0, 0, 0, 0, 0, 0}
 	for n, _ := range nodes {
@@ -416,7 +505,7 @@ func pdata_tensor(dat *bytes.Buffer, prefix, key string, start func(n int) int, 
 		}
 		io.Ff(dat, "%23.15e %23.15e %23.15e %23.15e %23.15e %23.15e  ", v[0], v[1], v[2], v[3], v[4], v[5])
 	}
-	if withIps {
+	if withips {
 		if key == "sE" {
 			if ndim == 2 {
 				for _, e := range elems {
@@ -463,10 +552,12 @@ func pdata_tensor(dat *bytes.Buffer, prefix, key string, start func(n int) int, 
 	}
 	io.Ff(dat, "\n</DataArray>\n")
 }
+*/
 
 // cells data ////////////////////////////////////////////////////////////////////////////////////////
 
-func gen_cells_data(dat *bytes.Buffer, msh *inp.Mesh, withIps bool, E []out.Elem) {
+/*
+func gen_cells_data(dat *bytes.Buffer, msh *inp.Mesh, withips bool, E []out.Elem) {
 	// cells positive tags and geo types
 	io.Ff(dat, "<CellData Scalars=\"TheScalars\">\n")
 	io.Ff(dat, "<DataArray type=\"Float64\" Name=\"tag\" NumberOfComponents=\"1\" format=\"ascii\">\n")
@@ -477,14 +568,14 @@ func gen_cells_data(dat *bytes.Buffer, msh *inp.Mesh, withIps bool, E []out.Elem
 		}
 		io.Ff(dat, "%d ", ptag)
 	}
-	if withIps {
+	if withips {
 		for _, e := range elems {
 			for i := 0; i < len(E[e].IpsC); i++ {
 				ptag := 0
 				if cells[e].Tag < 0 {
 					ptag = -cells[e].Tag
 				}
-				io.Ff(dat, "%d ", IP_TAG0+ptag)
+				io.Ff(dat, "%d ", IP_TAG_INI+ptag)
 			}
 		}
 	}
@@ -492,7 +583,7 @@ func gen_cells_data(dat *bytes.Buffer, msh *inp.Mesh, withIps bool, E []out.Elem
 	for _, e := range elems {
 		io.Ff(dat, "%d ", cells[e].Geo)
 	}
-	if withIps {
+	if withips {
 		for _, e := range elems {
 			for i := 0; i < len(E[e].IpsC); i++ {
 				io.Ff(dat, "-1 ")
@@ -503,7 +594,7 @@ func gen_cells_data(dat *bytes.Buffer, msh *inp.Mesh, withIps bool, E []out.Elem
 	for _, e := range elems {
 		io.Ff(dat, "%d ", cells[e].Id)
 	}
-	if withIps {
+	if withips {
 		ncl := len(cells)
 		for _, e := range elems {
 			for i := 0; i < len(E[e].IpsC); i++ {
@@ -514,41 +605,4 @@ func gen_cells_data(dat *bytes.Buffer, msh *inp.Mesh, withIps bool, E []out.Elem
 	}
 	io.Ff(dat, "\n</DataArray>\n</CellData>\n")
 }
-
-func topology_lbb(pts, cls *bytes.Buffer, msh *inp.Mesh, elems []int) {
-
-	// all nodes coordinates
-	io.Ff(pts, "<Points>\n<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n")
-	for n, _ := range verts {
-		if ndim == 2 {
-			io.Ff(pts, "%23.15e %23.15e 0 ", verts[n].C[0], verts[n].C[1])
-		} else {
-			io.Ff(pts, "%23.15e %23.15e %23.15e ", verts[n].C[0], verts[n].C[1], verts[n].C[2])
-		}
-	}
-	io.Ff(pts, "\n</DataArray>\n</Points>\n")
-
-	// connectivity of active elements; but only getting LBB nodes
-	io.Ff(cls, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n")
-	for _, e := range elems {
-		for i := 0; i < inp.Geo2nvc[inp.Geo2geob[cells[e].Geo]]; i++ {
-			io.Ff(cls, "%d ", cells[e].Verts[i])
-		}
-	}
-
-	// offsets of active elements
-	io.Ff(cls, "\n</DataArray>\n<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n")
-	var offset int
-	for _, e := range elems {
-		offset += inp.Geo2nvc[inp.Geo2geob[cells[e].Geo]]
-		io.Ff(cls, "%d ", offset)
-	}
-
-	// types of active elements
-	io.Ff(cls, "\n</DataArray>\n<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n")
-	for _, e := range elems {
-		io.Ff(cls, "%d ", inp.Geo2vtk[inp.Geo2geob[cells[e].Geo]])
-	}
-	io.Ff(cls, "\n</DataArray>\n</Cells>\n")
-	return
-}
+*/
