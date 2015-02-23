@@ -10,6 +10,7 @@ import (
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/gm"
 	"github.com/cpmech/gosl/io"
+	"github.com/cpmech/gosl/utl"
 )
 
 // constants
@@ -23,12 +24,16 @@ var (
 var (
 
 	// data set by Start
-	Sum     *fem.Summary     // summary of results
-	Dom     *fem.Domain      // FE domain
-	Ipoints []*fem.OutIpData // all integration points
-	Cid2ips [][]int          // [ncells][nip] maps cell id to index in Ipoints
-	NodBins gm.Bins          // bins for nodes
-	IpsBins gm.Bins          // bins for integration points
+	Sum       *fem.Summary     // summary of results
+	Dom       *fem.Domain      // FE domain
+	Ipoints   []*fem.OutIpData // all integration points
+	Cid2ips   [][]int          // [ncells][nip] maps cell id to index in Ipoints
+	Ipkey2ips map[string][]int // maps ip keys to indices in Ipoints
+	Ipkeys    map[string]bool  // all ip keys
+	NodBins   gm.Bins          // bins for nodes
+	IpsBins   gm.Bins          // bins for integration points
+
+	// auxiliary
 
 	// results loaded by LoadResults
 	R ResultsMap // maps labels => points
@@ -74,6 +79,8 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 	// clear previous data
 	Ipoints = make([]*fem.OutIpData, 0)
 	Cid2ips = make([][]int, len(Dom.Msh.Cells))
+	Ipkey2ips = make(map[string][]int)
+	Ipkeys = make(map[string]bool)
 	R = make(map[string]Points)
 	I = make([]int, 0)
 	T = make([]float64, 0)
@@ -111,6 +118,10 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 			ids[i] = id
 			Ipoints = append(Ipoints, d)
 			IpsBins.Append(d.X, id)
+			for key, _ := range d.V {
+				utl.StrIntsMapAppend(&Ipkey2ips, key, id)
+				Ipkeys[key] = true
+			}
 		}
 		Cid2ips[cid] = ids
 	}

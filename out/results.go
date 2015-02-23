@@ -14,38 +14,38 @@ import (
 // ResultsMap maps aliases to points
 type ResultsMap map[string]Points
 
-// Define defines labels
-//  labels -- an alias to a group of points, an individual point, or labels to many points
-//            example: "A", "left-column" or "a b c". If the number of points found is different
-//            than the number of labels, a group is created.
+// Define defines aliases
+//  alias -- an alias to a group of points, an individual point, or to a set of points.
+//           Example: "A", "left-column" or "a b c". If the number of points found is different
+//           than the number of aliases, a group is created.
 //  Note:
-//    To use spaces in labels, prefix the label with an exclamation mark; e.g "!right column"
-func Define(labels string, loc Locator) {
+//    To use spaces in aliases, prefix the alias with an exclamation mark; e.g "!right column"
+func Define(alias string, loc Locator) {
 
 	// check
-	if len(labels) < 1 {
-		chk.Panic("labels must have at least one character. %q is invalid", labels)
+	if len(alias) < 1 {
+		chk.Panic("alias must have at least one character. %q is invalid", alias)
 	}
 
 	// locate points
 	pts := loc.Locate()
 	if len(pts) < 1 {
-		chk.Panic("cannot define entities with alias/labels=%q and locator=%v", labels, loc)
+		chk.Panic("cannot define entities with alias=%q and locator=%v", alias, loc)
 	}
 
 	// set results map
-	if labels[0] == '!' {
-		R[labels[1:]] = pts
+	if alias[0] == '!' {
+		R[alias[1:]] = pts
 		return
 	}
-	lbls := strings.Fields(labels)
+	lbls := strings.Fields(alias)
 	if len(lbls) == len(pts) {
 		for i, l := range lbls {
 			R[l] = []*Point{pts[i]}
 		}
 		return
 	}
-	R[labels] = pts
+	R[alias] = pts
 }
 
 // LoadResults loads all results after points are defined
@@ -97,14 +97,15 @@ func LoadResults(times []float64) {
 	}
 }
 
-// GetRes gets results as a time or space series corresponding to a given label or set of points.
+// GetRes gets results as a time or space series corresponding to a given alias
+// for a single point or set of points.
 //  idxI -- index in I slice corresponding to selected output time; use -1 for the last item.
-//          If label defines a single point, the whole time series is returned and idxI is ignored.
-func GetRes(key, label string, idxI int) []float64 {
+//          If alias defines a single point, the whole time series is returned and idxI is ignored.
+func GetRes(key, alias string, idxI int) []float64 {
 	if idxI < 0 {
 		idxI = len(I) - 1
 	}
-	if pts, ok := R[label]; ok {
+	if pts, ok := R[alias]; ok {
 		if len(pts) == 1 {
 			for k, v := range pts[0].Vals {
 				if k == key {
@@ -123,27 +124,27 @@ func GetRes(key, label string, idxI int) []float64 {
 			return res
 		}
 	}
-	chk.Panic("cannot get %q at %q", key, label)
+	chk.Panic("cannot get %q at %q", key, alias)
 	return nil
 }
 
 // GetCoords returns the coordinates of a single point
-func GetCoords(label string) []float64 {
-	if pts, ok := R[label]; ok {
+func GetCoords(alias string) []float64 {
+	if pts, ok := R[alias]; ok {
 		if len(pts) == 1 {
 			return pts[0].X
 		}
 	}
-	chk.Panic("cannot get coordinates of point with label %q (make sure this label corresponds to a single point)", label)
+	chk.Panic("cannot get coordinates of point with alias %q (make sure this alias corresponds to a single point)", alias)
 	return nil
 }
 
 // GetDist returns the distance from a reference point on the given line with selected points
 // if they contain a given key
 //  key -- use any to get coordinates of points with any key such as "ux", "pl", etc.
-func GetDist(key, label string) (dist []float64) {
+func GetDist(key, alias string) (dist []float64) {
 	any := key == "any"
-	if pts, ok := R[label]; ok {
+	if pts, ok := R[alias]; ok {
 		for _, p := range pts {
 			for k, _ := range p.Vals {
 				if k == key || any {
@@ -154,15 +155,15 @@ func GetDist(key, label string) (dist []float64) {
 		}
 		return
 	}
-	chk.Panic("cannot get distance with key %q and label %q", key, label)
+	chk.Panic("cannot get distance with key %q and alias %q", key, alias)
 	return
 }
 
 // GetXYZ returns the x-y-z coordinates of selected points that have a specified key
 //  key -- use any to get coordinates of points with any key such as "ux", "pl", etc.
-func GetXYZ(key, label string) (x, y, z []float64) {
+func GetXYZ(key, alias string) (x, y, z []float64) {
 	any := key == "any"
-	if pts, ok := R[label]; ok {
+	if pts, ok := R[alias]; ok {
 		for _, p := range pts {
 			for k, _ := range p.Vals {
 				if k == key || any {
@@ -177,6 +178,6 @@ func GetXYZ(key, label string) (x, y, z []float64) {
 		}
 		return
 	}
-	chk.Panic("cannot get x-y-z coordinates with key %q and label %q", key, label)
+	chk.Panic("cannot get x-y-z coordinates with key %q and alias %q", key, alias)
 	return
 }

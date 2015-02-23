@@ -12,6 +12,7 @@ import (
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
+	"github.com/cpmech/gosl/utl"
 )
 
 func Test_out01(tst *testing.T) {
@@ -47,6 +48,11 @@ func Test_out01(tst *testing.T) {
 	chk.IntAssert(len(Dom.Nodes), nnod)
 	chk.IntAssert(len(Ipoints), nele*nip)
 	chk.IntAssert(len(Cid2ips), 1)
+	chk.IntAssert(len(Ipkey2ips), 4)
+	chk.IntAssert(len(Ipkeys), 4)
+	for key, ips := range Ipkey2ips {
+		chk.Ints(tst, io.Sf("%s : ips", key), ips, utl.IntRange(4))
+	}
 
 	// load results
 	LoadResults(nil)
