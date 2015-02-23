@@ -6,6 +6,7 @@ package fem
 
 import (
 	"encoding/json"
+	"math"
 	"testing"
 
 	"github.com/cpmech/gofem/mporous"
@@ -29,6 +30,7 @@ type T_results struct {
 	Iterations []T_iteration // iterations data
 	Kmats      [][][]float64 // [nele][nu][nu] all stiffness matrices
 	Disp       [][]float64   // [nnod][ndim] displacements at nodes
+	DispMult   float64       // displacements multiplier
 	Note       string        // note about number of integration points
 	Sigmas     [][][]float64 // [nele][nip][nsig] all stresses @ all ips 2D:{sx, sy, sxy, sz}
 }
@@ -66,6 +68,12 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 
 	// run comparisons
 	for idx, cmp := range cmp_set {
+
+		// displacements multiplier
+		dmult := 1.0
+		if math.Abs(cmp.DispMult) > 1e-10 {
+			dmult = cmp.DispMult
+		}
 
 		// time index
 		tidx := idx + 1
@@ -109,11 +117,11 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 		for nid, usg := range cmp.Disp {
 			ix := d.Vid2node[nid].Dofs[0].Eq
 			iy := d.Vid2node[nid].Dofs[1].Eq
-			chk.AnaNum(tst, "ux", tolu, d.Sol.Y[ix], usg[0], verbose)
-			chk.AnaNum(tst, "uy", tolu, d.Sol.Y[iy], usg[1], verbose)
+			chk.AnaNum(tst, "ux", tolu, d.Sol.Y[ix], usg[0]*dmult, verbose)
+			chk.AnaNum(tst, "uy", tolu, d.Sol.Y[iy], usg[1]*dmult, verbose)
 			if len(usg) == 3 {
 				iz := d.Vid2node[nid].Dofs[2].Eq
-				chk.AnaNum(tst, "uz", tolu, d.Sol.Y[iz], usg[2], verbose)
+				chk.AnaNum(tst, "uz", tolu, d.Sol.Y[iz], usg[2]*dmult, verbose)
 			}
 		}
 
