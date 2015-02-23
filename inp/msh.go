@@ -68,6 +68,7 @@ type Mesh struct {
 	Cells []*Cell // cells
 
 	// derived
+	FnamePath  string  // complete filename path
 	Ndim       int     // space dimension
 	Xmin, Xmax float64 // min and max x-coordinate
 	Ymin, Ymax float64 // min and max x-coordinate
@@ -90,8 +91,9 @@ func ReadMsh(dir, fn string) *Mesh {
 	var o Mesh
 
 	// read file
-	b, err := io.ReadFile(filepath.Join(dir, fn))
-	if LogErr(err, "msh: cannot open mesh file "+dir+"/"+fn+"\n") {
+	o.FnamePath = filepath.Join(dir, fn)
+	b, err := io.ReadFile(o.FnamePath)
+	if LogErr(err, "msh: cannot open mesh file "+o.FnamePath) {
 		return nil
 	}
 
