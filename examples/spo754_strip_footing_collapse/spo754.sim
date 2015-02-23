@@ -1,0 +1,55 @@
+{
+  "data" : {
+    "desc"     : "De Souza Neto, Peric, Owen: Example 7.5.4 p252",
+    "matfile"  : "materials.mat",
+    "steady"   : true,
+    "showR"    : true
+  },
+  "functions" : [
+    { "name":"disp", "type":"lin", "prms":[ {"n":"m", "v":-0.002, "u":"m"}] },
+    { "name":"dt",   "type":"pts", "prms":[
+        {"n":"t0" , "v":0.00 }, {"n":"y0" , "v":0.05 },
+        {"n":"t1" , "v":0.05 }, {"n":"y1" , "v":0.025},
+        {"n":"t2" , "v":0.075}, {"n":"y2" , "v":0.025},
+        {"n":"t3" , "v":0.1  }, {"n":"y3" , "v":0.025},
+        {"n":"t4" , "v":0.125}, {"n":"y4" , "v":0.05 },
+        {"n":"t5" , "v":0.175}, {"n":"y5" , "v":0.05 },
+        {"n":"t6" , "v":0.225}, {"n":"y6" , "v":0.05 },
+        {"n":"t7" , "v":0.275}, {"n":"y7" , "v":0.05 },
+        {"n":"t8" , "v":0.325}, {"n":"y8" , "v":0.05 },
+        {"n":"t9" , "v":0.375}, {"n":"y9" , "v":0.025},
+        {"n":"t10", "v":0.4  }, {"n":"y10", "v":0.05 },
+        {"n":"t11", "v":0.45 }, {"n":"y11", "v":0.1  },
+        {"n":"t12", "v":0.55 }, {"n":"y12", "v":0.15 },
+        {"n":"t13", "v":0.7  }, {"n":"y13", "v":0.3  },
+        {"n":"t14", "v":1.0  }, {"n":"y14", "v":0.0  }
+    ] }                                   
+  ],
+  "regions" : [
+    {
+      "desc"      : "strip footing",
+      "mshfile"  : "spo754.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"M.7.5.4-mises", "type":"u", "extra":"!nip:4" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply surface displacements",
+      "nodebcs" : [
+        { "tag":-201, "keys":["uy"],      "funcs":["zero"] },
+        { "tag":-210, "keys":["ux"     ], "funcs":["zero"] },
+        { "tag":-211, "keys":["ux","uy"], "funcs":["zero","zero"] },
+        { "tag":-300, "keys":["uy"],      "funcs":["disp"] },
+        { "tag":-311, "keys":["ux","uy"], "funcs":["zero","disp"] }
+      ],
+      "solver" : {
+        "rtol"   : 1e-6
+      },
+      "control" : {
+        "dtfcn" : "dt"
+      }
+    }
+  ]
+}

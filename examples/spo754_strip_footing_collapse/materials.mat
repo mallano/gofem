@@ -1,0 +1,17 @@
+{
+  "functions" : [],
+  "materials" : [
+    {
+      "name"  : "M.7.5.4-mises",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 7.5.4 p252",
+      "model" : "vm",
+      "prms"  : [
+        {"n":"E",   "v":1e+07, "u":"kPa"},
+        {"n":"nu",  "v":0.48,  "u":"-"},
+        {"n":"qy0", "v":848.7, "u":"kPa"},
+        {"n":"H",   "v":0,     "u":"kPa"},
+        {"n":"rho", "v":2,     "u":"Mg/m3"}
+      ]
+    }
+  ]
+}
