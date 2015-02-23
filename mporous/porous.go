@@ -301,7 +301,7 @@ func (o Model) Update(s *State, Δpl, Δpg, divusNew float64) (err error) {
 
 	// check convergence
 	if it == o.NmaxIt {
-		return chk.Err("saturation updated failed after %d iterations\n", it)
+		return chk.Err("saturation update failed after %d iterations\n", it)
 	}
 	return
 }
