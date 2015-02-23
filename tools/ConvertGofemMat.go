@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build ignore
+
 package main
 
 import (
@@ -18,6 +20,8 @@ func main() {
 	matOld := "matOld.mat"
 	matNew := "matNew.mat"
 	convSymb := true
+
+	// parse flags
 	flag.Parse()
 	if len(flag.Args()) > 0 {
 		matOld = flag.Arg(0)

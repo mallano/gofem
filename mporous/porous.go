@@ -177,10 +177,8 @@ func (o Model) GetPrms(example bool) fun.Prms {
 	}
 }
 
-// NewState creates and initialises a new state structure
-//  Note: returns nil on errors
-func (o Model) NewState(pl, pg, divus float64) (s *State, err error) {
-	s = new(State)
+// InitState initialises a state structure with a continous solver and saturation starting at 1
+func (o Model) InitState(s *State, pl, pg, divus float64) (err error) {
 	s.Pl = pl
 	s.Pg = pg
 	s.Divus = divus
@@ -194,6 +192,14 @@ func (o Model) NewState(pl, pg, divus float64) (s *State, err error) {
 	if pc > 0 {
 		s.Sl, err = mreten.Update(o.Lrm, 0, 1, pc)
 	}
+	return
+}
+
+// NewState creates and initialises a new state structure
+//  Note: returns nil on errors
+func (o Model) NewState(pl, pg, divus float64) (s *State, err error) {
+	s = new(State)
+	err = o.InitState(s, pl, pg, divus)
 	return
 }
 
