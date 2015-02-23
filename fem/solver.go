@@ -14,6 +14,7 @@ import (
 	"github.com/cpmech/gofem/mreten"
 	"github.com/cpmech/gofem/msolid"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/mpi"
@@ -48,7 +49,13 @@ var Global struct {
 
 // End must be called and the end to flush log file
 func End() {
-	inp.FlushLog()
+	if err := recover(); err != nil {
+		chk.CallerInfo(3)
+		chk.CallerInfo(2)
+		io.PfRed("ERROR: %v\n", err)
+	} else {
+		inp.FlushLog()
+	}
 }
 
 // Start initialises 'global' and starts logging
@@ -209,7 +216,7 @@ func Run() (runisok bool) {
 
 			// message
 			if Global.Verbose {
-				if !Global.Sim.Data.ShowR {
+				if !Global.Sim.Data.ShowR && !Global.DoDebug {
 					io.Pf("time       = %g\r", t)
 				}
 			}
@@ -347,6 +354,10 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 				return
 			}
 		}
+
+		// debug
+		//KK := d.Kb.ToMatrix(nil).ToDense()
+		//la.PrintMat("KK", KK, "%20.10f", false)
 
 		// solve for wb := δyb
 		LogErr(d.LinSol.SolveR(d.Wb, d.Fb, false), "solve")

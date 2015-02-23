@@ -111,6 +111,9 @@ func init() {
 
 // implementation ///////////////////////////////////////////////////////////////////////////////////
 
+// Id returns the cell Id
+func (o ElemUP) Id() int { return o.u.Cell.Id }
+
 // SetEqs set equations
 func (o *ElemUP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	eqs_u := make([][]int, o.u.Cell.Shp.Nverts)

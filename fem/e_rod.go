@@ -151,6 +151,9 @@ func init() {
 
 // implementation ///////////////////////////////////////////////////////////////////////////////////
 
+// Id returns the cell Id
+func (o Rod) Id() int { return o.Cell.Id }
+
 // SetEqs set equations
 func (o *Rod) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	o.Umap = make([]int, o.Nu)

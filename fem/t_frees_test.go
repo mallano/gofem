@@ -14,29 +14,26 @@ import (
 
 func Test_frees01a(tst *testing.T) {
 
+	// finalise analysis process and catch errors
+	defer End()
+
 	//verbose()
 	chk.PrintTitle("frees01a")
 
 	// start simulation
 	if !Start("data/frees01.sim", true, chk.Verbose) {
-		tst.Errorf("test failed\n")
-		return
+		chk.Panic("cannot start FE simulation")
 	}
-
-	// make sure to flush log
-	defer End()
 
 	// domain
 	dom := NewDomain(Global.Sim.Regions[0])
 	if dom == nil {
-		tst.Errorf("test failed\n")
-		return
+		chk.Panic("cannot run FE simulation")
 	}
 
 	// set stage
 	if !dom.SetStage(0, Global.Sim.Stages[0]) {
-		tst.Errorf("test failed\n")
-		return
+		chk.Panic("cannot set stage\n")
 	}
 
 	// nodes and elements
@@ -71,31 +68,4 @@ func Test_frees01a(tst *testing.T) {
 	chk.Ints(tst, "e11.Fmap", e11.Fmap, []int{43, 56, 58})
 	e14 := dom.Elems[14].(*ElemP)
 	chk.Ints(tst, "e14.Fmap", e14.Fmap, []int{56, 69, 71})
-}
-
-func Test_frees01b(tst *testing.T) {
-
-	defer func() {
-		if err := recover(); err != nil {
-			tst.Error("[1;31mSome error has happened:[0m\n", err)
-		}
-	}()
-
-	//verbose()
-	//chk.PrintTitle("frees01b")
-
-	// run simulation
-	if !Start("data/frees01.sim", true, chk.Verbose) {
-		tst.Errorf("test failed\n")
-		return
-	}
-
-	// make sure to flush log
-	defer End()
-
-	// run simulation
-	if !Run() {
-		tst.Errorf("test failed\n")
-		return
-	}
 }

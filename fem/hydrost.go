@@ -43,6 +43,28 @@ func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
 		}
 	}
 
+	// set elements
+	for _, e := range o.ElemIntvars {
+
+		// get element's integration points data
+		ele := e.(Elem)
+		d := ele.OutIpsData()
+		nip := len(d)
+
+		// build map with pressures @ ips
+		pl := make([]float64, nip)
+		for i, ip := range d {
+			z := ip.X[ndim-1]
+			pl[i] = (zwater - z) * hst.GamW
+		}
+		ivs := map[string][]float64{"pl": pl}
+
+		// set element's states
+		if LogErrCond(!e.SetIvs(ivs), "hydrostatic: element's internal values setting failed") {
+			return
+		}
+	}
+
 	// success
 	log.Printf("dom: initial hydrostatic state set with zmax=%g zwater=%g γw=%g", zmax, zwater, hst.GamW)
 	return true

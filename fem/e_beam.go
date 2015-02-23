@@ -205,6 +205,9 @@ func init() {
 	}
 }
 
+// Id returns the cell Id
+func (o Beam) Id() int { return o.Cell.Id }
+
 // SetEqs set equations [2][?]. Format of eqs == format of info.Dofs
 func (o *Beam) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	ndof := 3 * (o.Ndim - 1)

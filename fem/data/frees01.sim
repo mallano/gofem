@@ -16,7 +16,7 @@
     {
       "mshfile"   : "frees01.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"porous1", "type":"p" }
+        { "tag":-1, "mat":"porous1", "type":"p", "extra":"!bet:70" }
       ]
     }
   ],
@@ -34,7 +34,7 @@
       ],
       "control" : {
         "tf"    : 1e3,
-        "dt"    : 10,
+        "dt"    : 1,
         "dtout" : 10
       }
     }

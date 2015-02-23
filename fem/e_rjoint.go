@@ -130,7 +130,8 @@ func init() {
 	}
 }
 
-// connect rod and solid ////////////////////////////////////////////////////////////////////////////
+// Id returns the cell Id
+func (o Rjoint) Id() int { return o.Cell.Id }
 
 // Connect connects rod/solid elements in this Rjoint
 func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {

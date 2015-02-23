@@ -20,7 +20,8 @@ type OutIpData struct {
 // Elem defines what elements must calculate
 type Elem interface {
 
-	// initialisation
+	// information and initialisation
+	Id() int                                           // returns the cell Id
 	SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) // set equations
 
 	// conditions (natural BCs and element's)

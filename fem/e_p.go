@@ -238,6 +238,9 @@ func init() {
 
 // implementation ///////////////////////////////////////////////////////////////////////////////////
 
+// Id returns the cell Id
+func (o ElemP) Id() int { return o.Cell.Id }
+
 // SetEqs sets equations
 func (o *ElemP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	o.Pmap = make([]int, o.Np)
@@ -346,6 +349,7 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 				o.ρl_ex[m] += o.Emat[m][idx] * ρl
 			}
 		}
+		//io.Pf(">>> %3d : pc=%13.10f sl=%13.10f\n", o.Cell.Id, o.States[idx].Pg-o.States[idx].Pl, o.States[idx].Sl)
 	}
 
 	// contribution from natural boundary conditions
@@ -473,6 +477,7 @@ func (o *ElemP) Update(sol *Solution) (ok bool) {
 		if LogErr(o.Mdl.Update(o.States[idx], Δpl, 0, 0), "update failed") {
 			return
 		}
+		//io.Pf("%3d : Δpl=%13.10f pc=%13.10f sl=%13.10f RhoL=%13.10f Wet=%v\n", o.Cell.Id, Δpl, o.States[idx].Pg-o.States[idx].Pl, o.States[idx].Sl, o.States[idx].RhoL, o.States[idx].Wet)
 	}
 	return true
 }
@@ -514,7 +519,24 @@ func (o *ElemP) InitIvs(sol *Solution) (ok bool) {
 }
 
 // SetIvs sets secondary variables; e.g. during initialisation via files
-func (o *ElemP) SetIvs(zvars map[string][]float64) (ok bool) {
+func (o *ElemP) SetIvs(ivs map[string][]float64) (ok bool) {
+	if pl, ok := ivs["pl"]; ok {
+		for idx, _ := range o.IpsElem {
+			o.States[idx].Pl = pl[idx]
+		}
+	}
+	if pg, ok := ivs["pg"]; ok {
+		for idx, _ := range o.IpsElem {
+			o.States[idx].Pg = pg[idx]
+		}
+	}
+	for idx, _ := range o.IpsElem {
+		pl := o.States[idx].Pl
+		pg := o.States[idx].Pg
+		if LogErr(o.Mdl.InitState(o.States[idx], pl, pg, 0), "state initialisation failed") {
+			return
+		}
+	}
 	return true
 }
 
