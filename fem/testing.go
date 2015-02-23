@@ -67,11 +67,11 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 	}
 
 	// run comparisons
+	dmult := 1.0
 	for idx, cmp := range cmp_set {
 
 		// displacements multiplier
-		dmult := 1.0
-		if math.Abs(cmp.DispMult) > 1e-10 {
+		if idx == 0 && math.Abs(cmp.DispMult) > 1e-10 {
 			dmult = cmp.DispMult
 		}
 
