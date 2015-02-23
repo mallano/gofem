@@ -1,0 +1,166 @@
+{
+  "functions" : [],
+  "materials" : [
+    {
+      "name"  : "M.7.5.1-elast",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 7.5.1 p244",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",   "v":210,    "u":"GPa"},
+        {"n":"nu",  "v":0.2,    "u":"-"},
+        {"n":"rho", "v":2e-6,   "u":"Tg/m3"}
+      ]
+    },
+    {
+      "name"  : "M.7.5.1-mises",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 7.5.1 p244",
+      "model" : "vm",
+      "prms"  : [
+        {"n":"E",   "v":210,    "u":"GPa"},
+        {"n":"nu",  "v":0.3,    "u":"-"},
+        {"n":"qy0", "v":0.24,   "u":"GPa"},
+        {"n":"H",   "v":0,      "u":"GPa"},
+        {"n":"rho", "v":2e-6,   "u":"Tg/m3"}
+      ]
+    },
+    {
+      "name"  : "M.7.5.4-mises",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 7.5.4 p252",
+      "model" : "von-mises",
+      "prms"  : [
+        {"n":"E",   "v":1e+07, "u":"kPa"},
+        {"n":"nu",  "v":0.48,  "u":"-"},
+        {"n":"qy0", "v":848.7, "u":"kPa"},
+        {"n":"H",   "v":0,     "u":"kPa"},
+        {"n":"rho", "v":2,     "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "M.8.4.3-dp-outer",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 8.4.3 p252 with Drucker-Prager model",
+      "model" : "drucker-prager",
+      "prms"  : [
+        {"n":"E",   "v":1e+07, "u":"kPa"},
+        {"n":"nu",  "v":0.48,  "u":"-"},
+        {"n":"c",   "v":490,   "u":"kPa"},
+        {"n":"phi", "v":20,    "u":"°"},
+        {"n":"typ", "v":1,     "u":"-"},
+        {"n":"H",   "v":0,     "u":"kPa"},
+        {"n":"rho", "v":2,     "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "M.8.4.3-dp-inner",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 8.4.3 p252 with Drucker-Prager model",
+      "model" : "drucker-prager",
+      "prms"  : [
+        {"n":"E",     "v":1e+07, "u":"kPa"},
+        {"n":"nu",    "v":0.48,  "u":"-"},
+        {"n":"c",     "v":490,   "u":"kPa"},
+        {"n":"phi",   "v":20,    "u":"°"},
+        {"n":"typ",   "v":2,     "u":"-"},
+        {"n":"H",     "v":0,     "u":"kPa"},
+        {"n":"rho",   "v":2,     "u":"Mg/m3"},
+        {"n":"gup",   "v":0,     "u":"-"},
+        {"n":"debug", "v":0,     "u":"-"}
+      ]
+    },
+    {
+      "name"  : "M.8.4.3-dp-pstrain",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 8.4.3 p252 with Drucker-Prager model",
+      "model" : "drucker-prager",
+      "prms"  : [
+        {"n":"E",   "v":1e+07, "u":"kPa"},
+        {"n":"nu",  "v":0.48,  "u":"-"},
+        {"n":"c",   "v":490,   "u":"kPa"},
+        {"n":"phi", "v":20,    "u":"°"},
+        {"n":"typ", "v":3,     "u":"-"},
+        {"n":"H",   "v":0,     "u":"kPa"},
+        {"n":"rho", "v":2,     "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "M.8.4.3-rdp-outer",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 8.4.3 p252 with Drucker-Prager model",
+      "model" : "rounded-dp",
+      "prms"  : [
+        {"n":"E",      "v":1e+07, "u":"kPa"},
+        {"n":"nu",     "v":0.48,  "u":"-"},
+        {"n":"c",      "v":490,   "u":"kPa"},
+        {"n":"phi",    "v":20,    "u":"°"},
+        {"n":"typ",    "v":1,     "u":"-"},
+        {"n":"H",      "v":0,     "u":"kPa"},
+        {"n":"r",      "v":0.1,   "u":"-"},
+        {"n":"rho",    "v":2,     "u":"Mg/m3"},
+        {"n":"debug",  "v":0,     "u":"-"},
+        {"n":"cplaLE", "v":1,     "u":"-"},
+        {"n":"smooth", "v":0,     "u":"-"},
+        {"n":"srmpcf", "v":1000,  "u":"-"}
+      ]
+    },
+    {
+      "name"  : "M.8.4.3-rdp-inner",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 8.4.3 p252 with Drucker-Prager model",
+      "model" : "rounded-dp",
+      "prms"  : [
+        {"n":"E",      "v":1e+07, "u":"kPa"},
+        {"n":"nu",     "v":0.48,  "u":"-"},
+        {"n":"c",      "v":490,   "u":"kPa"},
+        {"n":"phi",    "v":20,    "u":"°"},
+        {"n":"typ",    "v":2,     "u":"-"},
+        {"n":"H",      "v":0,     "u":"kPa"},
+        {"n":"r",      "v":0.1,   "u":"-"},
+        {"n":"rho",    "v":2,     "u":"Mg/m3"},
+        {"n":"debug",  "v":0,     "u":"-"},
+        {"n":"cplaLE", "v":1,     "u":"-"},
+        {"n":"smooth", "v":1,     "u":"-"},
+        {"n":"srmpcf", "v":1000,  "u":"-"}
+      ]
+    },
+    {
+      "name"  : "M.8.4.3-rdp-pstrain",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 8.4.3 p252 with Drucker-Prager model",
+      "model" : "rounded-dp",
+      "prms"  : [
+        {"n":"E",     "v":1e+07, "u":"kPa"},
+        {"n":"nu",    "v":0.48,  "u":"-"},
+        {"n":"c",     "v":490,   "u":"kPa"},
+        {"n":"phi",   "v":20,    "u":"°"},
+        {"n":"typ",   "v":3,     "u":"-"},
+        {"n":"H",     "v":0,     "u":"kPa"},
+        {"n":"r",     "v":0.1,   "u":"-"},
+        {"n":"rho",   "v":2,     "u":"Mg/m3"},
+        {"n":"debug", "v":0,     "u":"-"}
+      ]
+    },
+    {
+      "name"  : "M.8.4.5-dp",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 8.4.5 p351 with Drucker-Prager model",
+      "model" : "drucker-prager",
+      "prms"  : [
+        {"n":"E",   "v":20000,         "u":"kPa"},
+        {"n":"nu",  "v":0.49,          "u":"-"},
+        {"n":"c",   "v":50,            "u":"kPa"},
+        {"n":"phi", "v":20,            "u":"°"},
+        {"n":"typ", "v":3,             "u":"-"},
+        {"n":"H",   "v":0,             "u":"kPa"},
+        {"n":"rho", "v":2.03873598369, "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "M.8.4.5-rdp",
+      "desc"  : "De Souza Neto, Peric, Owen: Example 8.4.5 p351 with Drucker-Prager model",
+      "model" : "rounded-dp",
+      "prms"  : [
+        {"n":"E",   "v":20000,         "u":"kPa"},
+        {"n":"nu",  "v":0.49,          "u":"-"},
+        {"n":"c",   "v":50,            "u":"kPa"},
+        {"n":"phi", "v":20,            "u":"°"},
+        {"n":"typ", "v":3,             "u":"-"},
+        {"n":"H",   "v":0,             "u":"kPa"},
+        {"n":"r",   "v":1,             "u":"-"},
+        {"n":"rho", "v":2.03873598369, "u":"Mg/m3"}
+      ]
+    }
+  ]
+}
