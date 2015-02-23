@@ -29,7 +29,12 @@ var (
 
 	dirout  string // directory for output
 	fnkey   string // filename key
+	steady  bool   // steady simulation
 	withips bool   // output integration points
+
+	ukeys   = []string{"ux", "uy", "uz"}                      // displacement keys
+	skeys   = []string{"sx", "sy", "sz", "sxy", "syz", "szx"} // stress keys
+	rwlkeys = []string{"rwlx", "rwly", "rwlz"}                // ρl * wl keys
 )
 
 func main() {
@@ -86,11 +91,14 @@ func main() {
 	elems = out.Dom.Elems
 	dirout = fem.Global.Sim.Data.DirOut
 	fnkey = fem.Global.Sim.Data.FnameKey
+	steady = fem.Global.Sim.Data.Steady
 
-	// check for "pl" and "pg" variables
+	// check for keys
+	_, has_ux := out.Dom.YandC["ux"]
 	_, has_pl := out.Dom.YandC["pl"]
 	_, has_pg := out.Dom.YandC["pg"]
-	//_, has_ux := out.Dom.YandC["ux"]
+	_, has_sx := out.Ipkeys["sx"]
+	_, has_rwlx := out.Ipkeys["rwlx"]
 
 	// buffers for general scalars
 	b_top_ge := new(bytes.Buffer) // points/general
@@ -132,6 +140,7 @@ func main() {
 			topology(b_top_pg)
 		}
 
+		// buffers for data
 		var b_dat_ge, b_dat_pl, b_dat_pg *bytes.Buffer
 		b_dat_ge = new(bytes.Buffer)
 		if has_pl {
@@ -140,6 +149,55 @@ func main() {
 		if has_pg {
 			b_dat_pg = new(bytes.Buffer)
 		}
+
+		// open points-data section
+		open_pdata(b_dat_ge)
+		open_pdata(b_dat_pl)
+		open_pdata(b_dat_pg)
+
+		// points-data: displacements
+		if has_ux {
+			pdata_write(b_dat_ge, "u", ukeys, out.Dom.Sol.Y, false, false)
+			if !steady {
+				pdata_write(b_dat_ge, "v", ukeys, out.Dom.Sol.Dydt, false, false)
+				pdata_write(b_dat_ge, "a", ukeys, out.Dom.Sol.D2ydt2, false, false)
+			}
+		}
+
+		// points-data: pressure
+		if has_pl {
+			pdata_write(b_dat_pl, "pl", []string{"pl"}, out.Dom.Sol.Y, false, false)
+		}
+		if has_pg {
+			pdata_write(b_dat_pg, "pg", []string{"pl"}, out.Dom.Sol.Y, false, false)
+		}
+
+		// points-data: general scalars
+		for key, _ := range out.Dom.YandC {
+			if _, isnongen := nongeneral[key]; !isnongen {
+				pdata_write(b_dat_ge, key, []string{key}, out.Dom.Sol.Y, false, false)
+			}
+		}
+
+		// points-data: stresses
+		if has_sx {
+			pdata_write(b_dat_ge, "sig", skeys, out.Dom.Sol.Y, false, false)
+		}
+
+		// points-data: ρl * wl
+		if has_rwlx {
+			pdata_write(b_dat_ge, "rwl", rwlkeys, out.Dom.Sol.Y, false, false)
+		}
+
+		// close points-data section
+		close_pdata(b_dat_ge)
+		close_pdata(b_dat_pl)
+		close_pdata(b_dat_pg)
+
+		// tags
+		cdata_ids_and_tags(b_dat_ge, false, false)
+		cdata_ids_and_tags(b_dat_pl, false, false)
+		cdata_ids_and_tags(b_dat_pg, false, false)
 
 		// vtu
 		vtu_write(b_top_ge, b_dat_ge, tidx, "")
@@ -189,6 +247,7 @@ func vtu_write(top, dat *bytes.Buffer, tidx int, suffix string) {
 	nv := len(nodes)
 	nc := len(elems)
 	if withips {
+		nv += len(out.Ipoints)
 		nc += len(out.Ipoints)
 	}
 	var hdr, foo bytes.Buffer
@@ -276,4 +335,114 @@ func topology(buf *bytes.Buffer) {
 	}
 	io.Ff(buf, "\n</DataArray>\n</Cells>\n")
 	return
+}
+
+// points data /////////////////////////////////////////////////////////////////////////////////////
+
+func open_pdata(buf *bytes.Buffer) {
+	if buf == nil {
+		return
+	}
+	io.Ff(buf, "<PointData Scalars=\"TheScalars\">\n")
+}
+
+func close_pdata(buf *bytes.Buffer) {
+	if buf == nil {
+		return
+	}
+	io.Ff(buf, "</PointData>\n")
+}
+
+func get_zeros(n int) (l string) {
+	for i := 0; i < n; i++ {
+		l += "0 "
+	}
+	return
+}
+
+func pdata_write(buf *bytes.Buffer, label string, keys []string, Y []float64, skipNodes, skipIps bool) {
+	if buf == nil {
+		return
+	}
+
+	nkeys := len(keys)
+	zeros := get_zeros(nkeys)
+
+	io.Ff(buf, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">\n", label, nkeys)
+
+	// loop over nodes
+	for _, n := range nodes {
+		l := zeros
+		if !skipNodes {
+			l = ""
+			for _, key := range keys {
+				eq := n.GetEq(key)
+				if eq >= 0 {
+					l += io.Sf("%23.15e ", Y[eq])
+				} else {
+					l += "0 "
+				}
+			}
+		}
+		io.Ff(buf, l)
+	}
+
+	// loop over integration points
+	if withips {
+		for _, p := range out.Ipoints {
+			l := zeros
+			if !skipIps {
+				l = ""
+				for _, key := range keys {
+					if v, ok := p.V[key]; ok {
+						io.Ff(buf, "%23.15e ", *v)
+					} else {
+						l += "0 "
+					}
+				}
+			}
+			io.Ff(buf, l)
+		}
+	}
+	io.Ff(buf, "\n</DataArray>\n")
+}
+
+func cdata_ids_and_tags(buf *bytes.Buffer, skipNodes, skipIps bool) {
+	if buf == nil {
+		return
+	}
+
+	io.Ff(buf, "<CellData Scalars=\"TheScalars\">\n")
+
+	// ids
+	io.Ff(buf, "<DataArray type=\"Float64\" Name=\"eid\" NumberOfComponents=\"1\" format=\"ascii\">\n")
+	for _, e := range elems {
+		io.Ff(buf, "%d ", e.Id())
+	}
+	if withips {
+		for _, p := range out.Ipoints {
+			io.Ff(buf, "%d ", p.Eid)
+		}
+	}
+
+	// cells positive tags
+	io.Ff(buf, "\n</DataArray>\n<DataArray type=\"Float64\" Name=\"tag\" NumberOfComponents=\"1\" format=\"ascii\">\n")
+	for _, e := range elems {
+		ptag := iabs(cells[e.Id()].Tag)
+		io.Ff(buf, "%d ", ptag)
+	}
+	if withips {
+		for _, p := range out.Ipoints {
+			ptag := IP_TAG_INI + iabs(cells[p.Eid].Tag)
+			io.Ff(buf, "%d ", ptag)
+		}
+	}
+	io.Ff(buf, "\n</DataArray>\n</CellData>\n")
+}
+
+func iabs(val int) int {
+	if val < 0 {
+		return -val
+	}
+	return val
 }
