@@ -1,0 +1,31 @@
+{
+  "data" : {
+    "desc"    : "two qua4",
+    "matfile" : "simple.mat",
+    "steady"  : true,
+    "showR"   : true
+  },
+  "functions" : [
+    { "name":"qnH", "type":"cte", "prms":[{"n":"c", "v":-50 }] },
+    { "name":"qnV", "type":"cte", "prms":[{"n":"c", "v":-100}] }
+  ],
+  "regions" : [
+    {
+      "mshfile" : "twoqua4.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"elast", "type":"u" }
+      ]
+    }
+  ],
+  "stages" : [
+    {
+      "desc"    : "apply load",
+      "facebcs" : [
+        { "tag":-10, "keys":["uy"], "funcs":["zero"] },
+        { "tag":-13, "keys":["ux"], "funcs":["zero"] },
+        { "tag":-11, "keys":["qn"], "funcs":["qnH"] },
+        { "tag":-12, "keys":["qn"], "funcs":["qnV"] }
+      ]
+    }
+  ]
+}

@@ -4,12 +4,12 @@
 
 package out
 
-// parse_key parses key like "duxdt" returning "ux" and time derivative number
+// ParseKey parses key like "duxdt" returning "ux" and time derivative number
 //  Output: {key, number-of-time-derivatives}
 //  Examples:  "ux"      => "ux", 0
 //             "duxdt"   => "ux", 1
 //             "d2uxdt2" => "ux", 2
-func parse_key(key string) (string, int) {
+func ParseKey(key string) (string, int) {
 	if len(key) > 3 {
 		n := len(key)
 		if key[:1] == "d" && key[n-2:] == "dt" {
