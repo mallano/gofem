@@ -48,7 +48,8 @@
         "rtol"   : 1e-6
       },
       "control" : {
-        "dtfcn" : "dt"
+        "dtfcn" : "dt",
+        "dtofcn": "dt"
       }
     }
   ]

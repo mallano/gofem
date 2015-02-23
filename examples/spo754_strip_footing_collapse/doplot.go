@@ -4,9 +4,17 @@
 
 package main
 
-import "github.com/cpmech/gofem/out"
+import (
+	"testing"
+
+	"github.com/cpmech/gofem/fem"
+	"github.com/cpmech/gofem/out"
+)
 
 func main() {
+	// options
+	verbose := false
+	show := true
 
 	// finalise analysis process and catch errors upon exit
 	defer out.End()
@@ -16,10 +24,22 @@ func main() {
 
 	// all nodes
 	out.Define("all nodes", out.AllNodes())
+	out.Define("A", out.At{0, 5})
 
 	// load results
-	out.LoadResults([]float64{-1})
+	out.LoadResults(nil)
+
+	// check
+	skipK := true
+	tolK := 1e-17
+	tolu := 1e-11
+	tols := 1e-04
+
+	var tst testing.T
+	fem.TestingCompareResultsU(&tst, "data/spo754.sim", "spo754.cmp", tolK, tolu, tols, skipK, verbose)
 
 	// plot
-	out.Contour("uy", -1)
+	out.Splot("Plot")
+	out.Plt("uy", "t", "A", "ro-", -1)
+	out.Draw("", "", show)
 }
