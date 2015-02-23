@@ -16,7 +16,7 @@ func Test_plot01(tst *testing.T) {
 	defer End()
 
 	// test title
-	verbose()
+	//verbose()
 	chk.PrintTitle("plot01")
 
 	// start analysis process
@@ -48,5 +48,5 @@ func Test_plot01(tst *testing.T) {
 	Plt("y", "pl", "left", "'bo-'", 0)
 	Plt("y", "pl", "left", "'bo-'", -1)
 
-	Draw("", "", true)
+	Draw("", "", false)
 }
