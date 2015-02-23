@@ -13,8 +13,9 @@ import (
 
 // OutIpData is an auxiliary structure to transfer data from integration points (IP) to output routines.
 type OutIpData struct {
-	X []float64           // coordinates
-	V map[string]*float64 // maps label (e.g. "sx") to pointer to value
+	Eid int                 // id of element that owns this ip
+	X   []float64           // coordinates
+	V   map[string]*float64 // maps label (e.g. "sx") to pointer to value
 }
 
 // Elem defines what elements must calculate

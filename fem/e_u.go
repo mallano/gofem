@@ -528,7 +528,7 @@ func (o ElemU) OutIpsData() (data []*OutIpData) {
 		for i, key := range sigmas {
 			v[key] = &s.Sig[i]
 		}
-		data = append(data, &OutIpData{x, v})
+		data = append(data, &OutIpData{o.Id(), x, v})
 	}
 	return
 }

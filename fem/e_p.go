@@ -574,7 +574,7 @@ func (o ElemP) OutIpsData() (data []*OutIpData) {
 		s := o.States[idx]
 		x := o.Cell.Shp.IpRealCoords(o.X, ip)
 		v := map[string]*float64{"sl": &s.Sl}
-		data = append(data, &OutIpData{x, v})
+		data = append(data, &OutIpData{o.Id(), x, v})
 	}
 	return
 }
