@@ -88,6 +88,39 @@ func Draw(dirout, fname string, show bool) {
 	}
 }
 
+func Contour(key string, idxI int) {
+	if idxI < 0 {
+		idxI = len(I) - 1
+	}
+	l := io.Sf(`import json
+from gosl import *
+f = open('%s', 'r')
+M = json.load(f)
+f.close()
+ndim   = len(M['verts'][0]['c'])
+nverts = len(M['verts'])
+coords = zeros((nverts, ndim))
+xmin   = array(M['verts'][0]['c'])
+xmax   = array(M['verts'][0]['c'])
+for v in M['verts']:
+	for j in range(ndim):
+		coords[v['id'], j] = v['c'][j]
+		if v['c'][j] < xmin[j]: xmin[j] = v['c'][j]
+		if v['c'][j] > xmax[j]: xmax[j] = v['c'][j]
+npx = 21
+npy = 21
+xgrd  = linspace(xmin[0], xmax[0], npx)
+ygrd  = linspace(xmin[1], xmax[1], npy)
+gvals = {}
+`, Dom.Msh.FnamePath)
+	//Z = [N[i][%s][%d] for i in range(nverts)]
+	//gvals[key] = griddata((coords[:,0], coords[:,1]), Z, (xgrd[None,:], ygrd[:,None]), method='cubic', fill_value=fill_value)
+	//`, Dom.Msh.FnamePath, I[idxI])
+	io.Pf("%v\n", l)
+}
+
+// auxiliary /////////////////////////////////////////////////////////////////////////////////////////
+
 func get_vals_and_labels(handle, otherHandle interface{}, alias string, idxI int) ([]float64, string) {
 	otherKey := "any"
 	if key, ok := otherHandle.(string); ok {

@@ -161,11 +161,19 @@ func (o Along) Locate() (res Points) {
 
 // AllIps returns all cell/ip indices
 func AllIps() P {
-	p := make([][]int, 0)
+	var p [][]int
 	for i, ips := range Cid2ips {
 		for j, _ := range ips {
 			p = append(p, []int{i, j})
 		}
 	}
 	return p
+}
+
+func AllNodes() N {
+	var res []int
+	for _, nod := range Dom.Nodes {
+		res = append(res, nod.Vert.Id)
+	}
+	return res
 }
