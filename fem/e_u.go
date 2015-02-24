@@ -39,7 +39,7 @@ type ElemU struct {
 	IpsFace []*shp.Ipoint // integration points corresponding to faces
 
 	// material model and internal variables
-	Model    msolid.Solid // material model
+	Model    msolid.Model // material model
 	MdlSmall msolid.Small // model specialisation for small strains
 	MdlLarge msolid.Large // model specialisation for large deformations
 

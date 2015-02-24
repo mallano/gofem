@@ -59,7 +59,7 @@ func GetAndInitPorousModel(matname string) *mporous.Model {
 	return mdl
 }
 
-func GetAndInitSolidModel(matname string, ndim int) (msolid.Solid, fun.Prms) {
+func GetAndInitSolidModel(matname string, ndim int) (msolid.Model, fun.Prms) {
 
 	// material name
 	matdata := Global.Mdb.Get(matname)

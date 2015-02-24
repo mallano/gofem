@@ -36,7 +36,7 @@ type Ogden struct {
 
 // add model to factory
 func init() {
-	allocators["ogden"] = func() Solid { return new(Ogden) }
+	allocators["ogden"] = func() Model { return new(Ogden) }
 }
 
 // Init initialises model

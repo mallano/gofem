@@ -20,7 +20,7 @@ type VonMises struct {
 
 // add model to factory
 func init() {
-	allocators["vm"] = func() Solid { return new(VonMises) }
+	allocators["vm"] = func() Model { return new(VonMises) }
 }
 
 // Init initialises model

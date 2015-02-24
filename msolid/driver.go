@@ -17,7 +17,7 @@ type Driver struct {
 
 	// input
 	nsig  int   // number of stress components
-	model Solid // solid model
+	model Model // solid model
 
 	// settings
 	Silent  bool    // do not show error messages
