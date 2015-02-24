@@ -163,23 +163,14 @@ func init() {
 		nip = len(o.IpsElem)
 		nipf = len(o.IpsFace)
 
-		// material model name
-		matname := edat.Mat
-		matdata := Global.Mdb.Get(matname)
-		if LogErrCond(matdata == nil, "materials database failed on getting %q material\n", matname) {
+		// model
+		var prms fun.Prms
+		o.Model, prms = GetAndInitSolidModel(edat.Mat, o.Ndim)
+		if o.Model == nil {
 			return nil
 		}
-		mdlname := matdata.Model
 
-		// model and its specialisations
-		o.Model = msolid.GetModel(Global.Sim.Data.FnameKey, matname, mdlname, false)
-		if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
-			return nil
-		}
-		err = o.Model.Init(o.Ndim, Global.Sim.Data.Pstress, matdata.Prms)
-		if LogErr(err, "Model.Init failed") {
-			return nil
-		}
+		// model specialisations
 		switch m := o.Model.(type) {
 		case msolid.Small:
 			o.MdlSmall = m
@@ -188,7 +179,7 @@ func init() {
 		}
 
 		// parameters
-		for _, p := range matdata.Prms {
+		for _, p := range prms {
 			switch p.N {
 			case "rho":
 				o.Rho = p.V

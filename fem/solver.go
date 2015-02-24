@@ -53,6 +53,9 @@ func End() {
 		chk.CallerInfo(3)
 		chk.CallerInfo(2)
 		io.PfRed("ERROR: %v\n", err)
+		if inp.LogFile != nil {
+			io.Pfred("       please check log %s\n", inp.LogFile.Name())
+		}
 	} else {
 		inp.FlushLog()
 	}

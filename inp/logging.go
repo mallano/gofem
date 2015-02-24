@@ -12,8 +12,8 @@ import (
 	"github.com/cpmech/gosl/mpi"
 )
 
-// errFile holds a handle to errors logger file
-var logFile os.File
+// LogFile holds a handle to errors logger file
+var LogFile *os.File
 
 // InitLogFile initialises logger
 func InitLogFile(dirout, fnamekey string) (err error) {
@@ -23,19 +23,19 @@ func InitLogFile(dirout, fnamekey string) (err error) {
 	if mpi.IsOn() {
 		rank = mpi.Rank()
 	}
-	logFile, err := os.Create(io.Sf("%s/%s_p%d.log", dirout, fnamekey, rank))
+	LogFile, err = os.Create(io.Sf("%s/%s_p%d.log", dirout, fnamekey, rank))
 	if err != nil {
 		return
 	}
 
 	// connect logger to output file
-	log.SetOutput(logFile)
+	log.SetOutput(LogFile)
 	return
 }
 
 // FlusLog saves log (flushes to disk)
 func FlushLog() {
-	logFile.Close()
+	LogFile.Close()
 }
 
 // LogErr logs error and returs stop flag

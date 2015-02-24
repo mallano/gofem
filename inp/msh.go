@@ -46,6 +46,9 @@ type Cell struct {
 	// specific problems data
 	IsJoint   bool         // cell represents joint element
 	SeepVerts map[int]bool // local vertices ids of vertices on seepage faces
+
+	// for coupled problems
+	UseBasicGeo bool // tell underlying cells to use basic geo type in order to satisfy the LBB (Ladyženskaja-Babuška-Brezzi) condition
 }
 
 // CellFaceId structure

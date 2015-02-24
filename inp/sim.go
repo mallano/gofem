@@ -233,6 +233,15 @@ type IniStressData struct {
 	Nu  float64 `json:"nu"`  // Psa => Poisson's coefficient for plane-strain state
 }
 
+// GeoStData holds data for setting initial geostatic state (hydrostatic as well)
+type GeoStData struct {
+	HydroStData
+	Hom   bool    `json:"hom"`   // homogeneous stress distribution
+	Nu    float64 `json:"nu"`    // Poisson's coefficient to compute effective horizontal state
+	K0    float64 `json:"K0"`    // Earth pressure coefficient at rest to compute effective horizontal stresses
+	UseK0 bool    `json:"useK0"` // use K0 to compute effective horizontal stresses instead of "nu"
+}
+
 // Stage holds stage data
 type Stage struct {
 
@@ -247,6 +256,7 @@ type Stage struct {
 	HydroSt   *HydroStData   `json:"hydrost"`   // hydrostatic data
 	SeepFaces []int          `json:"seepfaces"` // face tags corresponding to seepage faces
 	IniStress *IniStressData `json:"inistress"` // initial stress data
+	GeoSt     *GeoStData     `json:"geost"`     // initial geostatic state data (hydrostatic as well)
 
 	// conditions
 	EleConds []*EleCond `json:"eleconds"` // element conditions. ex: gravity or beam distributed loads
