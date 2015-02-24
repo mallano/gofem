@@ -72,13 +72,16 @@ func (o *M1) Init(prms fun.Prms) (err error) {
 			return chk.Err("mconduct.M1: parameter named %q is incorrect\n", p.N)
 		}
 	}
-	o.klr.Init(fun.Prms{
+	err = o.klr.Init(fun.Prms{
 		&fun.Prm{N: "lam0", V: o.λ0l},
 		&fun.Prm{N: "lam1", V: o.λ1l},
 		&fun.Prm{N: "alp", V: o.αl},
 		&fun.Prm{N: "bet", V: o.βl},
 	})
-	o.kgr.Init(fun.Prms{
+	if err != nil {
+		return
+	}
+	err = o.kgr.Init(fun.Prms{
 		&fun.Prm{N: "lam0", V: o.λ0g},
 		&fun.Prm{N: "lam1", V: o.λ1g},
 		&fun.Prm{N: "alp", V: o.αg},
