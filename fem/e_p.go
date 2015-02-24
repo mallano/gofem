@@ -12,7 +12,6 @@ import (
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/utl"
 )
@@ -137,24 +136,11 @@ func init() {
 		o.Np = o.Cell.Shp.Nverts
 
 		// integration points
-		var nip, nipf int
-		if s_nip, found := io.Keycode(edat.Extra, "nip"); found {
-			nip = io.Atoi(s_nip)
-		}
-		if s_nipf, found := io.Keycode(edat.Extra, "nipf"); found {
-			nipf = io.Atoi(s_nipf)
-		}
-		var err error
-		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)
-		if LogErr(err, "GetIps failed for solid element") {
+		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Extra, o.Cell)
+		if o.IpsElem == nil || o.IpsFace == nil {
 			return nil
 		}
-		o.IpsFace, err = shp.GetIps(o.Cell.Shp.FaceType, nipf)
-		if LogErr(err, "GetIps failed for face") {
-			return nil
-		}
-		nip = len(o.IpsElem)
-		nipf = len(o.IpsFace)
+		nip := len(o.IpsElem)
 
 		// models
 		o.Mdl = GetAndInitPorousModel(edat.Mat)
@@ -178,6 +164,8 @@ func init() {
 		// seepage face
 		o.Nf = len(o.Cell.SeepVerts)
 		if o.Nf > 0 {
+
+			// vertices on seepage face; numbering
 			o.HasSeep = true
 			o.SeepId2vid = utl.IntBoolMapSort(o.Cell.SeepVerts)
 			o.Vid2seepId = utl.IntVals(o.Cell.Shp.Nverts, -1)
@@ -186,22 +174,8 @@ func init() {
 				o.Vid2seepId[m] = μ
 			}
 
-			// use macaulay function ?
-			if s_mac, found := io.Keycode(edat.Extra, "mac"); found {
-				o.Macaulay = io.Atob(s_mac)
-			}
-
-			// coefficient for smooth ramp function
-			o.βrmp = math.Ln2 / 0.01
-			if s_bet, found := io.Keycode(edat.Extra, "bet"); found {
-				o.βrmp = io.Atof(s_bet)
-			}
-
-			// κ coefficient
-			o.κ = 1.0
-			if s_kap, found := io.Keycode(edat.Extra, "kap"); found {
-				o.κ = io.Atof(s_kap)
-			}
+			// flags
+			o.Macaulay, o.βrmp, o.κ = GetSeepFaceFlags(edat.Extra)
 
 			// allocate coupling matrices
 			o.Kpf = la.MatAlloc(o.Np, o.Nf)

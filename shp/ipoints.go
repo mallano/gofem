@@ -20,6 +20,7 @@ type Ipoint struct {
 var ipsfactory = make(map[string][]*Ipoint)
 
 // GetIps returns a set of integration points
+//  If the number (nips) of integration points is zero, it returns a default set
 func GetIps(geoType string, nips int) (ips []*Ipoint, err error) {
 	key := io.Sf("%s_%d", geoType, nips)
 	s, ok := ipsfactory[key]
