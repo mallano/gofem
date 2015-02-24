@@ -94,8 +94,14 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 		xi = append(xi, m.Zmin)
 		xf = append(xf, m.Zmax)
 	}
-	NodBins.Init(xi, xf, Ndiv)
-	IpsBins.Init(xi, xf, Ndiv)
+	err := NodBins.Init(xi, xf, Ndiv)
+	if err != nil {
+		chk.Panic("cannot initialise bins for nodes: %v", err)
+	}
+	err = IpsBins.Init(xi, xf, Ndiv)
+	if err != nil {
+		chk.Panic("cannot initialise bins for integration points: %v", err)
+	}
 
 	// add nodes to bins
 	for activeId, nod := range Dom.Nodes {
@@ -117,7 +123,10 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 			id := len(Ipoints)
 			ids[i] = id
 			Ipoints = append(Ipoints, d)
-			IpsBins.Append(d.X, id)
+			err = IpsBins.Append(d.X, id)
+			if err != nil {
+				chk.Panic("cannot append to bins of integration points: %v", err)
+			}
 			for key, _ := range d.V {
 				utl.StrIntsMapAppend(&Ipkey2ips, key, id)
 				Ipkeys[key] = true
