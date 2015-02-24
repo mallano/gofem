@@ -83,31 +83,51 @@ func (o *Driver) Run(Pc []float64) (err error) {
 			if err != nil {
 				return
 			}
+			var has_errors bool
 			dnum := derivfcn(func(x float64, args ...interface{}) (res float64) {
 				tmp, pcNew = pcNew, x
 				Δpc = pcNew - pcOld
 				stmp.Set(o.Res[i-1])
-				o.Mdl.Update(&stmp, -Δpc, pg, divus)
+				e := o.Mdl.Update(&stmp, -Δpc, pg, divus)
+				if e != nil {
+					has_errors = true
+				}
 				res, pcNew = stmp.Sl, tmp
 				return
 			}, pcNew)
-			chk.PrintAnaNum(io.Sf("Ccb @ %.3f,%.4f", pcNew, o.Res[i].Sl), o.TolCcb, Ccb, dnum, o.VerD)
+			if has_errors {
+				return chk.Err("problems arised during update in numerical derivative for Ccb")
+			}
+			err = chk.PrintAnaNum(io.Sf("Ccb @ %.3f,%.4f", pcNew, o.Res[i].Sl), o.TolCcb, Ccb, dnum, o.VerD)
+			if err != nil {
+				return
+			}
 
 			// check Ccd
 			Ccd, err = o.Mdl.Ccd(o.Res[i])
 			if err != nil {
 				return
 			}
+			has_errors = false
 			dnum = derivfcn(func(x float64, args ...interface{}) (res float64) {
 				tmp, pcNew = pcNew, x
 				Δpc = pcNew - pcOld
 				stmp.Set(o.Res[i-1])
-				o.Mdl.Update(&stmp, -Δpc, pg, divus)
+				e := o.Mdl.Update(&stmp, -Δpc, pg, divus)
+				if e != nil {
+					has_errors = true
+				}
 				Ccbtmp, _ = o.Mdl.Ccb(&stmp)
 				res, pcNew = Ccbtmp, tmp
 				return
 			}, pcNew)
-			chk.PrintAnaNum(io.Sf("Ccd @ %.3f,%.4f", pcNew, o.Res[i].Sl), o.TolCcd, Ccd, dnum, o.VerD)
+			if has_errors {
+				return chk.Err("problems arised during update in numerical derivative for Ccd")
+			}
+			err = chk.PrintAnaNum(io.Sf("Ccd @ %.3f,%.4f", pcNew, o.Res[i].Sl), o.TolCcd, Ccd, dnum, o.VerD)
+			if err != nil {
+				return
+			}
 		}
 	}
 	return
