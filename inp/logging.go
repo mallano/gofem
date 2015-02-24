@@ -35,7 +35,10 @@ func InitLogFile(dirout, fnamekey string) (err error) {
 
 // FlusLog saves log (flushes to disk)
 func FlushLog() {
-	LogFile.Close()
+	err := LogFile.Close()
+	if err != nil {
+		io.PfRed("cannot close log file: %v", err)
+	}
 }
 
 // LogErr logs error and returs stop flag

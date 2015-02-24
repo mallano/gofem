@@ -20,6 +20,7 @@ def Cmd(command, verbose=False, debug=False):
     return out, err
 
 pkgs = [
+    ("ana",      "analytical solutions for comparisons"),
     ("shp",      "shape structures and quadrature points"),
     ("inp",      "input data structures. simulation, materials, meshes"),
     ("msolid",   "models for solids"),

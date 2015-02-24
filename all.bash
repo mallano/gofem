@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GOFEM="shp inp msolid mconduct mreten mporous fem out"
+GOFEM="ana shp inp msolid mconduct mreten mporous fem out"
 
 HERE=`pwd`
 for p in $GOFEM; do

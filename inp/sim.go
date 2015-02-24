@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/mpi"
@@ -59,7 +60,10 @@ func (o *Data) PostProcess(dir, fn string, erasefiles bool) {
 	if o.Encoder != "gob" || o.Encoder != "json" {
 		o.Encoder = "gob"
 	}
-	os.MkdirAll(o.DirOut, 0777)
+	err := os.MkdirAll(o.DirOut, 0777)
+	if err != nil {
+		chk.Panic("cannot create directory for output results (%s): %v", o.DirOut, err)
+	}
 	if erasefiles {
 		io.RemoveAll(io.Sf("%s/%s_*.gob", o.DirOut, o.FnameKey))
 		io.RemoveAll(io.Sf("%s/%s_*.json", o.DirOut, o.FnameKey))
@@ -394,6 +398,6 @@ func (o *Simulation) GetInfo(w goio.Writer) (err error) {
 	if err != nil {
 		return err
 	}
-	w.Write(b)
+	_, err = w.Write(b)
 	return
 }
