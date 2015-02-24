@@ -208,7 +208,9 @@ func Run() (runisok bool) {
 			}
 
 			// dynamic coefficients
-			Global.DynCoefs.CalcBoth(Δt)
+			if LogErr(Global.DynCoefs.CalcBoth(Δt), "cannot compute dynamic coefficients") {
+				return
+			}
 
 			// time update
 			t += Δt
@@ -347,7 +349,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 			// initialise linear solver
 			if d.InitLSol {
-				d.LinSol.InitR(d.Kb, Global.Sim.LinSol.Symmetric, Global.Sim.LinSol.Verbose, Global.Sim.LinSol.Timing)
+				if LogErr(d.LinSol.InitR(d.Kb, Global.Sim.LinSol.Symmetric, Global.Sim.LinSol.Verbose, Global.Sim.LinSol.Timing), "cannot initialise linear solver") {
+					return
+				}
 				d.InitLSol = false
 			}
 

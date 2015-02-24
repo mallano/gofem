@@ -159,7 +159,9 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	}
 
 	// initialise model
-	o.Mdl.Init(matdata.Prms)
+	if LogErr(o.Mdl.Init(matdata.Prms), "cannot initialise model for Rjoint element") {
+		return
+	}
 
 	// parameters
 	for _, p := range matdata.Prms {
