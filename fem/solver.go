@@ -40,7 +40,7 @@ var Global struct {
 	DynCoefs *DynCoefs // dynamic coefficients
 
 	// for debugging
-	DoDebug bool                          // debug flag
+	Debug   bool                          // debug flag
 	DebugKb func(d *Domain, firstIt bool) // debug Kb callback function
 
 	// options
@@ -95,7 +95,7 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	if Stop() {
 		return
 	}
-	Global.DoDebug = Global.Sim.Data.DoDebug
+	Global.Debug = Global.Sim.Data.Debug
 
 	// fix show residual flag
 	if !Global.Root {
@@ -143,7 +143,7 @@ func Run() (runisok bool) {
 	tidx := 0
 
 	// message
-	if Global.Verbose && !Global.DoDebug {
+	if Global.Verbose && !Global.Debug {
 		cpu_time := time.Now()
 		defer func() {
 			io.Pfcyan("\nfinal time = %g\n", t)
@@ -221,7 +221,7 @@ func Run() (runisok bool) {
 
 			// message
 			if Global.Verbose {
-				if !Global.Sim.Data.ShowR && !Global.DoDebug {
+				if !Global.Sim.Data.ShowR && !Global.Debug {
 					io.Pf("time       = %g\r", t)
 				}
 			}
@@ -303,7 +303,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		d.EssenBcs.AddToRhs(d.Fb, d.Sol)
 
 		// debug
-		if Global.DoDebug {
+		if Global.Debug {
 			la.PrintVec("fb", d.Fb[:d.Ny], "%13.10f ", false)
 		}
 
@@ -375,7 +375,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		}
 
 		// debug
-		if Global.DoDebug {
+		if Global.Debug {
 			la.PrintVec("wb", d.Wb[:d.Ny], "%13.10f ", false)
 		}
 
