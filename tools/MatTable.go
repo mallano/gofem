@@ -23,7 +23,6 @@ func main() {
 
 	// input data
 	matfn := "materials.mat"
-	fnk := io.FnKey(matfn)
 
 	skip := "gref nowet α"
 
@@ -41,6 +40,9 @@ func main() {
 	for _, key := range io.SplitKeys(skip) {
 		skipp[key] = true
 	}
+
+	// file key
+	fnk := io.FnKey(matfn)
 
 	// print input data
 	io.Pforan("Input data\n")
