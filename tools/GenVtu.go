@@ -371,9 +371,10 @@ func pdata_write(buf *bytes.Buffer, label string, keys []string, Y []float64, sk
 	io.Ff(buf, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">\n", label, nkeys)
 
 	// loop over nodes
-	for _, n := range nodes {
+	for _, v := range verts {
+		n := out.Dom.Vid2node[v.Id]
 		l := zeros
-		if !skipNodes {
+		if n != nil && !skipNodes {
 			l = ""
 			for _, key := range keys {
 				eq := n.GetEq(key)
