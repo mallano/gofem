@@ -74,9 +74,15 @@ func main() {
 
 	// build map of non-general keys
 	nongeneral := fem.GetIsEssenKeyMap()
-	nongeneral["ux"] = true
-	nongeneral["uy"] = true
-	nongeneral["uz"] = true
+	for _, key := range ukeys {
+		nongeneral[key] = true
+	}
+	for _, key := range skeys {
+		nongeneral[key] = true
+	}
+	for _, key := range rwlkeys {
+		nongeneral[key] = true
+	}
 	nongeneral["pl"] = true
 	nongeneral["pg"] = true
 
@@ -155,38 +161,45 @@ func main() {
 		open_pdata(b_dat_pl)
 		open_pdata(b_dat_pg)
 
-		// points-data: displacements
+		// node's points-data: displacements
 		if has_ux {
-			pdata_write(b_dat_ge, "u", ukeys, out.Dom.Sol.Y, false, false)
+			pdata_write(b_dat_ge, "u", ukeys, out.Dom.Sol.Y, false, true)
 			if !steady {
-				pdata_write(b_dat_ge, "v", ukeys, out.Dom.Sol.Dydt, false, false)
-				pdata_write(b_dat_ge, "a", ukeys, out.Dom.Sol.D2ydt2, false, false)
+				pdata_write(b_dat_ge, "v", ukeys, out.Dom.Sol.Dydt, false, true)
+				pdata_write(b_dat_ge, "a", ukeys, out.Dom.Sol.D2ydt2, false, true)
 			}
 		}
 
-		// points-data: pressure
+		// node's points-data: pressure
 		if has_pl {
-			pdata_write(b_dat_pl, "pl", []string{"pl"}, out.Dom.Sol.Y, false, false)
+			pdata_write(b_dat_pl, "pl", []string{"pl"}, out.Dom.Sol.Y, false, true)
 		}
 		if has_pg {
-			pdata_write(b_dat_pg, "pg", []string{"pl"}, out.Dom.Sol.Y, false, false)
+			pdata_write(b_dat_pg, "pg", []string{"pl"}, out.Dom.Sol.Y, false, true)
 		}
 
-		// points-data: general scalars
+		// node's points-data: general scalars
 		for key, _ := range out.Dom.YandC {
 			if _, isnongen := nongeneral[key]; !isnongen {
-				pdata_write(b_dat_ge, key, []string{key}, out.Dom.Sol.Y, false, false)
+				pdata_write(b_dat_ge, key, []string{key}, out.Dom.Sol.Y, false, true)
 			}
 		}
 
-		// points-data: stresses
+		// element's points-data: stresses
 		if has_sx {
-			pdata_write(b_dat_ge, "sig", skeys, out.Dom.Sol.Y, false, false)
+			pdata_write(b_dat_ge, "sig", skeys, out.Dom.Sol.Y, true, false)
 		}
 
-		// points-data: ρl * wl
+		// element's points-data: ρl * wl
 		if has_rwlx {
-			pdata_write(b_dat_ge, "rwl", rwlkeys, out.Dom.Sol.Y, false, false)
+			pdata_write(b_dat_ge, "rwl", rwlkeys, out.Dom.Sol.Y, true, false)
+		}
+
+		// element's points-data: general
+		for key, _ := range out.Ipkeys {
+			if _, isnongen := nongeneral[key]; !isnongen {
+				pdata_write(b_dat_ge, key, []string{key}, out.Dom.Sol.Y, true, false)
+			}
 		}
 
 		// close points-data section
