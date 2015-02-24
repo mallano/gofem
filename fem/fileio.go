@@ -78,13 +78,7 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 	}
 
 	// save file
-	fil, err := os.Create(out_nod_path(tidx, Global.Rank))
-	if LogErr(err, "SaveSol") {
-		return
-	}
-	defer fil.Close()
-	fil.Write(buf.Bytes())
-	return true
+	return save_file("SaveSol", "solution", out_nod_path(tidx, Global.Rank), &buf)
 }
 
 // ReadSol reads Solution from a file which name is set with tidx (time output index)
@@ -95,7 +89,11 @@ func (o *Domain) ReadSol(tidx int) (ok bool) {
 	if LogErr(err, "ReadSol") {
 		return
 	}
-	defer fil.Close()
+	defer func() {
+		if LogErr(fil.Close(), "ReadSol: cannot close file") {
+			return
+		}
+	}()
 
 	// get decoder
 	dec := GetDecoder(fil)
@@ -141,13 +139,7 @@ func (o Domain) SaveIvs(tidx int) (ok bool) {
 	}
 
 	// save file
-	fil, err := os.Create(out_ele_path(tidx))
-	if LogErr(err, "SaveIvs") {
-		return
-	}
-	defer fil.Close()
-	fil.Write(buf.Bytes())
-	return true
+	return save_file("SaveIvs", "internal values", out_ele_path(tidx), &buf)
 }
 
 // ReadIvs reads elements's internal values from a file which name is set with tidx (time output index)
@@ -158,7 +150,11 @@ func (o *Domain) ReadIvs(tidx int) (ok bool) {
 	if LogErr(err, "ReadIvs") {
 		return
 	}
-	defer fil.Close()
+	defer func() {
+		if LogErr(fil.Close(), "ReadIvs: cannot close file") {
+			return
+		}
+	}()
 
 	// decode internal variables
 	dec := GetDecoder(fil)
@@ -194,4 +190,21 @@ func out_nod_path(tidx, proc int) string {
 
 func out_ele_path(tidx int) string {
 	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_ele_%010d.%s", Global.Sim.Data.FnameKey, Global.Rank, tidx, Global.Sim.Data.Encoder))
+}
+
+func save_file(function, category, filename string, buf *bytes.Buffer) (ok bool) {
+	fil, err := os.Create(filename)
+	if LogErr(err, function) {
+		return
+	}
+	defer func() {
+		if LogErr(fil.Close(), io.Sf("cannot close %s file", category)) {
+			return
+		}
+	}()
+	_, err = fil.Write(buf.Bytes())
+	if LogErr(err, io.Sf("cannot write to %s file", category)) {
+		return
+	}
+	return true
 }

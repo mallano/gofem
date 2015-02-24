@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/mpi"
@@ -31,7 +32,8 @@ type Data struct {
 	Steady  bool `json:"steady"`  // steady simulation
 	Pstress bool `json:"pstress"` // plane-stress
 	Axisym  bool `json:"axisym"`  // axisymmetric
-	DoDebug bool `json:"dodebug"` // activate debugging
+	Debug   bool `json:"debug"`   // activate debugging
+	Stat    bool `json:"stat"`    // activate statistics
 
 	// options
 	React bool `json:"react"` // indicates whether or not reaction forces must be computed
@@ -59,7 +61,10 @@ func (o *Data) PostProcess(dir, fn string, erasefiles bool) {
 	if o.Encoder != "gob" || o.Encoder != "json" {
 		o.Encoder = "gob"
 	}
-	os.MkdirAll(o.DirOut, 0777)
+	err := os.MkdirAll(o.DirOut, 0777)
+	if err != nil {
+		chk.Panic("cannot create directory for output results (%s): %v", o.DirOut, err)
+	}
 	if erasefiles {
 		io.RemoveAll(io.Sf("%s/%s_*.gob", o.DirOut, o.FnameKey))
 		io.RemoveAll(io.Sf("%s/%s_*.json", o.DirOut, o.FnameKey))
@@ -233,6 +238,15 @@ type IniStressData struct {
 	Nu  float64 `json:"nu"`  // Psa => Poisson's coefficient for plane-strain state
 }
 
+// GeoStData holds data for setting initial geostatic state (hydrostatic as well)
+type GeoStData struct {
+	HydroStData
+	Hom   bool    `json:"hom"`   // homogeneous stress distribution
+	Nu    float64 `json:"nu"`    // Poisson's coefficient to compute effective horizontal state
+	K0    float64 `json:"K0"`    // Earth pressure coefficient at rest to compute effective horizontal stresses
+	UseK0 bool    `json:"useK0"` // use K0 to compute effective horizontal stresses instead of "nu"
+}
+
 // Stage holds stage data
 type Stage struct {
 
@@ -247,6 +261,7 @@ type Stage struct {
 	HydroSt   *HydroStData   `json:"hydrost"`   // hydrostatic data
 	SeepFaces []int          `json:"seepfaces"` // face tags corresponding to seepage faces
 	IniStress *IniStressData `json:"inistress"` // initial stress data
+	GeoSt     *GeoStData     `json:"geost"`     // initial geostatic state data (hydrostatic as well)
 
 	// conditions
 	EleConds []*EleCond `json:"eleconds"` // element conditions. ex: gravity or beam distributed loads
@@ -384,6 +399,6 @@ func (o *Simulation) GetInfo(w goio.Writer) (err error) {
 	if err != nil {
 		return err
 	}
-	w.Write(b)
+	_, err = w.Write(b)
 	return
 }

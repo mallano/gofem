@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/cpmech/gofem/inp"
+	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/la"
@@ -474,6 +475,10 @@ func (o *Domain) set_seepage_verts(stg *inp.Stage) {
 				p.C.SeepVerts = make(map[int]bool)
 			}
 			localverts := p.C.Shp.FaceLocalV[p.Fid]
+			if p.C.UseBasicGeo {
+				basic_shp := shp.Get(p.C.Shp.BasicType)
+				localverts = basic_shp.FaceLocalV[p.Fid]
+			}
 			for _, l := range localverts {
 				p.C.SeepVerts[l] = true
 			}

@@ -151,16 +151,16 @@ package shp implements shape structures/routines
 					<dd>&nbsp; &nbsp; <a href="#Shape.CalcAtR">func (o *Shape) CalcAtR(x [][]float64, R []float64, derivs bool) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Shape.Extrapolator">func (o *Shape) Extrapolator(E, ips [][]float64) (err error)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Shape.Extrapolator">func (o *Shape) Extrapolator(E [][]float64, ips []*Ipoint) (err error)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Shape.GetIpsNatCoordsMat">func (o *Shape) GetIpsNatCoordsMat(ips [][]float64) (ξh [][]float64)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Shape.GetIpsNatCoordsMat">func (o *Shape) GetIpsNatCoordsMat(ips []*Ipoint) (ξh [][]float64)</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Shape.GetNodesNatCoordsMat">func (o *Shape) GetNodesNatCoordsMat() (ξ [][]float64)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Shape.GetShapeMatAtIps">func (o *Shape) GetShapeMatAtIps(ips [][]float64) (N [][]float64)</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Shape.GetShapeMatAtIps">func (o *Shape) GetShapeMatAtIps(ips []*Ipoint) (N [][]float64)</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Shape.InvMap">func (o *Shape) InvMap(r, y []float64, x [][]float64) (err error)</a></dd>
@@ -293,11 +293,13 @@ constants
 		
 			
 			
-			<h2 id="GetIps">func <a href="https://github.com/cpmech/gofem/blob/master/shp/ipoints.go?s=529:593#L13">GetIps</a></h2>
+			<h2 id="GetIps">func <a href="https://github.com/cpmech/gofem/blob/master/shp/ipoints.go?s=610:674#L14">GetIps</a></h2>
 			<pre>func GetIps(geoType <a href="/pkg/builtin/#string">string</a>, nips <a href="/pkg/builtin/#int">int</a>) (ips []*<a href="#Ipoint">Ipoint</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
 GetIps returns a set of integration points
 </p>
+<pre>If the number (nips) of integration points is zero, it returns a default set
+</pre>
 
 			
 			
@@ -613,7 +615,7 @@ Get returns an existent Shape structure
 
 			
 				
-				<h3 id="Shape.AxisymGetRadius">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=6750:6813#L228">AxisymGetRadius</a></h3>
+				<h3 id="Shape.AxisymGetRadius">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=6760:6823#L229">AxisymGetRadius</a></h3>
 				<pre>func (o *<a href="#Shape">Shape</a>) AxisymGetRadius(x [][]<a href="/pkg/builtin/#float64">float64</a>) (radius <a href="/pkg/builtin/#float64">float64</a>)</pre>
 				<p>
 AxisymGetRadius returns the x0 == radius for axisymmetric computations
@@ -626,7 +628,7 @@ AxisymGetRadius returns the x0 == radius for axisymmetric computations
 				
 			
 				
-				<h3 id="Shape.AxisymGetRadiusF">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=7018:7095#L237">AxisymGetRadiusF</a></h3>
+				<h3 id="Shape.AxisymGetRadiusF">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=7028:7105#L238">AxisymGetRadiusF</a></h3>
 				<pre>func (o *<a href="#Shape">Shape</a>) AxisymGetRadiusF(x [][]<a href="/pkg/builtin/#float64">float64</a>, idxface <a href="/pkg/builtin/#int">int</a>) (radius <a href="/pkg/builtin/#float64">float64</a>)</pre>
 				<p>
 AxisymGetRadiusF (face) returns the x0 == radius for axisymmetric computations
@@ -639,7 +641,7 @@ AxisymGetRadiusF (face) returns the x0 == radius for axisymmetric computations
 				
 			
 				
-				<h3 id="Shape.CalcAtFaceIp">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=5797:5878#L194">CalcAtFaceIp</a></h3>
+				<h3 id="Shape.CalcAtFaceIp">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=5807:5888#L195">CalcAtFaceIp</a></h3>
 				<pre>func (o *<a href="#Shape">Shape</a>) CalcAtFaceIp(x [][]<a href="/pkg/builtin/#float64">float64</a>, ipf *<a href="#Ipoint">Ipoint</a>, idxface <a href="/pkg/builtin/#int">int</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 CalcAtFaceIp calculates face data such as Sf and Fnvec
@@ -657,7 +659,7 @@ Output:
 				
 			
 				
-				<h3 id="Shape.CalcAtIp">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=3206:3282#L76">CalcAtIp</a></h3>
+				<h3 id="Shape.CalcAtIp">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=3216:3292#L77">CalcAtIp</a></h3>
 				<pre>func (o *<a href="#Shape">Shape</a>) CalcAtIp(x [][]<a href="/pkg/builtin/#float64">float64</a>, ip *<a href="#Ipoint">Ipoint</a>, derivs <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 CalcAtIp calculates volume data such as S and G at natural coordinate r
@@ -674,7 +676,7 @@ Output:
 				
 			
 				
-				<h3 id="Shape.CalcAtR">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=4463:4539#L131">CalcAtR</a></h3>
+				<h3 id="Shape.CalcAtR">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/shp.go?s=4473:4549#L132">CalcAtR</a></h3>
 				<pre>func (o *<a href="#Shape">Shape</a>) CalcAtR(x [][]<a href="/pkg/builtin/#float64">float64</a>, R []<a href="/pkg/builtin/#float64">float64</a>, derivs <a href="/pkg/builtin/#bool">bool</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 CalcAtR calculates volume data such as S and G at natural coordinate r
@@ -691,8 +693,8 @@ Output:
 				
 			
 				
-				<h3 id="Shape.Extrapolator">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/algos.go?s=3703:3763#L143">Extrapolator</a></h3>
-				<pre>func (o *<a href="#Shape">Shape</a>) Extrapolator(E, ips [][]<a href="/pkg/builtin/#float64">float64</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<h3 id="Shape.Extrapolator">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/algos.go?s=3728:3798#L145">Extrapolator</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) Extrapolator(E [][]<a href="/pkg/builtin/#float64">float64</a>, ips []*<a href="#Ipoint">Ipoint</a>) (err <a href="/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Extrapolator computes the extrapolation matrix for this Shape with a combination of integration points &#39;ips&#39;
 </p>
@@ -704,8 +706,8 @@ Extrapolator computes the extrapolation matrix for this Shape with a combination
 				
 			
 				
-				<h3 id="Shape.GetIpsNatCoordsMat">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/algos.go?s=2848:2917#L111">GetIpsNatCoordsMat</a></h3>
-				<pre>func (o *<a href="#Shape">Shape</a>) GetIpsNatCoordsMat(ips [][]<a href="/pkg/builtin/#float64">float64</a>) (ξh [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<h3 id="Shape.GetIpsNatCoordsMat">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/algos.go?s=2848:2915#L111">GetIpsNatCoordsMat</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) GetIpsNatCoordsMat(ips []*<a href="#Ipoint">Ipoint</a>) (ξh [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
 				<p>
 GetIpsNatCoordsMat returns the matrix (\hat{ξ}) with natural coordinates of interation
 points, augmented by one column which is filled with ones [nip][ndim+1]
@@ -728,8 +730,8 @@ augmented by one column which is filled with ones [nverts][ndim+1]
 				
 			
 				
-				<h3 id="Shape.GetShapeMatAtIps">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/algos.go?s=3220:3285#L125">GetShapeMatAtIps</a></h3>
-				<pre>func (o *<a href="#Shape">Shape</a>) GetShapeMatAtIps(ips [][]<a href="/pkg/builtin/#float64">float64</a>) (N [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<h3 id="Shape.GetShapeMatAtIps">func (*Shape) <a href="https://github.com/cpmech/gofem/blob/master/shp/algos.go?s=3250:3313#L127">GetShapeMatAtIps</a></h3>
+				<pre>func (o *<a href="#Shape">Shape</a>) GetShapeMatAtIps(ips []*<a href="#Ipoint">Ipoint</a>) (N [][]<a href="/pkg/builtin/#float64">float64</a>)</pre>
 				<p>
 GetShapeMatAtIps returns a matrix formed by computing the shape functions
 at all integration points [nip][nverts]

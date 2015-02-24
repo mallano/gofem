@@ -40,7 +40,7 @@ var Global struct {
 	DynCoefs *DynCoefs // dynamic coefficients
 
 	// for debugging
-	DoDebug bool                          // debug flag
+	Debug   bool                          // debug flag
 	DebugKb func(d *Domain, firstIt bool) // debug Kb callback function
 
 	// options
@@ -53,6 +53,9 @@ func End() {
 		chk.CallerInfo(3)
 		chk.CallerInfo(2)
 		io.PfRed("ERROR: %v\n", err)
+		if inp.LogFile != nil {
+			io.Pfred("       please check log %s\n", inp.LogFile.Name())
+		}
 	} else {
 		inp.FlushLog()
 	}
@@ -92,7 +95,7 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	if Stop() {
 		return
 	}
-	Global.DoDebug = Global.Sim.Data.DoDebug
+	Global.Debug = Global.Sim.Data.Debug
 
 	// fix show residual flag
 	if !Global.Root {
@@ -140,7 +143,7 @@ func Run() (runisok bool) {
 	tidx := 0
 
 	// message
-	if Global.Verbose && !Global.DoDebug {
+	if Global.Verbose && !Global.Debug {
 		cpu_time := time.Now()
 		defer func() {
 			io.Pfcyan("\nfinal time = %g\n", t)
@@ -205,7 +208,9 @@ func Run() (runisok bool) {
 			}
 
 			// dynamic coefficients
-			Global.DynCoefs.CalcBoth(Δt)
+			if LogErr(Global.DynCoefs.CalcBoth(Δt), "cannot compute dynamic coefficients") {
+				return
+			}
 
 			// time update
 			t += Δt
@@ -216,7 +221,7 @@ func Run() (runisok bool) {
 
 			// message
 			if Global.Verbose {
-				if !Global.Sim.Data.ShowR && !Global.DoDebug {
+				if !Global.Sim.Data.ShowR && !Global.Debug {
 					io.Pf("time       = %g\r", t)
 				}
 			}
@@ -254,7 +259,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 	la.VecFill(d.Sol.ΔY, 0)
 
 	// calculate global starred vectors and interpolate starred variables from nodes to integration points
-	d.star_vars(Δt)
+	if LogErr(d.star_vars(Δt), "cannot compute starred variables") {
+		return
+	}
 
 	// auxiliary variables
 	var it int
@@ -296,7 +303,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		d.EssenBcs.AddToRhs(d.Fb, d.Sol)
 
 		// debug
-		if Global.DoDebug {
+		if Global.Debug {
 			la.PrintVec("fb", d.Fb[:d.Ny], "%13.10f ", false)
 		}
 
@@ -344,7 +351,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 			// initialise linear solver
 			if d.InitLSol {
-				d.LinSol.InitR(d.Kb, Global.Sim.LinSol.Symmetric, Global.Sim.LinSol.Verbose, Global.Sim.LinSol.Timing)
+				if LogErr(d.LinSol.InitR(d.Kb, Global.Sim.LinSol.Symmetric, Global.Sim.LinSol.Verbose, Global.Sim.LinSol.Timing), "cannot initialise linear solver") {
+					return
+				}
 				d.InitLSol = false
 			}
 
@@ -366,7 +375,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		}
 
 		// debug
-		if Global.DoDebug {
+		if Global.Debug {
 			la.PrintVec("wb", d.Wb[:d.Ny], "%13.10f ", false)
 		}
 

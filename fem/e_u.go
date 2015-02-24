@@ -10,7 +10,6 @@ import (
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/tsr"
 )
@@ -39,7 +38,7 @@ type ElemU struct {
 	IpsFace []*shp.Ipoint // integration points corresponding to faces
 
 	// material model and internal variables
-	Model    msolid.Solid // material model
+	Model    msolid.Model // material model
 	MdlSmall msolid.Small // model specialisation for small strains
 	MdlLarge msolid.Large // model specialisation for large deformations
 
@@ -120,66 +119,24 @@ func init() {
 		o.Ndim = msh.Ndim
 		o.Nu = o.Ndim * o.Cell.Shp.Nverts
 
-		// flag: use B matrix
-		if s_useB, found := io.Keycode(edat.Extra, "useB"); found {
-			o.UseB = io.Atob(s_useB)
-		}
-
-		if Global.Sim.Data.Axisym {
-			o.UseB = true
-		}
-
-		// flag: thickess => plane-stress
-		o.Thickness = 1.0
-		if s_thick, found := io.Keycode(edat.Extra, "thick"); found {
-			o.Thickness = io.Atof(s_thick)
-			if LogErrCond(!Global.Sim.Data.Pstress, "cannot specify 'thick' in element if Pstress=false in Global Data") {
-				return nil
-			}
-		}
-
-		// flag: debug
-		if s_debug, found := io.Keycode(edat.Extra, "debug"); found {
-			o.Debug = io.Atob(s_debug)
-		}
+		// parse flags
+		o.UseB, o.Debug, o.Thickness = GetSolidFlags(edat.Extra)
 
 		// integration points
-		var nip, nipf int
-		if s_nip, found := io.Keycode(edat.Extra, "nip"); found {
-			nip = io.Atoi(s_nip)
-		}
-		if s_nipf, found := io.Keycode(edat.Extra, "nipf"); found {
-			nipf = io.Atoi(s_nipf)
-		}
-		var err error
-		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)
-		if LogErr(err, "GetIps failed for solid element") {
+		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Extra, o.Cell)
+		if o.IpsElem == nil || o.IpsFace == nil {
 			return nil
 		}
-		o.IpsFace, err = shp.GetIps(o.Cell.Shp.FaceType, nipf)
-		if LogErr(err, "GetIps failed for face") {
-			return nil
-		}
-		nip = len(o.IpsElem)
-		nipf = len(o.IpsFace)
+		nip := len(o.IpsElem)
 
-		// material model name
-		matname := edat.Mat
-		matdata := Global.Mdb.Get(matname)
-		if LogErrCond(matdata == nil, "materials database failed on getting %q material\n", matname) {
+		// model
+		var prms fun.Prms
+		o.Model, prms = GetAndInitSolidModel(edat.Mat, o.Ndim)
+		if o.Model == nil {
 			return nil
 		}
-		mdlname := matdata.Model
 
-		// model and its specialisations
-		o.Model = msolid.GetModel(Global.Sim.Data.FnameKey, matname, mdlname, false)
-		if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
-			return nil
-		}
-		err = o.Model.Init(o.Ndim, Global.Sim.Data.Pstress, matdata.Prms)
-		if LogErr(err, "Model.Init failed") {
-			return nil
-		}
+		// model specialisations
 		switch m := o.Model.(type) {
 		case msolid.Small:
 			o.MdlSmall = m
@@ -188,7 +145,7 @@ func init() {
 		}
 
 		// parameters
-		for _, p := range matdata.Prms {
+		for _, p := range prms {
 			switch p.N {
 			case "rho":
 				o.Rho = p.V
@@ -256,7 +213,7 @@ func (o *ElemU) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 	return true
 }
 
-// SetSurfLoads set surface loads (natural boundary conditions)
+// SetNatBcs set surface loads (natural boundary conditions)
 func (o *ElemU) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
 	return true
@@ -294,7 +251,7 @@ func (o *ElemU) InterpStarVars(sol *Solution) (ok bool) {
 	return
 }
 
-// adds -R to global residual vector fb
+// AddToRhs adds -R to global residual vector fb
 func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// clear fi vector if using B matrix
@@ -359,7 +316,7 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	return o.add_surfloads_to_rhs(fb, sol)
 }
 
-// adds element K to global Jacobian matrix Kb
+// AddToKb adds element K to global Jacobian matrix Kb
 func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// zero K matrix

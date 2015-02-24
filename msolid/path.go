@@ -76,7 +76,10 @@ func (o *Path) SetPQstrain(ndim, nincs, niout int, K, G, p0 float64, DP, DQ []fl
 	o.UseE[0] = 1
 	for i := 1; i < n; i++ {
 		Δp, Δq = DP[i-1], DQ[i-1]
-		CalcΔεElast(Δε, K, G, Δp, Δq, axsym)
+		_, _, err = CalcΔεElast(Δε, K, G, Δp, Δq, axsym)
+		if err != nil {
+			return
+		}
 		o.Ex[i], o.Ey[i], o.Ez[i], o.UseE[i] = o.Ex[i-1]+Δε[0], o.Ey[i-1]+Δε[1], o.Ez[i-1]+Δε[2], 1
 		o.Ey[i] += noise
 		o.Ez[i] -= noise

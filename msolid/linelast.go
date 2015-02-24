@@ -13,7 +13,7 @@ type LinElast struct {
 
 // add model to factory
 func init() {
-	allocators["lin-elast"] = func() Solid { return new(LinElast) }
+	allocators["lin-elast"] = func() Model { return new(LinElast) }
 }
 
 // Init initialises model

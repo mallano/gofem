@@ -23,7 +23,7 @@ type DruckerPrager struct {
 
 // add model to factory
 func init() {
-	allocators["dp"] = func() Solid { return new(DruckerPrager) }
+	allocators["dp"] = func() Model { return new(DruckerPrager) }
 }
 
 // Init initialises model

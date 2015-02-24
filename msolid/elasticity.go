@@ -22,13 +22,17 @@ type KGcalculator interface {
 var kgcfactory = map[string]func() KGcalculator{}
 
 // GetKgc returns a KG calculator
+// It returns nil on errors
 func GetKgc(name string, prms fun.Prms) KGcalculator {
 	allocator, ok := kgcfactory[name]
 	if !ok {
 		return nil
 	}
 	o := allocator()
-	o.Init(prms)
+	err := o.Init(prms)
+	if err != nil {
+		return nil
+	}
 	return o
 }
 

@@ -29,8 +29,8 @@ import (
 	"github.com/cpmech/gosl/io"
 )
 
-// Solid defines the interface for solid models
-type Solid interface {
+// Model defines the interface for solid models
+type Model interface {
 	Init(ndim int, pstress bool, prms fun.Prms) error // initialises model
 	GetPrms() fun.Prms                                // gets (an example) of parameters
 	InitIntVars() (*State, error)                     // initialises AND allocates internal (secondary) variables
@@ -60,7 +60,7 @@ type SmallStrainUpdater interface {
 //  modelname -- model name
 //  getnew    -- force a new allocation; i.e. do not use any model found in database
 //  Note: returns nil on errors
-func GetModel(simfnk, matname, modelname string, getnew bool) Solid {
+func GetModel(simfnk, matname, modelname string, getnew bool) Model {
 
 	// get new model, regardless wheter it exists in database or not
 	if getnew {
@@ -103,7 +103,7 @@ func LogModels() {
 }
 
 // allocators holds all available solid models; modelname => allocator
-var allocators = map[string]func() Solid{}
+var allocators = map[string]func() Model{}
 
 // _models holds pre-allocated solid models (internal); key => Solid
-var _models = map[string]Solid{}
+var _models = map[string]Model{}

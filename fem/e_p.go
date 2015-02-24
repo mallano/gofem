@@ -8,13 +8,10 @@ import (
 	"math"
 
 	"github.com/cpmech/gofem/inp"
-	"github.com/cpmech/gofem/mconduct"
 	"github.com/cpmech/gofem/mporous"
-	"github.com/cpmech/gofem/mreten"
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/utl"
 )
@@ -99,6 +96,12 @@ func init() {
 		cell := msh.Cells[cid]
 		nverts := cell.Shp.Nverts
 
+		// check whether basic cell type must be used instead; e.g. to satisfy LBB condition
+		if cell.UseBasicGeo {
+			basic_shp := shp.Get(cell.Shp.BasicType)
+			nverts = basic_shp.Nverts
+		}
+
 		// solution variables
 		ykeys := []string{"pl"}
 		info.Dofs = make([][]string, nverts)
@@ -133,54 +136,15 @@ func init() {
 		o.Np = o.Cell.Shp.Nverts
 
 		// integration points
-		var nip, nipf int
-		if s_nip, found := io.Keycode(edat.Extra, "nip"); found {
-			nip = io.Atoi(s_nip)
-		}
-		if s_nipf, found := io.Keycode(edat.Extra, "nipf"); found {
-			nipf = io.Atoi(s_nipf)
-		}
-		var err error
-		o.IpsElem, err = shp.GetIps(o.Cell.Shp.Type, nip)
-		if LogErr(err, "GetIps failed for solid element") {
+		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Extra, o.Cell)
+		if o.IpsElem == nil || o.IpsFace == nil {
 			return nil
 		}
-		o.IpsFace, err = shp.GetIps(o.Cell.Shp.FaceType, nipf)
-		if LogErr(err, "GetIps failed for face") {
-			return nil
-		}
-		nip = len(o.IpsElem)
-		nipf = len(o.IpsFace)
-
-		// materials
-		matname := edat.Mat
-		cndmat, lrmmat, pormat, err := Global.Mdb.GroupGet3(matname, "c", "l", "p")
-		if LogErr(err, io.Sf("materials database failed on getting %q group\n", matname)) {
-			return nil
-		}
+		nip := len(o.IpsElem)
 
 		// models
-		simfnk := Global.Sim.Data.FnameKey
-		getnew := false
-		cnd := mconduct.GetModel(simfnk, cndmat.Name, cndmat.Model, getnew)
-		if LogErrCond(cnd == nil, "cannot allocate conductivity models with name=%q", cndmat.Model) {
-			return nil
-		}
-		lrm := mreten.GetModel(simfnk, lrmmat.Name, lrmmat.Model, getnew)
-		if LogErrCond(lrm == nil, "cannot allocate liquid retention model with name=%q", lrmmat.Model) {
-			return nil
-		}
-		o.Mdl = mporous.GetModel(simfnk, pormat.Name, getnew)
-		if LogErrCond(o.Mdl == nil, "cannot allocate model for porous medium with name=%q", pormat.Name) {
-			return nil
-		}
-		if LogErr(cnd.Init(cndmat.Prms), "cannot initialise conductivity model") {
-			return nil
-		}
-		if LogErr(lrm.Init(lrmmat.Prms), "cannot initialise liquid retention model") {
-			return nil
-		}
-		if LogErr(o.Mdl.Init(pormat.Prms, cnd, lrm), "cannot initialise porous model") {
+		o.Mdl = GetAndInitPorousModel(edat.Mat)
+		if o.Mdl == nil {
 			return nil
 		}
 
@@ -200,6 +164,8 @@ func init() {
 		// seepage face
 		o.Nf = len(o.Cell.SeepVerts)
 		if o.Nf > 0 {
+
+			// vertices on seepage face; numbering
 			o.HasSeep = true
 			o.SeepId2vid = utl.IntBoolMapSort(o.Cell.SeepVerts)
 			o.Vid2seepId = utl.IntVals(o.Cell.Shp.Nverts, -1)
@@ -208,22 +174,8 @@ func init() {
 				o.Vid2seepId[m] = μ
 			}
 
-			// use macaulay function ?
-			if s_mac, found := io.Keycode(edat.Extra, "mac"); found {
-				o.Macaulay = io.Atob(s_mac)
-			}
-
-			// coefficient for smooth ramp function
-			o.βrmp = math.Ln2 / 0.01
-			if s_bet, found := io.Keycode(edat.Extra, "bet"); found {
-				o.βrmp = io.Atof(s_bet)
-			}
-
-			// κ coefficient
-			o.κ = 1.0
-			if s_kap, found := io.Keycode(edat.Extra, "kap"); found {
-				o.κ = io.Atof(s_kap)
-			}
+			// flags
+			o.Macaulay, o.βrmp, o.κ = GetSeepFaceFlags(edat.Extra)
 
 			// allocate coupling matrices
 			o.Kpf = la.MatAlloc(o.Np, o.Nf)
