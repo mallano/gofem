@@ -84,8 +84,6 @@ func init() {
 		// underlying elements
 		u_allocator := eallocators["u"]
 		p_allocator := eallocators["p"]
-		io.Pforan("u_allocator = %v\n", u_allocator)
-		io.Pforan("p_allocator = %v\n", p_allocator)
 		u_elem := u_allocator(edat, cid, msh)
 		p_elem := p_allocator(edat, cid, msh)
 		if LogErrCond(u_elem == nil, "cannot allocate underlying u-element") {
@@ -102,8 +100,6 @@ func init() {
 		o.bs = make([]float64, ndim)
 
 		// return new element
-		io.Pforan("U = %+v\n", o.U)
-		io.Pforan("P = %+v\n", o.P)
 		return &o
 	}
 }
@@ -115,6 +111,7 @@ func (o ElemUP) Id() int { return o.U.Cell.Id }
 
 // SetEqs set equations
 func (o *ElemUP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
+	io.Pforan("here = %v\n", 1)
 	ndim := o.U.Ndim
 	eqs_u := make([][]int, o.U.Cell.Shp.Nverts)
 	eqs_p := make([][]int, o.P.Cell.Shp.Nverts)

@@ -95,7 +95,10 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	if Stop() {
 		return
 	}
+
+	// debugging and statistics
 	Global.Debug = Global.Sim.Data.Debug
+	Stat.Detailed = Global.Sim.Data.Stat
 
 	// fix show residual flag
 	if !Global.Root {
@@ -142,28 +145,15 @@ func Run() (runisok bool) {
 	tout := 0.0
 	tidx := 0
 
-	// message
-	if Global.Verbose && !Global.Debug {
-		cpu_time := time.Now()
-		defer func() {
-			io.Pfcyan("\nfinal time = %g\n", t)
-			io.Pfblue2("cpu time   = %v\n", time.Now().Sub(cpu_time))
-		}()
-	}
-
-	// summary of outputs; e.g. with output times
-	var sum Summary
-	sum.Times = []float64{t}
-	sum.StgTidx = make([]int, len(Global.Sim.Stages))
-	defer func() {
-		SaveSum(&sum)
-	}()
+	// summary and statistics
+	Stat.TimeCpu = time.Now()
+	defer StatEnd(t)
 
 	// loop over stages
 	for stgidx, stg := range Global.Sim.Stages {
 
 		// summary
-		sum.StgTidx[stgidx] = tidx
+		StatInit(stgidx, tidx)
 
 		// time incrementers
 		Dt := stg.Control.DtFunc
@@ -227,6 +217,7 @@ func Run() (runisok bool) {
 			}
 
 			// run iterations
+			StatInitIter(stgidx, tidx)
 			for _, d := range domains {
 				if !run_iterations(t, Δt, d) {
 					return
@@ -235,7 +226,7 @@ func Run() (runisok bool) {
 
 			// perform output
 			if t >= tout || lasttimestep {
-				sum.Times = append(sum.Times, t)
+				StatSimtime(t)
 				for _, d := range domains {
 					if !d.Out(tidx) {
 						break
@@ -281,6 +272,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 	for it = 0; it < Global.Sim.Solver.NmaxIt; it++ {
 
 		// assemble right-hand side vector (fb) with negative of residuals
+		StatResetTime()
 		la.VecFill(d.Fb, 0)
 		for _, e := range d.Elems {
 			if !e.AddToRhs(d.Fb, d.Sol) {
@@ -309,6 +301,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 		// find largest absolute component of fb
 		largFb = la.VecLargest(d.Fb, 1)
+		StatFb(largFb)
 		if it == 0 {
 			// store largest absolute component of fb
 			largFb0 = largFb
@@ -329,6 +322,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		if do_asm_fact {
 
 			// assemble element matrices
+			StatResetTime()
 			d.Kb.Start()
 			for _, e := range d.Elems {
 				if !e.AddToKb(d.Kb, d.Sol, it == 0) {
@@ -348,6 +342,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 			if Global.Root {
 				d.Kb.PutMatAndMatT(&d.EssenBcs.A)
 			}
+			StatKb()
 
 			// initialise linear solver
 			if d.InitLSol {
@@ -369,10 +364,12 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		//la.PrintMat("KK", KK, "%20.10f", false)
 
 		// solve for wb := δyb
+		StatResetTime()
 		LogErr(d.LinSol.SolveR(d.Wb, d.Fb, false), "solve")
 		if Stop() {
 			return
 		}
+		StatLinsol()
 
 		// debug
 		if Global.Debug {
@@ -413,6 +410,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		}
 
 		// update secondary variables
+		StatResetTime()
 		for _, e := range d.Elems {
 			if !e.Update(d.Sol) {
 				break
@@ -421,6 +419,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		if Stop() {
 			return
 		}
+		StatUpdate()
 
 		// compute RMS norm of δu and check convegence on δu
 		Lδu = la.VecRmsErr(d.Wb[:d.Ny], Global.Sim.Solver.Atol, Global.Sim.Solver.Rtol, d.Sol.Y[:d.Ny])
