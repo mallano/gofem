@@ -259,7 +259,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 	la.VecFill(d.Sol.ΔY, 0)
 
 	// calculate global starred vectors and interpolate starred variables from nodes to integration points
-	d.star_vars(Δt)
+	if LogErr(d.star_vars(Δt), "cannot compute starred variables") {
+		return
+	}
 
 	// auxiliary variables
 	var it int

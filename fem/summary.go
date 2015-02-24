@@ -36,13 +36,7 @@ func SaveSum(sum *Summary) (ok bool) {
 	}
 
 	// save file
-	fil, err := os.Create(out_sum_path(Global.Rank))
-	if LogErr(err, "SaveSum") {
-		return
-	}
-	defer fil.Close()
-	fil.Write(buf.Bytes())
-	return true
+	return save_file("SaveSum", "summary", out_sum_path(Global.Rank), &buf)
 }
 
 // ReadSum reads summary back
@@ -53,7 +47,11 @@ func ReadSum() *Summary {
 	if LogErr(err, "ReadSum") {
 		return nil
 	}
-	defer fil.Close()
+	defer func() {
+		if LogErr(fil.Close(), "ReadSum: cannot close file") {
+			return
+		}
+	}()
 
 	// decode summary
 	var sum Summary

@@ -1,0 +1,271 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Gofem &ndash; package ana</title>
+<link type="text/css" rel="stylesheet" href="static/style.css">
+<script type="text/javascript" src="static/godocs.js"></script>
+<style type="text/css"></style>
+</head>
+<body>
+<div id="page"><h1>Gofem &ndash; <b>ana</b> &ndash; analytical solutions for comparisons</h1>
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script type='text/javascript'>
+	document.ANALYSIS_DATA = ;
+	document.CALLGRAPH = ;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/cpmech/gofem/ana"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+package ana implements analytical solutions
+</p>
+
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+			
+			
+				
+				<dd><a href="#CteStressPstrain">type CteStressPstrain</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#CteStressPstrain.CheckDispl">func (o CteStressPstrain) CheckDispl(tst *testing.T, t float64, u, x []float64, tol float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#CteStressPstrain.CheckStress">func (o CteStressPstrain) CheckStress(tst *testing.T, t float64, σ, x []float64, tol float64)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#CteStressPstrain.Init">func (o *CteStressPstrain) Init(prms fun.Prms)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#CteStressPstrain.Solution">func (o CteStressPstrain) Solution(t float64) (σx, σy, σz, εx, εy float64)</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/cpmech/gofem/ana/constantstress.go">constantstress.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		<div id="pkg-callgraph" class="toggle" style="display: none">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Internal Call Graph section">Internal call graph ▹</h2>
+		</div> <!-- .expanded -->
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Internal Call Graph section">Internal call graph ▾</h2>
+			<p>
+			  In the call graph viewer below, each node
+			  is a function belonging to this package
+			  and its children are the functions it
+			  calls&mdash;perhaps dynamically.
+			</p>
+			<p>
+			  The root nodes are the entry points of the
+			  package: functions that may be called from
+			  outside the package.
+			  There may be non-exported or anonymous
+			  functions among them if they are called
+			  dynamically from another package.
+			</p>
+			<p>
+			  Click a node to visit that function's source code.
+			  From there you can visit its callers by
+			  clicking its declaring <code>func</code>
+			  token.
+			</p>
+			<p>
+			  Functions may be omitted if they were
+			  determined to be unreachable in the
+			  particular programs or tests that were
+			  analyzed.
+			</p>
+			<!-- Zero means show all package entry points. -->
+			<ul style="margin-left: 0.5in" id="callgraph-0" class="treeview"></ul>
+		</div>
+		</div> <!-- #pkg-callgraph -->
+
+		
+		
+		
+		
+			
+			
+			<h2 id="CteStressPstrain">type <a href="https://github.com/cpmech/gofem/blob/master/ana/constantstress.go?s=741:1129#L19">CteStressPstrain</a></h2>
+			<pre>type CteStressPstrain struct {
+    E <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Young&#39;s modulus</span>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			<p>
+CteStressPstrain computes the constant-stress solution to a simple
+linear elastic plane-strain problem
+</p>
+<pre>            qnV
+      ↓↓↓↓↓↓↓↓↓↓↓↓↓
+    ▷ o-----------o ←
+    ▷ |           | ←
+    ▷ |     E     | ← qnH
+ly  ▷ |     ν     | ←
+    ▷ |           | ←
+    ▷ o-----------o ←
+      △  △  △  △  △
+           lx
+</pre>
+
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="CteStressPstrain.CheckDispl">func (CteStressPstrain) <a href="https://github.com/cpmech/gofem/blob/master/ana/constantstress.go?s=2059:2151#L86">CheckDispl</a></h3>
+				<pre>func (o <a href="#CteStressPstrain">CteStressPstrain</a>) CheckDispl(tst *<a href="/pkg/testing/">testing</a>.<a href="/pkg/testing/#T">T</a>, t <a href="/pkg/builtin/#float64">float64</a>, u, x []<a href="/pkg/builtin/#float64">float64</a>, tol <a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+CheckDispl checks displacements
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="CteStressPstrain.CheckStress">func (CteStressPstrain) <a href="https://github.com/cpmech/gofem/blob/master/ana/constantstress.go?s=2413:2507#L99">CheckStress</a></h3>
+				<pre>func (o <a href="#CteStressPstrain">CteStressPstrain</a>) CheckStress(tst *<a href="/pkg/testing/">testing</a>.<a href="/pkg/testing/#T">T</a>, t <a href="/pkg/builtin/#float64">float64</a>, σ, x []<a href="/pkg/builtin/#float64">float64</a>, tol <a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+CheckStress check stresses
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="CteStressPstrain.Init">func (*CteStressPstrain) <a href="https://github.com/cpmech/gofem/blob/master/ana/constantstress.go?s=1166:1212#L34">Init</a></h3>
+				<pre>func (o *<a href="#CteStressPstrain">CteStressPstrain</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>)</pre>
+				<p>
+Init initialises this structure
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="CteStressPstrain.Solution">func (CteStressPstrain) <a href="https://github.com/cpmech/gofem/blob/master/ana/constantstress.go?s=1722:1801#L73">Solution</a></h3>
+				<pre>func (o <a href="#CteStressPstrain">CteStressPstrain</a>) Solution(t <a href="/pkg/builtin/#float64">float64</a>) (σx, σy, σz, εx, εy <a href="/pkg/builtin/#float64">float64</a>)</pre>
+				<p>
+Solution computes solution
+</p>
+
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+</div><!-- page -->
+<div id="footer">
+<br /><br />
+<hr>
+<pre class="copyright">
+Copyright (c) 2015, Dorival Pedroso and Raul Durand
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of gofem nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+</pre><!-- copyright -->
+</div><!-- footer -->
+</body>
+</html>
