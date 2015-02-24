@@ -213,7 +213,7 @@ func (o *ElemU) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 	return true
 }
 
-// SetSurfLoads set surface loads (natural boundary conditions)
+// SetNatBcs set surface loads (natural boundary conditions)
 func (o *ElemU) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
 	return true
@@ -251,7 +251,7 @@ func (o *ElemU) InterpStarVars(sol *Solution) (ok bool) {
 	return
 }
 
-// adds -R to global residual vector fb
+// AddToRhs adds -R to global residual vector fb
 func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// clear fi vector if using B matrix
@@ -316,7 +316,7 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	return o.add_surfloads_to_rhs(fb, sol)
 }
 
-// adds element K to global Jacobian matrix Kb
+// AddToKb adds element K to global Jacobian matrix Kb
 func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// zero K matrix
