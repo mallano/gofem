@@ -10,14 +10,12 @@ import (
 	"path"
 
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/utl"
 )
 
 // Summary records summary of outputs
 type Summary struct {
-	Times   []float64       // [nOutTimes] output times
-	StgTidx []int           // [nstg] first stage's time-output-index
-	Resids  []*utl.Deep2mat // [nstg][nOutTimes][nIter] residuals (if Stat.Detailed is on)
+	Times   []float64 // [nOutTimes] output times
+	StgTidx []int     // [nstg] first stage's time-output-index
 }
 
 // SaveSums saves summary to disc
