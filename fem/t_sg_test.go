@@ -357,7 +357,8 @@ func Test_sg111(tst *testing.T) {
 	if doplot {
 
 		// read summary
-		sum := ReadSum()
+		sum := Global.Sum
+		sum.Read()
 
 		// allocate domain
 		d := NewDomain(Global.Sim.Regions[0])
@@ -371,7 +372,7 @@ func Test_sg111(tst *testing.T) {
 		didx := 1
 
 		// gofem
-		ntout := len(sum.Times)
+		ntout := len(sum.OutTimes)
 		uy := make([]float64, ntout)
 		for tidx := 0; tidx < ntout; tidx++ {
 			if !d.ReadSol(tidx) {
@@ -382,12 +383,12 @@ func Test_sg111(tst *testing.T) {
 			eq := nod.Dofs[didx].Eq
 			uy[tidx] = d.Sol.Y[eq]
 			// check
-			if math.Abs(d.Sol.T-sum.Times[tidx]) > 1e-14 {
+			if math.Abs(d.Sol.T-sum.OutTimes[tidx]) > 1e-14 {
 				tst.Errorf("output times do not match time in solution array")
 				return
 			}
 		}
-		plt.Plot(sum.Times, uy, "'ro-', clip_on=0, label='gofem'")
+		plt.Plot(sum.OutTimes, uy, "'ro-', clip_on=0, label='gofem'")
 
 		// analytical solution
 		ta := 1.0
@@ -434,7 +435,8 @@ func Test_sg114(tst *testing.T) {
 	if doplot {
 
 		// read summary
-		sum := ReadSum()
+		sum := Global.Sum
+		sum.Read()
 
 		// allocate domain
 		d := NewDomain(Global.Sim.Regions[0])
@@ -448,7 +450,7 @@ func Test_sg114(tst *testing.T) {
 		didx := 1
 
 		// new results
-		ntout := len(sum.Times)
+		ntout := len(sum.OutTimes)
 		uy := make([]float64, ntout)
 		for tidx := 0; tidx < ntout; tidx++ {
 			if !d.ReadSol(tidx) {
@@ -459,12 +461,12 @@ func Test_sg114(tst *testing.T) {
 			eq := nod.Dofs[didx].Eq
 			uy[tidx] = d.Sol.Y[eq]
 			// check
-			if math.Abs(d.Sol.T-sum.Times[tidx]) > 1e-14 {
+			if math.Abs(d.Sol.T-sum.OutTimes[tidx]) > 1e-14 {
 				tst.Errorf("output times do not match time in solution array")
 				return
 			}
 		}
-		plt.Plot(sum.Times, uy, "'k*-', clip_on=0, label='gofem'")
+		plt.Plot(sum.OutTimes, uy, "'k*-', clip_on=0, label='gofem'")
 
 		// old results
 		b, err := io.ReadFile("cmp/sg114gofemold.json")
@@ -521,7 +523,8 @@ func Test_sg1121(tst *testing.T) {
 	if doplot {
 
 		// read summary
-		sum := ReadSum()
+		sum := Global.Sum
+		sum.Read()
 
 		// allocate domain
 		d := NewDomain(Global.Sim.Regions[0])
@@ -535,7 +538,7 @@ func Test_sg1121(tst *testing.T) {
 		didx := 1
 
 		// new results
-		ntout := len(sum.Times)
+		ntout := len(sum.OutTimes)
 		uy := make([]float64, ntout)
 		for tidx := 0; tidx < ntout; tidx++ {
 			if !d.ReadSol(tidx) {
@@ -546,12 +549,12 @@ func Test_sg1121(tst *testing.T) {
 			eq := nod.Dofs[didx].Eq
 			uy[tidx] = d.Sol.Y[eq]
 			// check
-			if math.Abs(d.Sol.T-sum.Times[tidx]) > 1e-14 {
+			if math.Abs(d.Sol.T-sum.OutTimes[tidx]) > 1e-14 {
 				tst.Errorf("output times do not match time in solution array")
 				return
 			}
 		}
-		plt.Plot(sum.Times, uy, "'k*-', clip_on=0, label='gofem'")
+		plt.Plot(sum.OutTimes, uy, "'k*-', clip_on=0, label='gofem'")
 
 		// old results
 		b, err := io.ReadFile("cmp/sg1121gofemold.json")

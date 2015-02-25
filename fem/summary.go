@@ -10,16 +10,21 @@ import (
 	"path"
 
 	"github.com/cpmech/gosl/io"
+	"github.com/cpmech/gosl/utl"
 )
 
 // Summary records summary of outputs
 type Summary struct {
-	Times   []float64 // [nOutTimes] output times
-	StgTidx []int     // [nstg] first stage's time-output-index
+	OutTimes []float64   // [nOutTimes] output times
+	StgTidx  []int       // [nstg] first stage's time-output-index
+	Resids   utl.DblList // [nTimes][nIter] residuals (if Stat is on; includes all stages)
+
+	// auxiliary
+	cinc int // current time-step increment (used)
 }
 
 // SaveSums saves summary to disc
-func SaveSum(sum *Summary) (ok bool) {
+func (o Summary) Save() (ok bool) {
 
 	// skip if not root
 	if !Global.Root {
@@ -31,7 +36,7 @@ func SaveSum(sum *Summary) (ok bool) {
 	enc := GetEncoder(&buf)
 
 	// encode summary
-	if LogErr(enc.Encode(sum), "SaveSum") {
+	if LogErr(enc.Encode(o), "SaveSum") {
 		return
 	}
 
@@ -40,12 +45,12 @@ func SaveSum(sum *Summary) (ok bool) {
 }
 
 // ReadSum reads summary back
-func ReadSum() *Summary {
+func (o Summary) Read() (ok bool) {
 
 	// open file
 	fil, err := os.Open(out_sum_path(0)) // read always from proc # 0
 	if LogErr(err, "ReadSum") {
-		return nil
+		return
 	}
 	defer func() {
 		if LogErr(fil.Close(), "ReadSum: cannot close file") {
@@ -54,13 +59,24 @@ func ReadSum() *Summary {
 	}()
 
 	// decode summary
-	var sum Summary
 	dec := GetDecoder(fil)
-	err = dec.Decode(&sum)
+	err = dec.Decode(&o)
+
 	if LogErr(err, "ReadSum") {
-		return nil
+		return
 	}
-	return &sum
+	return
+}
+
+// AddResid adds the residual value for a given iteration
+func (o Summary) AddResid(iter int, resid float64) {
+	// update time-step counter
+	if iter == 0 && o.cinc != 0 {
+		o.cinc += 1
+	}
+
+	// add residual
+	o.Resids.Append(o.cinc, resid)
 }
 
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////

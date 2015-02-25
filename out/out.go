@@ -24,7 +24,7 @@ var (
 var (
 
 	// data set by Start
-	Sum       *fem.Summary     // summary of results
+	//Sum       *fem.Summary     // summary of results
 	Dom       *fem.Domain      // FE domain
 	Ipoints   []*fem.OutIpData // all integration points
 	Cid2ips   [][]int          // [ncells][nip] maps cell id to index in Ipoints
@@ -65,8 +65,7 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 	}
 
 	// read summary
-	Sum = fem.ReadSum()
-	if Sum == nil {
+	if !fem.Global.Sum.Read() {
 		chk.Panic("cannot read summary file for simulation=%q\n", simfnpath)
 	}
 

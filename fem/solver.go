@@ -34,6 +34,7 @@ var Global struct {
 	// simulation and materials
 	Sim *inp.Simulation // simulation data
 	Mdb *inp.MatDb      // materials database
+	Sum *Summary        // output times and all residuals
 
 	// auxiliar structures
 	DynCoefs *DynCoefs // dynamic coefficients
@@ -97,6 +98,7 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 
 	// debugging and statistics
 	Global.Debug = Global.Sim.Data.Debug
+	Global.Sum = new(Summary)
 
 	// fix show residual flag
 	if !Global.Root {
@@ -142,6 +144,12 @@ func Run() (runisok bool) {
 	t := 0.0
 	tout := 0.0
 	tidx := 0
+
+	// summary of outputs; e.g. with output times
+	Global.Sum.OutTimes = []float64{t}
+	defer func() {
+		Global.Sum.Save()
+	}()
 
 	// loop over stages
 	for stgidx, stg := range Global.Sim.Stages {
@@ -216,6 +224,7 @@ func Run() (runisok bool) {
 
 			// perform output
 			if t >= tout || lasttimestep {
+				Global.Sum.OutTimes = append(Global.Sum.OutTimes, t)
 				for _, d := range domains {
 					if !d.Out(tidx) {
 						break
@@ -289,6 +298,11 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 		// find largest absolute component of fb
 		largFb = la.VecLargest(d.Fb, 1)
+
+		// save residual
+		Global.Sum.Resids.Append(it, largFb)
+
+		// check largFb value
 		if it == 0 {
 			// store largest absolute component of fb
 			largFb0 = largFb

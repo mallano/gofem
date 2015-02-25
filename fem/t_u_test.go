@@ -90,9 +90,10 @@ func Test_sigini02(tst *testing.T) {
 	}
 
 	// read results
-	sum := ReadSum()
+	sum := Global.Sum
+	sum.Read()
 	io.Pforan("sum = %+v\n", sum)
-	ntout := len(sum.Times)
+	ntout := len(sum.OutTimes)
 	d.In(ntout - 1)
 
 	// solution

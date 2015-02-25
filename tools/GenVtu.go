@@ -132,7 +132,7 @@ func main() {
 	pvd_header(b_pvd_pg)
 
 	// process results
-	for tidx, t := range out.Sum.Times {
+	for tidx, t := range fem.Global.Sum.OutTimes {
 
 		// input results into domain
 		if !out.Dom.In(tidx) {

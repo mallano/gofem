@@ -7,6 +7,7 @@ package out
 import (
 	"strings"
 
+	"github.com/cpmech/gofem/fem"
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/utl"
 )
@@ -55,9 +56,9 @@ func LoadResults(times []float64) {
 
 	// selected output times and indices
 	if times == nil {
-		times = Sum.Times
+		times = fem.Global.Sum.OutTimes
 	}
-	I, T = utl.GetITout(Sum.Times, times, TolT)
+	I, T = utl.GetITout(fem.Global.Sum.OutTimes, times, TolT)
 
 	// for each selected output time
 	for _, tidx := range I {
