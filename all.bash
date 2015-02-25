@@ -8,6 +8,7 @@ for p in $GOFEM; do
     echo
     echo "[1;32m>>> compiling $p <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<[0m"
     cd $p
+    touch *.go
     go test
     go install
     cd $HERE
