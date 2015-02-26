@@ -35,3 +35,11 @@ func GetBasicType(cellType string) string {
 	}
 	return shape.BasicType
 }
+
+func GetVtkCode(cellType string) int {
+	shape, ok := factory[cellType]
+	if !ok {
+		return -1
+	}
+	return shape.VtkCode
+}
