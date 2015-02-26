@@ -444,6 +444,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	if !o.SetHydroSt(stg) {
 		return
 	}
+	if !o.SetGeoSt(stg) {
+		return
+	}
 	if !o.SetIniStress(stg) {
 		return
 	}

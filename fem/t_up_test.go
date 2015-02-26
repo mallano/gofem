@@ -13,7 +13,7 @@ import (
 	"github.com/cpmech/gosl/utl"
 )
 
-func Test_up01a(tst *testing.T) {
+func test_up01a(tst *testing.T) {
 
 	/* this tests simulates seepage flow along a column
 	 * by reducing the initial hydrostatic pressure at
@@ -161,10 +161,10 @@ func Test_up01a(tst *testing.T) {
 	// intial values @ integration points
 	io.Pforan("initial values @ integration points\n")
 	for _, ele := range dom.Elems {
-		e := ele.(*ElemP)
-		for idx, ip := range e.IpsElem {
-			s := e.States[idx]
-			z := e.Shp.IpRealCoords(e.X, ip)[1]
+		e := ele.(*ElemUP)
+		for idx, ip := range e.P.IpsElem {
+			s := e.P.States[idx]
+			z := e.P.Shp.IpRealCoords(e.P.X, ip)[1]
 			chk.Scalar(tst, io.Sf("sl @ %g", z), 1e-17, s.Sl, 1)
 			chk.Scalar(tst, io.Sf("pl @ %g", z), 1e-13, s.Pl, 100-10*z)
 		}
