@@ -5,16 +5,33 @@
 package shp
 
 func GetNverts(cellType string) int {
-	// TODO
-	return 0
+	shape, ok := factory[cellType]
+	if !ok {
+		return -1
+	}
+	return shape.Nverts
 }
 
-func GetLocalVerts(cellType string) []int {
-	// TODO
-	return nil
+func GetFaceLocalVerts(cellType string, fidx int) []int {
+	shape, ok := factory[cellType]
+	if !ok {
+		return nil
+	}
+	return shape.FaceLocalV[fidx]
 }
 
 func GetFaceType(cellType string) string {
-	// TODO
-	return ""
+	shape, ok := factory[cellType]
+	if !ok {
+		return ""
+	}
+	return shape.FaceType
+}
+
+func GetBasicType(cellType string) string {
+	shape, ok := factory[cellType]
+	if !ok {
+		return ""
+	}
+	return shape.BasicType
 }
