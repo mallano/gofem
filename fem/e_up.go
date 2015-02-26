@@ -9,7 +9,6 @@ import (
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
-	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 )
 
@@ -42,6 +41,10 @@ func init() {
 
 		// p-element cell type
 		p_cellType := cellType
+		lbb := !Global.Sim.Data.NoLBB
+		if lbb {
+			p_cellType = shp.GetBasicType(cellType)
+		}
 
 		// underlying cells info
 		u_info := infogetters["u"](ndim, cellType, faceConds)
@@ -77,6 +80,10 @@ func init() {
 
 		// p-element cell type
 		p_cellType := cellType
+		lbb := !Global.Sim.Data.NoLBB
+		if lbb {
+			p_cellType = shp.GetBasicType(cellType)
+		}
 
 		// underlying elements
 		u_allocator := eallocators["u"]
@@ -107,7 +114,6 @@ func (o ElemUP) Id() int { return o.U.Id() }
 
 // SetEqs set equations
 func (o *ElemUP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
-	io.Pforan("here = %v\n", 1)
 	ndim := o.U.Ndim
 	eqs_u := make([][]int, o.U.Shp.Nverts)
 	eqs_p := make([][]int, o.P.Shp.Nverts)
