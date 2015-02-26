@@ -69,6 +69,7 @@ func GetVertsWithCond(fconds []*FaceCond, cond string) (verts []int) {
 			verts = append(verts, lv)
 		}
 	}
+	return
 }
 
 // Solution holds the solution data @ nodes.
