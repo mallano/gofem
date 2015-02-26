@@ -24,7 +24,7 @@ import (
 type ElemP struct {
 
 	// basic data
-	Cell *inp.Cell   // cell
+	Cid  int         // cell/element id
 	X    [][]float64 // matrix of nodal coordinates [ndim][nnode]
 	Ndim int         // space dimension
 	Np   int         // total number of unknowns == number of vertices
@@ -87,20 +87,13 @@ type ElemP struct {
 func init() {
 
 	// information allocator
-	iallocators["p"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info {
+	infogetters["p"] = func(ndim int, cellType string, faceConds *FaceConds) *Info {
 
 		// new info
 		var info Info
 
 		// number of nodes in element
-		cell := msh.Cells[cid]
-		nverts := cell.Shp.Nverts
-
-		// check whether basic cell type must be used instead; e.g. to satisfy LBB condition
-		if cell.UseBasicGeo {
-			basic_shp := shp.Get(cell.Shp.BasicType)
-			nverts = basic_shp.Nverts
-		}
+		nverts := shp.GetNverts(cellType)
 
 		// solution variables
 		ykeys := []string{"pl"}
@@ -110,11 +103,15 @@ func init() {
 		}
 
 		// vertices on seepage faces
-		if len(cell.SeepVerts) > 0 {
-			ykeys = append(ykeys, "fl")
-		}
-		for m, _ := range cell.SeepVerts {
-			info.Dofs[m] = append(info.Dofs[m], "fl")
+		for _, fc := range faceConds {
+			if fc.Cond == "seepP" || fc.Cond == "seepH" {
+				for _, m := range fc.LocalVerts {
+					if m < nverts { // avoid adding vertices of superelement (e.g. qua8 vertices in this qua4 cell)
+						info.Dofs[m] = append(info.Dofs[m], "fl")
+					}
+				}
+				break
+			}
 		}
 
 		// maps
@@ -126,17 +123,17 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["p"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) Elem {
+	eallocators["p"] = func(ndim int, cellType string, faceConds *FaceConds, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o ElemP
-		o.Cell = msh.Cells[cid]
-		o.X = BuildCoordsMatrix(o.Cell, msh)
-		o.Ndim = msh.Ndim
-		o.Np = o.Cell.Shp.Nverts
+		o.Cid = cid
+		o.X = x
+		o.Ndim = ndim
+		o.Np = o.Shp.Nverts
 
 		// integration points
-		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Extra, o.Cell)
+		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Extra, cellType)
 		if o.IpsElem == nil || o.IpsFace == nil {
 			return nil
 		}
@@ -161,14 +158,25 @@ func init() {
 		o.tmp = make([]float64, o.Ndim)
 		o.Kpp = la.MatAlloc(o.Np, o.Np)
 
-		// seepage face
-		o.Nf = len(o.Cell.SeepVerts)
-		if o.Nf > 0 {
+		// vertices on seepage faces
+		var seepverts []int
+		for _, fc := range faceConds {
+			if fc.Cond == "seepP" || fc.Cond == "seepH" {
+				for _, m := range fc.LocalVerts {
+					if m < nverts { // avoid adding vertices of superelement (e.g. qua8 vertices in this qua4 cell)
+						seepverts = append(seepverts, m)
+					}
+				}
+				break
+			}
+		}
+		o.Nf = len(seepverts)
+		o.HasSeep = o.Nf > 0
+		if o.HasSeep {
 
 			// vertices on seepage face; numbering
-			o.HasSeep = true
-			o.SeepId2vid = utl.IntBoolMapSort(o.Cell.SeepVerts)
-			o.Vid2seepId = utl.IntVals(o.Cell.Shp.Nverts, -1)
+			o.SeepId2vid = utl.IntBoolMapSort(seepverts)
+			o.Vid2seepId = utl.IntVals(nverts, -1)
 			o.Fmap = make([]int, o.Nf)
 			for μ, m := range o.SeepId2vid {
 				o.Vid2seepId[m] = μ
@@ -191,12 +199,12 @@ func init() {
 // implementation ///////////////////////////////////////////////////////////////////////////////////
 
 // Id returns the cell Id
-func (o ElemP) Id() int { return o.Cell.Id }
+func (o ElemP) Id() int { return o.Cid }
 
 // SetEqs sets equations
 func (o *ElemP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	o.Pmap = make([]int, o.Np)
-	for m := 0; m < o.Cell.Shp.Nverts; m++ {
+	for m := 0; m < o.Shp.Nverts; m++ {
 		o.Pmap[m] = eqs[m][0]
 	}
 	if o.HasSeep {
@@ -219,13 +227,13 @@ func (o *ElemP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 func (o *ElemP) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
 	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
 	if key == "qb" || key == "seepP" || key == "seepH" {
-		nv := o.Cell.Shp.Nverts
+		nv := o.Shp.Nverts
 		nip := len(o.IpsElem)
 		o.ρl_ex = make([]float64, nv)
 		o.dρldpl_ex = la.MatAlloc(nv, nv)
 		o.Emat = la.MatAlloc(nv, nip)
 		o.DoExtrap = true
-		if LogErr(o.Cell.Shp.Extrapolator(o.Emat, o.IpsElem), "SetNatBcs") {
+		if LogErr(o.Shp.Extrapolator(o.Emat, o.IpsElem), "SetNatBcs") {
 			return
 		}
 	}
@@ -239,14 +247,14 @@ func (o *ElemP) InterpStarVars(sol *Solution) (ok bool) {
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions and gradients
-		if LogErr(o.Cell.Shp.CalcAtIp(o.X, ip, true), "InterpStarVars") {
+		if LogErr(o.Shp.CalcAtIp(o.X, ip, true), "InterpStarVars") {
 			return
 		}
 
 		// interpolate starred variables
 		o.ψl[idx] = 0
-		for m := 0; m < o.Cell.Shp.Nverts; m++ {
-			o.ψl[idx] += o.Cell.Shp.S[m] * sol.Psi[o.Pmap[m]]
+		for m := 0; m < o.Shp.Nverts; m++ {
+			o.ψl[idx] += o.Shp.S[m] * sol.Psi[o.Pmap[m]]
 		}
 	}
 	return true
@@ -262,7 +270,7 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
 	β1 := Global.DynCoefs.β1
-	nverts := o.Cell.Shp.Nverts
+	nverts := o.Shp.Nverts
 	var coef, plt, klr, RhoL, ρl, Cpl float64
 	var err error
 	for idx, ip := range o.IpsElem {
@@ -271,9 +279,9 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		if !o.ipvars(idx, sol) {
 			return
 		}
-		coef = o.Cell.Shp.J * ip.W
-		S := o.Cell.Shp.S
-		G := o.Cell.Shp.G
+		coef = o.Shp.J * ip.W
+		S := o.Shp.S
+		G := o.Shp.G
 		plt = β1*o.pl - o.ψl[idx]
 		klr = o.Mdl.Cnd.Klr(o.States[idx].Sl)
 		RhoL = o.States[idx].RhoL
@@ -316,7 +324,7 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// clear matrices
 	la.MatFill(o.Kpp, 0)
-	nverts := o.Cell.Shp.Nverts
+	nverts := o.Shp.Nverts
 	if o.DoExtrap {
 		for i := 0; i < nverts; i++ {
 			o.ρl_ex[i] = 0
@@ -337,9 +345,9 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 		if !o.ipvars(idx, sol) {
 			return
 		}
-		coef = o.Cell.Shp.J * ip.W
-		S := o.Cell.Shp.S
-		G := o.Cell.Shp.G
+		coef = o.Shp.J * ip.W
+		S := o.Shp.S
+		G := o.Shp.G
 		plt = β1*o.pl - o.ψl[idx]
 		klr = o.Mdl.Cnd.Klr(o.States[idx].Sl)
 		RhoL = o.States[idx].RhoL
@@ -414,15 +422,15 @@ func (o *ElemP) Update(sol *Solution) (ok bool) {
 	for idx, _ := range o.IpsElem {
 
 		// interpolation functions and gradients
-		if LogErr(o.Cell.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "Update") {
+		if LogErr(o.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "Update") {
 			return
 		}
 
 		// compute Δpl @ ip by means of interpolating from nodes
 		Δpl = 0
-		for m := 0; m < o.Cell.Shp.Nverts; m++ {
+		for m := 0; m < o.Shp.Nverts; m++ {
 			r := o.Pmap[m]
-			Δpl += o.Cell.Shp.S[m] * sol.ΔY[r]
+			Δpl += o.Shp.S[m] * sol.ΔY[r]
 		}
 
 		// update state
@@ -447,15 +455,15 @@ func (o *ElemP) InitIvs(sol *Solution) (ok bool) {
 	for idx, _ := range o.IpsElem {
 
 		// interpolation functions and gradients
-		if LogErr(o.Cell.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "InitIvs") {
+		if LogErr(o.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "InitIvs") {
 			return
 		}
 
 		// compute pl @ ip by means of interpolating from nodes
 		o.pl = 0
-		for m := 0; m < o.Cell.Shp.Nverts; m++ {
+		for m := 0; m < o.Shp.Nverts; m++ {
 			r := o.Pmap[m]
-			o.pl += o.Cell.Shp.S[m] * sol.Y[r]
+			o.pl += o.Shp.S[m] * sol.Y[r]
 		}
 
 		// state initialisation
@@ -524,7 +532,7 @@ func (o ElemP) Decode(dec Decoder) (ok bool) {
 func (o ElemP) OutIpsData() (data []*OutIpData) {
 	for idx, ip := range o.IpsElem {
 		s := o.States[idx]
-		x := o.Cell.Shp.IpRealCoords(o.X, ip)
+		x := o.Shp.IpRealCoords(o.X, ip)
 		v := map[string]*float64{"sl": &s.Sl}
 		data = append(data, &OutIpData{o.Id(), x, v})
 	}
@@ -537,7 +545,7 @@ func (o ElemP) OutIpsData() (data []*OutIpData) {
 func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 
 	// interpolation functions and gradients
-	if LogErr(o.Cell.Shp.CalcAtIp(o.X, o.IpsElem[idx], true), "ipvars") {
+	if LogErr(o.Shp.CalcAtIp(o.X, o.IpsElem[idx], true), "ipvars") {
 		return
 	}
 
@@ -554,11 +562,11 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 	}
 
 	// compute pl and its gradient @ ip by means of interpolating from nodes
-	for m := 0; m < o.Cell.Shp.Nverts; m++ {
+	for m := 0; m < o.Shp.Nverts; m++ {
 		r := o.Pmap[m]
-		o.pl += o.Cell.Shp.S[m] * sol.Y[r]
+		o.pl += o.Shp.S[m] * sol.Y[r]
 		for i := 0; i < o.Ndim; i++ {
-			o.gpl[i] += o.Cell.Shp.G[m][i] * sol.Y[r]
+			o.gpl[i] += o.Shp.G[m][i] * sol.Y[r]
 		}
 	}
 	return true
@@ -566,9 +574,9 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 
 // fipvars computes current values @ face integration points
 func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, z, pl, fl float64) {
-	Sf := o.Cell.Shp.Sf
+	Sf := o.Shp.Sf
 	iz := o.Ndim - 1 // index of z-coordinate (elevation)
-	for i, m := range o.Cell.Shp.FaceLocalV[fidx] {
+	for i, m := range o.Shp.FaceLocalV[fidx] {
 		μ := o.Vid2seepId[m]
 		ρl += Sf[i] * o.ρl_ex[m]
 		z += Sf[i] * o.X[iz][m]
@@ -610,10 +618,10 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 			// interpolation functions and gradients @ face
 			iface := nbc.IdxFace
-			if LogErr(o.Cell.Shp.CalcAtFaceIp(o.X, ipf, iface), "add_natbcs_to_rhs") {
+			if LogErr(o.Shp.CalcAtFaceIp(o.X, ipf, iface), "add_natbcs_to_rhs") {
 				return
 			}
-			Sf := o.Cell.Shp.Sf
+			Sf := o.Shp.Sf
 
 			// select natural boundary condition type
 			switch nbc.Key {
@@ -636,7 +644,7 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 				if math.Abs(g) < 1e-13 {
 					g = 0
 				}
-				for i, m := range o.Cell.Shp.FaceLocalV[iface] {
+				for i, m := range o.Shp.FaceLocalV[iface] {
 					μ := o.Vid2seepId[m]
 					fb[o.Pmap[m]] -= ipf.W * Sf[i] * rx
 					fb[o.Fmap[μ]] -= ipf.W * Sf[i] * rf
@@ -662,7 +670,7 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 	}
 
 	// compute surface integral
-	nverts := o.Cell.Shp.Nverts
+	nverts := o.Shp.Nverts
 	var tmp float64
 	var ρl, z, pl, fl, plmax, g, rmp, rmpD float64
 	var drxdpl, drxdfl, drfdpl, drfdfl float64
@@ -676,10 +684,10 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
 			// interpolation functions and gradients @ face
 			iface := nbc.IdxFace
-			if LogErr(o.Cell.Shp.CalcAtFaceIp(o.X, ipf, iface), "add_natbcs_to_jac") {
+			if LogErr(o.Shp.CalcAtFaceIp(o.X, ipf, iface), "add_natbcs_to_jac") {
 				return
 			}
-			Sf := o.Cell.Shp.Sf
+			Sf := o.Shp.Sf
 
 			// select natural boundary condition type
 			switch nbc.Key {
@@ -702,9 +710,9 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 				drxdfl = ρl * rmpD       // Eq. (A.5) (without Sn)
 				drfdpl = -o.κ * rmpD     // Eq. (A.6) (corrected with κ and without Sn)
 				drfdfl = 1.0 - rmpD      // Eq. (A.7) (without Sn)
-				for i, m := range o.Cell.Shp.FaceLocalV[iface] {
+				for i, m := range o.Shp.FaceLocalV[iface] {
 					μ := o.Vid2seepId[m]
-					for j, n := range o.Cell.Shp.FaceLocalV[iface] {
+					for j, n := range o.Shp.FaceLocalV[iface] {
 						ν := o.Vid2seepId[n]
 						o.Kpp[m][n] += ipf.W * Sf[i] * Sf[j] * drxdpl
 						o.Kpf[m][ν] += ipf.W * Sf[i] * Sf[j] * drxdfl
@@ -712,7 +720,7 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 						o.Kff[μ][ν] += ipf.W * Sf[i] * Sf[j] * drfdfl
 					}
 					for n := 0; n < nverts; n++ { // Eqs. (18) and (22)
-						for l, r := range o.Cell.Shp.FaceLocalV[iface] {
+						for l, r := range o.Shp.FaceLocalV[iface] {
 							o.Kpp[m][n] += ipf.W * Sf[i] * Sf[l] * o.dρldpl_ex[r][n] * rmp
 						}
 					}

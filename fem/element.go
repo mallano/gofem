@@ -74,26 +74,31 @@ type Info struct {
 }
 
 // GetElemInfo returns information about elements/formulations
-func GetElemInfo(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info {
-	allocator, ok := iallocators[edat.Type]
-	if LogErrCond(!ok, "cannot find element type = %s", edat.Type) {
+//  cellType -- e.g. "qua8"
+//  elemType -- e.g. "u"
+func GetElemInfo(ndim int, cellType, elemType string, faceConds *FaceConds) *Info {
+	infogetter, ok := infogetters[elemType]
+	if LogErrCond(!ok, "cannot find element type = %s", elemType) {
 		return nil
 	}
-	info := allocator(edat, cid, msh)
-	if LogErrCond(info == nil, "cannot find info from %q element", edat.Type) {
+	info := infogetter(ndim, cellType, faceConds)
+	if LogErrCond(info == nil, "cannot find info from %q element", elemType) {
 		return nil
 	}
 	return info
 }
 
 // NewElem returns a new element from its type; e.g. "p", "u" or "up"
-func NewElem(edat *inp.ElemData, cid int, msh *inp.Mesh) Elem {
-	allocator, ok := eallocators[edat.Type]
-	if LogErrCond(!ok, "cannot find element type = %s", edat.Type) {
+func NewElem(edat *inp.ElemData, cid int, msh *inp.Mesh, faceConds *FaceConds) Elem {
+	elemType := edat.Type
+	allocator, ok := eallocators[elemType]
+	if LogErrCond(!ok, "cannot find element type = %s", elemType) {
 		return nil
 	}
-	ele := allocator(edat, cid, msh)
-	if LogErrCond(ele == nil, "cannot allocate %q element", edat.Type) {
+	c := msh.Cells[cid]
+	x := BuildCoordsMatrix(c, msh)
+	ele := allocator(ndim, cellType, faceConds, cid, edat, x)
+	if LogErrCond(ele == nil, "cannot allocate %q element", elemType) {
 		return nil
 	}
 	return ele
@@ -110,8 +115,8 @@ func BuildCoordsMatrix(c *inp.Cell, msh *inp.Mesh) (x [][]float64) {
 	return
 }
 
-// iallocators holds all available formulations/info; elemType => iallocator
-var iallocators = make(map[string]func(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info)
+// infogetters holds all available formulations/info; elemType => infogetter
+var infogetters = make(map[string]func(ndim int, cellType string, faceConds *FaceConds) *Info)
 
 // eallocators holds all available elements; elemType => eallocator
-var eallocators = make(map[string]func(edat *inp.ElemData, cid int, msh *inp.Mesh) Elem)
+var eallocators = make(map[string]func(ndim int, cellType string, faceConds *FaceConds, cid int, edat *inp.ElemData, x [][]float64) Elem)

@@ -6,6 +6,7 @@ package fem
 
 import (
 	"github.com/cpmech/gofem/inp"
+	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
@@ -34,7 +35,7 @@ type ElemUP struct {
 func init() {
 
 	// information allocator
-	iallocators["up"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info {
+	infogetters["up"] = func(ndim int, cellType string, faceConds *FaceConds) *Info {
 
 		// new info
 		var info Info
@@ -48,11 +49,11 @@ func init() {
 		// cell
 		cell := msh.Cells[cid]
 		cell.UseBasicGeo = lbb
-		nverts := cell.Shp.Nverts
+		nverts := shp.GetNverts(cellType)
 
 		// underlying cells info
-		u_info := iallocators["u"](edat, cid, msh)
-		p_info := iallocators["p"](edat, cid, msh)
+		u_info := infogetters["u"](edat, cid, msh)
+		p_info := infogetters["p"](edat, cid, msh)
 
 		// solution variables
 		info.Dofs = make([][]string, nverts)
@@ -76,7 +77,7 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["up"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) Elem {
+	eallocators["up"] = func(ndim int, cellType string, faceConds *FaceConds, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o ElemUP

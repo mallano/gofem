@@ -17,7 +17,7 @@ import (
 type Beam struct {
 
 	// basic data
-	Cell *inp.Cell   // cell
+	Cid  int         // cell/element id
 	X    [][]float64 // matrix of nodal coordinates [ndim][nnode]
 	Ndim int         // space dimension
 	Nu   int         // total number of unknowns == 2 * nsn
@@ -58,14 +58,14 @@ type Beam struct {
 func init() {
 
 	// information allocator
-	iallocators["beam"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info {
+	infogetters["beam"] = func(ndim int, cellType string, faceConds *FaceConds) *Info {
 
 		// new info
 		var info Info
 
 		// solution variables
 		ykeys := []string{"ux", "uy", "rz"}
-		if msh.Ndim == 3 {
+		if ndim == 3 {
 			ykeys = []string{"ux", "uy", "uz", "rx", "ry", "rz"}
 		}
 		info.Dofs = make([][]string, 2)
@@ -82,18 +82,18 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["beam"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) Elem {
+	eallocators["beam"] = func(ndim int, cellType string, faceConds *FaceConds, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// check
-		if LogErrCond(msh.Ndim == 3, "beam is not implemented for 3D yet") {
+		if LogErrCond(ndim == 3, "beam is not implemented for 3D yet") {
 			return nil
 		}
 
 		// basic data
 		var o Beam
-		o.Cell = msh.Cells[cid]
-		o.X = BuildCoordsMatrix(o.Cell, msh)
-		o.Ndim = msh.Ndim
+		o.Cid = cid
+		o.X = x
+		o.Ndim = ndim
 		ndof := 3 * (o.Ndim - 1)
 		o.Nu = ndof * o.Ndim
 
@@ -206,7 +206,7 @@ func init() {
 }
 
 // Id returns the cell Id
-func (o Beam) Id() int { return o.Cell.Id }
+func (o Beam) Id() int { return o.Cid }
 
 // SetEqs set equations [2][?]. Format of eqs == format of info.Dofs
 func (o *Beam) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {

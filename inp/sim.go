@@ -271,6 +271,9 @@ type Stage struct {
 
 	// timecontrol
 	Control TimeControl `json:"control"` // time control
+
+	// derived
+	FaceTag2faceBc map[int]*FaceBc `json:"-"` // maps face tag to face boundary condition available in FaceBcs
 }
 
 // Simulation holds all simulation data
@@ -373,6 +376,9 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 			}
 			stg.Control.DtOut = stg.Control.DtoFunc.F(t, nil)
 		}
+
+		// prepare stg.FaceTag2faceBc map
+		// TODO:
 
 		// update time
 		t += stg.Control.Tf

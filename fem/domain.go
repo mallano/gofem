@@ -7,12 +7,56 @@ package fem
 import (
 	"log"
 
+	"code.google.com/p/gofem/fun"
+
 	"github.com/cpmech/gofem/inp"
-	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/la"
 )
+
+/* FaceCond holds information of one single face boundary condition. Example:
+ *
+ *                     -12 => "qn", "seepH"
+ *  36    -12     35   -11 => "ux", "seepH"
+ *   (3)--------(2)
+ *    |    2     |     face id => conditions
+ *    |          |           0 => <nil>
+ *    |3        1| -11       1 => {"ux", "seepH"} => localVerts={1,2} => globalVerts={34,35}
+ *    |          |           2 => {"qn", "seepH"} => localVerts={2,3} => globalVerts={35,36}
+ *    |    0     |           3 => <nil>
+ *   (0)--------(1)
+ *  33            34    "seepH" => localVerts={1,2,3}
+ *                      "seepH" => globalVerts={34,35,36}
+ *
+ *  face id => condition
+ *        1 => "ux"    => localVerts={1,2} => globalVerts={34,35}
+ *        1 => "seepH" => localVerts={1,2} => globalVerts={34,35}
+ *        2 => "qn"    => localVerts={2,3} => globalVerts={35,36}
+ *        2 => "seepH" => localVerts={2,3} => globalVerts={35,36}
+ */
+type FaceCond struct {
+	FaceId      int      // msh: cell's face local id
+	LocalVerts  []int    // msh: ALL cell's face local vertices ids (sorted)
+	GlobalVerts []int    // msh: ALL global vertices ids (sorted)
+	Cond        string   // sim: condition; e.g. "qn" or "seepH"
+	Func        fun.Func // sim: function to compute boundary condition
+	Extra       string   // sim: extra information
+}
+
+type FaceConds []*FaceCond
+
+func (o *FaceConds) Append(c *inp.Cell, faceId int, faceBc *inp.FaceBc) {
+	if faceBc == nil {
+		return
+	}
+	// TODO
+	fcn := Global.Sim.Functions.Get(nc.Funcs[j])
+}
+
+// Has["seepH"] => true
+//func (o FaceConds) Has(cond string) bool {
+//}
 
 // Solution holds the solution data @ nodes.
 //        / u \         / u \
@@ -46,6 +90,9 @@ type Domain struct {
 	Reg    *inp.Region // region data
 	Msh    *inp.Mesh   // mesh data
 	LinSol la.LinSol   // linear solver
+
+	// stage: auxiliary maps for setting boundary conditions
+	FaceConds map[int]*FaceConds // maps cell id to its face boundary conditions
 
 	// stage: nodes (active) and elements (active AND in this processor)
 	Nodes []*Node // active nodes (for each stage)
@@ -118,6 +165,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		}
 	}
 
+	// auxiliary maps for setting boundary conditions
+	o.FaceConds = make(map[int]*FaceConds) // cid => conditions
+
 	// nodes (active) and elements (active AND in this processor)
 	o.Nodes = make([]*Node, 0)
 	o.Elems = make([]Elem, 0)
@@ -136,9 +186,6 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	o.ElemConnect = make([]ElemConnector, 0)
 	o.ElemIntvars = make([]ElemIntvars, 0)
 
-	// set special features
-	o.set_seepage_verts(stg)
-
 	// allocate nodes and cells (active only) -------------------------------------------------------
 
 	// for each cell
@@ -155,7 +202,17 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			continue
 		}
 		o.Cid2active[c.Id] = true
-		info := GetElemInfo(edat, c.Id, o.Msh)
+
+		// prepare maps of face conditions
+		for faceId, faceTag := range c.FTags {
+			if faceTag < 0 {
+				faceBc := stg.FaceTag2faceBc[faceTag]
+				o.FaceConds[c.Id].Append(c, faceId, faceBc)
+			}
+		}
+
+		// get element info (such as DOFs, etc.)
+		info := GetElemInfo(o.Msh.Ndim, c.Type, edat.Type, o.FaceConds[c.Id])
 		if info == nil {
 			return
 		}
@@ -211,7 +268,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		if mycell {
 
 			// new element
-			ele := NewElem(edat, c.Id, o.Msh)
+			ele := NewElem(edat, c.Id, o.Msh, o.FaceConds[c.Id])
 			if ele == nil {
 				return
 			}
@@ -272,23 +329,15 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	}
 
 	// face boundary conditions
-	for _, fc := range stg.FaceBcs {
-		pairs, ok := o.Msh.FaceTag2cells[fc.Tag]
-		if LogErrCond(!ok, "cannot find cells with face tag = %d to assign face boundary conditions", fc.Tag) {
-			return
-		}
-		for _, p := range pairs {
-			if !o.Cid2active[p.C.Id] { // skip inactive element
-				continue
-			}
-			localverts := p.C.Shp.FaceLocalV[p.Fid]
+	// TODO
+	/*
+		for faceTag, faceBc := range stg.FaceTag2faceBc {
 			var enodes []*Node
-			for _, l := range localverts {
-				v := p.C.Verts[l]
+			for _, v := range faceBc.Verts {
 				enodes = append(enodes, o.Vid2node[v])
 			}
-			for j, key := range fc.Keys {
-				fcn := Global.Sim.Functions.Get(fc.Funcs[j])
+			for j, key := range faceBc.Keys {
+				fcn := Global.Sim.Functions.Get(faceBc.Funcs[j])
 				if LogErrCond(fcn == nil, "Functions.Get failed\n") {
 					return
 				}
@@ -296,17 +345,10 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 					if !o.EssenBcs.Set(key, enodes, fcn, fc.Extra) {
 						return
 					}
-				} else {
-					e := o.Cid2elem[p.C.Id]
-					if e != nil { // set natural BCs only for this processor's / active element
-						if !e.SetNatBcs(key, p.Fid, fcn, fc.Extra) {
-							return
-						}
-					}
 				}
 			}
 		}
-	}
+	*/
 
 	// vertex bounday conditions
 	for _, nc := range stg.NodeBcs {
@@ -475,10 +517,6 @@ func (o *Domain) set_seepage_verts(stg *inp.Stage) {
 				p.C.SeepVerts = make(map[int]bool)
 			}
 			localverts := p.C.Shp.FaceLocalV[p.Fid]
-			if p.C.UseBasicGeo {
-				basic_shp := shp.Get(p.C.Shp.BasicType)
-				localverts = basic_shp.FaceLocalV[p.Fid]
-			}
 			for _, l := range localverts {
 				p.C.SeepVerts[l] = true
 			}
