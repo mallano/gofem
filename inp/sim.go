@@ -271,9 +271,16 @@ type Stage struct {
 
 	// timecontrol
 	Control TimeControl `json:"control"` // time control
+}
 
-	// derived
-	FaceTag2faceBc map[int]*FaceBc `json:"-"` // maps face tag to face boundary condition available in FaceBcs
+func (o Stage) GetFaceBc(facetag int) *FaceBc {
+
+	for _, fbc := range o.FaceBcs {
+		if facetag == fbc.Tag {
+			return fbc
+		}
+	}
+	return nil
 }
 
 // Simulation holds all simulation data
