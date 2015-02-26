@@ -237,11 +237,6 @@ func (o *ElemP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 	return true
 }
 
-// SetSurfLoads sets surface loads (natural boundary conditions)
-func (o *ElemP) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
-	return true
-}
-
 // InterpStarVars interpolates star variables to integration points
 func (o *ElemP) InterpStarVars(sol *Solution) (ok bool) {
 

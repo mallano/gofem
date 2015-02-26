@@ -184,7 +184,7 @@ func init() {
 			}
 		}
 
-		// SetNatBcs set surface loads (natural boundary conditions)
+		// surface loads (natural boundary conditions)
 		for _, fc := range faceConds {
 			o.NatBcs = append(o.NatBcs, &NaturalBc{fc.Cond, fc.FaceId, fc.Func, fc.Extra})
 		}
@@ -216,12 +216,6 @@ func (o *ElemU) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 	if key == "g" { // gravity
 		o.Gfcn = f
 	}
-	return true
-}
-
-// SetNatBcs set surface loads (natural boundary conditions)
-func (o *ElemU) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
-	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
 	return true
 }
 

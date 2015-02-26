@@ -247,11 +247,6 @@ func (o *Beam) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 	return true
 }
 
-// SetSurfLoads set surface loads (natural boundary conditions)
-func (o *Beam) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
-	return true
-}
-
 // InterpStarVars interpolates star variables to integration points
 func (o *Beam) InterpStarVars(sol *Solution) (ok bool) {
 

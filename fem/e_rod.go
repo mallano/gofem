@@ -302,11 +302,6 @@ func (o *Rod) Update(sol *Solution) (ok bool) {
 	return true
 }
 
-// SetSurfLoads set surface loads (natural boundary conditions)
-func (o *Rod) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
-	return true
-}
-
 // internal variables ///////////////////////////////////////////////////////////////////////////////
 
 // InitIvs reset (and fix) internal variables after primary variables have been changed
