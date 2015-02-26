@@ -104,14 +104,10 @@ func init() {
 		}
 
 		// vertices on seepage faces
-		for _, fc := range faceConds {
-			if fc.Cond == "seepP" || fc.Cond == "seepH" {
-				for _, m := range fc.LocalVerts {
-					if m < nverts { // avoid adding vertices of superelement (e.g. qua8 vertices in this qua4 cell)
-						info.Dofs[m] = append(info.Dofs[m], "fl")
-					}
-				}
-				break
+		lverts := GetVertsWithCond(faceConds, "seepP", "seepH")
+		for _, m := range lverts {
+			if m < nverts { // avoid adding vertices of superelement (e.g. qua8 vertices in this qua4 cell)
+				info.Dofs[m] = append(info.Dofs[m], "fl")
 			}
 		}
 
@@ -161,18 +157,14 @@ func init() {
 		o.Kpp = la.MatAlloc(o.Np, o.Np)
 
 		// vertices on seepage faces
-		nverts := o.Shp.Nverts
 		var seepverts []int
-		for _, fc := range faceConds {
-			if fc.Cond == "seepP" || fc.Cond == "seepH" {
-				for _, m := range fc.LocalVerts {
-					if m < nverts { // avoid adding vertices of superelement (e.g. qua8 vertices in this qua4 cell)
-						seepverts = append(seepverts, m)
-					}
-				}
-				break
+		lverts := GetVertsWithCond(faceConds, "seepP", "seepH")
+		for _, m := range lverts {
+			if m < o.Np { // avoid adding vertices of superelement (e.g. qua8 vertices in this qua4 cell)
+				seepverts = append(seepverts, m)
 			}
 		}
+
 		o.Nf = len(seepverts)
 		o.HasSeep = o.Nf > 0
 		if o.HasSeep {
@@ -180,7 +172,7 @@ func init() {
 			// vertices on seepage face; numbering
 			//o.SeepId2vid = utl.IntBoolMapSort(seepverts)
 			o.SeepId2vid = seepverts
-			o.Vid2seepId = utl.IntVals(nverts, -1)
+			o.Vid2seepId = utl.IntVals(o.Np, -1)
 			o.Fmap = make([]int, o.Nf)
 			for μ, m := range o.SeepId2vid {
 				o.Vid2seepId[m] = μ

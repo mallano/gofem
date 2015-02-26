@@ -6,6 +6,7 @@ package fem
 
 import (
 	"log"
+	"sort"
 
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/shp"
@@ -13,6 +14,7 @@ import (
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/la"
+	"github.com/cpmech/gosl/utl"
 )
 
 /* FaceCond holds information of one single face boundary condition. Example:
@@ -45,30 +47,25 @@ type FaceCond struct {
 	Extra       string   // sim: extra information
 }
 
-func GetVertsWithCond(fconds []*FaceCond, cond string) (verts []int) {
+// GetVertsWithCond gets all vertices with any of the given conditions
+//  "seepH" => localVerts={1,2,3}
+func GetVertsWithCond(fconds []*FaceCond, conds ...string) (verts []int) {
 	for _, fc := range fconds {
-		// check if there is cond
-		if fc.Cond != cond {
+		// check if fc has any of conds
+		if utl.StrIndexSmall(conds, fc.Cond) < 0 {
 			continue
 		}
 
 		// add local verts
 		for _, lv := range fc.LocalVerts {
-
-			// check if exists
-			exists := false
-			for _, i := range verts {
-				if lv == i {
-					exists = true
-				}
+			// check if vert was added already
+			if utl.IntIndexSmall(verts, lv) < 0 {
+				verts = append(verts, lv) // add a vert
 			}
-			if exists {
-				continue
-			}
-			// add a vert
-			verts = append(verts, lv)
 		}
 	}
+
+	sort.Ints(verts)
 	return
 }
 
@@ -354,25 +351,22 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 
 	// face boundary conditions
 	// TODO
-	/*
-		for faceTag, faceBc := range stg.FaceTag2faceBc {
+
+	for _, fcs := range o.FaceConds {
+		for _, fc := range fcs {
+			lverts := fc.LocalVerts
 			var enodes []*Node
-			for _, v := range faceBc.Verts {
+			for _, v := range lverts {
 				enodes = append(enodes, o.Vid2node[v])
 			}
-			for j, key := range faceBc.Keys {
-				fcn := Global.Sim.Functions.Get(faceBc.Funcs[j])
-				if LogErrCond(fcn == nil, "Functions.Get failed\n") {
+			if o.YandC[fc.Cond] {
+				if !o.EssenBcs.Set(fc.Cond, enodes, fc.Func, fc.Extra) {
 					return
 				}
-				if o.YandC[key] {
-					if !o.EssenBcs.Set(key, enodes, fcn, fc.Extra) {
-						return
-					}
-				}
 			}
+
 		}
-	*/
+	}
 
 	// vertex bounday conditions
 	for _, nc := range stg.NodeBcs {
