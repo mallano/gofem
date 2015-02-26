@@ -54,7 +54,7 @@ func End() {
 }
 
 // Start starts handling of results given a simulation input file
-func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
+func Start(simfnpath string, stageIdx, regionIdx int) {
 
 	// start FE global structure
 	erasefiles := false
@@ -132,7 +132,4 @@ func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool) {
 		}
 		Cid2ips[cid] = ids
 	}
-
-	// success
-	return true
 }

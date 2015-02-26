@@ -18,7 +18,14 @@ import (
 func Test_out01(tst *testing.T) {
 
 	// finalise analysis process and catch errors
-	defer End()
+	defer func() {
+		if err := recover(); err != nil {
+			tst.Fail()
+			io.PfRed("ERROR: %v\n", err)
+		} else {
+			fem.End()
+		}
+	}()
 
 	// test title
 	//verbose()
@@ -31,6 +38,9 @@ func Test_out01(tst *testing.T) {
 	if !fem.Run() {
 		chk.Panic("cannot run FE simulation")
 	}
+
+	// clear old summary
+	fem.Global.Sum = nil
 
 	// start analysis process
 	Start("data/onequa4.sim", 0, 0)
@@ -153,7 +163,14 @@ func Test_out01(tst *testing.T) {
 func Test_out02(tst *testing.T) {
 
 	// finalise analysis process and catch errors
-	defer End()
+	defer func() {
+		if err := recover(); err != nil {
+			tst.Fail()
+			io.PfRed("ERROR: %v\n", err)
+		} else {
+			fem.End()
+		}
+	}()
 
 	// test title
 	//verbose()
@@ -166,6 +183,9 @@ func Test_out02(tst *testing.T) {
 	if !fem.Run() {
 		chk.Panic("cannot run FE simulation")
 	}
+
+	// clear old summary
+	fem.Global.Sum = nil
 
 	// start analysis process
 	Start("data/twoqua4.sim", 0, 0)

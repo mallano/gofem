@@ -7,13 +7,22 @@ package out
 import (
 	"testing"
 
+	"github.com/cpmech/gofem/fem"
 	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/io"
 )
 
 func Test_plot01(tst *testing.T) {
 
 	// finalise analysis process and catch errors
-	defer End()
+	defer func() {
+		if err := recover(); err != nil {
+			tst.Fail()
+			io.PfRed("ERROR: %v\n", err)
+		} else {
+			fem.End()
+		}
+	}()
 
 	// test title
 	//verbose()
