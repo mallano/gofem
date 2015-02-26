@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/cpmech/gofem/inp"
+	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
@@ -34,13 +35,40 @@ import (
  *        2 => "qn"    => localVerts={2,3} => globalVerts={35,36}
  *        2 => "seepH" => localVerts={2,3} => globalVerts={35,36}
  */
+
 type FaceCond struct {
 	FaceId      int      // msh: cell's face local id
-	LocalVerts  []int    // msh: ALL cell's face local vertices ids (sorted)
-	GlobalVerts []int    // msh: ALL global vertices ids (sorted)
+	LocalVerts  []int    // msh: cell's face local vertices ids (sorted)
+	GlobalVerts []int    // msh: global vertices ids (sorted)
 	Cond        string   // sim: condition; e.g. "qn" or "seepH"
 	Func        fun.Func // sim: function to compute boundary condition
 	Extra       string   // sim: extra information
+}
+
+func GetVertsWithCond(fconds []*FaceCond, cond string) (verts []int) {
+	for _, fc := range fconds {
+		// check if there is cond
+		if fc.Cond != cond {
+			continue
+		}
+
+		// add local verts
+		for _, lv := range fc.LocalVerts {
+
+			// check if exists
+			exists := false
+			for _, i := range verts {
+				if lv == i {
+					exists = true
+				}
+			}
+			if exists {
+				continue
+			}
+			// add a vert
+			verts = append(verts, lv)
+		}
+	}
 }
 
 // Solution holds the solution data @ nodes.
@@ -193,7 +221,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			if faceTag < 0 {
 				faceBc := stg.FaceTag2faceBc[faceTag]
 				if faceBc != nil {
-					lverts := []int{} // TODO shp.GetFaceLocalVerts(c.Type)
+					lverts := shp.GetFaceLocalVerts(c.Type, faceId)
 					gverts := o.faceLocal2globalVerts(lverts, c)
 					// TODO: must sort lverts and gverts
 					for j, key := range faceBc.Keys {
@@ -504,7 +532,7 @@ func (o *Domain) fix_inact_flags(eids_or_tags []int, deactivate bool) (ok bool) 
 func (o Domain) faceLocal2globalVerts(faceLverts []int, cell *inp.Cell) (faceGverts []int) {
 	faceGverts = make([]int, len(faceLverts))
 	for i, l := range faceLverts {
-		faceGverts[i] = cell.Verts[i]
+		faceGverts[i] = cell.Verts[l]
 	}
 	return
 }
