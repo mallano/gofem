@@ -43,20 +43,6 @@ type FaceCond struct {
 	Extra       string   // sim: extra information
 }
 
-type FaceConds []*FaceCond
-
-func (o *FaceConds) Append(c *inp.Cell, faceId int, faceBc *inp.FaceBc) {
-	if faceBc == nil {
-		return
-	}
-	// TODO
-	//fcn := Global.Sim.Functions.Get(nc.Funcs[j])
-}
-
-// Has["seepH"] => true
-//func (o FaceConds) Has(cond string) bool {
-//}
-
 // Solution holds the solution data @ nodes.
 //        / u \         / u \
 //        |   | => y =  |   |
@@ -91,7 +77,7 @@ type Domain struct {
 	LinSol la.LinSol   // linear solver
 
 	// stage: auxiliary maps for setting boundary conditions
-	FaceConds map[int]*FaceConds // maps cell id to its face boundary conditions
+	FaceConds map[int][]*FaceCond // maps cell id to its face boundary conditions
 
 	// stage: nodes (active) and elements (active AND in this processor)
 	Nodes []*Node // active nodes (for each stage)
@@ -165,7 +151,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	}
 
 	// auxiliary maps for setting boundary conditions
-	o.FaceConds = make(map[int]*FaceConds) // cid => conditions
+	o.FaceConds = make(map[int][]*FaceCond) // cid => conditions
 
 	// nodes (active) and elements (active AND in this processor)
 	o.Nodes = make([]*Node, 0)
@@ -206,7 +192,17 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		for faceId, faceTag := range c.FTags {
 			if faceTag < 0 {
 				faceBc := stg.FaceTag2faceBc[faceTag]
-				o.FaceConds[c.Id].Append(c, faceId, faceBc)
+				if faceBc != nil {
+					lverts := []int{} // TODO shp.GetFaceLocalVerts(c.Type)
+					gverts := o.faceLocal2globalVerts(lverts, c)
+					// TODO: must sort lverts and gverts
+					for j, key := range faceBc.Keys {
+						fcn := Global.Sim.Functions.Get(faceBc.Funcs[j])
+						fcond := &FaceCond{faceId, lverts, gverts, key, fcn, faceBc.Extra}
+						fconds := o.FaceConds[c.Id]
+						o.FaceConds[c.Id] = append(fconds, fcond)
+					}
+				}
 			}
 		}
 
@@ -290,7 +286,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 
 	// connect elements (e.g. Joints)
 	for _, e := range o.ElemConnect {
-		nnz, ok := e.Connect(o.Cid2elem)
+		nnz, ok := e.Connect(o.Cid2elem, o.Msh.Cells[e.Id()])
 		if LogErrCond(!ok, "Connect failed") {
 			return
 		}
@@ -504,21 +500,11 @@ func (o *Domain) fix_inact_flags(eids_or_tags []int, deactivate bool) (ok bool) 
 	return true
 }
 
-// set_seepage_verts sets the ids of vertices on seepage faces
-func (o *Domain) set_seepage_verts(stg *inp.Stage) {
-	for _, ftag := range stg.SeepFaces {
-		pairs, ok := o.Msh.FaceTag2cells[ftag]
-		if LogErrCond(!ok, "cannot find cells with face tag = %d to assign seepage face condition", ftag) {
-			return
-		}
-		for _, p := range pairs {
-			if p.C.SeepVerts == nil {
-				p.C.SeepVerts = make(map[int]bool)
-			}
-			localverts := p.C.Shp.FaceLocalV[p.Fid]
-			for _, l := range localverts {
-				p.C.SeepVerts[l] = true
-			}
-		}
+// faceLocal2globalVerts returns the face global vertices ids
+func (o Domain) faceLocal2globalVerts(faceLverts []int, cell *inp.Cell) (faceGverts []int) {
+	faceGverts = make([]int, len(faceLverts))
+	for i, l := range faceLverts {
+		faceGverts[i] = cell.Verts[i]
 	}
+	return
 }
