@@ -58,7 +58,7 @@ func (o *Data) PostProcess(dir, fn string, erasefiles bool) {
 	if o.DirOut == "" {
 		o.DirOut = "/tmp/gofem/" + o.FnameKey
 	}
-	if o.Encoder != "gob" || o.Encoder != "json" {
+	if o.Encoder != "gob" && o.Encoder != "json" {
 		o.Encoder = "gob"
 	}
 	err := os.MkdirAll(o.DirOut, 0777)
