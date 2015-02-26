@@ -16,7 +16,7 @@ go get github.com/cpmech/gofem/...
 
 ## Website
 
-http://cpmech.github.io/gosl
+http://cpmech.github.io/gofem
 
 ## Documentation for developers
 
