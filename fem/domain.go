@@ -13,6 +13,7 @@ import (
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/utl"
 )
@@ -217,7 +218,8 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 		// prepare maps of face conditions
 		for faceId, faceTag := range c.FTags {
 			if faceTag < 0 {
-				faceBc := stg.FaceTag2faceBc[faceTag]
+				faceBc := stg.GetFaceBc(faceTag)
+				io.Pforan("faceBc = %v\n", faceBc)
 				if faceBc != nil {
 					lverts := shp.GetFaceLocalVerts(c.Type, faceId)
 					gverts := o.faceLocal2globalVerts(lverts, c)
