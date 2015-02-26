@@ -50,7 +50,7 @@ func (o *FaceConds) Append(c *inp.Cell, faceId int, faceBc *inp.FaceBc) {
 		return
 	}
 	// TODO
-	fcn := Global.Sim.Functions.Get(nc.Funcs[j])
+	//fcn := Global.Sim.Functions.Get(nc.Funcs[j])
 }
 
 // Has["seepH"] => true
