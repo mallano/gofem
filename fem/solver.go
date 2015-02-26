@@ -6,6 +6,7 @@ package fem
 
 import (
 	"path/filepath"
+	"time"
 
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/mconduct"
@@ -13,7 +14,6 @@ import (
 	"github.com/cpmech/gofem/mreten"
 	"github.com/cpmech/gofem/msolid"
 
-	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/mpi"
@@ -49,16 +49,7 @@ var Global struct {
 
 // End must be called and the end to flush log file
 func End() {
-	if err := recover(); err != nil {
-		chk.CallerInfo(3)
-		chk.CallerInfo(2)
-		io.PfRed("ERROR: %v\n", err)
-		if inp.LogFile != nil {
-			io.Pfred("       please check log %s\n", inp.LogFile.Name())
-		}
-	} else {
-		inp.FlushLog()
-	}
+	inp.FlushLog()
 }
 
 // Start initialises 'global' and starts logging
@@ -147,9 +138,13 @@ func Run() (runisok bool) {
 	tidx := 0
 
 	// summary of outputs; e.g. with output times
+	cputime := time.Now()
 	Global.Sum.OutTimes = []float64{t}
 	defer func() {
 		Global.Sum.Save()
+		if Global.Verbose && !Global.Debug {
+			io.Pfblue2("\ncpu time = %v\n", time.Now().Sub(cputime))
+		}
 	}()
 
 	// loop over stages
@@ -212,7 +207,7 @@ func Run() (runisok bool) {
 			// message
 			if Global.Verbose {
 				if !Global.Sim.Data.ShowR && !Global.Debug {
-					io.Pf("time       = %g\r", t)
+					io.PfWhite("time     = %g\r", t)
 				}
 			}
 

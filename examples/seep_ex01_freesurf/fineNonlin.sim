@@ -15,8 +15,7 @@
   ],
   "regions" : [
     {
-      "mshfile_"  : "msh/fineNonlin.msh",
-      "mshfile"   : "msh/coarse.msh",
+      "mshfile" : "msh/fineNonlin.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"ex 1 and 2", "type":"p", "extra":"!bet:70" },
         { "tag":-2, "mat":"ex 1 and 2", "type":"p", "extra":"!bet:70" }

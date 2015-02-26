@@ -18,8 +18,8 @@ func main() {
 
 	// catch errors
 	defer func() {
-		if mpi.Rank() == 0 {
-			if err := recover(); err != nil {
+		if err := recover(); err != nil {
+			if mpi.Rank() == 0 {
 				io.PfRed("ERROR: %v\n", err)
 			}
 		}
@@ -28,10 +28,12 @@ func main() {
 	mpi.Start(false)
 
 	// message
-	io.PfWhite("\nGofem v3 -- Go Finite Element Method\n\n")
-	io.Pf("Copyright 2015 Dorival Pedroso and Raul Durand. All rights reserved.\n")
-	io.Pf("Use of this source code is governed by a BSD-style\n")
-	io.Pf("license that can be found in the LICENSE file.\n\n")
+	if mpi.Rank() == 0 {
+		io.PfWhite("\nGofem v3 -- Go Finite Element Method\n\n")
+		io.Pf("Copyright 2015 Dorival Pedroso and Raul Durand. All rights reserved.\n")
+		io.Pf("Use of this source code is governed by a BSD-style\n")
+		io.Pf("license that can be found in the LICENSE file.\n\n")
+	}
 
 	// simulation filenamepath
 	flag.Parse()

@@ -1,3 +1,4 @@
 #!/bin/bash
 
-gofem fineNonlin.sim && GenVtu fineNonlin
+gofem coarse && GenVtu coarse
+gofem fineNonlin && GenVtu fineNonlin
