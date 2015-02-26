@@ -189,6 +189,22 @@ func init() {
 			o.Kff = la.MatAlloc(o.Nf, o.Nf)
 		}
 
+		// set natural boundary conditions
+		for _, fc := range faceConds {
+			o.NatBcs = append(o.NatBcs, &NaturalBc{fc.Cond, fc.FaceId, fc.Func, fc.Extra})
+			if fc.Cond == "qb" || fc.Cond == "seepP" || fc.Cond == "seepH" {
+				nv := o.Shp.Nverts
+				nip := len(o.IpsElem)
+				o.ρl_ex = make([]float64, nv)
+				o.dρldpl_ex = la.MatAlloc(nv, nv)
+				o.Emat = la.MatAlloc(nv, nip)
+				o.DoExtrap = true
+				if LogErr(o.Shp.Extrapolator(o.Emat, o.IpsElem), "element allocation") {
+					return nil
+				}
+			}
+		}
+
 		// return new element
 		return &o
 	}
@@ -223,18 +239,6 @@ func (o *ElemP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 
 // SetSurfLoads sets surface loads (natural boundary conditions)
 func (o *ElemP) SetNatBcs(key string, idxface int, f fun.Func, extra string) (ok bool) {
-	o.NatBcs = append(o.NatBcs, &NaturalBc{key, idxface, f, extra})
-	if key == "qb" || key == "seepP" || key == "seepH" {
-		nv := o.Shp.Nverts
-		nip := len(o.IpsElem)
-		o.ρl_ex = make([]float64, nv)
-		o.dρldpl_ex = la.MatAlloc(nv, nv)
-		o.Emat = la.MatAlloc(nv, nip)
-		o.DoExtrap = true
-		if LogErr(o.Shp.Extrapolator(o.Emat, o.IpsElem), "SetNatBcs") {
-			return
-		}
-	}
 	return true
 }
 
