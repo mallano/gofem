@@ -32,6 +32,8 @@ type Data struct {
 	Steady  bool `json:"steady"`  // steady simulation
 	Pstress bool `json:"pstress"` // plane-stress
 	Axisym  bool `json:"axisym"`  // axisymmetric
+	NoLBB   bool `json:"nolbb"`   // do not satisfy Ladyženskaja-Babuška-Brezzi condition; i.e. do not use [qua8,qua4] for u-p formulation
+	LogBcs  bool `json:"logbcs"`  // log boundary conditions setting up
 	Debug   bool `json:"debug"`   // activate debugging
 	Stat    bool `json:"stat"`    // activate statistics
 
