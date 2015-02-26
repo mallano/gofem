@@ -27,10 +27,9 @@ var (
 	nodes []*fem.Node // active/allocated nodes
 	elems []fem.Elem  // active/allocated elements
 
-	dirout  string // directory for output
-	fnkey   string // filename key
-	steady  bool   // steady simulation
-	withips bool   // output integration points
+	dirout string // directory for output
+	fnkey  string // filename key
+	steady bool   // steady simulation
 
 	ukeys   = []string{"ux", "uy", "uz"}                      // displacement keys
 	skeys   = []string{"sx", "sy", "sz", "sxy", "syz", "szx"} // stress keys
@@ -56,7 +55,6 @@ func main() {
 
 	// input data
 	simfn := "data/twoqua4.sim"
-	withips = true
 	stgidx := 0
 
 	// parse flags
@@ -65,10 +63,7 @@ func main() {
 		simfn = flag.Arg(0)
 	}
 	if len(flag.Args()) > 1 {
-		withips = io.Atob(flag.Arg(1))
-	}
-	if len(flag.Args()) > 2 {
-		stgidx = io.Atoi(flag.Arg(2))
+		stgidx = io.Atoi(flag.Arg(1))
 	}
 
 	// check extension
@@ -80,7 +75,6 @@ func main() {
 	io.Pf("\nInput data\n")
 	io.Pf("==========\n")
 	io.Pf("  simfn   = %20s // simulation filename\n", simfn)
-	io.Pf("  withips = %20v // with integration points\n", withips)
 	io.Pf("  stgidx  = %20v // stage index\n", stgidx)
 	io.Pf("\n")
 
@@ -175,52 +169,10 @@ func main() {
 
 			// cells data
 			cdata_write(b, label == "ips")
+
+			// write vtu file
+			vtu_write(geo[label], b, tidx, label)
 		}
-
-		/*
-			// node's points-data: displacements
-			if has_ux {
-				pdata_write(b_dat_ge, "u", ukeys, out.Dom.Sol.Y, false, true)
-				if !steady {
-					pdata_write(b_dat_ge, "v", ukeys, out.Dom.Sol.Dydt, false, true)
-					pdata_write(b_dat_ge, "a", ukeys, out.Dom.Sol.D2ydt2, false, true)
-				}
-			}
-			// node's points-data: pressure
-			if has_pl {
-				pdata_write(b_dat_pl, "pl", []string{"pl"}, out.Dom.Sol.Y, false, true)
-			}
-			if has_pg {
-				pdata_write(b_dat_pg, "pg", []string{"pl"}, out.Dom.Sol.Y, false, true)
-			}
-			// node's points-data: general scalars
-			for key, _ := range out.Dom.YandC {
-				if _, isnongen := nongeneral[key]; !isnongen {
-					pdata_write(b_dat_ge, key, []string{key}, out.Dom.Sol.Y, false, true)
-				}
-			}
-			// element's points-data: stresses
-			if has_sx {
-				pdata_write(b_dat_ge, "sig", skeys, out.Dom.Sol.Y, true, false)
-			}
-			// element's points-data: ρl * wl
-			if has_rwlx {
-				pdata_write(b_dat_ge, "rwl", rwlkeys, out.Dom.Sol.Y, true, false)
-			}
-			// element's points-data: general
-			for key, _ := range out.Ipkeys {
-				if _, isnongen := nongeneral[key]; !isnongen {
-					pdata_write(b_dat_ge, key, []string{key}, out.Dom.Sol.Y, true, false)
-				}
-			}
-			// close points-data section
-			close_pdata(b_dat_ge)
-			close_pdata(b_dat_pl)
-			close_pdata(b_dat_pg)
-		*/
-
-		// vtu
-		//vtu_write(b_top_pg, b_dat_pg, tidx, "_pg")
 
 		// pvd
 		for label, b := range pvd {
@@ -258,21 +210,21 @@ func pvd_write(buf *bytes.Buffer, label string) {
 	io.WriteFileV(io.Sf("%s/%s_%s.pvd", dirout, fnkey, label), buf)
 }
 
-func vtu_write(top, dat *bytes.Buffer, tidx int, suffix string) {
-	if top == nil || dat == nil {
+func vtu_write(geo, dat *bytes.Buffer, tidx int, label string) {
+	if geo == nil || dat == nil {
 		return
 	}
-	nv := len(nodes)
+	nv := len(verts)
 	nc := len(elems)
-	if withips {
-		nv += len(out.Ipoints)
-		nc += len(out.Ipoints)
+	if label == "ips" {
+		nv = len(out.Ipoints)
+		nc = nv
 	}
 	var hdr, foo bytes.Buffer
 	io.Ff(&hdr, "<?xml version=\"1.0\"?>\n<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n<UnstructuredGrid>\n")
 	io.Ff(&hdr, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nv, nc)
 	io.Ff(&foo, "</Piece>\n</UnstructuredGrid>\n</VTKFile>\n")
-	io.WriteFile(io.Sf("%s/%s_%06d%s.vtu", dirout, fnkey, tidx, suffix), &hdr, top, dat, &foo)
+	io.WriteFile(io.Sf("%s/%s_%06d_%s.vtu", dirout, fnkey, tidx, label), &hdr, geo, dat, &foo)
 }
 
 // topology ////////////////////////////////////////////////////////////////////////////////////////
@@ -311,13 +263,13 @@ func topology(buf *bytes.Buffer, ips, lbb bool) {
 	} else {
 		for _, e := range elems {
 			cell := cells[e.Id()]
-			verts := cell.Verts
-			nverts := len(verts)
+			cverts := cell.Verts
+			nverts := len(cverts)
 			if lbb {
 				nverts = shp.GetNverts(shp.GetBasicType(cell.Type))
 			}
 			for j := 0; j < nverts; j++ {
-				io.Ff(buf, "%d ", verts[j])
+				io.Ff(buf, "%d ", cverts[j])
 			}
 		}
 	}
