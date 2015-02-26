@@ -221,7 +221,6 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 				if faceBc != nil {
 					lverts := shp.GetFaceLocalVerts(c.Type, faceId)
 					gverts := o.faceLocal2globalVerts(lverts, c)
-					// TODO: must sort lverts and gverts
 					for j, key := range faceBc.Keys {
 						fcn := Global.Sim.Functions.Get(faceBc.Funcs[j])
 						fcond := &FaceCond{faceId, lverts, gverts, key, fcn, faceBc.Extra}
@@ -350,8 +349,6 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	}
 
 	// face boundary conditions
-	// TODO
-
 	for cidx, fcs := range o.FaceConds {
 		c := o.Msh.Cells[cidx]
 		for _, fc := range fcs {

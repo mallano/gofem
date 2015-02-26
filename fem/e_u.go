@@ -184,6 +184,11 @@ func init() {
 			}
 		}
 
+		// SetNatBcs set surface loads (natural boundary conditions)
+		for _, fc := range faceConds {
+			o.NatBcs = append(o.NatBcs, &NaturalBc{fc.Cond, fc.FaceId, fc.Func, fc.Extra})
+		}
+
 		// return new element
 		return &o
 	}
