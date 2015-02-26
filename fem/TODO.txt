@@ -1,0 +1,1 @@
+1) check in .sim that keys and funcs have the same size for boundary conditions

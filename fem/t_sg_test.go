@@ -106,7 +106,7 @@ func Test_sg52a(tst *testing.T) {
 	}
 	for i, ele := range dom.Elems {
 		e := ele.(*ElemU)
-		io.Pforan("e%d.umap = %v\n", e.Cell.Id, e.Umap)
+		io.Pforan("e%d.umap = %v\n", e.Id(), e.Umap)
 		chk.Ints(tst, "umap", e.Umap, umaps[i])
 	}
 
@@ -172,6 +172,7 @@ func Test_sg52b(tst *testing.T) {
 
 func Test_sg57(tst *testing.T) {
 
+	//verbose()
 	chk.PrintTitle("sg57")
 
 	// run simulation
@@ -199,6 +200,7 @@ func Test_sg57(tst *testing.T) {
 
 func Test_sg511(tst *testing.T) {
 
+	//verbose()
 	chk.PrintTitle("sg511")
 
 	// run simulation

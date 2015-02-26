@@ -229,6 +229,15 @@ type HydroStData struct {
 	Unsat  bool    `json:"unsat"`  // consider unsaturated state with zwater < zmax
 }
 
+// GeoStData holds data for setting initial geostatic state (hydrostatic as well)
+type GeoStData struct {
+	HydroStData
+	Hom   bool    `json:"hom"`   // homogeneous stress distribution
+	Nu    float64 `json:"nu"`    // Poisson's coefficient to compute effective horizontal state
+	K0    float64 `json:"K0"`    // Earth pressure coefficient at rest to compute effective horizontal stresses
+	UseK0 bool    `json:"useK0"` // use K0 to compute effective horizontal stresses instead of "nu"
+}
+
 // IniStressData holds data for setting initial stresses
 type IniStressData struct {
 	Hom bool    `json:"hom"` // homogeneous stress distribution
@@ -238,15 +247,6 @@ type IniStressData struct {
 	Sh  float64 `json:"sh"`  // Psa => horizontal stress
 	Sv  float64 `json""sv"`  // Psa => vertical stress
 	Nu  float64 `json:"nu"`  // Psa => Poisson's coefficient for plane-strain state
-}
-
-// GeoStData holds data for setting initial geostatic state (hydrostatic as well)
-type GeoStData struct {
-	HydroStData
-	Hom   bool    `json:"hom"`   // homogeneous stress distribution
-	Nu    float64 `json:"nu"`    // Poisson's coefficient to compute effective horizontal state
-	K0    float64 `json:"K0"`    // Earth pressure coefficient at rest to compute effective horizontal stresses
-	UseK0 bool    `json:"useK0"` // use K0 to compute effective horizontal stresses instead of "nu"
 }
 
 // Stage holds stage data
@@ -273,6 +273,16 @@ type Stage struct {
 
 	// timecontrol
 	Control TimeControl `json:"control"` // time control
+}
+
+func (o Stage) GetFaceBc(facetag int) *FaceBc {
+
+	for _, fbc := range o.FaceBcs {
+		if facetag == fbc.Tag {
+			return fbc
+		}
+	}
+	return nil
 }
 
 // Simulation holds all simulation data
@@ -375,6 +385,9 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 			}
 			stg.Control.DtOut = stg.Control.DtoFunc.F(t, nil)
 		}
+
+		// prepare stg.FaceTag2faceBc map
+		// TODO:
 
 		// update time
 		t += stg.Control.Tf

@@ -7,12 +7,11 @@ package fem
 import (
 	"math"
 
-	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/shp"
 	"github.com/cpmech/gosl/io"
 )
 
-func GetIntegrationPoints(extra string, cell *inp.Cell) (ipsElem, ipsFace []*shp.Ipoint) {
+func GetIntegrationPoints(extra, cellType string) (ipsElem, ipsFace []*shp.Ipoint) {
 
 	// get number of ips of element
 	var nip int
@@ -28,14 +27,15 @@ func GetIntegrationPoints(extra string, cell *inp.Cell) (ipsElem, ipsFace []*shp
 
 	// get integration points of element
 	var err error
-	ipsElem, err = shp.GetIps(cell.Shp.Type, nip)
-	if LogErr(err, io.Sf("cannot get integration points for element with shape type=%q and nip=%d", cell.Shp.Type, nip)) {
+	ipsElem, err = shp.GetIps(cellType, nip)
+	if LogErr(err, io.Sf("cannot get integration points for element with shape type=%q and nip=%d", cellType, nip)) {
 		return nil, nil
 	}
 
-	// get integration points of false
-	ipsFace, err = shp.GetIps(cell.Shp.FaceType, nipf)
-	if LogErr(err, io.Sf("cannot get integration points for face with face-shape type=%q and nip=%d", cell.Shp.FaceType, nip)) {
+	// get integration points of face
+	faceType := shp.GetFaceType(cellType)
+	ipsFace, err = shp.GetIps(faceType, nipf)
+	if LogErr(err, io.Sf("cannot get integration points for face with face-shape type=%q and nip=%d", faceType, nip)) {
 		return nil, nil
 	}
 	return

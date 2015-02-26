@@ -54,7 +54,7 @@ type Rjoint struct {
 
 	// basic data
 	Edat *inp.ElemData // element data; stored in allocator to be used in Connect
-	Cell *inp.Cell     // cell
+	Cid  int           // cell/element id
 	Ndim int           // space dimension
 	Ny   int           // total number of dofs == rod.Nu + sld.Nu
 
@@ -116,29 +116,29 @@ type Rjoint struct {
 func init() {
 
 	// information allocator
-	iallocators["rjoint"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) *Info {
+	infogetters["rjoint"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
 		return &Info{}
 	}
 
 	// element allocator
-	eallocators["rjoint"] = func(edat *inp.ElemData, cid int, msh *inp.Mesh) Elem {
+	eallocators["rjoint"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 		var o Rjoint
 		o.Edat = edat
-		o.Cell = msh.Cells[cid]
-		o.Ndim = msh.Ndim
+		o.Cid = cid
+		o.Ndim = ndim
 		return &o
 	}
 }
 
 // Id returns the cell Id
-func (o Rjoint) Id() int { return o.Cell.Id }
+func (o Rjoint) Id() int { return o.Cid }
 
 // Connect connects rod/solid elements in this Rjoint
-func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
+func (o *Rjoint) Connect(cid2elem []Elem, c *inp.Cell) (nnzK int, ok bool) {
 
 	// get rod and solid elements
-	rodId := o.Cell.JlinId
-	sldId := o.Cell.JsldId
+	rodId := c.JlinId
+	sldId := c.JsldId
 	o.Rod = cid2elem[rodId].(*Rod)
 	o.Sld = cid2elem[sldId].(*ElemU)
 	if LogErrCond(o.Rod == nil, "cannot find joint's rod cell with id == %d", rodId) {
@@ -184,13 +184,13 @@ func (o *Rjoint) Connect(cid2elem []Elem) (nnzK int, ok bool) {
 	nsig := 2 * o.Ndim
 
 	// rod data
-	rodH := o.Rod.Cell.Shp
+	rodH := o.Rod.Shp
 	rodNp := len(o.Rod.IpsElem)
 	rodNn := rodH.Nverts
 	rodNu := o.Rod.Nu
 
 	// solid data
-	sldH := o.Sld.Cell.Shp
+	sldH := o.Sld.Shp
 	sldS := sldH.S
 	sldNp := len(o.Sld.IpsElem)
 	sldNn := sldH.Nverts
@@ -353,10 +353,10 @@ func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// auxiliary
 	ndim := o.Ndim
-	rodH := o.Rod.Cell.Shp
+	rodH := o.Rod.Shp
 	rodS := rodH.S
 	rodNn := rodH.Nverts
-	sldH := o.Sld.Cell.Shp
+	sldH := o.Sld.Shp
 	sldNn := sldH.Nverts
 
 	// internal forces vector
@@ -412,10 +412,10 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 	// auxiliary
 	ndim := o.Ndim
 	nsig := 2 * o.Ndim
-	rodH := o.Rod.Cell.Shp
+	rodH := o.Rod.Shp
 	rodS := rodH.S
 	rodNn := rodH.Nverts
-	sldH := o.Sld.Cell.Shp
+	sldH := o.Sld.Shp
 	sldNn := sldH.Nverts
 
 	// compute DσNoDu
@@ -618,10 +618,10 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 	// auxiliary
 	ndim := o.Ndim
 	nsig := 2 * o.Ndim
-	rodH := o.Rod.Cell.Shp
+	rodH := o.Rod.Shp
 	rodS := rodH.S
 	rodNn := rodH.Nverts
-	sldH := o.Sld.Cell.Shp
+	sldH := o.Sld.Shp
 	sldNn := sldH.Nverts
 
 	// extrapolate stresses at integration points of solid element to its nodes
@@ -783,8 +783,8 @@ func (o Rjoint) OutIpsData() (data []*OutIpData) {
 // debugging ////////////////////////////////////////////////////////////////////////////////////////
 
 func (o Rjoint) debug_print_init() {
-	sldNn := o.Sld.Cell.Shp.Nverts
-	rodNn := o.Rod.Cell.Shp.Nverts
+	sldNn := o.Sld.Shp.Nverts
+	rodNn := o.Rod.Shp.Nverts
 	rodNp := len(o.Rod.IpsElem)
 	io.Pf("Nmat =\n")
 	for i := 0; i < sldNn; i++ {
@@ -814,8 +814,8 @@ func (o Rjoint) debug_print_init() {
 
 func (o Rjoint) debug_print_K() {
 	ndim := o.Ndim
-	sldNn := o.Sld.Cell.Shp.Nverts
-	rodNn := o.Rod.Cell.Shp.Nverts
+	sldNn := o.Sld.Shp.Nverts
+	rodNn := o.Rod.Shp.Nverts
 	K := la.MatAlloc(o.Ny, o.Ny)
 	start := o.Sld.Nu
 	for i := 0; i < ndim; i++ {
