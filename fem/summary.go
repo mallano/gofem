@@ -45,7 +45,7 @@ func (o Summary) Save() (ok bool) {
 }
 
 // ReadSum reads summary back
-func (o Summary) Read() (ok bool) {
+func (o *Summary) Read() (ok bool) {
 
 	// open file
 	fil, err := os.Open(out_sum_path(0)) // read always from proc # 0
@@ -53,19 +53,16 @@ func (o Summary) Read() (ok bool) {
 		return
 	}
 	defer func() {
-		if LogErr(fil.Close(), "ReadSum: cannot close file") {
-			return
-		}
+		LogErr(fil.Close(), "ReadSum: cannot close file")
 	}()
 
 	// decode summary
 	dec := GetDecoder(fil)
 	err = dec.Decode(&o)
-
 	if LogErr(err, "ReadSum") {
 		return
 	}
-	return
+	return true
 }
 
 // AddResid adds the residual value for a given iteration

@@ -90,9 +90,7 @@ func (o *Domain) ReadSol(tidx int) (ok bool) {
 		return
 	}
 	defer func() {
-		if LogErr(fil.Close(), "ReadSol: cannot close file") {
-			return
-		}
+		LogErr(fil.Close(), "ReadSol: cannot close file")
 	}()
 
 	// get decoder
@@ -151,9 +149,7 @@ func (o *Domain) ReadIvs(tidx int) (ok bool) {
 		return
 	}
 	defer func() {
-		if LogErr(fil.Close(), "ReadIvs: cannot close file") {
-			return
-		}
+		LogErr(fil.Close(), "ReadIvs: cannot close file")
 	}()
 
 	// decode internal variables
@@ -198,9 +194,7 @@ func save_file(function, category, filename string, buf *bytes.Buffer) (ok bool)
 		return
 	}
 	defer func() {
-		if LogErr(fil.Close(), io.Sf("cannot close %s file", category)) {
-			return
-		}
+		LogErr(fil.Close(), io.Sf("cannot close %s file", category))
 	}()
 	_, err = fil.Write(buf.Bytes())
 	if LogErr(err, io.Sf("cannot write to %s file", category)) {

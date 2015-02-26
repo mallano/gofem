@@ -110,6 +110,9 @@ func init() {
 				info.Dofs[m] = append(info.Dofs[m], "fl")
 			}
 		}
+		if len(lverts) > 0 {
+			ykeys = append(ykeys, "fl")
+		}
 
 		// maps
 		info.Y2F = map[string]string{"pl": "ql"}
