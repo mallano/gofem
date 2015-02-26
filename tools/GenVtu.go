@@ -92,8 +92,16 @@ func main() {
 	steady = fem.Global.Sim.Data.Steady
 
 	// flags
+	has_u := out.Dom.YandC["ux"]
+	has_pl := out.Dom.YandC["pl"]
+	has_pg := out.Dom.YandC["pg"]
 	has_sig := out.Ipkeys["sx"]
 	has_rwl := out.Ipkeys["rwlx"]
+	has_p := has_pl || has_pg
+	lbb := has_u && has_p
+	if fem.Global.Sim.Data.NoLBB {
+		lbb = false
+	}
 
 	// buffers
 	pvd := make(map[string]*bytes.Buffer)
@@ -136,7 +144,7 @@ func main() {
 		// generate topology
 		if tidx == 0 {
 			for label, b := range geo {
-				topology(b, label == "ips", label == "pl" || label == "pg")
+				topology(b, label == "ips", lbb)
 			}
 		}
 
