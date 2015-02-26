@@ -7,11 +7,10 @@ package fem
 import (
 	"log"
 
-	"code.google.com/p/gofem/fun"
-
 	"github.com/cpmech/gofem/inp"
 
 	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/la"
 )
 
