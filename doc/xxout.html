@@ -113,7 +113,7 @@ package out implements FE simulation output handling for analyses and plotting
 				<dd><a href="#SplotConfig">func SplotConfig(xunit, yunit string, xscale, yscale float64)</a></dd>
 			
 				
-				<dd><a href="#Start">func Start(simfnpath string, stageIdx, regionIdx int) (startisok bool)</a></dd>
+				<dd><a href="#Start">func Start(simfnpath string, stageIdx, regionIdx int)</a></dd>
 			
 			
 				
@@ -312,7 +312,6 @@ constants
 				<pre>var (
 
     <span class="comment">// data set by Start</span>
-    <span id="Sum">Sum</span>       *<a href="/pkg/github.com/cpmech/gofem/fem/">fem</a>.<a href="/pkg/github.com/cpmech/gofem/fem/#Summary">Summary</a>     <span class="comment">// summary of results</span>
     <span id="Dom">Dom</span>       *<a href="/pkg/github.com/cpmech/gofem/fem/">fem</a>.<a href="/pkg/github.com/cpmech/gofem/fem/#Domain">Domain</a>      <span class="comment">// FE domain</span>
     <span id="Ipoints">Ipoints</span>   []*<a href="/pkg/github.com/cpmech/gofem/fem/">fem</a>.<a href="/pkg/github.com/cpmech/gofem/fem/#OutIpData">OutIpData</a> <span class="comment">// all integration points</span>
     <span id="Cid2ips">Cid2ips</span>   [][]<a href="/pkg/builtin/#int">int</a>          <span class="comment">// [ncells][nip] maps cell id to index in Ipoints</span>
@@ -348,7 +347,7 @@ Global variables
 		
 			
 			
-			<h2 id="Define">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=722:760#L13">Define</a></h2>
+			<h2 id="Define">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=753:791#L14">Define</a></h2>
 			<pre>func Define(alias <a href="/pkg/builtin/#string">string</a>, loc <a href="#Locator">Locator</a>)</pre>
 			<p>
 Define defines aliases
@@ -375,7 +374,7 @@ Note:
 		
 			
 			
-			<h2 id="End">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=1384:1394#L39">End</a></h2>
+			<h2 id="End">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=1334:1344#L38">End</a></h2>
 			<pre>func End()</pre>
 			<p>
 End must be called and the end to flush log file
@@ -387,7 +386,7 @@ End must be called and the end to flush log file
 		
 			
 			
-			<h2 id="GetCoords">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=3126:3164#L122">GetCoords</a></h2>
+			<h2 id="GetCoords">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=3185:3223#L123">GetCoords</a></h2>
 			<pre>func GetCoords(alias <a href="/pkg/builtin/#string">string</a>) []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 GetCoords returns the coordinates of a single point
@@ -399,7 +398,7 @@ GetCoords returns the coordinates of a single point
 		
 			
 			
-			<h2 id="GetDist">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=3590:3638#L135">GetDist</a></h2>
+			<h2 id="GetDist">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=3649:3697#L136">GetDist</a></h2>
 			<pre>func GetDist(key, alias <a href="/pkg/builtin/#string">string</a>) (dist []<a href="/pkg/builtin/#float64">float64</a>)</pre>
 			<p>
 GetDist returns the distance from a reference point on the given line with selected points
@@ -414,7 +413,7 @@ if they contain a given key
 		
 			
 			
-			<h2 id="GetRes">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=2609:2659#L94">GetRes</a></h2>
+			<h2 id="GetRes">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=2668:2718#L95">GetRes</a></h2>
 			<pre>func GetRes(key, alias <a href="/pkg/builtin/#string">string</a>, idxI <a href="/pkg/builtin/#int">int</a>) []<a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 GetRes gets results as a time or space series corresponding to a given alias
@@ -439,7 +438,7 @@ for a single point or set of points.
 		
 			
 			
-			<h2 id="GetXYZ">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=4097:4147#L154">GetXYZ</a></h2>
+			<h2 id="GetXYZ">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=4156:4206#L155">GetXYZ</a></h2>
 			<pre>func GetXYZ(key, alias <a href="/pkg/builtin/#string">string</a>) (x, y, z []<a href="/pkg/builtin/#float64">float64</a>)</pre>
 			<p>
 GetXYZ returns the x-y-z coordinates of selected points that have a specified key
@@ -453,7 +452,7 @@ GetXYZ returns the x-y-z coordinates of selected points that have a specified ke
 		
 			
 			
-			<h2 id="LoadResults">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=1403:1436#L44">LoadResults</a></h2>
+			<h2 id="LoadResults">func <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=1434:1467#L45">LoadResults</a></h2>
 			<pre>func LoadResults(times []<a href="/pkg/builtin/#float64">float64</a>)</pre>
 			<p>
 LoadResults loads all results after points are defined
@@ -515,8 +514,8 @@ Splot activates a new subplot window
 		
 			
 			
-			<h2 id="Start">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=1557:1627#L48">Start</a></h2>
-			<pre>func Start(simfnpath <a href="/pkg/builtin/#string">string</a>, stageIdx, regionIdx <a href="/pkg/builtin/#int">int</a>) (startisok <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<h2 id="Start">func <a href="https://github.com/cpmech/gofem/blob/master/out/out.go?s=1507:1560#L47">Start</a></h2>
+			<pre>func Start(simfnpath <a href="/pkg/builtin/#string">string</a>, stageIdx, regionIdx <a href="/pkg/builtin/#int">int</a>)</pre>
 			<p>
 Start starts handling of results given a simulation input file
 </p>
@@ -887,7 +886,7 @@ Swap swaps two Points
 		
 			
 			
-			<h2 id="ResultsMap">type <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=311:344#L5">ResultsMap</a></h2>
+			<h2 id="ResultsMap">type <a href="https://github.com/cpmech/gofem/blob/master/out/results.go?s=342:375#L6">ResultsMap</a></h2>
 			<pre>type ResultsMap map[<a href="/pkg/builtin/#string">string</a>]<a href="#Points">Points</a></pre>
 			<p>
 ResultsMap maps aliases to points

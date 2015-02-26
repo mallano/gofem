@@ -69,7 +69,22 @@ package shp implements shape structures/routines
 			
 			
 				
+				<dd><a href="#GetBasicType">func GetBasicType(cellType string) string</a></dd>
+			
+				
+				<dd><a href="#GetFaceLocalVerts">func GetFaceLocalVerts(cellType string, fidx int) []int</a></dd>
+			
+				
+				<dd><a href="#GetFaceType">func GetFaceType(cellType string) string</a></dd>
+			
+				
 				<dd><a href="#GetIps">func GetIps(geoType string, nips int) (ips []*Ipoint, err error)</a></dd>
+			
+				
+				<dd><a href="#GetNverts">func GetNverts(cellType string) int</a></dd>
+			
+				
+				<dd><a href="#GetVtkCode">func GetVtkCode(cellType string) int</a></dd>
 			
 				
 				<dd><a href="#Hex20">func Hex20(S []float64, dSdR [][]float64, r, s, t float64, derivs bool)</a></dd>
@@ -187,6 +202,8 @@ package shp implements shape structures/routines
 			
 				<a href="/src/github.com/cpmech/gofem/shp/algos.go">algos.go</a>
 			
+				<a href="/src/github.com/cpmech/gofem/shp/geodefs.go">geodefs.go</a>
+			
 				<a href="/src/github.com/cpmech/gofem/shp/hexs.go">hexs.go</a>
 			
 				<a href="/src/github.com/cpmech/gofem/shp/ipoints.go">ipoints.go</a>
@@ -293,6 +310,33 @@ constants
 		
 			
 			
+			<h2 id="GetBasicType">func <a href="https://github.com/cpmech/gofem/blob/master/shp/geodefs.go?s=585:626#L21">GetBasicType</a></h2>
+			<pre>func GetBasicType(cellType <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#string">string</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="GetFaceLocalVerts">func <a href="https://github.com/cpmech/gofem/blob/master/shp/geodefs.go?s=309:364#L5">GetFaceLocalVerts</a></h2>
+			<pre>func GetFaceLocalVerts(cellType <a href="/pkg/builtin/#string">string</a>, fidx <a href="/pkg/builtin/#int">int</a>) []<a href="/pkg/builtin/#int">int</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="GetFaceType">func <a href="https://github.com/cpmech/gofem/blob/master/shp/geodefs.go?s=459:499#L13">GetFaceType</a></h2>
+			<pre>func GetFaceType(cellType <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#string">string</a></pre>
+			
+			
+			
+
+		
+			
+			
 			<h2 id="GetIps">func <a href="https://github.com/cpmech/gofem/blob/master/shp/ipoints.go?s=610:674#L14">GetIps</a></h2>
 			<pre>func GetIps(geoType <a href="/pkg/builtin/#string">string</a>, nips <a href="/pkg/builtin/#int">int</a>) (ips []*<a href="#Ipoint">Ipoint</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
 			<p>
@@ -301,6 +345,24 @@ GetIps returns a set of integration points
 <pre>If the number (nips) of integration points is zero, it returns a default set
 </pre>
 
+			
+			
+
+		
+			
+			
+			<h2 id="GetNverts">func <a href="https://github.com/cpmech/gofem/blob/master/shp/geodefs.go?s=190:225#L1">GetNverts</a></h2>
+			<pre>func GetNverts(cellType <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#int">int</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="GetVtkCode">func <a href="https://github.com/cpmech/gofem/blob/master/shp/geodefs.go?s=713:749#L29">GetVtkCode</a></h2>
+			<pre>func GetVtkCode(cellType <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#int">int</a></pre>
+			
 			
 			
 
