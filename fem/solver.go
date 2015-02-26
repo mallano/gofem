@@ -98,6 +98,7 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 
 	// debugging and statistics
 	Global.Debug = Global.Sim.Data.Debug
+	Global.LogBcs = Global.Sim.Data.LogBcs
 	Global.Sum = new(Summary)
 
 	// fix show residual flag

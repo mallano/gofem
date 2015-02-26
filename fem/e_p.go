@@ -170,7 +170,6 @@ func init() {
 		if o.HasSeep {
 
 			// vertices on seepage face; numbering
-			//o.SeepId2vid = utl.IntBoolMapSort(seepverts)
 			o.SeepId2vid = seepverts
 			o.Vid2seepId = utl.IntVals(o.Np, -1)
 			o.Fmap = make([]int, o.Nf)
