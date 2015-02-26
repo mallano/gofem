@@ -306,10 +306,9 @@ func topology(buf *bytes.Buffer, ips, lbb bool) {
 	} else {
 		for _, e := range elems {
 			cell := cells[e.Id()]
-			vtk := shp.VTK_QUADRATIC_QUAD // TODO: shp.GetVtk(cell.Type)
+			vtk := shp.GetVtkCode(cell.Type)
 			if lbb {
-				// TODO: vtk = shp.GetVtk(shp.GetBasicType(cell.Type))
-				vtk = shp.VTK_QUADRATIC_QUAD // TODO: <<<< REMOVE THIS
+				vtk = shp.GetVtkCode(shp.GetBasicType(cell.Type))
 			}
 			if cell.Type == "qua9" {
 				vtk = shp.VTK_QUADRATIC_QUAD
