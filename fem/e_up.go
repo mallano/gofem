@@ -35,27 +35,20 @@ type ElemUP struct {
 func init() {
 
 	// information allocator
-	infogetters["up"] = func(ndim int, cellType string, faceConds *FaceConds) *Info {
+	infogetters["up"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
 
-		// lbb flag
-		lbb := true
-		if val, found := io.Keycode(edat.Extra, "nolbb"); found {
-			lbb = !io.Atob(val)
-		}
-
-		// cell
-		cell := msh.Cells[cid]
-		cell.UseBasicGeo = lbb
-		nverts := shp.GetNverts(cellType)
+		// p-element cell type
+		p_cellType := cellType
 
 		// underlying cells info
-		u_info := infogetters["u"](edat, cid, msh)
-		p_info := infogetters["p"](edat, cid, msh)
+		u_info := infogetters["u"](ndim, cellType, faceConds)
+		p_info := infogetters["p"](ndim, p_cellType, faceConds)
 
 		// solution variables
+		nverts := shp.GetNverts(cellType)
 		info.Dofs = make([][]string, nverts)
 		for i, dofs := range u_info.Dofs {
 			info.Dofs[i] = append(info.Dofs[i], dofs...)
@@ -77,16 +70,19 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["up"] = func(ndim int, cellType string, faceConds *FaceConds, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["up"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o ElemUP
 
+		// p-element cell type
+		p_cellType := cellType
+
 		// underlying elements
 		u_allocator := eallocators["u"]
 		p_allocator := eallocators["p"]
-		u_elem := u_allocator(edat, cid, msh)
-		p_elem := p_allocator(edat, cid, msh)
+		u_elem := u_allocator(ndim, cellType, faceConds, cid, edat, x)
+		p_elem := p_allocator(ndim, p_cellType, faceConds, cid, edat, x)
 		if LogErrCond(u_elem == nil, "cannot allocate underlying u-element") {
 			return nil
 		}
@@ -97,7 +93,6 @@ func init() {
 		o.P = p_elem.(*ElemP)
 
 		// scratchpad. computed @ each ip
-		ndim := o.U.Ndim
 		o.bs = make([]float64, ndim)
 
 		// return new element
@@ -108,19 +103,19 @@ func init() {
 // implementation ///////////////////////////////////////////////////////////////////////////////////
 
 // Id returns the cell Id
-func (o ElemUP) Id() int { return o.U.Cell.Id }
+func (o ElemUP) Id() int { return o.U.Id() }
 
 // SetEqs set equations
 func (o *ElemUP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 	io.Pforan("here = %v\n", 1)
 	ndim := o.U.Ndim
-	eqs_u := make([][]int, o.U.Cell.Shp.Nverts)
-	eqs_p := make([][]int, o.P.Cell.Shp.Nverts)
-	for m := 0; m < o.U.Cell.Shp.Nverts; m++ {
+	eqs_u := make([][]int, o.U.Shp.Nverts)
+	eqs_p := make([][]int, o.P.Shp.Nverts)
+	for m := 0; m < o.U.Shp.Nverts; m++ {
 		eqs_u[m] = eqs[m][:ndim]
 	}
 	idxp := ndim
-	for m := 0; m < o.P.Cell.Shp.Nverts; m++ {
+	for m := 0; m < o.P.Shp.Nverts; m++ {
 		eqs_p[m] = []int{eqs[m][idxp]}
 	}
 	if !o.U.SetEqs(eqs_u, mixedform_eqs) {
@@ -238,10 +233,10 @@ func (o ElemUP) OutIpsData() (data []*OutIpData) {
 func (o *ElemUP) ipvars(idx int, sol *Solution, tpm_derivs bool) (ok bool) {
 
 	// interpolation functions and gradients
-	if LogErr(o.U.Cell.Shp.CalcAtIp(o.U.X, o.U.IpsElem[idx], true), "ipvars") {
+	if LogErr(o.U.Shp.CalcAtIp(o.U.X, o.U.IpsElem[idx], true), "ipvars") {
 		return
 	}
-	if LogErr(o.P.Cell.Shp.CalcAtIp(o.P.X, o.U.IpsElem[idx], true), "ipvars") {
+	if LogErr(o.P.Shp.CalcAtIp(o.P.X, o.U.IpsElem[idx], true), "ipvars") {
 		return
 	}
 
@@ -262,21 +257,21 @@ func (o *ElemUP) ipvars(idx int, sol *Solution, tpm_derivs bool) (ok bool) {
 	}
 
 	// recover p-variables @ ip
-	for m := 0; m < o.P.Cell.Shp.Nverts; m++ {
+	for m := 0; m < o.P.Shp.Nverts; m++ {
 		r := o.P.Pmap[m]
-		o.P.pl += o.P.Cell.Shp.S[m] * sol.Y[r]
+		o.P.pl += o.P.Shp.S[m] * sol.Y[r]
 		for i := 0; i < ndim; i++ {
-			o.P.gpl[i] += o.P.Cell.Shp.G[m][i] * sol.Y[r]
+			o.P.gpl[i] += o.P.Shp.G[m][i] * sol.Y[r]
 		}
 	}
 
 	// recover u-variables @ ip
 	var divus float64
-	for m := 0; m < o.U.Cell.Shp.Nverts; m++ {
+	for m := 0; m < o.U.Shp.Nverts; m++ {
 		for i := 0; i < ndim; i++ {
 			r := o.U.Umap[i+m*ndim]
-			o.U.us[i] += o.U.Cell.Shp.S[m] * sol.Y[r]
-			divus += o.U.Cell.Shp.G[m][i] * sol.Y[r]
+			o.U.us[i] += o.U.Shp.S[m] * sol.Y[r]
+			divus += o.U.Shp.G[m][i] * sol.Y[r]
 		}
 	}
 	return true

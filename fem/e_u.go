@@ -21,6 +21,7 @@ type ElemU struct {
 	Cid  int         // cell/element id
 	X    [][]float64 // matrix of nodal coordinates [ndim][nnode]
 	Ndim int         // space dimension
+	Shp  *shp.Shape  // shape structure
 	Nu   int         // total number of unknowns
 
 	// variables for dynamics
@@ -82,13 +83,12 @@ type ElemU struct {
 func init() {
 
 	// information allocator
-	infogetters["u"] = func(ndim int, cellType string, faceConds *FaceConds) *Info {
+	infogetters["u"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
 
 		// number of nodes in element
-		cell := msh.Cells[cid]
 		nverts := shp.GetNverts(cellType)
 
 		// solution variables
@@ -110,20 +110,21 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["u"] = func(ndim int, cellType string, faceConds *FaceConds, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["u"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o ElemU
 		o.Cid = cid
 		o.X = x
 		o.Ndim = ndim
+		o.Shp = shp.Get(cellType)
 		o.Nu = o.Ndim * o.Shp.Nverts
 
 		// parse flags
 		o.UseB, o.Debug, o.Thickness = GetSolidFlags(edat.Extra)
 
 		// integration points
-		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Extra, o.Cell)
+		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Extra, cellType)
 		if o.IpsElem == nil || o.IpsFace == nil {
 			return nil
 		}
@@ -334,7 +335,7 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 		// check Jacobian
 		if o.Shp.J < 0 {
-			LogErrCond(true, "ElemU: eid=%d: Jacobian is negative = %g\n", o.Cell.Id, o.Shp.J)
+			LogErrCond(true, "ElemU: eid=%d: Jacobian is negative = %g\n", o.Id(), o.Shp.J)
 			return
 		}
 

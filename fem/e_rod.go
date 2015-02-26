@@ -21,6 +21,7 @@ type Rod struct {
 	Cid  int         // cell/element id
 	X    [][]float64 // matrix of nodal coordinates [ndim][nnode]
 	Ndim int         // space dimension
+	Shp  *shp.Shape  // shape structure
 	Nu   int         // total number of unknowns == 2 * nsn
 
 	// parameters
@@ -57,13 +58,12 @@ type Rod struct {
 func init() {
 
 	// information allocator
-	infogetters["rod"] = func(ndim int, cellType string, faceConds *FaceConds) *Info {
+	infogetters["rod"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
 
 		// number of nodes in element
-		cell := msh.Cells[cid]
 		nverts := shp.GetNverts(cellType)
 
 		// solution variables
@@ -85,13 +85,14 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["rod"] = func(ndim int, cellType string, faceConds *FaceConds, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["rod"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o Rod
 		o.Cid = cid
 		o.X = x
 		o.Ndim = ndim
+		o.Shp = shp.Get(cellType)
 		o.Nu = o.Ndim * o.Shp.Nverts
 
 		var err error

@@ -102,7 +102,7 @@ func Test_p01a(tst *testing.T) {
 	}
 	for i, ele := range dom.Elems {
 		e := ele.(*ElemP)
-		io.Pforan("e%d.pmap = %v\n", e.Cell.Id, e.Pmap)
+		io.Pforan("e%d.pmap = %v\n", e.Id(), e.Pmap)
 		chk.Ints(tst, "pmap", e.Pmap, pmaps[i])
 	}
 
@@ -137,7 +137,7 @@ func Test_p01a(tst *testing.T) {
 		e := ele.(*ElemP)
 		for idx, ip := range e.IpsElem {
 			s := e.States[idx]
-			z := e.Cell.Shp.IpRealCoords(e.X, ip)[1]
+			z := e.Shp.IpRealCoords(e.X, ip)[1]
 			chk.Scalar(tst, io.Sf("sl @ %g", z), 1e-17, s.Sl, 1)
 			chk.Scalar(tst, io.Sf("pl @ %g", z), 1e-13, s.Pl, 100-10*z)
 		}

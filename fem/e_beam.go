@@ -58,7 +58,7 @@ type Beam struct {
 func init() {
 
 	// information allocator
-	infogetters["beam"] = func(ndim int, cellType string, faceConds *FaceConds) *Info {
+	infogetters["beam"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
@@ -82,7 +82,7 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["beam"] = func(ndim int, cellType string, faceConds *FaceConds, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["beam"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// check
 		if LogErrCond(ndim == 3, "beam is not implemented for 3D yet") {

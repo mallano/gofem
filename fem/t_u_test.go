@@ -119,7 +119,7 @@ func Test_sigini02(tst *testing.T) {
 	e := d.Elems[0].(*ElemU)
 	tols := 1e-13
 	for idx, ip := range e.IpsElem {
-		x := e.Cell.Shp.IpRealCoords(e.X, ip)
+		x := e.Shp.IpRealCoords(e.X, ip)
 		σ := e.States[idx].Sig
 		io.Pforan("σ = %v\n", σ)
 		sol.CheckStress(tst, t, σ, x, tols)

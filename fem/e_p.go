@@ -27,6 +27,7 @@ type ElemP struct {
 	Cid  int         // cell/element id
 	X    [][]float64 // matrix of nodal coordinates [ndim][nnode]
 	Ndim int         // space dimension
+	Shp  *shp.Shape  // shape structure
 	Np   int         // total number of unknowns == number of vertices
 
 	// integration points
@@ -87,7 +88,7 @@ type ElemP struct {
 func init() {
 
 	// information allocator
-	infogetters["p"] = func(ndim int, cellType string, faceConds *FaceConds) *Info {
+	infogetters["p"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
@@ -123,13 +124,14 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["p"] = func(ndim int, cellType string, faceConds *FaceConds, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["p"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o ElemP
 		o.Cid = cid
 		o.X = x
 		o.Ndim = ndim
+		o.Shp = shp.Get(cellType)
 		o.Np = o.Shp.Nverts
 
 		// integration points
@@ -159,6 +161,7 @@ func init() {
 		o.Kpp = la.MatAlloc(o.Np, o.Np)
 
 		// vertices on seepage faces
+		nverts := o.Shp.Nverts
 		var seepverts []int
 		for _, fc := range faceConds {
 			if fc.Cond == "seepP" || fc.Cond == "seepH" {
@@ -175,7 +178,8 @@ func init() {
 		if o.HasSeep {
 
 			// vertices on seepage face; numbering
-			o.SeepId2vid = utl.IntBoolMapSort(seepverts)
+			//o.SeepId2vid = utl.IntBoolMapSort(seepverts)
+			o.SeepId2vid = seepverts
 			o.Vid2seepId = utl.IntVals(nverts, -1)
 			o.Fmap = make([]int, o.Nf)
 			for μ, m := range o.SeepId2vid {
