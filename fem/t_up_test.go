@@ -75,87 +75,100 @@ func test_up01a(tst *testing.T) {
 	chk.IntAssert(len(dom.Nodes), 27)
 	chk.IntAssert(len(dom.Elems), 4)
 
-	// nodes with pl
-	nods_with_pl := map[int]bool{0: true, 2: true, 4: true, 6: true, 8: true, 1: true, 3: true, 5: true, 7: true, 9: true}
+	if false {
 
-	// check dofs
-	for _, nod := range dom.Nodes {
-		if nods_with_pl[nod.Vert.Id] {
-			chk.IntAssert(len(nod.Dofs), 3)
-			chk.StrAssert(nod.Dofs[0].Key, "ux")
-			chk.StrAssert(nod.Dofs[1].Key, "uy")
-			chk.StrAssert(nod.Dofs[2].Key, "pl")
-		} else {
-			chk.IntAssert(len(nod.Dofs), 2)
-			chk.StrAssert(nod.Dofs[0].Key, "ux")
-			chk.StrAssert(nod.Dofs[1].Key, "uy")
+		// nodes with pl
+		nods_with_pl := map[int]bool{0: true, 2: true, 4: true, 6: true, 8: true, 1: true, 3: true, 5: true, 7: true, 9: true}
+
+		// check dofs
+		for _, nod := range dom.Nodes {
+			if nods_with_pl[nod.Vert.Id] {
+				chk.IntAssert(len(nod.Dofs), 3)
+				chk.StrAssert(nod.Dofs[0].Key, "ux")
+				chk.StrAssert(nod.Dofs[1].Key, "uy")
+				chk.StrAssert(nod.Dofs[2].Key, "pl")
+			} else {
+				chk.IntAssert(len(nod.Dofs), 2)
+				chk.StrAssert(nod.Dofs[0].Key, "ux")
+				chk.StrAssert(nod.Dofs[1].Key, "uy")
+			}
 		}
-	}
 
-	// check equations
-	nids, eqs := get_nids_eqs(dom)
-	chk.Ints(tst, "eqs", eqs, utl.IntRange(10*3+17*2))
-	chk.Ints(tst, "nids", nids, []int{
-		0, 1, 3, 2, 10, 16, 11, 15, 23,
-		5, 4, 18, 12, 17, 24,
-		7, 6, 20, 13, 19, 25,
-		9, 8, 22, 14, 21, 26,
-	})
+		// check equations
+		nids, eqs := get_nids_eqs(dom)
+		chk.Ints(tst, "eqs", eqs, utl.IntRange(10*3+17*2))
+		chk.Ints(tst, "nids", nids, []int{
+			0, 1, 3, 2, 10, 16, 11, 15, 23,
+			5, 4, 18, 12, 17, 24,
+			7, 6, 20, 13, 19, 25,
+			9, 8, 22, 14, 21, 26,
+		})
 
-	// check pmap
-	Pmaps := [][]int{
-		{2, 5, 8, 11},
-		{11, 8, 24, 27},
-		{27, 24, 38, 41},
-		{41, 38, 52, 55},
-	}
-	Umaps := [][]int{
-		{0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21},
-		{9, 10, 6, 7, 22, 23, 25, 26, 16, 17, 28, 29, 30, 31, 32, 33, 34, 35},
-		{25, 26, 22, 23, 36, 37, 39, 40, 30, 31, 42, 43, 44, 45, 46, 47, 48, 49},
-		{39, 40, 36, 37, 50, 51, 53, 54, 44, 45, 56, 57, 58, 59, 60, 61, 62, 63},
-	}
-	for i, ele := range dom.Elems {
-		e := ele.(*ElemUP)
-		io.Pfpink("%2d : Pmap = %v\n", e.Id(), e.P.Pmap)
-		io.Pfpink("%2d : Umap = %v\n", e.Id(), e.U.Umap)
-		chk.Ints(tst, "Pmap", e.P.Pmap, Pmaps[i])
-		chk.Ints(tst, "Umap", e.U.Umap, Umaps[i])
-	}
-
-	// constraints
-	chk.IntAssert(len(dom.EssenBcs.Bcs), 9*2+2+3)
-	var ct_ux_eqs []int // equations with ux prescribed [sorted]
-	var ct_uy_eqs []int // equations with uy prescribed [sorted]
-	var ct_pl_eqs []int // equations with pl prescribed [sorted]
-	for _, c := range dom.EssenBcs.Bcs {
-		chk.IntAssert(len(c.Eqs), 1)
-		eq := c.Eqs[0]
-		io.Pfgrey("key=%v eq=%v\n", c.Key, eq)
-		switch c.Key {
-		case "ux":
-			ct_ux_eqs = append(ct_ux_eqs, eq)
-		case "uy":
-			ct_uy_eqs = append(ct_uy_eqs, eq)
-		case "pl":
-			ct_pl_eqs = append(ct_pl_eqs, eq)
-		default:
-			tst.Errorf("key %s is incorrect", c.Key)
+		// check pmap
+		Pmaps := [][]int{
+			{2, 5, 8, 11},
+			{11, 8, 24, 27},
+			{27, 24, 38, 41},
+			{41, 38, 52, 55},
 		}
+		Umaps := [][]int{
+			{0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21},
+			{9, 10, 6, 7, 22, 23, 25, 26, 16, 17, 28, 29, 30, 31, 32, 33, 34, 35},
+			{25, 26, 22, 23, 36, 37, 39, 40, 30, 31, 42, 43, 44, 45, 46, 47, 48, 49},
+			{39, 40, 36, 37, 50, 51, 53, 54, 44, 45, 56, 57, 58, 59, 60, 61, 62, 63},
+		}
+		for i, ele := range dom.Elems {
+			e := ele.(*ElemUP)
+			io.Pfpink("%2d : Pmap = %v\n", e.Id(), e.P.Pmap)
+			io.Pfpink("%2d : Umap = %v\n", e.Id(), e.U.Umap)
+			chk.Ints(tst, "Pmap", e.P.Pmap, Pmaps[i])
+			chk.Ints(tst, "Umap", e.U.Umap, Umaps[i])
+		}
+
+		// constraints
+		chk.IntAssert(len(dom.EssenBcs.Bcs), 9*2+2+3)
+		var ct_ux_eqs []int // equations with ux prescribed [sorted]
+		var ct_uy_eqs []int // equations with uy prescribed [sorted]
+		var ct_pl_eqs []int // equations with pl prescribed [sorted]
+		for _, c := range dom.EssenBcs.Bcs {
+			chk.IntAssert(len(c.Eqs), 1)
+			eq := c.Eqs[0]
+			io.Pfgrey("key=%v eq=%v\n", c.Key, eq)
+			switch c.Key {
+			case "ux":
+				ct_ux_eqs = append(ct_ux_eqs, eq)
+			case "uy":
+				ct_uy_eqs = append(ct_uy_eqs, eq)
+			case "pl":
+				ct_pl_eqs = append(ct_pl_eqs, eq)
+			default:
+				tst.Errorf("key %s is incorrect", c.Key)
+			}
+		}
+		sort.Ints(ct_ux_eqs)
+		sort.Ints(ct_uy_eqs)
+		sort.Ints(ct_pl_eqs)
+		chk.Ints(tst, "equations with ux prescribed", ct_ux_eqs, []int{0, 3, 6, 9, 14, 18, 22, 25, 28, 32, 36, 39, 42, 46, 50, 53, 56, 60})
+		chk.Ints(tst, "equations with uy prescribed", ct_uy_eqs, []int{1, 4, 13})
+		chk.Ints(tst, "equations with pl prescribed", ct_pl_eqs, []int{2, 5})
+
 	}
-	sort.Ints(ct_ux_eqs)
-	sort.Ints(ct_uy_eqs)
-	sort.Ints(ct_pl_eqs)
-	chk.Ints(tst, "equations with ux prescribed", ct_ux_eqs, []int{0, 3, 6, 9, 14, 18, 22, 25, 28, 32, 36, 39, 42, 46, 50, 53, 56, 60})
-	chk.Ints(tst, "equations with uy prescribed", ct_uy_eqs, []int{1, 4, 13})
-	chk.Ints(tst, "equations with pl prescribed", ct_pl_eqs, []int{2, 5})
 
 	// initial values @ nodes
 	io.Pforan("initial values @ nodes\n")
 	for _, nod := range dom.Nodes {
 		z := nod.Vert.C[1]
-		eq := nod.Dofs[0].Eq
-		chk.Scalar(tst, io.Sf("pl @ %g", z), 1e-17, dom.Sol.Y[eq], 100-10*z)
+		for _, dof := range nod.Dofs {
+			u := dom.Sol.Y[dof.Eq]
+			switch dof.Key {
+			case "ux":
+				chk.Scalar(tst, io.Sf("nod %3d : ux(@ %4g)= %6g", nod.Vert.Id, z, u), 1e-17, u, 0)
+			case "uy":
+				chk.Scalar(tst, io.Sf("nod %3d : uy(@ %4g)= %6g", nod.Vert.Id, z, u), 1e-17, u, 0)
+			case "pl":
+				chk.Scalar(tst, io.Sf("nod %3d : pl(@ %4g)= %6g", nod.Vert.Id, z, u), 1e-17, u, 100-10*z)
+			}
+		}
 	}
 
 	// intial values @ integration points
@@ -165,8 +178,8 @@ func test_up01a(tst *testing.T) {
 		for idx, ip := range e.P.IpsElem {
 			s := e.P.States[idx]
 			z := e.P.Shp.IpRealCoords(e.P.X, ip)[1]
-			chk.Scalar(tst, io.Sf("sl @ %g", z), 1e-17, s.Sl, 1)
-			chk.Scalar(tst, io.Sf("pl @ %g", z), 1e-13, s.Pl, 100-10*z)
+			chk.Scalar(tst, io.Sf("sl(@ %18g)= %18g", z, s.Sl), 1e-17, s.Sl, 1)
+			chk.Scalar(tst, io.Sf("pl(@ %18g)= %18g", z, s.Pl), 1e-13, s.Pl, 100-10*z)
 		}
 	}
 }

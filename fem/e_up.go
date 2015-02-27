@@ -8,6 +8,7 @@ import (
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/shp"
 
+	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/la"
 )
@@ -218,6 +219,18 @@ func (o ElemUP) Decode(dec Decoder) (ok bool) {
 
 // OutIpsData returns data from all integration points for output
 func (o ElemUP) OutIpsData() (data []*OutIpData) {
+	u_dat := o.U.OutIpsData()
+	p_dat := o.P.OutIpsData()
+	nip := len(o.U.IpsElem)
+	chk.IntAssert(len(u_dat), nip)
+	chk.IntAssert(len(u_dat), len(p_dat))
+	data = make([]*OutIpData, nip)
+	for i, d := range u_dat {
+		for key, val := range p_dat[i].V {
+			d.V[key] = val
+		}
+		data[i] = &OutIpData{d.Eid, d.X, d.V}
+	}
 	return
 }
 

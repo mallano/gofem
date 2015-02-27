@@ -15,9 +15,10 @@
   ],
   "regions" : [
     {
-      "mshfile" : "column10m4e.msh",
+      "mshfile" : "col10m4e2lay.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"porous1", "type":"up", "extra":"!nip:4 !nolbb:0" }
+        { "tag":-1, "mat":"porous2", "type":"up", "extra":"!nip:4 !nolbb:0" },
+        { "tag":-2, "mat":"porous1", "type":"up", "extra":"!nip:4 !nolbb:0" }
       ]
     }
   ],
@@ -31,7 +32,8 @@
         { "tag":-13, "keys":["ux"],      "funcs":["zero"] }
       ],
       "eleconds" : [
-        { "tag":-1, "keys":["g"], "funcs":["grav"] }
+        { "tag":-1, "keys":["g"], "funcs":["grav"] },
+        { "tag":-2, "keys":["g"], "funcs":["grav"] }
       ],
       "control" : {
         "tf"    : 1000,
