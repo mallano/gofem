@@ -24,5 +24,6 @@ func main() {
 	out.Splot("Internal pressurised cylinder")
 	out.Plt("ux", "t", "A", "'b.-'", -1)
 
-	out.Draw("", "", false)
+	// show
+	out.Draw("", "", true)
 }
