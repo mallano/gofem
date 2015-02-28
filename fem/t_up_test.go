@@ -9,11 +9,12 @@ import (
 	"testing"
 
 	"github.com/cpmech/gosl/chk"
+	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/utl"
 )
 
-func test_up01a(tst *testing.T) {
+func Test_up01a(tst *testing.T) {
 
 	/* this tests simulates seepage flow along a column
 	 * by reducing the initial hydrostatic pressure at
@@ -23,25 +24,25 @@ func test_up01a(tst *testing.T) {
 	 *                              ux uy pl               ux uy pl
 	 *     8 o----o----o 9 (-5)     53 54 55  o----o----o  50 51 52
 	 *       |   14    |             .  .  .  |  58 59  |   .  .  .
-	 *       |         |             .  .  .  |         |   .  .  .
+	 *       |  (-1)   |             .  .  .  |         |   .  .  .
 	 *    21 o    o    o 22 (-6)    60 61  .  o    o    o  56 57  .
 	 *       |   26    |             .  .  .  |  62 63  |   .  .  .
 	 *       |         |             .  .  .  |         |   .  .  .
 	 *     6 o----o----o 7 (-4)     39 40 41  o----o----o  36 37 38
 	 *       |   13    |             .  .  .  |  44 45  |   .  .  .
-	 *       |         |             .  .  .  |         |   .  .  .
+	 *       |  (-1)   |             .  .  .  |         |   .  .  .
 	 *    19 |    o    o 20 (-6)    46 47  .  |    o    o  42 43  .
 	 *       |   25    |             .  .  .  |  48 49  |   .  .  .
 	 *       |         |             .  .  .  |         |   .  .  .
 	 *     4 o----o----o 5 (-3)     25 26 27  o----o----o  22 23 24
 	 *       |   12    |             .  .  .  |  30 31  |   .  .  .
-	 *       |         |             .  .  .  |         |   .  .  .
+	 *       |  (-2)   |             .  .  .  |         |   .  .  .
 	 *    17 o    o    o 18 (-6)    32 33  .  o    o    o  28 29  .
 	 *       |   24    |             .  .  .  |  34 35  |   .  .  .
 	 *       |         |             .  .  .  |         |   .  .  .
 	 *     2 o----o----o 3 (-2)      9 10 11  o----o----o   6  7  8
 	 *       |   11    |             .  .  .  |  16 17  |   .  .  .
-	 *       |         |             .  .  .  |         |   .  .  .
+	 *       |  (-2)   |             .  .  .  |         |   .  .  .
 	 *    15 o    o    o 16 (-6)    18 19     o    o    o  14 15
 	 *       |   23    |             .  .  .  |  20 21  |   .  .  .
 	 *       |         |             .  .  .  |         |   .  .  .
@@ -52,7 +53,7 @@ func test_up01a(tst *testing.T) {
 	// capture errors and flush log
 	defer End()
 
-	verbose()
+	//verbose()
 	chk.PrintTitle("up01a")
 
 	// start simulation
@@ -75,7 +76,7 @@ func test_up01a(tst *testing.T) {
 	chk.IntAssert(len(dom.Nodes), 27)
 	chk.IntAssert(len(dom.Elems), 4)
 
-	if false {
+	if true {
 
 		// nodes with pl
 		nods_with_pl := map[int]bool{0: true, 2: true, 4: true, 6: true, 8: true, 1: true, 3: true, 5: true, 7: true, 9: true}
@@ -182,4 +183,64 @@ func test_up01a(tst *testing.T) {
 			chk.Scalar(tst, io.Sf("pl(@ %18g)= %18g", z, s.Pl), 1e-13, s.Pl, 100-10*z)
 		}
 	}
+
+	// parameters
+	ν := 0.2            // Poisson's coefficient
+	K0 := ν / (1.0 - ν) // earth pressure at rest
+	nf := 0.3           // porosity
+	sl := 1.0           // saturation
+	ρL := 1.0           // intrinsic (real) density of liquid
+	ρS_top := 2.0       // intrinsic (real) density of solids in top layer
+	ρS_bot := 3.0       // intrinsic (real) density of solids in bottom layer
+	h := 5.0            // height of each layer
+	g := 10.0           // gravity
+
+	// densities
+	nl := nf * sl         // volume fraction of luqid
+	ns := 1.0 - nf        // volume fraction of solid
+	ρl := nl * ρL         // partial density of liquid
+	ρs_top := ns * ρS_top // partial density of solids in top layer
+	ρs_bot := ns * ρS_bot // partial density of solids in bottom layer
+	ρ_top := ρl + ρs_top  // density of mixture in top layer
+	ρ_bot := ρl + ρs_bot  // density of mixture in bottom layer
+
+	// absolute values of stresses
+	σV_z5 := ρ_top * g * h     // total vertical stress @ elevation z = 5 m (absolute value)
+	σV_z0 := σV_z5 + ρ_bot*g*h // total vertical stress @ elevation z = 0 m (absolute value)
+	io.Pfyel("ρ_top       = %g\n", ρ_top)
+	io.Pfyel("ρ_bot       = %g\n", ρ_bot)
+	io.Pfyel("|ΔσV_top|   = %g\n", ρ_top*g*h)
+	io.Pfyel("|ΔσV_bot|   = %g\n", ρ_bot*g*h)
+	io.PfYel("|σV|(@ z=0) = %g\n", σV_z0)
+	io.PfYel("|σV|(@ z=5) = %g\n", σV_z5)
+
+	// stress functions
+	var sig fun.Pts
+	var pres fun.Pts
+	sig.Init(fun.Prms{
+		&fun.Prm{N: "t0", V: 0.00}, {N: "y0", V: -σV_z0},
+		&fun.Prm{N: "t1", V: 5.00}, {N: "y1", V: -σV_z5},
+		&fun.Prm{N: "t2", V: 10.00}, {N: "y2", V: 0.0},
+	})
+	pres.Init(fun.Prms{
+		&fun.Prm{N: "t0", V: 0.00}, {N: "y0", V: 100},
+		&fun.Prm{N: "t1", V: 10.00}, {N: "y1", V: 0},
+	})
+
+	// check stresses
+	io.Pforan("initial stresses @ integration points\n")
+	for _, ele := range dom.Elems {
+		e := ele.(*ElemUP)
+		for idx, ip := range e.U.IpsElem {
+			z := e.U.Shp.IpRealCoords(e.U.X, ip)[1]
+			σe := e.U.States[idx].Sig
+			sv := sig.F(z, nil)
+			sve := sv + pres.F(z, nil)
+			she := sve * K0
+			sze := ν * (she + sve)
+			σe_cor := []float64{she, sve, sze, 0}
+			chk.Vector(tst, "σe", 1e-13, σe, σe_cor)
+		}
+	}
+	return
 }

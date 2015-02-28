@@ -232,7 +232,6 @@ type HydroStData struct {
 // GeoStData holds data for setting initial geostatic state (hydrostatic as well)
 type GeoStData struct {
 	HydroStData
-	Hom   bool    `json:"hom"`   // homogeneous stress distribution
 	Nu    float64 `json:"nu"`    // Poisson's coefficient to compute effective horizontal state
 	K0    float64 `json:"K0"`    // Earth pressure coefficient at rest to compute effective horizontal stresses
 	UseK0 bool    `json:"useK0"` // use K0 to compute effective horizontal stresses instead of "nu"
