@@ -159,10 +159,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 // Update perform (tangent) update
 func (o *ElemUP) Update(sol *Solution) (ok bool) {
-	if !o.U.Update(sol) {
-		return
-	}
-	return o.P.Update(sol)
+	return true
 }
 
 // internal variables ///////////////////////////////////////////////////////////////////////////////
@@ -251,9 +248,9 @@ func (o *ElemUP) ipvars(idx int, sol *Solution, tpm_derivs bool) (ok bool) {
 	ndim := o.U.Ndim
 
 	// gravity
-	o.U.grav[ndim-1] = 0
-	if o.U.Gfcn != nil {
-		o.U.grav[ndim-1] = -o.U.Gfcn.F(sol.T, nil)
+	o.P.g[ndim-1] = 0
+	if o.P.Gfcn != nil {
+		o.P.g[ndim-1] = -o.P.Gfcn.F(sol.T, nil)
 	}
 
 	// clear variables
@@ -273,12 +270,12 @@ func (o *ElemUP) ipvars(idx int, sol *Solution, tpm_derivs bool) (ok bool) {
 	}
 
 	// recover u-variables @ ip
-	var divus float64
+	//var divus float64
 	for m := 0; m < o.U.Shp.Nverts; m++ {
 		for i := 0; i < ndim; i++ {
 			r := o.U.Umap[i+m*ndim]
 			o.U.us[i] += o.U.Shp.S[m] * sol.Y[r]
-			divus += o.U.Shp.G[m][i] * sol.Y[r]
+			//divus += o.U.Shp.G[m][i] * sol.Y[r]
 		}
 	}
 	return true

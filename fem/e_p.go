@@ -279,6 +279,8 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		coef = o.Shp.J * ip.W
 		S := o.Shp.S
 		G := o.Shp.G
+
+		// tpm variables
 		plt = β1*o.pl - o.ψl[idx]
 		klr = o.Mdl.Cnd.Klr(o.States[idx].Sl)
 		RhoL = o.States[idx].RhoL
@@ -345,6 +347,8 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 		coef = o.Shp.J * ip.W
 		S := o.Shp.S
 		G := o.Shp.G
+
+		// tpm variables
 		plt = β1*o.pl - o.ψl[idx]
 		klr = o.Mdl.Cnd.Klr(o.States[idx].Sl)
 		RhoL = o.States[idx].RhoL
