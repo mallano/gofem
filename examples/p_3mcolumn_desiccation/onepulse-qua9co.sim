@@ -1,7 +1,8 @@
 {
   "data" : {
     "desc"    : "porous: 2D: desiccation of a column (lowering pressure)",
-    "matfile" : "nmepaper.mat"
+    "matfile" : "nmepaper.mat",
+    "debug"   : false
   },
   "functions" : [
     { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
@@ -22,6 +23,9 @@
       ]
     }
   ],
+  "solver" : {
+    "thCombo1" : true
+  },
   "stages" : [
     {
       "facebcs" : [
@@ -34,9 +38,9 @@
         { "tag":-2, "keys":["g"], "funcs":["grav"] }
       ],
       "control" : {
-        "tf"    : 4e3,
+        "tf"    : 4000,
         "dt"    : 50,
-        "dtout" : 1e5
+        "dtout" : 100
       }
     }
   ]

@@ -246,10 +246,12 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		}
 
 		// debug
-		if math.Abs(plt) < 1e-14 {
-			plt = 0
+		if false {
+			if math.Abs(plt) < 1e-14 {
+				plt = 0
+			}
+			io.Pf("pl=%13.10f plt=%13.10f klr=%13.10f ρl=%13.10f sl=%13.10f ρ=%13.10f Cpl=%13.10f Cvs=%13.10f\n", o.P.pl, plt, klr, ρl, o.P.States[idx].Sl, ρ, Cpl, Cvs)
 		}
-		//io.Pf("pl=%13.10f plt=%13.10f klr=%13.10f ρl=%13.10f sl=%13.10f ρ=%13.10f Cpl=%13.10f Cvs=%13.10f\n", o.P.pl, plt, klr, ρl, o.P.States[idx].Sl, ρ, Cpl, Cvs)
 
 		// compute ρwl. see Eq (34b) and (35) of [1]
 		for i := 0; i < ndim; i++ {
@@ -489,7 +491,9 @@ func (o *ElemUP) Update(sol *Solution) (ok bool) {
 		if !o.U.ipupdate(idx, o.U.Shp.S, o.U.Shp.G, sol) {
 			return
 		}
-		//io.Pf("%3d : Δpl=%13.10f pc=%13.10f sl=%13.10f RhoL=%13.10f Wet=%v\n", o.Cell.Id, Δpl, o.States[idx].Pg-o.States[idx].Pl, o.States[idx].Sl, o.States[idx].RhoL, o.States[idx].Wet)
+
+		// debug
+		//io.Pf("%3d : Δpl=%13.10f pcNew=%13.10f sl=%13.10f RhoL=%13.10f Wet=%v\n", o.Id(), Δpl, o.P.States[idx].Pg-o.P.States[idx].Pl, o.P.States[idx].Sl, o.P.States[idx].RhoL, o.P.States[idx].Wet)
 	}
 	return true
 }
