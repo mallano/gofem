@@ -16,7 +16,6 @@
     {
       "desc" : "porous column",
       "mshfile" : "msh/col3m16eQ9.msh",
-      "geost" : { "gamw":10, "nu":0.2 },
       "elemsdata" : [
         { "tag":-1, "mat":"fig8", "type":"up", "extra":"!ncns:0 !ncns2:0" },
         { "tag":-2, "mat":"fig8", "type":"up", "extra":"!ncns:0 !ncns2:0" }
@@ -28,6 +27,7 @@
   },
   "stages" : [
     {
+      "geost" : { "gamw":10, "nu":0.2 },
       "facebcs" : [
         { "tag":-10, "keys":["uy","pl"], "funcs":["zero","pbot"] },
         { "tag":-11, "keys":["ux"],      "funcs":["zero"] },
@@ -39,6 +39,7 @@
       ],
       "control" : {
         "tf"    : 4000,
+        "dt_"   : 10,
         "dt"    : 50,
         "dtout" : 100
       }
