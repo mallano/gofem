@@ -244,3 +244,26 @@ func Test_up01a(tst *testing.T) {
 	}
 	return
 }
+
+func Test_up01b(tst *testing.T) {
+
+	// capture errors and flush log
+	defer End()
+	defer func() {
+		if err := recover(); err != nil {
+		}
+	}()
+
+	verbose()
+	chk.PrintTitle("up01b")
+
+	// start simulation
+	if !Start("data/up01onelay.sim", true, chk.Verbose) {
+		chk.Panic("cannot start simulation")
+	}
+
+	// run simulation
+	if !Run() {
+		chk.Panic("cannot run simulation\n")
+	}
+}

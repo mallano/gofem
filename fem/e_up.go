@@ -5,11 +5,14 @@
 package fem
 
 import (
+	"math"
+
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/tsr"
 )
@@ -151,10 +154,48 @@ func (o *ElemUP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 
 // InterpStarVars interpolates star variables to integration points
 func (o *ElemUP) InterpStarVars(sol *Solution) (ok bool) {
-	if !o.U.InterpStarVars(sol) {
-		return
+
+	// for each integration point
+	ndim := o.U.Ndim
+	u_nverts := o.U.Shp.Nverts
+	p_nverts := o.P.Shp.Nverts
+	var r int
+	for idx, ip := range o.U.IpsElem {
+
+		// interpolation functions and gradients
+		if LogErr(o.P.Shp.CalcAtIp(o.P.X, ip, true), "InterpStarVars") {
+			return
+		}
+		if LogErr(o.U.Shp.CalcAtIp(o.U.X, ip, true), "InterpStarVars") {
+			return
+		}
+		S := o.U.Shp.S
+		G := o.U.Shp.G
+		Sb := o.P.Shp.S
+
+		// clear local variables
+		o.P.ψl[idx], o.U.divχs[idx] = 0, 0
+		for i := 0; i < ndim; i++ {
+			o.U.ζs[idx][i], o.U.χs[idx][i] = 0, 0
+		}
+
+		// p-variables
+		for m := 0; m < p_nverts; m++ {
+			r = o.P.Pmap[m]
+			o.P.ψl[idx] += Sb[m] * sol.Psi[r]
+		}
+
+		// u-variables
+		for m := 0; m < u_nverts; m++ {
+			for i := 0; i < ndim; i++ {
+				r = o.U.Umap[i+m*ndim]
+				o.U.ζs[idx][i] += S[m] * sol.Zet[r]
+				o.U.χs[idx][i] += S[m] * sol.Chi[r]
+				o.U.divχs[idx] += G[m][i] * sol.Chi[r]
+			}
+		}
 	}
-	return o.P.InterpStarVars(sol)
+	return true
 }
 
 // adds -R to global residual vector fb
@@ -183,7 +224,7 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		S := o.U.Shp.S
 		G := o.U.Shp.G
 		Sb := o.P.Shp.S
-		Gp := o.P.Shp.G
+		Gb := o.P.Shp.G
 
 		// auxiliary
 		σe := o.U.States[idx].Sig
@@ -198,6 +239,12 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 			return
 		}
 
+		// debug
+		if math.Abs(plt) < 1e-14 {
+			plt = 0
+		}
+		//io.Pf("pl=%13.10f plt=%13.10f klr=%13.10f ρl=%13.10f sl=%13.10f ρ=%13.10f Cpl=%13.10f Cvs=%13.10f\n", o.P.pl, plt, klr, ρl, o.P.States[idx].Sl, ρ, Cpl, Cvs)
+
 		// compute ρwl. see Eq (34b) and (35) of [1]
 		for i := 0; i < ndim; i++ {
 			o.P.ρwl[i] = 0
@@ -211,7 +258,7 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 			r = o.P.Pmap[m]
 			fb[r] -= coef * Sb[m] * (Cpl*plt + Cvs*divvs)
 			for i := 0; i < ndim; i++ {
-				fb[r] += coef * Gp[m][i] * o.P.ρwl[i] // += coef * div(ρl*wl)
+				fb[r] += coef * Gb[m][i] * o.P.ρwl[i] // += coef * div(ρl*wl)
 			}
 			if o.P.DoExtrap { // Eq. (19) of [2]
 				o.P.ρl_ex[m] += o.P.Emat[m][idx] * ρl
@@ -275,7 +322,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 		S := o.U.Shp.S
 		G := o.U.Shp.G
 		Sb := o.P.Shp.S
-		Gp := o.P.Shp.G
+		Gb := o.P.Shp.G
 
 		// auxiliary
 		divus = o.P.States[idx].Divus
@@ -291,6 +338,13 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 			return
 		}
 
+		// debug
+		if false {
+			io.Pf("coef=%23.10f Gb=%v Klsat=%v dklrdpl = %23.10f\n", coef, Gb, o.P.Mdl.Klsat, dklrdpl)
+			io.Pf("Sb=%v hl=%v klr=%v Cl=%v bs=%v\n", Sb, o.hl, klr, Cl, o.bs)
+			io.Pf("dCpldpl=%v plt=%v dCvsdpl=%v divvs=%v β1=%v Cpl=%v\n", dCpldpl, plt, dCvsdpl, divvs, dc.β1, Cpl)
+		}
+
 		// Kpu, Kup and Kpp
 		for n := 0; n < p_nverts; n++ {
 			for j := 0; j < ndim; j++ {
@@ -304,7 +358,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 					// add ∂(ρl.wl)/∂us^m: Eq (A.8) of [1]
 					for i := 0; i < ndim; i++ {
-						o.Kpu[n][c] += coef * Gp[n][i] * S[m] * dc.α1 * ρL * klr * o.P.Mdl.Klsat[i][j]
+						o.Kpu[n][c] += coef * Gb[n][i] * S[m] * dc.α1 * ρL * klr * o.P.Mdl.Klsat[i][j]
 					}
 
 					// add ∂rl/∂pl^n and ∂p/∂pl^n: Eqs (A.9) and (A.11) of [1]
@@ -312,7 +366,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 				}
 
 				// term in brackets in Eq (A.7) of [1]
-				o.P.tmp[j] = Sb[n]*dklrdpl*o.hl[j] - klr*(Sb[n]*Cl*o.bs[j]+Gp[n][j])
+				o.P.tmp[j] = Sb[n]*dklrdpl*o.hl[j] - klr*(Sb[n]*Cl*o.bs[j]+Gb[n][j])
 			}
 
 			// Kpp := ∂Rl^m/∂pl^n; see Eq (47) of [1]
@@ -324,7 +378,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 				// add ∂(ρl.wl)/∂us^m: Eq (A.7) of [1]
 				for i := 0; i < ndim; i++ {
 					for j := 0; j < ndim; j++ {
-						o.P.Kpp[m][n] -= coef * Gp[m][i] * o.P.Mdl.Klsat[i][j] * o.P.tmp[j]
+						o.P.Kpp[m][n] -= coef * Gb[m][i] * o.P.Mdl.Klsat[i][j] * o.P.tmp[j]
 					}
 				}
 
@@ -358,6 +412,29 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 			return
 		}
 		IpAddToKt(o.U.K, u_nverts, ndim, coef, G, o.U.D)
+	}
+
+	// debug
+	//if true {
+	if false {
+		//if false {
+		o.debug_print_K()
+	}
+
+	// add K to sparse matrix Kb
+	for i, I := range o.P.Pmap {
+		for j, J := range o.P.Pmap {
+			Kb.Put(I, J, o.P.Kpp[i][j])
+		}
+		for j, J := range o.U.Umap {
+			Kb.Put(I, J, o.Kpu[i][j])
+			Kb.Put(J, I, o.Kup[j][i])
+		}
+	}
+	for i, I := range o.U.Umap {
+		for j, J := range o.U.Umap {
+			Kb.Put(I, J, o.U.K[i][j])
+		}
 	}
 	return true
 }
@@ -530,4 +607,11 @@ func (o *ElemUP) ipvars(idx int, sol *Solution) (ok bool) {
 		o.hl[i] = -ρL*o.bs[i] - o.P.gpl[i]
 	}
 	return true
+}
+
+func (o ElemUP) debug_print_K() {
+	la.PrintMat("Kpp", o.P.Kpp, "%20.10f", false)
+	la.PrintMat("Kpu", o.Kpu, "%20.10f", false)
+	la.PrintMat("Kup", o.Kup, "%20.10f", false)
+	la.PrintMat("Kuu", o.U.K, "%20.10f", false)
 }

@@ -117,6 +117,8 @@ func (o State) LSvars(m *Model) (ρl, ρ, p, Cpl, Cvs float64, err error) {
 	ρs := ns * m.RhoS0
 	ρ = ρl + ρs
 
+	//io.Pf("ρl=%13.10f ns=%13.10f ρS=%13.10f ρs=%13.10f\n", ρl, ns, m.RhoS0, ρs)
+
 	// pore-fluid pressure
 	p = o.Pl * o.Sl // Eq. (16) of [1]
 

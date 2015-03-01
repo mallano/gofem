@@ -5,6 +5,7 @@
 package fem
 
 import (
+	"math"
 	"path/filepath"
 	"time"
 
@@ -222,7 +223,10 @@ func Run() (runisok bool) {
 			if t >= tout || lasttimestep {
 				Global.Sum.OutTimes = append(Global.Sum.OutTimes, t)
 				for _, d := range domains {
-					//io.Pf("U = %10.5f\n", d.Sol.Y)
+					if true {
+						//if false {
+						debug_print_up_results(d)
+					}
 					if !d.Out(tidx) {
 						break
 					}
@@ -291,6 +295,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		// debug
 		if Global.Debug {
 			//la.PrintVec("fb", d.Fb[:d.Ny], "%13.10f ", false)
+			//panic("stop")
 		}
 
 		// find largest absolute component of fb
@@ -358,6 +363,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		// debug
 		//KK := d.Kb.ToMatrix(nil).ToDense()
 		//la.PrintMat("KK", KK, "%20.10f", false)
+		//panic("stop")
 
 		// solve for wb := δyb
 		LogErr(d.LinSol.SolveR(d.Wb, d.Fb, false), "solve")
@@ -435,4 +441,34 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 	// success
 	return true
+}
+
+func debug_print_up_results(d *Domain) {
+	io.Pf("\ntime = %23.10f\n", d.Sol.T)
+	for _, v := range d.Msh.Verts {
+		n := d.Vid2node[v.Id]
+		eqpl := n.GetEq("pl")
+		equx := n.GetEq("ux")
+		equy := n.GetEq("uy")
+		var pl, ux, uy float64
+		if eqpl >= 0 {
+			pl = d.Sol.Y[eqpl]
+		}
+		if equx >= 0 {
+			ux = d.Sol.Y[equx]
+		}
+		if equy >= 0 {
+			uy = d.Sol.Y[equy]
+		}
+		if math.Abs(pl) < 1e-13 {
+			pl = 0
+		}
+		if math.Abs(ux) < 1e-13 {
+			ux = 0
+		}
+		if math.Abs(uy) < 1e-13 {
+			uy = 0
+		}
+		io.Pf("%3d : pl=%23.10v ux=%23.10f uy=%23.10f\n", v.Id, pl, ux, uy)
+	}
 }

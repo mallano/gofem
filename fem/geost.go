@@ -208,7 +208,6 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 		if i > 0 {
 			σ0abs += layers[i-1].DsigV
 		}
-		io.Pfpink("σ0abs = %v\n", σ0abs)
 		cells := o.Msh.CellTag2cells[lay.Tag]
 		for _, c := range cells {
 			elem := o.Cid2elem[c.Id]
@@ -234,7 +233,6 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 					}
 
 				}
-				io.Pfcyan("pl @ ip = %v\n", pl)
 				ivs := map[string][]float64{"sx": sx, "sy": sy, "sz": sz, "pl": pl, "pg": pg}
 
 				// set element's states

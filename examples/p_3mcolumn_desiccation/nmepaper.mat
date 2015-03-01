@@ -1,0 +1,57 @@
+{
+  "functions" : [],
+  "materials" : [
+    {
+      "name"  : "pm1",
+      "model" : "porous",
+      "prms"  : [
+        {"n":"nf0",   "v":0.3,     "u":"-"},
+        {"n":"RhoL0", "v":1,       "u":"Mg/m3"},
+        {"n":"RhoS0", "v":2.7,     "u":"Mg/m3"},
+        {"n":"BulkL", "v":2.2e+09, "u":"kPa"},
+        {"n":"gref",  "v":10,      "u":"m/s2"},
+        {"n":"kl",    "v":0.001,   "u":"m/s"}
+      ]
+    },
+    {
+      "name"  : "cnd1",
+      "model" : "m1",
+      "prms"  : [
+        {"n":"alpl",  "v":0.001},
+        {"n":"betl",  "v":6.0  },
+        {"n":"lam0l", "v":0.001},
+        {"n":"lam1l", "v":5.0  }
+      ]
+    },
+    {
+      "name"  : "lrm1",
+      "model" : "ref-m1",
+      "prms"  : [
+        {"n":"lamd", "v":4   },
+        {"n":"lamw", "v":4   },
+        {"n":"xrd",  "v":2.5 },
+        {"n":"xrw",  "v":2.1 },
+        {"n":"yr",   "v":0.05},
+        {"n":"betd", "v":2   },
+        {"n":"betw", "v":2   },
+        {"n":"bet1", "v":2   },
+        {"n":"bet2", "v":3   },
+        {"n":"alp",  "v":0.5 }
+      ]
+    },
+    {
+      "name"  : "sld1",
+      "model" : "lin-elast",
+      "prms"  : [
+        {"n":"E",   "v":3000, "u":"kPa"},
+        {"n":"nu",  "v":0.3,  "u":"-"},
+        {"n":"rho", "v":2.7,  "u":"Mg/m3"}
+      ]
+    },
+    {
+      "name"  : "fig8",
+      "model" : "group",
+      "extra" : "!l:lrm1 !c:cnd1 !p:pm1 !s:sld1"
+    }
+  ]
+}
