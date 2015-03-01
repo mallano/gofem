@@ -6,6 +6,7 @@ package fem
 
 import (
 	"math"
+	"sort"
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
@@ -233,13 +234,34 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 	return true
 }
 
+// auxiliary /////////////////////////////////////////////////////////////////////////////////////////
+
+type eqbcpair struct {
+	eq int
+	bc *EssentialBc
+}
+
+type eqspairsT []eqbcpair
+
+func (o eqspairsT) Len() int           { return len(o) }
+func (o eqspairsT) Swap(i, j int)      { o[i], o[j] = o[j], o[i] }
+func (o eqspairsT) Less(i, j int) bool { return o[i].eq < o[j].eq }
+
 // List returns a simple list logging bcs at time t
 func (o *EssentialBcs) List(t float64) (l string) {
-	for i, bc := range o.Bcs {
-		if i > 0 {
-			l += " "
+	var pairs eqspairsT
+	for _, bc := range o.Bcs {
+		for _, eq := range bc.Eqs {
+			pairs = append(pairs, eqbcpair{eq, bc})
 		}
-		l += io.Sf("[%s eqs=%v f(%g)=%g]", bc.Key, bc.Eqs, t, bc.Fcn.F(t, nil))
 	}
+	sort.Sort(pairs)
+	l = "\n  ====================================================================================\n"
+	l += io.Sf("  %8s%8s%23s%23s\n", "eq", "key", "value @ t=0", io.Sf("value @ t=%g", t))
+	l += "  ------------------------------------------------------------------------------------\n"
+	for _, p := range pairs {
+		l += io.Sf("  %8d%8s%23.13f%23.13f\n", p.eq, p.bc.Key, p.bc.Fcn.F(0, nil), p.bc.Fcn.F(t, nil))
+	}
+	l += "  ====================================================================================\n"
 	return
 }

@@ -453,7 +453,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 
 	// logging
 	if Global.LogBcs {
-		log.Printf("dom: essenbcs=%v", o.EssenBcs.List(stg.Control.Tf))
+		log.Printf("dom: essential boundary conditions:%v", o.EssenBcs.List(stg.Control.Tf))
 		log.Printf("dom: ptnatbcs=%v", o.PtNatBcs.List(stg.Control.Tf))
 	}
 	log.Printf("dom: ny=%d nlam=%d nnzKb=%d nnzA=%d nt1eqs=%d nt2eqs=%d", o.Ny, o.Nlam, o.NnzKb, o.NnzA, len(o.T1eqs), len(o.T2eqs))
