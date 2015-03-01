@@ -161,16 +161,8 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 			return
 		}
 
-		// get model (from first element)
-		cell := cells[0]
-		elem := o.Cid2elem[cell.Id]
-		switch e := elem.(type) {
-		case *ElemUP:
-			lay.Mdl = e.P.Mdl
-		default:
-			LogErrCond(true, "geost: cannot handle element type %v. only \"up\" is available now", cell.Type)
-			return
-		}
+		// get model
+		lay.Mdl = GetAndInitPorousModel(d.Mat)
 
 		// parameters
 		if geo.UseK0 {
