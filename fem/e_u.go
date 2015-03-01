@@ -388,34 +388,15 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 func (o *ElemU) Update(sol *Solution) (ok bool) {
 
 	// for each integration point
-	var σ0 []float64
-	nverts := o.Shp.Nverts
 	for idx, _ := range o.IpsElem {
 
 		// interpolation functions, gradients and variables @ ip
 		if !o.ipvars(idx, sol) {
 			return
 		}
-		S := o.Shp.S
-		G := o.Shp.G
 
-		// compute strains
-		if o.UseB {
-			radius := 1.0
-			if Global.Sim.Data.Axisym {
-				radius = o.Shp.AxisymGetRadius(o.X)
-			}
-			IpBmatrix(o.B, o.Ndim, nverts, G, Global.Sim.Data.Axisym, radius, S)
-			IpStrainsAndIncB(o.ε, o.Δε, 2*o.Ndim, o.Nu, o.B, sol.Y, sol.ΔY, o.Umap)
-		} else {
-			IpStrainsAndInc(o.ε, o.Δε, nverts, o.Ndim, sol.Y, sol.ΔY, o.Umap, G)
-		}
-
-		// call model update => update stresses
-		if len(o.Sig0) > 0 {
-			σ0 = o.Sig0[idx]
-		}
-		if LogErr(o.MdlSmall.Update(o.States[idx], σ0, o.ε, o.Δε), "Update") {
+		// update internal state
+		if !o.ipupdate(idx, o.Shp.S, o.Shp.G, sol) {
 			return
 		}
 	}
@@ -491,6 +472,34 @@ func (o ElemU) OutIpsData() (data []*OutIpData) {
 }
 
 // auxiliary ////////////////////////////////////////////////////////////////////////////////////////
+
+// ipudpate updates internal state
+func (o *ElemU) ipupdate(idx int, S []float64, G [][]float64, sol *Solution) (ok bool) {
+
+	// compute strains
+	ndim := o.Ndim
+	nverts := o.Shp.Nverts
+	if o.UseB {
+		radius := 1.0
+		if Global.Sim.Data.Axisym {
+			radius = o.Shp.AxisymGetRadius(o.X)
+		}
+		IpBmatrix(o.B, ndim, nverts, G, Global.Sim.Data.Axisym, radius, S)
+		IpStrainsAndIncB(o.ε, o.Δε, 2*ndim, o.Nu, o.B, sol.Y, sol.ΔY, o.Umap)
+	} else {
+		IpStrainsAndInc(o.ε, o.Δε, nverts, ndim, sol.Y, sol.ΔY, o.Umap, G)
+	}
+
+	// call model update => update stresses
+	var σ0 []float64
+	if len(o.Sig0) > 0 {
+		σ0 = o.Sig0[idx]
+	}
+	if LogErr(o.MdlSmall.Update(o.States[idx], σ0, o.ε, o.Δε), "ipupdate") {
+		return
+	}
+	return true
+}
 
 // ipvars computes current values @ integration points. idx == index of integration point
 func (o *ElemU) ipvars(idx int, sol *Solution) (ok bool) {

@@ -103,3 +103,72 @@ func (o State) Lderivs(m *Model) (ρl, Cpl, dCpldpl, dklrdpl float64, err error)
 	dklrdpl = -m.Cnd.DklrDsl(o.Sl) * Ccb
 	return
 }
+
+// LSvars calculates variables for liquid-solid simulations
+func (o State) LSvars(m *Model) (ρl, ρ, p, Cpl, Cvs float64, err error) {
+
+	// n variables; Eqs (13) and (28) of [1]
+	ns := (1.0 - o.Divus) * o.Ns0
+	nf := 1.0 - ns
+	nl := nf * o.Sl
+
+	// ρ variables; Eq (13) of [1]
+	ρl = nl * o.RhoL
+	ρs := ns * m.RhoS0
+	ρ = ρl + ρs
+
+	// pore-fluid pressure
+	p = o.Pl * o.Sl // Eq. (16) of [1]
+
+	// moduli
+	Ccb, err := m.Ccb(&o)
+	if err != nil {
+		return
+	}
+	Cpl = nf * (o.Sl*m.Cl - o.RhoL*Ccb) // Eq. (32a) of [1]
+	Cvs = o.Sl * o.RhoL                 // Eq. (32b) of [1]
+	return
+}
+
+// LSderivs calculates derivatives for liquid-solid simulations
+func (o State) LSderivs(m *Model) (ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dCvsdpl, dklrdpl, dCpldusM, dρdusM float64, err error) {
+
+	// n variables; Eqs (13) and (28) of [1]
+	ns := (1.0 - o.Divus) * o.Ns0
+	nf := 1.0 - ns
+	nl := nf * o.Sl
+
+	// ρ variables; Eq (13) of [1]
+	ρl = nl * o.RhoL
+	ρs := ns * m.RhoS0
+	ρ = ρl + ρs
+
+	// capillary pressure
+	pc := o.Pg - o.Pl
+
+	// moduli
+	Ccb, err := m.Ccb(&o)
+	if err != nil {
+		return
+	}
+	Cpl = nf * (o.Sl*m.Cl - o.RhoL*Ccb) // Eq (32a) of [1]
+	Cvs = o.Sl * o.RhoL                 // Eq (32b) of [1]
+
+	// derivatives
+	Ccd, err := m.Ccd(&o)
+	if err != nil {
+		return
+	}
+
+	// derivatives w.r.t pl
+	dρdpl = nf * (o.Sl*m.Cl - o.RhoL*Ccb)      // Eq (A.9) of [1]
+	dpdpl = o.Sl + pc*Ccb                      // Eq (A.11) of [1]
+	dCpldpl = nf * (o.RhoL*Ccd - 2.0*Ccb*m.Cl) // Eq (A.2) of[1]
+	dCvsdpl = o.Sl*m.Cl - Ccb*o.RhoL           // Eq (A.4) of [1]
+	dklrdpl = -m.Cnd.DklrDsl(o.Sl) * Ccb       // Eq (A.7) of [1]
+
+	// derivatives w.r.t us (multipliers only)
+	dρdusM = (o.Sl*o.RhoL - m.RhoS0) * o.Ns0    // Eq (A.10) of [1]
+	dCpldusM = (o.Sl*m.Cl - o.RhoL*Ccb) * o.Ns0 // Eq (A.3) of [1]
+	return
+}

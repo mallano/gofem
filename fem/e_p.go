@@ -293,7 +293,7 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		for i := 0; i < o.Ndim; i++ {
 			o.ρwl[i] = 0
 			for j := 0; j < o.Ndim; j++ {
-				o.ρwl[i] += klr * o.Mdl.Klsat[i][j] * (RhoL*o.g[i] - o.gpl[i])
+				o.ρwl[i] += klr * o.Mdl.Klsat[i][j] * (RhoL*o.g[i] - o.gpl[i]) // TODO: fix this
 			}
 		}
 
@@ -423,7 +423,7 @@ func (o *ElemP) Update(sol *Solution) (ok bool) {
 	for idx, _ := range o.IpsElem {
 
 		// interpolation functions and gradients
-		if LogErr(o.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "Update") {
+		if LogErr(o.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "Update") { // TODO: no need for false here
 			return
 		}
 
