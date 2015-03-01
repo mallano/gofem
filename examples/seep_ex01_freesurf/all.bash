@@ -1,4 +1,4 @@
 #!/bin/bash
 
 gofem coarse && GenVtu coarse
-gofem fineNonlin && GenVtu fineNonlin
+#gofem fineNonlin && GenVtu fineNonlin
