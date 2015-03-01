@@ -170,7 +170,7 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 	ndim := o.U.Ndim
 	u_nverts := o.U.Shp.Nverts
 	p_nverts := o.P.Shp.Nverts
-	var coef, plt, klr, ρL, ρl, ρ, p, Cpl, Cvs, divus, divvs float64
+	var coef, plt, klr, ρl, ρ, p, Cpl, Cvs, divus, divvs float64
 	var err error
 	var r int
 	for idx, ip := range o.U.IpsElem {
@@ -193,16 +193,9 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		// tpm variables
 		plt = dc.β1*o.P.pl - o.P.ψl[idx] // Eq. (35c) [1]
 		klr = o.P.Mdl.Cnd.Klr(o.P.States[idx].Sl)
-		ρL = o.P.States[idx].RhoL
 		ρl, ρ, p, Cpl, Cvs, err = o.P.States[idx].LSvars(o.P.Mdl)
 		if LogErr(err, "calc of tpm variables failed") {
 			return
-		}
-
-		// compute bs and hl. see Eqs (A.1) of [1]
-		for i := 0; i < ndim; i++ {
-			o.bs[i] = dc.α1*o.U.us[i] - o.U.ζs[idx][i] - o.P.g[i]
-			o.hl[i] = -ρL*o.bs[i] - o.P.gpl[i]
 		}
 
 		// compute ρwl. see Eq (34b) and (35) of [1]
@@ -296,12 +289,6 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 		ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dCvsdpl, dklrdpl, dCpldusM, dρdusM, err = o.P.States[idx].LSderivs(o.P.Mdl)
 		if LogErr(err, "calc of tpm derivatives failed") {
 			return
-		}
-
-		// compute bs and hl. see Eqs (A.1) of [1]
-		for i := 0; i < ndim; i++ {
-			o.bs[i] = dc.α1*o.U.us[i] - o.U.ζs[idx][i] - o.P.g[i]
-			o.hl[i] = -ρL*o.bs[i] - o.P.gpl[i]
 		}
 
 		// Kpu, Kup and Kpp
@@ -508,6 +495,8 @@ func (o *ElemUP) ipvars(idx int, sol *Solution) (ok bool) {
 
 	// auxiliary
 	ndim := o.U.Ndim
+	dc := Global.DynCoefs
+	ρL := o.P.States[idx].RhoL
 
 	// gravity
 	o.P.g[ndim-1] = 0
@@ -533,6 +522,12 @@ func (o *ElemUP) ipvars(idx int, sol *Solution) (ok bool) {
 		for i := 0; i < ndim; i++ {
 			o.P.gpl[i] += o.P.Shp.G[m][i] * sol.Y[r]
 		}
+	}
+
+	// compute bs and hl. see Eqs (A.1) of [1]
+	for i := 0; i < ndim; i++ {
+		o.bs[i] = dc.α1*o.U.us[i] - o.U.ζs[idx][i] - o.P.g[i]
+		o.hl[i] = -ρL*o.bs[i] - o.P.gpl[i]
 	}
 	return true
 }
