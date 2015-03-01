@@ -144,7 +144,8 @@ func Run() (runisok bool) {
 	defer func() {
 		Global.Sum.Save()
 		if Global.Verbose && !Global.Debug {
-			io.Pfblue2("\ncpu time = %v\n", time.Now().Sub(cputime))
+			io.Pf("\nfinal t  = %v\n", t)
+			io.Pfblue2("cpu time = %v\n", time.Now().Sub(cputime))
 		}
 	}()
 
