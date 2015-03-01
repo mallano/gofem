@@ -1,6 +1,9 @@
 #!/bin/bash
 
-examples="rjoint_ex06_pullout seep_ex01_freesurf spo751_pressurised_cylinder spo754_strip_footing_collapse"
+examples="rjoint_ex06_pullout \
+          seep_ex01_freesurf \
+          spo751_pressurised_cylinder \
+          spo754_strip_footing_collapse"
 for ex in $examples; do
     echo
     echo
