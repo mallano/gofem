@@ -5,6 +5,7 @@
 package fem
 
 import (
+	"log"
 	"math"
 	"sort"
 
@@ -40,19 +41,19 @@ type EssentialBc struct {
 // Each constraint will have a unique Lagrange multiplier index.
 type EssentialBcs struct {
 	Ndim   int            // space dimension
-	Eq2idx map[int][]int  // maps eq number to indices in cstmp
+	Eq2idx map[int][]int  // maps eq number to indices in BcsTmp
 	Bcs    []*EssentialBc // active essential bcs / constraints
 	A      la.Triplet     // matrix of coefficients 'A'
 	Am     *la.CCMatrix   // compressed form of A matrix
 
 	// temporary
-	BcsTmp []*EssentialBc // temporary essential bcs / constraints, including inactive ones
+	BcsTmp eqbcpairs // temporary essential bcs / constraints, including inactive ones. maps the first equation number to bcs
 }
 
 // Reset initialises this structure. It also performs a reset of internal structures.
 func (o *EssentialBcs) Reset(ndim int) {
 	o.Ndim = ndim
-	o.BcsTmp = make([]*EssentialBc, 0)
+	o.BcsTmp = make([]eqbcpair, 0)
 	o.Eq2idx = make(map[int][]int)
 	o.Bcs = make([]*EssentialBc, 0)
 }
@@ -62,12 +63,15 @@ func (o *EssentialBcs) Reset(ndim int) {
 //  nnzA -- is the number of non-zeros in matrix 'A'
 func (o *EssentialBcs) Build(ny int) (nλ, nnzA int) {
 
+	// sort bcs to make sure all processors will number Lagrange multipliers in the same order
+	sort.Sort(o.BcsTmp)
+
 	// count number of active constraints and non-zeros in matrix A
-	for _, c := range o.BcsTmp {
-		if !c.Inact {
-			o.Bcs = append(o.Bcs, c)
+	for _, pair := range o.BcsTmp {
+		if !pair.bc.Inact {
+			o.Bcs = append(o.Bcs, pair.bc)
 			nλ += 1
-			nnzA += len(c.ValsA)
+			nnzA += len(pair.bc.ValsA)
 		}
 	}
 
@@ -84,6 +88,15 @@ func (o *EssentialBcs) Build(ny int) (nλ, nnzA int) {
 		}
 	}
 	o.Am = o.A.ToMatrix(nil)
+
+	// debug
+	if false {
+		if Global.Rank == 0 {
+			log.Printf("\n\nAm=%v\n", o.Am)
+		} else {
+			log.Printf("\n\nAm=%v\n", o.Am)
+		}
+	}
 	return
 }
 
@@ -109,7 +122,7 @@ func (o EssentialBcs) AddToRhs(fb []float64, sol *Solution) {
 // add adds new essential bcs / constraint and sets map eq2idx
 func (o *EssentialBcs) add(key string, eqs []int, valsA []float64, fcn fun.Func) {
 	idx := len(o.BcsTmp)
-	o.BcsTmp = append(o.BcsTmp, &EssentialBc{key, eqs, valsA, fcn, false})
+	o.BcsTmp = append(o.BcsTmp, eqbcpair{eqs[0], &EssentialBc{key, eqs, valsA, fcn, false}})
 	for _, eq := range eqs {
 		utl.IntIntsMapAppend(&o.Eq2idx, eq, idx)
 	}
@@ -118,11 +131,11 @@ func (o *EssentialBcs) add(key string, eqs []int, valsA []float64, fcn fun.Func)
 // add_single adds single-point constraint
 func (o *EssentialBcs) add_single(key string, eq int, fcn fun.Func) {
 	for _, idx := range o.Eq2idx[eq] {
-		c := o.BcsTmp[idx]
-		if c.Key == "rigid" || c.Key == "incsup" {
+		pair := o.BcsTmp[idx]
+		if pair.bc.Key == "rigid" || pair.bc.Key == "incsup" {
 			return
 		}
-		c.Inact = true
+		pair.bc.Inact = true
 	}
 	o.add(key, []int{eq}, []float64{1}, fcn)
 }
@@ -176,9 +189,9 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 			eqy := nod.Dofs[1].Eq
 			for _, eq := range []int{eqx, eqy} {
 				for _, idx := range o.Eq2idx[eq] {
-					c := o.BcsTmp[idx]
-					if c.Key != "rigid" {
-						c.Inact = true
+					pair := o.BcsTmp[idx]
+					if pair.bc.Key != "rigid" {
+						pair.bc.Inact = true
 					}
 				}
 			}
@@ -241,15 +254,15 @@ type eqbcpair struct {
 	bc *EssentialBc
 }
 
-type eqspairsT []eqbcpair
+type eqbcpairs []eqbcpair
 
-func (o eqspairsT) Len() int           { return len(o) }
-func (o eqspairsT) Swap(i, j int)      { o[i], o[j] = o[j], o[i] }
-func (o eqspairsT) Less(i, j int) bool { return o[i].eq < o[j].eq }
+func (o eqbcpairs) Len() int           { return len(o) }
+func (o eqbcpairs) Swap(i, j int)      { o[i], o[j] = o[j], o[i] }
+func (o eqbcpairs) Less(i, j int) bool { return o[i].eq < o[j].eq }
 
 // List returns a simple list logging bcs at time t
 func (o *EssentialBcs) List(t float64) (l string) {
-	var pairs eqspairsT
+	var pairs eqbcpairs
 	for _, bc := range o.Bcs {
 		for _, eq := range bc.Eqs {
 			pairs = append(pairs, eqbcpair{eq, bc})
