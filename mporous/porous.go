@@ -37,6 +37,7 @@ type Model struct {
 	// constants
 	NmaxIt  int     // max number iterations in Update
 	Itol    float64 // iterations tolerance in Update
+	PcZero  float64 // minimum value allowed for pc
 	MEtrial bool    // perform Modified-Euler trial to start update process
 	ShowR   bool    // show residual values in Update
 	AllBE   bool    // use BE for all models, including those that directly implements sl=f(pc)
@@ -83,7 +84,8 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 
 	// constants
 	o.NmaxIt = 20
-	o.Itol = 1e-8
+	o.Itol = 1e-9
+	o.PcZero = 1e-10
 	o.MEtrial = true
 
 	// saturated conductivities
@@ -98,6 +100,8 @@ func (o *Model) Init(prms fun.Prms, cnd mconduct.Model, lrm mreten.Model) (err e
 			o.NmaxIt = int(p.V)
 		case "Itol":
 			o.Itol = p.V
+		case "PcZero":
+			o.PcZero = p.V
 		case "MEtrial":
 			o.MEtrial = p.V > 0
 		case "ShowR":
