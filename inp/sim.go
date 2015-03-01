@@ -115,14 +115,19 @@ type SolverData struct {
 	FbMin  float64 `json:"fbmin"`  // minimum value of fb
 
 	// transient analyses
-	DtMin float64 `json:"dtmin"` // minium value of Dt for transient (θ and Newmark / Dyn coefficients)
-	Theta float64 `json:"theta"` // θ-method
+	DtMin      float64 `json:"dtmin"`      // minium value of Dt for transient (θ and Newmark / Dyn coefficients)
+	Theta      float64 `json:"theta"`      // θ-method
+	ThGalerkin bool    `json:"thgalerkin"` // use θ = 2/3
+	ThLiniger  bool    `json:"thliniger"`  // use θ = 0.878
 
 	// dynamics
 	Theta1 float64 `json:"theta1"` // Newmark's method parameter
 	Theta2 float64 `json:"theta2"` // Newmark's method parameter
 	HHT    bool    `json:"hht"`    // use Hilber-Hughes-Taylor method
 	HHTalp float64 `json:"hhtalp"` // HHT α parameter
+
+	// combination of coefficients
+	ThCombo1 bool `json:"thcombo1"` // use θ=2/3, θ1=5/6 and θ2=8/9 to avoid oscillations
 
 	// derived
 	Itol float64 // iterations tolerance
@@ -153,6 +158,21 @@ func (o *SolverData) SetDefault() {
 
 // PostProcess performs a post-processing of the just read json file
 func (o *SolverData) PostProcess() {
+
+	// coefficients for transient analyses
+	if o.ThGalerkin {
+		o.Theta = 2.0 / 3.0
+	}
+	if o.ThLiniger {
+		o.Theta = 0.878
+	}
+	if o.ThCombo1 {
+		o.Theta = 2.0 / 3.0
+		o.Theta1 = 5.0 / 6.0
+		o.Theta2 = 8.0 / 9.0
+	}
+
+	// iterations tolerance
 	o.Itol = max(10.0*o.Eps/o.Rtol, min(0.01, math.Sqrt(o.Rtol)))
 }
 
