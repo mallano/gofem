@@ -199,13 +199,17 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 			return
 		}
 
-		// compute bs, hl and ρwl. see Eqs (34b), (35) and (A.1a) of [1]
+		// compute bs and hl. see Eqs (A.1) of [1]
 		for i := 0; i < ndim; i++ {
 			o.bs[i] = dc.α1*o.U.us[i] - o.U.ζs[idx][i] - o.P.g[i]
 			o.hl[i] = -ρL*o.bs[i] - o.P.gpl[i]
+		}
+
+		// compute ρwl. see Eq (34b) and (35) of [1]
+		for i := 0; i < ndim; i++ {
 			o.P.ρwl[i] = 0
 			for j := 0; j < ndim; j++ {
-				o.P.ρwl[i] += klr * o.P.Mdl.Klsat[i][j] * o.hl[i] // TODO: fix this
+				o.P.ρwl[i] += klr * o.P.Mdl.Klsat[i][j] * o.hl[j]
 			}
 		}
 
@@ -294,7 +298,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 			return
 		}
 
-		// compute bs and hl. see Eqs (A.1)
+		// compute bs and hl. see Eqs (A.1) of [1]
 		for i := 0; i < ndim; i++ {
 			o.bs[i] = dc.α1*o.U.us[i] - o.U.ζs[idx][i] - o.P.g[i]
 			o.hl[i] = -ρL*o.bs[i] - o.P.gpl[i]
