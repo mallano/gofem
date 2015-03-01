@@ -19,7 +19,7 @@ func main() {
 
 	// define entities
 	out.Define("A B C D E", out.N{-5, -4, -3, -2, -1})
-	//out.Define("A", out.N{-5})
+	out.Define("a b c d e f g h i", out.P{{15, 0}, {15, 1}, {15, 2}, {15, 3}, {15, 4}, {15, 5}, {15, 6}, {15, 7}, {15, 8}})
 
 	// load results
 	out.LoadResults(nil)
@@ -30,6 +30,11 @@ func main() {
 	out.Plt("t", "pl", "C", plt.FmtS{"mx-"}, -1)
 	out.Plt("t", "pl", "D", plt.FmtL{M: "+", C: "orange", Ls: "-"}, -1)
 	out.Plt("t", "pl", "E", plt.FmtS{"r^-"}, -1)
+
+	out.Splot("liquid saturation")
+	for _, l := range []string{"a", "b", "c", "d", "e", "f", "g", "h", "i"} {
+		out.Plt("t", "sl", l, plt.FmtS{""}, -1)
+	}
 
 	// show
 	out.Draw("", "", true)

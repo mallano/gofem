@@ -271,13 +271,9 @@ func topology(buf *bytes.Buffer, ips, lbb bool) {
 	} else {
 		for _, e := range elems {
 			cell := cells[e.Id()]
-			cverts := cell.Verts
-			nverts := len(cverts)
-			if lbb {
-				nverts = shp.GetNverts(shp.GetBasicType(cell.Type))
-			}
+			_, nverts := get_cell_info(cell.Type, lbb)
 			for j := 0; j < nverts; j++ {
-				io.Ff(buf, "%d ", cverts[j])
+				io.Ff(buf, "%d ", cell.Verts[j])
 			}
 		}
 	}
@@ -293,13 +289,7 @@ func topology(buf *bytes.Buffer, ips, lbb bool) {
 	} else {
 		for _, e := range elems {
 			cell := cells[e.Id()]
-			nverts := len(cell.Verts)
-			if lbb {
-				nverts = shp.GetNverts(shp.GetBasicType(cell.Type))
-			}
-			if cell.Type == "qua9" {
-				nverts = 8
-			}
+			_, nverts := get_cell_info(cell.Type, lbb)
 			offset += nverts
 			io.Ff(buf, "%d ", offset)
 		}
@@ -314,13 +304,8 @@ func topology(buf *bytes.Buffer, ips, lbb bool) {
 	} else {
 		for _, e := range elems {
 			cell := cells[e.Id()]
-			vtk := shp.GetVtkCode(cell.Type)
-			if lbb {
-				vtk = shp.GetVtkCode(shp.GetBasicType(cell.Type))
-			}
-			if cell.Type == "qua9" {
-				vtk = shp.VTK_QUADRATIC_QUAD
-			}
+			ctype, _ := get_cell_info(cell.Type, lbb)
+			vtk := shp.GetVtkCode(ctype)
 			if vtk < 0 {
 				chk.Panic("cannot handle cell type %q", cell.Type)
 			}
@@ -369,7 +354,7 @@ func pdata_write(buf *bytes.Buffer, label string, keys []string, ips bool) {
 			l := ""
 			for _, key := range keys {
 				if v, ok := p.V[key]; ok {
-					io.Ff(buf, "%23.15e ", *v)
+					l += io.Sf("%23.15e ", *v)
 				} else {
 					l += "0 "
 				}
@@ -451,4 +436,16 @@ func iabs(val int) int {
 		return -val
 	}
 	return val
+}
+
+func get_cell_info(ctype string, lbb bool) (ctypeNew string, nverts int) {
+	ctypeNew = ctype
+	if ctypeNew == "qua9" {
+		ctypeNew = "qua8"
+	}
+	if lbb {
+		ctypeNew = shp.GetBasicType(ctypeNew)
+	}
+	nverts = shp.GetNverts(ctypeNew)
+	return
 }
