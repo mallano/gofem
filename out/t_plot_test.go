@@ -10,6 +10,7 @@ import (
 	"github.com/cpmech/gofem/fem"
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
+	"github.com/cpmech/gosl/plt"
 )
 
 func Test_plot01(tst *testing.T) {
@@ -43,19 +44,20 @@ func Test_plot01(tst *testing.T) {
 	plA := GetRes("pl", "A", 0)
 
 	Splot("liquid pressure")
-	Plt("t", "pl", "B", "'b.-'", -1)
-	Plt("t", plA, "A", "'r.-'", -1)
+	Plt("t", "pl", "B", plt.FmtS{"b.-"}, -1)
+	Plt("t", plA, "A", plt.FmtS{"r.", "-"}, -1)
 
 	Splot("")
-	Plt("pl", "pl", "A", "'ko-'", -1)
+	Plt("pl", "pl", "A", plt.FmtS{"k", "o", "-"}, -1)
 
 	Splot("")
-	Plt("pl", "y", "left", "'bo-'", 0)
-	Plt("pl", "y", "left", "'bo-'", -1)
+	Plt("pl", "y", "left", plt.FmtS{"bo-"}, 0)
+	Plt("pl", "y", "left", plt.FmtS{"go-"}, -1)
 
 	Splot("")
-	Plt("y", "pl", "left", "'bo-'", 0)
-	Plt("y", "pl", "left", "'bo-'", -1)
+	Plt("y", "pl", "left", plt.FmtS{"b", "o", "-"}, 0)
+	Plt("y", "pl", "left", plt.FmtL{C: "m", M: "*", Ls: "-", Lw: 2}, -1)
 
+	//Draw("", "", true)
 	Draw("", "", false)
 }

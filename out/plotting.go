@@ -13,11 +13,11 @@ import (
 
 // PltEntity stores all data for a plot entity (X vs Y)
 type PltEntity struct {
-	X     []float64    // x-values
-	Y     []float64    // y-values
-	Xlbl  string       // horizontal axis label (raw; e.g. "t")
-	Ylbl  string       // vertical axis label (raw; e.g. "pl")
-	Style plt.LineData // style
+	X     []float64     // x-values
+	Y     []float64     // y-values
+	Xlbl  string        // horizontal axis label (raw; e.g. "t")
+	Ylbl  string        // vertical axis label (raw; e.g. "pl")
+	Style plt.Formatter // style
 }
 
 // SplotDat stores all data for one subplot
@@ -51,8 +51,9 @@ func SplotConfig(xunit, yunit string, xscale, yscale float64) {
 	}
 }
 
-func Plt(xHandle, yHandle interface{}, alias, format string, idxI int) {
+func Plt(xHandle, yHandle interface{}, alias string, fm plt.Formatter, idxI int) {
 	var e PltEntity
+	e.Style = fm
 	e.X, e.Xlbl = get_vals_and_labels(xHandle, yHandle, alias, idxI)
 	e.Y, e.Ylbl = get_vals_and_labels(yHandle, xHandle, alias, idxI)
 	if len(e.X) != len(e.Y) {
