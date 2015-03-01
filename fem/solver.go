@@ -223,8 +223,8 @@ func Run() (runisok bool) {
 			if t >= tout || lasttimestep {
 				Global.Sum.OutTimes = append(Global.Sum.OutTimes, t)
 				for _, d := range domains {
-					if true {
-						//if false {
+					//if true {
+					if false {
 						debug_print_up_results(d)
 					}
 					if !d.Out(tidx) {

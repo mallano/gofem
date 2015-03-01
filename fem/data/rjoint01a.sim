@@ -11,8 +11,8 @@
       "desc" : "curved line in 3D",
       "mshfile" : "rjoint01.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"sld1", "type":"u",   "extra":"!nip:8" },
-        { "tag":-2, "mat":"lin1", "type":"rod", "extra":"!nip:3" },
+        { "tag":-1, "mat":"sld1", "type":"u",   "nip":8 },
+        { "tag":-2, "mat":"lin1", "type":"rod", "nip":3 },
         { "tag":-3, "mat":"jnt1", "type":"rjoint"}
       ]
     }

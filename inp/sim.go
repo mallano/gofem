@@ -161,6 +161,8 @@ type ElemData struct {
 	Tag   int    `json:"tag"`   // tag of element
 	Mat   string `json:"mat"`   // material name
 	Type  string `json:"type"`  // type of element. ex: u, p, up, rod, beam, rjoint
+	Nip   int    `json:"nip"`   // number of integration points; 0 => use default
+	Nipf  int    `json:"nipf"`  // number of integration points on face; 0 => use default
 	Extra string `json:"extra"` // extra flags (in keycode format). ex: "!thick:0.2 !nip:4"
 	Inact bool   `json:"inact"` // whether element starts inactive or not
 }

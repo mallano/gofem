@@ -124,7 +124,7 @@ func init() {
 		o.UseB, o.Debug, o.Thickness = GetSolidFlags(edat.Extra)
 
 		// integration points
-		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Extra, cellType)
+		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Nip, edat.Nipf, cellType)
 		if o.IpsElem == nil || o.IpsFace == nil {
 			return nil
 		}

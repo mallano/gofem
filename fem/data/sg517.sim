@@ -13,8 +13,8 @@
       "desc"      : "flexible footing (axisymmetric)",
       "mshfile"  : "sg517.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"SG-5.17-M1", "type":"u", "extra":"!nip:9" },
-        { "tag":-2, "mat":"SG-5.17-M2", "type":"u", "extra":"!nip:9" }
+        { "tag":-1, "mat":"SG-5.17-M1", "type":"u", "nip":9 },
+        { "tag":-2, "mat":"SG-5.17-M2", "type":"u", "nip":9 }
       ]
     }
   ],

@@ -11,19 +11,7 @@ import (
 	"github.com/cpmech/gosl/io"
 )
 
-func GetIntegrationPoints(extra, cellType string) (ipsElem, ipsFace []*shp.Ipoint) {
-
-	// get number of ips of element
-	var nip int
-	if s_nip, found := io.Keycode(extra, "nip"); found {
-		nip = io.Atoi(s_nip)
-	}
-
-	// get number of ips of face
-	var nipf int
-	if s_nipf, found := io.Keycode(extra, "nipf"); found {
-		nipf = io.Atoi(s_nipf)
-	}
+func GetIntegrationPoints(nip, nipf int, cellType string) (ipsElem, ipsFace []*shp.Ipoint) {
 
 	// get integration points of element
 	var err error

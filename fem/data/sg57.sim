@@ -12,7 +12,7 @@
       "desc"      : "flexible footing",
       "mshfile"  : "sg57.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"SG-5.7-M1", "type":"u", "extra":"!nip:12" }
+        { "tag":-1, "mat":"SG-5.7-M1", "type":"u", "nip":12 }
       ]
     }
   ],

@@ -11,7 +11,7 @@
       "desc"      : "quarter of solid beam",
       "mshfile"   : "sg1121.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"SG-11.21", "type":"u", "extra":"!nip:9" }
+        { "tag":-1, "mat":"SG-11.21", "type":"u", "nip":9 }
       ]
     }
   ],

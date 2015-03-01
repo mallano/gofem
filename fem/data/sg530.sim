@@ -13,7 +13,7 @@
       "desc"      : "ground",
       "mshfile"   : "sg530.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"SG-5.30-M1", "type":"u", "extra":"!nip:1" }
+        { "tag":-1, "mat":"SG-5.30-M1", "type":"u", "nip":1 }
       ]
     }
   ],

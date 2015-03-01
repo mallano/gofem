@@ -22,7 +22,7 @@
       "desc"      : "slice of cylinder",
       "mshfile"   : "spo751.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"M.7.5.1-mises", "type":"u", "extra":"!nip:4" }
+        { "tag":-1, "mat":"M.7.5.1-mises", "type":"u", "nip":4 }
       ]
     }
   ],

@@ -12,7 +12,7 @@
       "desc"      : "rectangle",
       "mshfile"  : "sg515.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"SG-5.15-M1", "type":"u", "extra":"!nip:4 !useB:true" }
+        { "tag":-1, "mat":"SG-5.15-M1", "type":"u", "nip":4, "extra":"!useB:true" }
       ]
     }
   ],

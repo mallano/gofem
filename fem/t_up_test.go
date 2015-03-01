@@ -249,12 +249,12 @@ func Test_up01b(tst *testing.T) {
 
 	// capture errors and flush log
 	defer End()
-	defer func() {
-		if err := recover(); err != nil {
-		}
-	}()
+	//defer func() {
+	//if err := recover(); err != nil {
+	//}
+	//}()
 
-	verbose()
+	//verbose()
 	chk.PrintTitle("up01b")
 
 	// start simulation

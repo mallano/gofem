@@ -96,18 +96,24 @@ func init() {
 			p_cellType = shp.GetBasicType(cellType)
 		}
 
-		// underlying elements
+		// allocate u element
 		u_allocator := eallocators["u"]
-		p_allocator := eallocators["p"]
 		u_elem := u_allocator(ndim, cellType, faceConds, cid, edat, x)
-		p_elem := p_allocator(ndim, p_cellType, faceConds, cid, edat, x)
 		if LogErrCond(u_elem == nil, "cannot allocate underlying u-element") {
 			return nil
 		}
+		o.U = u_elem.(*ElemU)
+
+		// make sure p-element uses the same nubmer of integration points than u-element
+		edat.Nip = len(o.U.IpsElem)
+		//edat.Nipf = len(o.U.IpsFace) // TODO: check if this is necessary
+
+		// allocate p-element
+		p_allocator := eallocators["p"]
+		p_elem := p_allocator(ndim, p_cellType, faceConds, cid, edat, x)
 		if LogErrCond(p_elem == nil, "cannot allocate underlying p-element") {
 			return nil
 		}
-		o.U = u_elem.(*ElemU)
 		o.P = p_elem.(*ElemP)
 
 		// scratchpad. computed @ each ip

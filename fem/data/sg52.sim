@@ -13,7 +13,7 @@
       "desc"      : "plane-strain section",
       "mshfile"   : "sg52.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"SG-5.2-M1", "type":"u", "extra":"!nip:1" }
+        { "tag":-1, "mat":"SG-5.2-M1", "type":"u", "nip":1 }
       ]
     }
   ],

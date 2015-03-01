@@ -134,7 +134,7 @@ func init() {
 		o.Np = o.Shp.Nverts
 
 		// integration points
-		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Extra, cellType)
+		o.IpsElem, o.IpsFace = GetIntegrationPoints(edat.Nip, edat.Nipf, cellType)
 		if o.IpsElem == nil || o.IpsFace == nil {
 			return nil
 		}
