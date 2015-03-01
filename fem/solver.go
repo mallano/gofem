@@ -222,6 +222,7 @@ func Run() (runisok bool) {
 			if t >= tout || lasttimestep {
 				Global.Sum.OutTimes = append(Global.Sum.OutTimes, t)
 				for _, d := range domains {
+					//io.Pf("U = %10.5f\n", d.Sol.Y)
 					if !d.Out(tidx) {
 						break
 					}
@@ -289,7 +290,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 		// debug
 		if Global.Debug {
-			la.PrintVec("fb", d.Fb[:d.Ny], "%13.10f ", false)
+			//la.PrintVec("fb", d.Fb[:d.Ny], "%13.10f ", false)
 		}
 
 		// find largest absolute component of fb
@@ -366,7 +367,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 		// debug
 		if Global.Debug {
-			la.PrintVec("wb", d.Wb[:d.Ny], "%13.10f ", false)
+			//la.PrintVec("wb", d.Wb[:d.Ny], "%13.10f ", false)
 		}
 
 		// update primary variables (y)

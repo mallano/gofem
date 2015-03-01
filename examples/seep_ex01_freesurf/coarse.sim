@@ -1,7 +1,7 @@
 {
   "data" : {
     "matfile" : "materials.mat",
-    "dodebug" : false
+    "debug" : false
   },
   "functions" : [
     { "name":"Hl", "type":"cte", "prms":[{"n":"c", "v":10}] },

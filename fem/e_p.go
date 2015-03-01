@@ -153,10 +153,10 @@ func init() {
 		o.ψl = make([]float64, nip)
 
 		// scratchpad. computed @ each ip
-		o.g = make([]float64, o.Ndim)
-		o.gpl = make([]float64, o.Ndim)
-		o.ρwl = make([]float64, o.Ndim)
-		o.tmp = make([]float64, o.Ndim)
+		o.g = make([]float64, ndim)
+		o.gpl = make([]float64, ndim)
+		o.ρwl = make([]float64, ndim)
+		o.tmp = make([]float64, ndim)
 		o.Kpp = la.MatAlloc(o.Np, o.Np)
 
 		// vertices on seepage faces
@@ -267,6 +267,7 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
 	β1 := Global.DynCoefs.β1
+	ndim := o.Ndim
 	nverts := o.Shp.Nverts
 	var coef, plt, klr, RhoL, ρl, Cpl float64
 	var err error
@@ -290,10 +291,10 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		}
 
 		// compute ρwl. see Eq. (6) of [1]
-		for i := 0; i < o.Ndim; i++ {
+		for i := 0; i < ndim; i++ {
 			o.ρwl[i] = 0
-			for j := 0; j < o.Ndim; j++ {
-				o.ρwl[i] += klr * o.Mdl.Klsat[i][j] * (RhoL*o.g[i] - o.gpl[i]) // TODO: fix this
+			for j := 0; j < ndim; j++ {
+				o.ρwl[i] += klr * o.Mdl.Klsat[i][j] * (RhoL*o.g[j] - o.gpl[j])
 			}
 		}
 
@@ -301,14 +302,14 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		for m := 0; m < nverts; m++ {
 			r := o.Pmap[m]
 			fb[r] -= coef * S[m] * Cpl * plt
-			for i := 0; i < o.Ndim; i++ {
+			for i := 0; i < ndim; i++ {
 				fb[r] += coef * G[m][i] * o.ρwl[i] // += coef * div(ρl*wl)
 			}
 			if o.DoExtrap { // Eq. (19)
 				o.ρl_ex[m] += o.Emat[m][idx] * ρl
 			}
 		}
-		//io.Pf(">>> %3d : pc=%13.10f sl=%13.10f\n", o.Cell.Id, o.States[idx].Pg-o.States[idx].Pl, o.States[idx].Sl)
+		//io.Pf(">>> %3d : pc=%13.10f sl=%13.10f\n", o.Id(), o.States[idx].Pg-o.States[idx].Pl, o.States[idx].Sl)
 	}
 
 	// contribution from natural boundary conditions
@@ -323,6 +324,7 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// clear matrices
 	la.MatFill(o.Kpp, 0)
+	ndim := o.Ndim
 	nverts := o.Shp.Nverts
 	if o.DoExtrap {
 		for i := 0; i < nverts; i++ {
@@ -359,13 +361,13 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 		// Kpp := dRpl/dpl. see Eqs. (18), (A.2) and (A.3) of [1]
 		for n := 0; n < nverts; n++ {
-			for j := 0; j < o.Ndim; j++ {
+			for j := 0; j < ndim; j++ {
 				o.tmp[j] = S[n]*dklrdpl*(RhoL*o.g[j]-o.gpl[j]) + klr*(S[n]*Cl*o.g[j]-G[n][j])
 			}
 			for m := 0; m < nverts; m++ {
 				o.Kpp[m][n] += coef * S[m] * S[n] * (dCpldpl*plt + β1*Cpl)
-				for i := 0; i < o.Ndim; i++ {
-					for j := 0; j < o.Ndim; j++ {
+				for i := 0; i < ndim; i++ {
+					for j := 0; j < ndim; j++ {
 						o.Kpp[m][n] -= coef * G[m][i] * o.Mdl.Klsat[i][j] * o.tmp[j]
 					}
 				}
@@ -423,7 +425,7 @@ func (o *ElemP) Update(sol *Solution) (ok bool) {
 	for idx, _ := range o.IpsElem {
 
 		// interpolation functions and gradients
-		if LogErr(o.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "Update") { // TODO: no need for false here
+		if LogErr(o.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "Update") {
 			return
 		}
 
@@ -438,7 +440,7 @@ func (o *ElemP) Update(sol *Solution) (ok bool) {
 		if LogErr(o.Mdl.Update(o.States[idx], Δpl, 0, 0), "update failed") {
 			return
 		}
-		//io.Pf("%3d : Δpl=%13.10f pc=%13.10f sl=%13.10f RhoL=%13.10f Wet=%v\n", o.Cell.Id, Δpl, o.States[idx].Pg-o.States[idx].Pl, o.States[idx].Sl, o.States[idx].RhoL, o.States[idx].Wet)
+		//io.Pf("%3d : Δpl=%13.7f pc=%13.7f sl=%13.7f RhoL=%13.7f Wet=%v\n", o.Id(), Δpl, o.States[idx].Pg-o.States[idx].Pl, o.States[idx].Sl, o.States[idx].RhoL, o.States[idx].Wet)
 	}
 	return true
 }
@@ -551,14 +553,15 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 	}
 
 	// gravity
-	o.g[o.Ndim-1] = 0
+	ndim := o.Ndim
+	o.g[ndim-1] = 0
 	if o.Gfcn != nil {
-		o.g[o.Ndim-1] = -o.Gfcn.F(sol.T, nil)
+		o.g[ndim-1] = -o.Gfcn.F(sol.T, nil)
 	}
 
 	// clear pl and its gradient @ ip
 	o.pl = 0
-	for i := 0; i < o.Ndim; i++ {
+	for i := 0; i < ndim; i++ {
 		o.gpl[i] = 0
 	}
 
@@ -566,7 +569,7 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 	for m := 0; m < o.Shp.Nverts; m++ {
 		r := o.Pmap[m]
 		o.pl += o.Shp.S[m] * sol.Y[r]
-		for i := 0; i < o.Ndim; i++ {
+		for i := 0; i < ndim; i++ {
 			o.gpl[i] += o.Shp.G[m][i] * sol.Y[r]
 		}
 	}
@@ -575,8 +578,9 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 
 // fipvars computes current values @ face integration points
 func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, z, pl, fl float64) {
+	ndim := o.Ndim
 	Sf := o.Shp.Sf
-	iz := o.Ndim - 1 // index of z-coordinate (elevation)
+	iz := ndim - 1 // index of z-coordinate (elevation)
 	for i, m := range o.Shp.FaceLocalV[fidx] {
 		μ := o.Vid2seepId[m]
 		ρl += Sf[i] * o.ρl_ex[m]
