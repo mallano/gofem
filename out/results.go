@@ -73,12 +73,12 @@ func LoadResults(times []float64) {
 			for _, p := range pts {
 
 				// node or integration point id
-				nid := p.Nid
+				vid := p.Vid
 				pid := p.IpId
 
 				// handle node
-				if nid >= 0 {
-					nod := Dom.Nodes[nid]
+				if vid >= 0 {
+					nod := Dom.Vid2node[vid]
 					for _, dof := range nod.Dofs {
 						if dof != nil {
 							utl.StrDblsMapAppend(&p.Vals, dof.Key, Dom.Sol.Y[dof.Eq])

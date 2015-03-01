@@ -4,7 +4,11 @@
 
 package out
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/cpmech/gosl/chk"
+)
 
 // PointLocator defines interface for locating space positions
 type Locator interface {
@@ -39,18 +43,18 @@ type AlongZ []float64
 func (o At) Locate() Points {
 
 	// node
-	id := NodBins.Find(o)
-	if id >= 0 {
-		q := get_nod_point(id, nil)
+	vid := NodBins.Find(o)
+	if vid >= 0 {
+		q := get_nod_point(vid, nil)
 		if q != nil {
 			return Points{q}
 		}
 	}
 
 	// integration point
-	id = IpsBins.Find(o)
-	if id >= 0 {
-		q := get_ip_point(id, nil)
+	ipid := IpsBins.Find(o)
+	if ipid >= 0 {
+		q := get_ip_point(ipid, nil)
 		if q != nil {
 			return Points{q}
 		}
@@ -58,7 +62,7 @@ func (o At) Locate() Points {
 	return nil
 }
 
-// Locate finds points
+// Locate finds nodes
 func (o N) Locate() (res Points) {
 	var A []float64 // reference point
 	for _, idortag := range o {
@@ -75,8 +79,8 @@ func (o N) Locate() (res Points) {
 				}
 			}
 		} else {
-			id := idortag
-			q := get_nod_point(id, A)
+			vid := idortag
+			q := get_nod_point(vid, A)
 			if q != nil {
 				res = append(res, q)
 				if A == nil {
@@ -84,6 +88,9 @@ func (o N) Locate() (res Points) {
 				}
 			}
 		}
+	}
+	if len(res) < len(o) {
+		chk.Panic("cannot locate all nodes in %v", o)
 	}
 	return
 }
@@ -124,6 +131,9 @@ func (o P) Locate() (res Points) {
 				}
 			}
 		}
+	}
+	if len(res) < len(o) {
+		chk.Panic("cannot locate all points in %v", o)
 	}
 	return
 }

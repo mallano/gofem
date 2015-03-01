@@ -7,7 +7,7 @@ package out
 import "github.com/cpmech/gosl/io"
 
 func (o Point) String() string {
-	l := io.Sf("\"Nid:%d\", \"IpId:%d\", \"dist\":%g, \"X\":[%g,%g", o.Nid, o.IpId, o.Dist, o.X[0], o.X[1])
+	l := io.Sf("\"Vid:%d\", \"IpId:%d\", \"dist\":%g, \"X\":[%g,%g", o.Vid, o.IpId, o.Dist, o.X[0], o.X[1])
 	if len(o.X) == 3 {
 		l += io.Sf(",%g", o.X[2])
 	}

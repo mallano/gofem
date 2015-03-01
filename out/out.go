@@ -102,8 +102,8 @@ func Start(simfnpath string, stageIdx, regionIdx int) {
 	}
 
 	// add nodes to bins
-	for activeId, nod := range Dom.Nodes {
-		err := NodBins.Append(nod.Vert.C, activeId)
+	for _, nod := range Dom.Nodes {
+		err := NodBins.Append(nod.Vert.C, nod.Vert.Id)
 		if err != nil {
 			return
 		}

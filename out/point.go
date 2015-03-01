@@ -8,7 +8,7 @@ import "math"
 
 // Point holds information about one specific node xor one integration point
 type Point struct {
-	Nid  int                  // node id; -1 => not node
+	Vid  int                  // vertex id; -1 => not node
 	IpId int                  // ip id; -1 => not ip
 	X    []float64            // coordinates
 	Dist float64              // distance from reference point (if along line)
@@ -33,14 +33,14 @@ func (o Points) Less(i, j int) bool {
 	return o[i].Dist < o[j].Dist
 }
 
-func get_nod_point(nid int, A []float64) *Point {
-	nod := Dom.Nodes[nid]
+func get_nod_point(vid int, A []float64) *Point {
+	nod := Dom.Vid2node[vid]
 	if nod != nil {
 		var dist float64
 		if A != nil {
 			dist = dist_point_point(nod.Vert.C, A)
 		}
-		return &Point{nid, -1, nod.Vert.C, dist, make(map[string][]float64)}
+		return &Point{vid, -1, nod.Vert.C, dist, make(map[string][]float64)}
 	}
 	return nil
 }
