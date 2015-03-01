@@ -9,6 +9,7 @@ import (
 
 	"github.com/cpmech/gofem/fem"
 	"github.com/cpmech/gofem/out"
+	"github.com/cpmech/gosl/plt"
 )
 
 func main() {
@@ -40,6 +41,6 @@ func main() {
 
 	// plot
 	out.Splot("Plot")
-	out.Plt("uy", "t", "A", "ro-", -1)
+	out.Plt("uy", "t", "A", plt.FmtS{"ro-"}, -1)
 	out.Draw("", "", show)
 }

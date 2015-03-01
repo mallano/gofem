@@ -4,7 +4,10 @@
 
 package main
 
-import "github.com/cpmech/gofem/out"
+import (
+	"github.com/cpmech/gofem/out"
+	"github.com/cpmech/gosl/plt"
+)
 
 func main() {
 
@@ -22,7 +25,7 @@ func main() {
 	out.LoadResults(nil)
 
 	out.Splot("Internal pressurised cylinder")
-	out.Plt("ux", "t", "A", "'b.-'", -1)
+	out.Plt("ux", "t", "A", plt.FmtS{"b.-"}, -1)
 
 	// show
 	out.Draw("", "", true)
