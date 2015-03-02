@@ -285,6 +285,18 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 			}
 		}
 	}
+
+	// external forces
+	if len(o.U.NatBcs) > 0 {
+		if !o.U.add_surfloads_to_rhs(fb, sol) {
+			return
+		}
+	}
+
+	// contribution from natural boundary conditions
+	if len(o.P.NatBcs) > 0 {
+		return o.P.add_natbcs_to_rhs(fb, sol)
+	}
 	return true
 }
 
