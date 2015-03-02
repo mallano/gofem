@@ -127,42 +127,31 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 	}
 	reg := Global.Sim.Regions[0]
 
-	// find layers
+	// initialise layers
 	var layers Layers
+	layers = make([]*Layer, len(geo.Layers))
 	tag2lay := make(map[int]*Layer)
-	for _, d := range reg.ElemsData {
-
-		// check tags
-		cells := o.Msh.CellTag2cells[d.Tag]
-		if LogErrCond(len(cells) < 1, "geost: there are no cells with tag = %d", d.Tag) {
-			return
-		}
+	for idx, laytags := range geo.Layers {
 
 		// new layer
 		var lay Layer
-		lay.Tag = d.Tag
+		tag0 := laytags[0]
+		lay.Tag = tag0
 		lay.Ndim = ndim
 		lay.GamW = geo.GamW
 		lay.Zwater = zwater
-
-		// find min and max z-coordinates
-		lay.Zmin = o.Msh.Verts[cells[0].Verts[0]].C[ndim-1]
-		lay.Zmax = lay.Zmin
-		for _, c := range cells {
-			for _, v := range c.Verts {
-				lay.Zmin = min(lay.Zmin, o.Msh.Verts[v].C[ndim-1])
-				lay.Zmax = max(lay.Zmax, o.Msh.Verts[v].C[ndim-1])
-			}
-		}
+		lay.Zmin = zmax
+		lay.Zmax = 0
 
 		// gravity
-		lay.Grav, ok = get_gravity(stg, d.Tag)
+		lay.Grav, ok = get_gravity(stg, tag0)
 		if !ok {
 			return
 		}
 
 		// get model
-		lay.Mdl = GetAndInitPorousModel(d.Mat)
+		edat := reg.Etag2data(tag0)
+		lay.Mdl = GetAndInitPorousModel(edat.Mat)
 
 		// parameters
 		if geo.UseK0 {
@@ -176,6 +165,27 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 			return
 		}
 
+		// for each tag of cells in this layer
+		for _, tag := range laytags {
+
+			// check tags
+			cells := o.Msh.CellTag2cells[tag]
+			if LogErrCond(len(cells) < 1, "geost: there are no cells with tag = %d", tag) {
+				return
+			}
+
+			// find min and max z-coordinates
+			for _, c := range cells {
+				for _, v := range c.Verts {
+					lay.Zmin = min(lay.Zmin, o.Msh.Verts[v].C[ndim-1])
+					lay.Zmax = max(lay.Zmax, o.Msh.Verts[v].C[ndim-1])
+				}
+			}
+
+			// set mat
+			tag2lay[tag] = layers[idx]
+		}
+
 		// increment of vertical stress added by this layer
 		lay.DsigV = num.TrapzRange(lay.Zmin, lay.Zmax, 10, func(z float64) float64 {
 			pl := (lay.Zwater - z) * lay.GamW
@@ -185,13 +195,12 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 		})
 
 		// append layer
-		n := len(layers)
-		layers = append(layers, &lay)
-		tag2lay[d.Tag] = layers[n]
+		layers[idx] = &lay
 	}
 
 	// sort layers from top to bottom
 	sort.Sort(layers)
+	//io.Pforan("layers = %v\n", layers)
 
 	// loop over layers, from top to bottom
 	var σ0abs float64
