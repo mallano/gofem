@@ -129,6 +129,9 @@ func (o Domain) SaveIvs(tidx int) (ok bool) {
 	var buf bytes.Buffer
 	enc := GetEncoder(&buf)
 
+	// elements that go to file
+	enc.Encode(o.MyCids)
+
 	// encode internal variables
 	for _, e := range o.Elems {
 		if !e.Encode(enc) {
@@ -137,14 +140,14 @@ func (o Domain) SaveIvs(tidx int) (ok bool) {
 	}
 
 	// save file
-	return save_file("SaveIvs", "internal values", out_ele_path(tidx), &buf)
+	return save_file("SaveIvs", "internal values", out_ele_path(tidx, Global.Rank), &buf)
 }
 
 // ReadIvs reads elements's internal values from a file which name is set with tidx (time output index)
-func (o *Domain) ReadIvs(tidx int) (ok bool) {
+func (o *Domain) ReadIvs(tidx, proc int) (ok bool) {
 
 	// open file
-	fil, err := os.Open(out_ele_path(tidx))
+	fil, err := os.Open(out_ele_path(tidx, proc))
 	if LogErr(err, "ReadIvs") {
 		return
 	}
@@ -152,10 +155,19 @@ func (o *Domain) ReadIvs(tidx int) (ok bool) {
 		LogErr(fil.Close(), "ReadIvs: cannot close file")
 	}()
 
-	// decode internal variables
+	// decoder
 	dec := GetDecoder(fil)
-	for _, e := range o.Elems {
-		if !e.Decode(dec) {
+
+	// elements that are in file
+	dec.Decode(&o.MyCids)
+
+	// decode internal variables
+	for _, cid := range o.MyCids {
+		elem := o.Cid2elem[cid]
+		if LogErrCond(elem == nil, "ReadIvs: cannot find element with cid=%d", cid) {
+			return
+		}
+		if !elem.Decode(dec) {
 			return
 		}
 	}
@@ -172,8 +184,10 @@ func (o *Domain) Out(tidx int) (ok bool) {
 
 // In performes the inverse operation from Out
 func (o *Domain) In(tidx int) (ok bool) {
-	if !o.ReadIvs(tidx) {
-		return
+	for i := 0; i < Global.Sum.Nproc; i++ {
+		if !o.ReadIvs(tidx, i) {
+			return
+		}
 	}
 	return o.ReadSol(tidx)
 }
@@ -184,8 +198,8 @@ func out_nod_path(tidx, proc int) string {
 	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_nod_%010d.%s", Global.Sim.Data.FnameKey, proc, tidx, Global.Sim.Data.Encoder))
 }
 
-func out_ele_path(tidx int) string {
-	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_ele_%010d.%s", Global.Sim.Data.FnameKey, Global.Rank, tidx, Global.Sim.Data.Encoder))
+func out_ele_path(tidx, proc int) string {
+	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_ele_%010d.%s", Global.Sim.Data.FnameKey, proc, tidx, Global.Sim.Data.Encoder))
 }
 
 func save_file(function, category, filename string, buf *bytes.Buffer) (ok bool) {

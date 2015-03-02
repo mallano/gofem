@@ -17,6 +17,7 @@ import (
 type Summary struct {
 
 	// essential
+	Nproc    int         // number of processors used in last last run; equal to 1 if not distributed
 	OutTimes []float64   // [nOutTimes] output times
 	Resids   utl.DblList // [nTimes][nIter] residuals (if Stat is on; includes all stages)
 
@@ -26,6 +27,9 @@ type Summary struct {
 
 // SaveSums saves summary to disc
 func (o Summary) Save() (ok bool) {
+
+	// set flags before saving
+	o.Nproc = Global.Nproc
 
 	// skip if not root
 	if !Global.Root {

@@ -106,8 +106,9 @@ type Domain struct {
 	FaceConds map[int][]*FaceCond // maps cell id to its face boundary conditions
 
 	// stage: nodes (active) and elements (active AND in this processor)
-	Nodes []*Node // active nodes (for each stage)
-	Elems []Elem  // only active elements in this processor (for each stage)
+	Nodes  []*Node // active nodes (for each stage)
+	Elems  []Elem  // [procNcells] only active elements in this processor (for each stage)
+	MyCids []int   // [procNcells] the ids of cells in this processor
 
 	// stage: auxiliary maps for dofs and equation types
 	F2Y      map[string]string // converts f-keys to y-keys; e.g.: "ux" => "fx"
@@ -182,6 +183,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 	// nodes (active) and elements (active AND in this processor)
 	o.Nodes = make([]*Node, 0)
 	o.Elems = make([]Elem, 0)
+	o.MyCids = make([]int, 0)
 
 	// auxiliary maps for dofs and equation types
 	o.F2Y = make(map[string]string)
@@ -294,6 +296,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 			}
 			o.Cid2elem[c.Id] = ele
 			o.Elems = append(o.Elems, ele)
+			o.MyCids = append(o.MyCids, ele.Id())
 
 			// give equation numbers to new element
 			eqs := make([][]int, len(c.Verts))
