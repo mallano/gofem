@@ -17,7 +17,7 @@ import (
 
 // Layer holds information of one soil layer
 type Layer struct {
-	Tag    int            // element's tag == layer tag
+	Tags   []int          // element's tags (elements in layer)
 	Ndim   int            // space dimension
 	GamW   float64        // unit weight of water
 	Zwater float64        // water-table
@@ -136,7 +136,7 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 		// new layer
 		var lay Layer
 		tag0 := laytags[0]
-		lay.Tag = tag0
+		lay.Tags = laytags
 		lay.Ndim = ndim
 		lay.GamW = geo.GamW
 		lay.Zwater = zwater
@@ -209,36 +209,38 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 		if i > 0 {
 			σ0abs += layers[i-1].DsigV
 		}
-		cells := o.Msh.CellTag2cells[lay.Tag]
-		for _, c := range cells {
-			elem := o.Cid2elem[c.Id]
-			switch ele := elem.(type) {
-			case ElemIntvars:
+		for _, tag := range lay.Tags {
+			cells := o.Msh.CellTag2cells[tag]
+			for _, c := range cells {
+				elem := o.Cid2elem[c.Id]
+				switch ele := elem.(type) {
+				case ElemIntvars:
 
-				// get element's integration points data
-				e := ele.(Elem)
-				d := e.OutIpsData()
-				nip := len(d)
+					// get element's integration points data
+					e := ele.(Elem)
+					d := e.OutIpsData()
+					nip := len(d)
 
-				// build maps of pressures and effective stresses
-				sx := make([]float64, nip)
-				sy := make([]float64, nip)
-				sz := make([]float64, nip)
-				pl := make([]float64, nip)
-				pg := make([]float64, nip)
-				for i, ip := range d {
-					z := ip.X[ndim-1]
-					_, sx[i], sy[i], sz[i], pl[i], pg[i], err = lay.State(σ0abs, z)
-					if LogErr(err, "geost: cannot compute State") {
+					// build maps of pressures and effective stresses
+					sx := make([]float64, nip)
+					sy := make([]float64, nip)
+					sz := make([]float64, nip)
+					pl := make([]float64, nip)
+					pg := make([]float64, nip)
+					for i, ip := range d {
+						z := ip.X[ndim-1]
+						_, sx[i], sy[i], sz[i], pl[i], pg[i], err = lay.State(σ0abs, z)
+						if LogErr(err, "geost: cannot compute State") {
+							return
+						}
+
+					}
+					ivs := map[string][]float64{"sx": sx, "sy": sy, "sz": sz, "pl": pl, "pg": pg}
+
+					// set element's states
+					if LogErrCond(!ele.SetIvs(ivs), "geost: element's internal values setting failed") {
 						return
 					}
-
-				}
-				ivs := map[string][]float64{"sx": sx, "sy": sy, "sz": sz, "pl": pl, "pg": pg}
-
-				// set element's states
-				if LogErrCond(!ele.SetIvs(ivs), "geost: element's internal values setting failed") {
-					return
 				}
 			}
 		}
@@ -335,7 +337,7 @@ func (o Layers) String() string {
 		if i > 0 {
 			l += ",\n"
 		}
-		l += io.Sf("  { \"Tag\":%d, \"Zmin\":%g, \"Zmax\":%g, \"DsigV\":%g }", lay.Tag, lay.Zmin, lay.Zmax, lay.DsigV)
+		l += io.Sf("  { \"Tags\":%v, \"Zmin\":%g, \"Zmax\":%g, \"DsigV\":%g }", lay.Tags, lay.Zmin, lay.Zmax, lay.DsigV)
 	}
 	l += "\n]"
 	return l
