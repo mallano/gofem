@@ -41,6 +41,12 @@ type T_results_set []*T_results
 // testing_compare_results_u compares results with u-formulation
 func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tolu, tols float64, skipK, verbose bool) {
 
+	// read summary
+	if !Global.Sum.Read() {
+		tst.Error("cannot read summary file for simulation=%q\n", simfname)
+		return
+	}
+
 	// allocate domain
 	d := NewDomain(Global.Sim.Regions[0])
 	LogErrCond(!d.SetStage(0, Global.Sim.Stages[0]), "TestingCompareResultsU: SetStage failed")
