@@ -43,33 +43,48 @@ type Hill struct {
 	Plim float64
 }
 
-var tmp *Hill // temporary value (necessary in functions)
-
 // Init initialises this structure
 func (o *Hill) Init(prms fun.Prms) {
 	// default values
-	o.a = 100      // [mm]
-	o.b = 200      // [mm]
-	o.E = 210000.0 // Young modulus
-	o.ν = 0.3      // Poisson ratio
+	o.a = 100  // [mm]
+	o.b = 200  // [mm]
+	o.E = 210  // Young modulus
+	o.ν = 0.3  // Poisson ratio
+	o.σy = 0.3 // Poisson ratio
+	o.P = 0.2  // Poisson ratio
+
+	// parameters
+	for _, p := range prms {
+		switch p.N {
+		case "a":
+			o.a = p.V
+		case "b":
+			o.b = p.V
+		case "E":
+			o.E = p.V
+		case "ν":
+			o.ν = p.V
+		case "σy":
+			o.σy = p.V
+		case "P":
+			o.P = p.V
+		}
+	}
 
 	// derived
 	o.coef = o.a * o.a / (o.b * o.b)
 	o.Y = 2.0 * o.σy / math.Sqrt(3.0)
 	o.P0 = o.Y * (1 - o.coef) / 2.0
 	o.Plim = o.Y * math.Log(o.b/o.a)
-
-	tmp = o // saves to temporary
 }
 
-// Solution computes solution
-func (o Hill) Solution(t float64) (σx, σy, σz, εx, εy float64) {
-	return
-}
-
-// Elastic solution for the radial displacement
+// Elastic solution for the radial displacement of the outer surface
 func (o Hill) ub_e() float64 {
 	return 2.0 * o.P * o.b * (1.0 - o.ν*o.ν) / (o.E/o.coef - o.E)
+}
+
+func (o Hill) ub_p(c float64) float64 {
+	return o.Y * c * c * (1.0 - o.ν*o.ν) / (o.E * o.b)
 }
 
 // Plastic solution for the radial displacment
@@ -80,30 +95,31 @@ func (o Hill) plas(c float64) (float64, float64) {
 	return P, ub
 }
 
-func (o Hill) Getc(P float64) float64 {
+func (o Hill) Getc() float64 {
 	var nls num.NlSolver
 	defer nls.Clean()
 
 	// function to be solved
-	fx := func(fx, X []float64) (err error) {
+	fx_fun := func(fx, X []float64) (err error) {
 		x := X[0]
-		fx[0] = P/o.Y - (math.Log(x/o.a) + (1-x*x/(o.b*o.b))/2)
+		fx[0] = o.P/o.Y - (math.Log(x/o.a) + (1.0-x*x/(o.b*o.b))/2)
 		return
 	}
+
 	// derivative function of f
-	dfdx := func(dfdx [][]float64, X []float64) (err error) {
+	dfdx_fun := func(dfdx [][]float64, X []float64) (err error) {
 		x := X[0]
 		dfdx[0][0] = -1.0/x + x/(o.b*o.b)
 		return
 	}
 
-	Res := make([]float64, 1)
-	nls.Init(1, fx, nil, dfdx, true, false, nil)
+	Res := []float64{100} // initial values
+	nls.Init(1, fx_fun, nil, dfdx_fun, true, false, nil)
 	nls.Solve(Res, false)
 	return Res[0]
 }
 
-func (o Hill) sig(r, c float64) (float64, float64) { //_sig
+func (o Hill) sig(c, r float64) (float64, float64) { //_sig
 	b := o.b
 	Y := o.Y
 	var sr, st float64
@@ -117,8 +133,8 @@ func (o Hill) sig(r, c float64) (float64, float64) { //_sig
 	return sr, st
 }
 
-func (o Hill) Sig(R, C, SR, ST []float64) {
+func (o Hill) Sig(c float64, R, SR, ST []float64) {
 	for i := 0; i < len(R); i++ {
-		SR[i], ST[i] = o.sig(R[i], C[i])
+		SR[i], ST[i] = o.sig(c, R[i])
 	}
 }
