@@ -536,7 +536,7 @@ func (o ElemP) OutIpsData() (data []*OutIpData) {
 	for idx, ip := range o.IpsElem {
 		s := o.States[idx]
 		x := o.Shp.IpRealCoords(o.X, ip)
-		v := map[string]*float64{"sl": &s.Sl}
+		v := map[string]*float64{"pl": &s.Pl, "pg": &s.Pg, "sl": &s.Sl}
 		data = append(data, &OutIpData{o.Id(), x, v})
 	}
 	return
