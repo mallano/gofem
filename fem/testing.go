@@ -164,11 +164,18 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 	}
 }
 
-func TestingDefineDebugKb(tst *testing.T, eid int, tol float64, verb bool) {
+func TestingDefineDebugKb(tst *testing.T, eid int, tmin, tmax, tol float64, verb bool) {
 	//derivfcn := num.DerivFwd
 	//derivfcn := num.DerivBwd
 	derivfcn := num.DerivCen
 	Global.DebugKb = func(d *Domain, firstIt bool) {
+
+		// skip other times
+		if tmin >= 0 && tmax >= 0 {
+			if d.Sol.T < tmin || d.Sol.T > tmax {
+				return
+			}
+		}
 
 		// get element structures
 		var Ymap []int
@@ -230,6 +237,9 @@ func TestingDefineDebugKb(tst *testing.T, eid int, tol float64, verb bool) {
 
 		// check
 		var tmp float64
+		if verb {
+			io.Pf("\n")
+		}
 		for i, I := range Ymap {
 			for j, J := range Ymap {
 				dnum := derivfcn(func(x float64, args ...interface{}) float64 {

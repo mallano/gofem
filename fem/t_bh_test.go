@@ -149,7 +149,7 @@ func Test_bh16b(tst *testing.T) {
 	eid := 3
 	tolKb := 1e-12
 	if false {
-		TestingDefineDebugKb(tst, eid, tolKb, chk.Verbose)
+		TestingDefineDebugKb(tst, eid, -1, -1, tolKb, chk.Verbose)
 		defer func() {
 			Global.DebugKb = nil
 		}()

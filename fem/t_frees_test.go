@@ -69,3 +69,38 @@ func Test_frees01a(tst *testing.T) {
 	e14 := dom.Elems[14].(*ElemP)
 	chk.Ints(tst, "e14.Fmap", e14.Fmap, []int{56, 69, 71})
 }
+
+func Test_frees01b(tst *testing.T) {
+
+	// capture errors and flush log
+	defer End()
+	//defer func() {
+	//if err := recover(); err != nil {
+	//}
+	//}()
+
+	//verbose()
+	chk.PrintTitle("frees01b")
+
+	// start simulation
+	if !Start("data/frees01.sim", true, chk.Verbose) {
+		chk.Panic("cannot start simulation")
+	}
+
+	// for debugging Kb
+	eid := 14
+	tolKb := 1e-4
+	//if true {
+	if false {
+		TestingDefineDebugKb(tst, eid, 199, 199, tolKb, chk.Verbose)
+		defer func() {
+			Global.DebugKb = nil
+		}()
+
+	}
+
+	// run simulation
+	if !Run() {
+		chk.Panic("cannot run simulation\n")
+	}
+}

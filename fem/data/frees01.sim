@@ -33,7 +33,7 @@
         { "tag":-1, "keys":["g"], "funcs":["grav"] }
       ],
       "control" : {
-        "tf"    : 1e3,
+        "tf"    : 200,
         "dt"    : 1,
         "dtout" : 10
       }

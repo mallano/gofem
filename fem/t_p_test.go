@@ -182,7 +182,7 @@ func Test_p02(tst *testing.T) {
 	tolKb := 1e-7
 	if false {
 		//if true {
-		TestingDefineDebugKb(tst, eid, tolKb, chk.Verbose)
+		TestingDefineDebugKb(tst, eid, -1, -1, tolKb, chk.Verbose)
 		defer func() {
 			Global.DebugKb = nil
 		}()
