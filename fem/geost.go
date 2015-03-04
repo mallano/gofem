@@ -107,6 +107,11 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 		return true
 	}
 
+	// check layers definition
+	if LogErrCond(len(geo.Layers) < 1, "geost: layers must be defined by stating what tags belong to which layer") {
+		return
+	}
+
 	// max elevation and water level
 	ndim := o.Msh.Ndim
 	zmax, zwater := get_zmax_zwater(geo, o.Msh)

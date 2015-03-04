@@ -27,7 +27,7 @@
   },
   "stages" : [
     {
-      "geost" : { "gamw":10, "nu":0.2 },
+      "geost" : { "gamw":10, "nu":0.2, "layers":[[-1],[-2]] },
       "facebcs" : [
         { "tag":-10, "keys":["uy","pl"], "funcs":["zero","pbot"] },
         { "tag":-11, "keys":["ux"],      "funcs":["zero"] },
