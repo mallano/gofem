@@ -74,8 +74,8 @@ func main() {
 	// print input data
 	io.Pf("\nInput data\n")
 	io.Pf("==========\n")
-	io.Pf("  simfn   = %20s // simulation filename\n", simfn)
-	io.Pf("  stgidx  = %20v // stage index\n", stgidx)
+	io.Pf("  simfn   = %30s // simulation filename\n", simfn)
+	io.Pf("  stgidx  = %30v // stage index\n", stgidx)
 	io.Pf("\n")
 
 	// start analysis process

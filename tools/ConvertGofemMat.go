@@ -36,9 +36,9 @@ func main() {
 	// print input data
 	io.Pf("\nInput data\n")
 	io.Pf("==========\n")
-	io.Pf("  matOld   = %20s // old material filename\n", matOld)
-	io.Pf("  matNew   = %20s // new material filename\n", matNew)
-	io.Pf("  convSymb = %20v // do convert symbols\n", convSymb)
+	io.Pf("  matOld   = %30s // old material filename\n", matOld)
+	io.Pf("  matNew   = %30s // new material filename\n", matNew)
+	io.Pf("  convSymb = %30v // do convert symbols\n", convSymb)
 	io.Pf("\n")
 
 	// convert old => new
