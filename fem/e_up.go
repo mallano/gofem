@@ -27,6 +27,12 @@ import (
 //       http://dx.doi.org/10.1016/j.cma.2014.12.009
 type ElemUP struct {
 
+	// auxiliary
+	Ndim   int         // space dimension
+	Fconds []*FaceCond // face conditions; e.g. seepage faces
+	CtypeU string      // u: cell type
+	CtypeP string      // p: cell type
+
 	// underlying elements
 	U *ElemU // u-element
 	P *ElemP // p-element
@@ -88,6 +94,8 @@ func init() {
 
 		// basic data
 		var o ElemUP
+		o.Ndim = ndim
+		o.Fconds = faceConds
 
 		// p-element cell type
 		p_cellType := cellType
@@ -95,6 +103,10 @@ func init() {
 		if lbb {
 			p_cellType = shp.GetBasicType(cellType)
 		}
+
+		// cell types
+		o.CtypeU = cellType
+		o.CtypeP = p_cellType
 
 		// allocate u element
 		u_allocator := eallocators["u"]
@@ -134,20 +146,39 @@ func (o ElemUP) Id() int { return o.U.Id() }
 
 // SetEqs set equations
 func (o *ElemUP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
-	ndim := o.U.Ndim
-	eqs_u := make([][]int, o.U.Shp.Nverts)
-	eqs_p := make([][]int, o.P.Shp.Nverts)
-	for m := 0; m < o.U.Shp.Nverts; m++ {
-		eqs_u[m] = eqs[m][:ndim]
+
+	// u: equations
+	u_getter := infogetters["u"]
+	u_info := u_getter(o.Ndim, o.CtypeU, o.Fconds)
+	u_nverts := len(u_info.Dofs)
+	u_eqs := make([][]int, u_nverts)
+	for i := 0; i < u_nverts; i++ {
+		nkeys := len(u_info.Dofs[i])
+		u_eqs[i] = make([]int, nkeys)
+		for j := 0; j < nkeys; j++ {
+			u_eqs[i][j] = eqs[i][j]
+		}
 	}
-	idxp := ndim
-	for m := 0; m < o.P.Shp.Nverts; m++ {
-		eqs_p[m] = []int{eqs[m][idxp]}
+
+	// p: equations
+	p_getter := infogetters["p"]
+	p_info := p_getter(o.Ndim, o.CtypeP, o.Fconds)
+	p_nverts := len(p_info.Dofs)
+	p_eqs := make([][]int, p_nverts)
+	for i := 0; i < p_nverts; i++ {
+		start := len(u_info.Dofs[i])
+		nkeys := len(p_info.Dofs[i])
+		p_eqs[i] = make([]int, nkeys)
+		for j := 0; j < nkeys; j++ {
+			p_eqs[i][j] = eqs[i][start+j]
+		}
 	}
-	if !o.U.SetEqs(eqs_u, mixedform_eqs) {
+
+	// set equations
+	if !o.U.SetEqs(u_eqs, mixedform_eqs) {
 		return
 	}
-	return o.P.SetEqs(eqs_p, nil)
+	return o.P.SetEqs(p_eqs, nil)
 }
 
 // SetEleConds set element conditions
@@ -162,7 +193,7 @@ func (o *ElemUP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 func (o *ElemUP) InterpStarVars(sol *Solution) (ok bool) {
 
 	// for each integration point
-	ndim := o.U.Ndim
+	ndim := o.Ndim
 	u_nverts := o.U.Shp.Nverts
 	p_nverts := o.P.Shp.Nverts
 	var r int
@@ -214,7 +245,7 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
 	dc := Global.DynCoefs
-	ndim := o.U.Ndim
+	ndim := o.Ndim
 	u_nverts := o.U.Shp.Nverts
 	p_nverts := o.P.Shp.Nverts
 	var coef, plt, klr, ρl, ρ, p, Cpl, Cvs, divus, divvs float64
@@ -327,7 +358,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// for each integration point
 	dc := Global.DynCoefs
-	ndim := o.U.Ndim
+	ndim := o.Ndim
 	var coef, plt, klr, ρL, Cl, divus, divvs float64
 	var ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dCvsdpl, dklrdpl, dCpldusM, dρdusM float64
 	var err error
@@ -463,7 +494,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 func (o *ElemUP) Update(sol *Solution) (ok bool) {
 
 	// auxiliary
-	ndim := o.U.Ndim
+	ndim := o.Ndim
 
 	// for each integration point
 	var Δpl, divusNew float64
@@ -593,7 +624,7 @@ func (o *ElemUP) ipvars(idx int, sol *Solution) (ok bool) {
 	}
 
 	// auxiliary
-	ndim := o.U.Ndim
+	ndim := o.Ndim
 	dc := Global.DynCoefs
 	ρL := o.P.States[idx].RhoL
 
