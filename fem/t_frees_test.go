@@ -74,10 +74,6 @@ func Test_frees01b(tst *testing.T) {
 
 	// capture errors and flush log
 	defer End()
-	//defer func() {
-	//if err := recover(); err != nil {
-	//}
-	//}()
 
 	//verbose()
 	chk.PrintTitle("frees01b")
@@ -88,15 +84,11 @@ func Test_frees01b(tst *testing.T) {
 	}
 
 	// for debugging Kb
-	eid := 14
-	tolKb := 1e-4
-	//if true {
-	if false {
-		TestingDefineDebugKbP(tst, eid, 199, 199, tolKb, chk.Verbose)
-		defer func() {
-			Global.DebugKb = nil
-		}()
-
+	if true {
+		defer p_DebugKb(&testKb{
+			tst: tst, eid: 14, tol: 1e-5, verb: chk.Verbose,
+			ni: 1, nj: 1, itmin: 1, itmax: -1, tmin: 200, tmax: 200,
+		})()
 	}
 
 	// run simulation

@@ -164,10 +164,10 @@ func Test_p01b(tst *testing.T) {
 	}
 }
 
-func Test_p02(tst *testing.T) {
+func Test_p02_(tst *testing.T) {
 
 	//verbose()
-	chk.PrintTitle("p02")
+	chk.PrintTitle("p02_")
 
 	// run simulation
 	if !Start("data/p02.sim", true, chk.Verbose) {
@@ -179,14 +179,11 @@ func Test_p02(tst *testing.T) {
 	defer End()
 
 	// for debugging Kb
-	eid := 3
-	tolKb := 1e-4
-	if false {
-		//if true {
-		TestingDefineDebugKbP(tst, eid, -1, -1, tolKb, chk.Verbose)
-		defer func() {
-			Global.DebugKb = nil
-		}()
+	if true {
+		defer p_DebugKb(&testKb{
+			tst: tst, eid: 3, tol: 1e-4, verb: chk.Verbose,
+			ni: 1, nj: 1, itmin: 0, itmax: -1, tmin: 5000, tmax: 5000,
+		})()
 	}
 
 	// run simulation

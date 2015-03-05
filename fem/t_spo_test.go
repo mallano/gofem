@@ -154,15 +154,12 @@ func Test_spo751b(tst *testing.T) {
 	defer End()
 
 	// for debugging Kb
-	eid := 3
-	tolKb := 1e-4
-	//if true {
-	if false {
-		TestingDefineDebugKbU(tst, eid, 0.89, 0.96, tolKb, chk.Verbose)
-		defer func() {
-			Global.DebugKb = nil
-		}()
-
+	if true {
+		//if false {
+		defer u_DebugKb(&testKb{
+			tst: tst, eid: 3, tol: 1e-5, verb: chk.Verbose,
+			ni: 1, nj: 1, itmin: 1, itmax: -1, tmin: 0.89, tmax: 0.96,
+		})()
 	}
 
 	// run simulation
@@ -173,11 +170,11 @@ func Test_spo751b(tst *testing.T) {
 
 	// check
 	if true {
-		//if false {
+		verb := false
 		skipK := true
 		tolK := 1e-17
 		tolu := 1e-12
 		tols := 1e-14
-		TestingCompareResultsU(tst, "data/spo751.sim", "cmp/spo751.cmp", tolK, tolu, tols, skipK, chk.Verbose)
+		TestingCompareResultsU(tst, "data/spo751.sim", "cmp/spo751.cmp", tolK, tolu, tols, skipK, verb)
 	}
 }

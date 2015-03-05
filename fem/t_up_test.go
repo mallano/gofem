@@ -272,10 +272,6 @@ func Test_up02(tst *testing.T) {
 
 	// capture errors and flush log
 	defer End()
-	//defer func() {
-	//if err := recover(); err != nil {
-	//}
-	//}()
 
 	//verbose()
 	chk.PrintTitle("up02")
@@ -286,15 +282,12 @@ func Test_up02(tst *testing.T) {
 	}
 
 	// for debugging Kb
-	//eid := 69
-	//tolKb := 1e-4
-	//if true {
-	//if false {
-	//TestingDefineDebugKbUP(tst, eid, 1, 1, tolKb, chk.Verbose)
-	//defer func() {
-	//Global.DebugKb = nil
-	//}()
-	//}
+	if true {
+		defer up_DebugKb(&testKb{
+			tst: tst, eid: 69, tol: 1e-11, verb: chk.Verbose,
+			ni: 1, nj: 1, itmin: 0, itmax: -1, tmin: 1, tmax: 1,
+		})()
+	}
 
 	// run simulation
 	if !Run() {
