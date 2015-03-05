@@ -145,16 +145,6 @@ func Test_bh16b(tst *testing.T) {
 	// make sure to flush log
 	defer End()
 
-	// for debugging Kb
-	eid := 3
-	tolKb := 1e-12
-	if false {
-		TestingDefineDebugKb(tst, eid, -1, -1, tolKb, chk.Verbose)
-		defer func() {
-			Global.DebugKb = nil
-		}()
-	}
-
 	// run simulation
 	if !Run() {
 		tst.Errorf("test failed\n")

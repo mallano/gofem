@@ -41,8 +41,8 @@ var Global struct {
 	DynCoefs *DynCoefs // dynamic coefficients
 
 	// for debugging
-	Debug   bool                          // debug flag
-	DebugKb func(d *Domain, firstIt bool) // debug Kb callback function
+	Debug   bool                    // debug flag
+	DebugKb func(d *Domain, it int) // debug Kb callback function
 
 	// options
 	LogBcs bool // log essential and ptnatural boundary conditions
@@ -341,7 +341,7 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 
 			// debug
 			if Global.DebugKb != nil {
-				Global.DebugKb(d, it == 0)
+				Global.DebugKb(d, it)
 			}
 
 			// join A and tr(A) matrices into Kb

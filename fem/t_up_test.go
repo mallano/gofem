@@ -267,3 +267,37 @@ func Test_up01b(tst *testing.T) {
 		chk.Panic("cannot run simulation\n")
 	}
 }
+
+func Test_up02(tst *testing.T) {
+
+	// capture errors and flush log
+	defer End()
+	//defer func() {
+	//if err := recover(); err != nil {
+	//}
+	//}()
+
+	//verbose()
+	chk.PrintTitle("up02")
+
+	// start simulation
+	if !Start("data/up02.sim", true, chk.Verbose) {
+		chk.Panic("cannot start simulation")
+	}
+
+	// for debugging Kb
+	//eid := 69
+	//tolKb := 1e-4
+	//if true {
+	//if false {
+	//TestingDefineDebugKbUP(tst, eid, 1, 1, tolKb, chk.Verbose)
+	//defer func() {
+	//Global.DebugKb = nil
+	//}()
+	//}
+
+	// run simulation
+	if !Run() {
+		chk.Panic("cannot run simulation\n")
+	}
+}

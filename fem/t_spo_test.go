@@ -158,7 +158,7 @@ func Test_spo751b(tst *testing.T) {
 	tolKb := 1e-4
 	//if true {
 	if false {
-		TestingDefineDebugKb(tst, eid, -1, -1, tolKb, chk.Verbose)
+		TestingDefineDebugKbU(tst, eid, 0.89, 0.96, tolKb, chk.Verbose)
 		defer func() {
 			Global.DebugKb = nil
 		}()

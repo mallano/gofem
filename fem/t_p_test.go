@@ -166,6 +166,7 @@ func Test_p01b(tst *testing.T) {
 
 func Test_p02(tst *testing.T) {
 
+	//verbose()
 	chk.PrintTitle("p02")
 
 	// run simulation
@@ -179,10 +180,10 @@ func Test_p02(tst *testing.T) {
 
 	// for debugging Kb
 	eid := 3
-	tolKb := 1e-7
+	tolKb := 1e-4
 	if false {
 		//if true {
-		TestingDefineDebugKb(tst, eid, -1, -1, tolKb, chk.Verbose)
+		TestingDefineDebugKbP(tst, eid, -1, -1, tolKb, chk.Verbose)
 		defer func() {
 			Global.DebugKb = nil
 		}()
