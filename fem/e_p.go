@@ -5,8 +5,6 @@
 package fem
 
 import (
-	"math"
-
 	"github.com/cpmech/gofem/inp"
 	"github.com/cpmech/gofem/mporous"
 	"github.com/cpmech/gofem/shp"
@@ -646,9 +644,6 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 				rmp = o.ramp(fl + o.κ*g)
 				rx = ρl * rmp // Eq. (30)
 				rf = fl - rmp // Eq. (26)
-				if math.Abs(g) < 1e-13 {
-					g = 0
-				}
 				for i, m := range o.Shp.FaceLocalV[iface] {
 					μ := o.Vid2seepId[m]
 					fb[o.Pmap[m]] -= ipf.W * Sf[i] * rx
