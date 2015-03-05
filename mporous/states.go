@@ -133,7 +133,7 @@ func (o State) LSvars(m *Model) (ρl, ρ, p, Cpl, Cvs float64, err error) {
 }
 
 // LSderivs calculates derivatives for liquid-solid simulations
-func (o State) LSderivs(m *Model) (ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dCvsdpl, dklrdpl, dCpldusM, dρdusM float64, err error) {
+func (o State) LSderivs(m *Model) (ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dCvsdpl, dklrdpl, dCpldusM, dρldusM, dρdusM float64, err error) {
 
 	// n variables; Eqs (13) and (28) of [1]
 	ns := (1.0 - o.Divus) * o.Ns0
@@ -170,6 +170,7 @@ func (o State) LSderivs(m *Model) (ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dC
 	dklrdpl = -m.Cnd.DklrDsl(o.Sl) * Ccb       // Eq (A.7) of [1]
 
 	// derivatives w.r.t us (multipliers only)
+	dρldusM = o.Sl * o.RhoL * o.Ns0
 	dρdusM = (o.Sl*o.RhoL - m.RhoS0) * o.Ns0    // Eq (A.10) of [1]
 	dCpldusM = (o.Sl*m.Cl - o.RhoL*Ccb) * o.Ns0 // Eq (A.3) of [1]
 	return

@@ -7,7 +7,7 @@
     { "name":"Hl", "type":"cte", "prms":[{"n":"c", "v":5}] },
     { "name":"Hr", "type":"rmp", "prms":[
       { "n":"ca", "v":5   },
-      { "n":"cb", "v":5   },
+      { "n":"cb", "v":1   },
       { "n":"ta", "v":0   },
       { "n":"tb", "v":1e3 }]
     },
@@ -35,7 +35,7 @@
         { "tag":-1, "keys":["g"], "funcs":["grav"] }
       ],
       "control" : {
-        "tf"    : 1,
+        "tf"    : 7,
         "dt"    : 1,
         "dtout" : 10
       }

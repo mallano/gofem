@@ -43,6 +43,9 @@ type ElemUP struct {
 	hl    []float64   // hl = -ρL・bs - ∇pl; Eq (A.1) of [1]
 	Kup   [][]float64 // [nu][np] Kup := dRus/dpl consistent tangent matrix
 	Kpu   [][]float64 // [np][nu] Kpu := dRpl/dus consistent tangent matrix
+
+	// for seepage face derivatives
+	dρldus_ex [][]float64 // [nverts][nverts*ndim] ∂ρl/∂us extrapolted to nodes => if has qb (flux)
 }
 
 // initialisation ///////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +136,13 @@ func init() {
 		o.hl = make([]float64, ndim)
 		o.Kup = la.MatAlloc(o.U.Nu, o.P.Np)
 		o.Kpu = la.MatAlloc(o.P.Np, o.U.Nu)
+
+		// seepage terms
+		if o.P.DoExtrap {
+			p_nverts := o.P.Shp.Nverts
+			u_nverts := o.U.Shp.Nverts
+			o.dρldus_ex = la.MatAlloc(p_nverts, u_nverts*ndim)
+		}
 
 		// return new element
 		return &o
@@ -335,6 +345,7 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// clear matrices
+	ndim := o.Ndim
 	u_nverts := o.U.Shp.Nverts
 	p_nverts := o.P.Shp.Nverts
 	la.MatFill(o.P.Kpp, 0)
@@ -353,14 +364,16 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 			for j := 0; j < p_nverts; j++ {
 				o.P.dρldpl_ex[i][j] = 0
 			}
+			for j := 0; j < o.U.Nu; j++ {
+				o.dρldus_ex[i][j] = 0
+			}
 		}
 	}
 
 	// for each integration point
 	dc := Global.DynCoefs
-	ndim := o.Ndim
 	var coef, plt, klr, ρL, Cl, divus, divvs float64
-	var ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dCvsdpl, dklrdpl, dCpldusM, dρdusM float64
+	var ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dCvsdpl, dklrdpl, dCpldusM, dρldusM, dρdusM float64
 	var err error
 	var r, c int
 	for idx, ip := range o.U.IpsElem {
@@ -384,7 +397,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 		klr = o.P.Mdl.Cnd.Klr(o.P.States[idx].Sl)
 		ρL = o.P.States[idx].RhoL
 		Cl = o.P.Mdl.Cl
-		ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dCvsdpl, dklrdpl, dCpldusM, dρdusM, err = o.P.States[idx].LSderivs(o.P.Mdl)
+		ρl, ρ, Cpl, Cvs, dρdpl, dpdpl, dCpldpl, dCvsdpl, dklrdpl, dCpldusM, dρldusM, dρdusM, err = o.P.States[idx].LSderivs(o.P.Mdl)
 		if LogErr(err, "calc of tpm derivatives failed") {
 			return
 		}
@@ -414,6 +427,11 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 					// add ∂rl/∂pl^n and ∂p/∂pl^n: Eqs (A.9) and (A.11) of [1]
 					o.Kup[c][n] += coef * (S[m]*Sb[n]*dρdpl*o.bs[j] - G[m][j]*Sb[n]*dpdpl)
+
+					// for seepage face
+					if o.P.DoExtrap {
+						o.dρldus_ex[n][c] += o.P.Emat[n][idx] * dρldusM * G[m][j]
+					}
 				}
 
 				// term in brackets in Eq (A.7) of [1]
@@ -468,6 +486,9 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 	// contribution from natural boundary conditions
 	if o.P.HasSeep {
 		if !o.P.add_natbcs_to_jac(sol) {
+			return
+		}
+		if !o.add_natbcs_to_jac(sol) {
 			return
 		}
 	}
@@ -685,6 +706,63 @@ func (o *ElemUP) ipvars(idx int, sol *Solution) (ok bool) {
 	for i := 0; i < ndim; i++ {
 		o.bs[i] = dc.α1*o.U.us[i] - o.U.ζs[idx][i] - o.P.g[i]
 		o.hl[i] = -ρL*o.bs[i] - o.P.gpl[i]
+	}
+	return true
+}
+
+// add_natbcs_to_jac adds contribution from natural boundary conditions to Jacobian
+func (o ElemUP) add_natbcs_to_jac(sol *Solution) (ok bool) {
+
+	// compute surface integral
+	ndim := o.Ndim
+	u_nverts := o.U.Shp.Nverts
+	var tmp float64
+	var z, pl, fl, plmax, g, rmp float64
+	for _, nbc := range o.P.NatBcs {
+
+		// temporary value == function evaluation
+		tmp = nbc.Fcn.F(sol.T, nil)
+
+		// loop over ips of face
+		for _, ipf := range o.P.IpsFace {
+
+			// interpolation functions and gradients @ face
+			iface := nbc.IdxFace
+			if LogErr(o.P.Shp.CalcAtFaceIp(o.P.X, ipf, iface), "up: add_natbcs_to_jac") {
+				return
+			}
+			Sf := o.P.Shp.Sf
+			Jf := la.VecNorm(o.P.Shp.Fnvec)
+			coef := ipf.W * Jf
+
+			// select natural boundary condition type
+			switch nbc.Key {
+			case "seepP", "seepH":
+
+				// variables extrapolated to face
+				_, z, pl, fl = o.P.fipvars(iface, sol)
+
+				// specified condition
+				plmax = tmp
+				if nbc.Key == "seepH" {
+					plmax = max(o.P.γl*(tmp-z), 0.0)
+				}
+
+				// compute derivatives
+				g = pl - plmax // Eq. (24)
+				rmp = o.P.ramp(fl + o.P.κ*g)
+				for i, m := range o.P.Shp.FaceLocalV[iface] {
+					for n := 0; n < u_nverts; n++ {
+						for j := 0; j < ndim; j++ {
+							c := j + n*ndim
+							for l, r := range o.P.Shp.FaceLocalV[iface] {
+								o.Kpu[m][c] += coef * Sf[i] * Sf[l] * o.dρldus_ex[r][c] * rmp
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	return true
 }

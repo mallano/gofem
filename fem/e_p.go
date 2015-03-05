@@ -625,6 +625,8 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 				return
 			}
 			Sf := o.Shp.Sf
+			Jf := la.VecNorm(o.Shp.Fnvec)
+			coef := ipf.W * Jf
 
 			// select natural boundary condition type
 			switch nbc.Key {
@@ -646,8 +648,8 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 				rf = fl - rmp // Eq. (26)
 				for i, m := range o.Shp.FaceLocalV[iface] {
 					μ := o.Vid2seepId[m]
-					fb[o.Pmap[m]] -= ipf.W * Sf[i] * rx
-					fb[o.Fmap[μ]] -= ipf.W * Sf[i] * rf
+					fb[o.Pmap[m]] -= coef * Sf[i] * rx
+					fb[o.Fmap[μ]] -= coef * Sf[i] * rf
 				}
 			}
 		}
@@ -688,6 +690,8 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 				return
 			}
 			Sf := o.Shp.Sf
+			Jf := la.VecNorm(o.Shp.Fnvec)
+			coef := ipf.W * Jf
 
 			// select natural boundary condition type
 			switch nbc.Key {
@@ -714,14 +718,14 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 					μ := o.Vid2seepId[m]
 					for j, n := range o.Shp.FaceLocalV[iface] {
 						ν := o.Vid2seepId[n]
-						o.Kpp[m][n] += ipf.W * Sf[i] * Sf[j] * drxdpl
-						o.Kpf[m][ν] += ipf.W * Sf[i] * Sf[j] * drxdfl
-						o.Kfp[μ][n] += ipf.W * Sf[i] * Sf[j] * drfdpl
-						o.Kff[μ][ν] += ipf.W * Sf[i] * Sf[j] * drfdfl
+						o.Kpp[m][n] += coef * Sf[i] * Sf[j] * drxdpl
+						o.Kpf[m][ν] += coef * Sf[i] * Sf[j] * drxdfl
+						o.Kfp[μ][n] += coef * Sf[i] * Sf[j] * drfdpl
+						o.Kff[μ][ν] += coef * Sf[i] * Sf[j] * drfdfl
 					}
 					for n := 0; n < nverts; n++ { // Eqs. (18) and (22)
 						for l, r := range o.Shp.FaceLocalV[iface] {
-							o.Kpp[m][n] += ipf.W * Sf[i] * Sf[l] * o.dρldpl_ex[r][n] * rmp
+							o.Kpp[m][n] += coef * Sf[i] * Sf[l] * o.dρldpl_ex[r][n] * rmp
 						}
 					}
 				}

@@ -14,7 +14,9 @@
   ],
   "regions" : [
     {
-      "mshfile"   : "frees01.msh",
+      "mshfile"  : "frees01a.msh",
+      "mshfile_" : "frees01b.msh",
+      "mshfile_" : "frees01c.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"porous1", "type":"p", "extra":"!bet:70" }
       ]
