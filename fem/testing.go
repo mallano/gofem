@@ -191,9 +191,6 @@ func TestingDefineDebugKbP(tst *testing.T, eid int, tmin, tmax, tol float64, ver
 				statesBkp[i] = ele.StatesBkp[i].GetCopy()
 			}
 			Fbtmp, ΔYbkp, Yold := testing_get_aux_vectors(d)
-			if false {
-				io.Pforan("a = %v\n", Fbtmp, Yold)
-			}
 
 			// make sure to restore states and solution
 			defer func() {
@@ -213,9 +210,6 @@ func TestingDefineDebugKbP(tst *testing.T, eid int, tmin, tmax, tol float64, ver
 						for k := 0; k < d.Ny; k++ {
 							Fbtmp[k] = 0
 							d.Sol.ΔY[k] = d.Sol.Y[k] - Yold[k]
-						}
-						if false {
-							io.Pforan("i,I,j,J = %v\n", i, I, j, J)
 						}
 						if it == 0 {
 							for k := 0; k < nip; k++ {
@@ -271,9 +265,6 @@ func TestingDefineDebugKbU(tst *testing.T, eid int, tmin, tmax, tol float64, ver
 				statesBkp[i] = ele.StatesBkp[i].GetCopy()
 			}
 			Fbtmp, ΔYbkp, Yold := testing_get_aux_vectors(d)
-			if false {
-				io.Pforan("a = %v\n", Fbtmp, Yold)
-			}
 
 			// make sure to restore states and solution
 			defer func() {
@@ -293,9 +284,6 @@ func TestingDefineDebugKbU(tst *testing.T, eid int, tmin, tmax, tol float64, ver
 						for k := 0; k < d.Ny; k++ {
 							Fbtmp[k] = 0
 							d.Sol.ΔY[k] = d.Sol.Y[k] - Yold[k]
-						}
-						if false {
-							io.Pforan("i,I,j,J = %v\n", i, I, j, J)
 						}
 						if it == 0 {
 							for k := 0; k < nip; k++ {
@@ -319,6 +307,111 @@ func TestingDefineDebugKbU(tst *testing.T, eid int, tmin, tmax, tol float64, ver
 	}
 }
 
+func TestingDefineDebugKbUP(tst *testing.T, eid int, tmin, tmax, tol float64, verb bool) {
+	Global.DebugKb = func(d *Domain, it int) {
+		elem := d.Elems[eid]
+		if e, ok := elem.(*ElemUP); ok {
+
+			// skip other times
+			if tmin >= 0 && tmax >= 0 {
+				if d.Sol.T < tmin || d.Sol.T > tmax {
+					return
+				}
+			}
+
+			// message
+			//if it > 1 {
+			//return
+			//}
+			if verb {
+				io.PfYel("\nit=%2d t=%v\n", it, d.Sol.T)
+			}
+
+			// copy states and solution
+			nip := len(e.U.IpsElem)
+			u_states := make([]*msolid.State, nip)
+			u_statesBkp := make([]*msolid.State, nip)
+			p_states := make([]*mporous.State, nip)
+			p_statesBkp := make([]*mporous.State, nip)
+			for i := 0; i < nip; i++ {
+				u_states[i] = e.U.States[i].GetCopy()
+				u_statesBkp[i] = e.U.StatesBkp[i].GetCopy()
+				p_states[i] = e.P.States[i].GetCopy()
+				p_statesBkp[i] = e.P.StatesBkp[i].GetCopy()
+			}
+			Fbtmp, ΔYbkp, Yold := testing_get_aux_vectors(d)
+
+			// make sure to restore states and solution
+			defer func() {
+				for i := 0; i < nip; i++ {
+					e.U.States[i].Set(u_states[i])
+					e.U.StatesBkp[i].Set(u_statesBkp[i])
+					e.P.States[i].Set(p_states[i])
+					e.P.StatesBkp[i].Set(p_statesBkp[i])
+				}
+				copy(d.Sol.ΔY, ΔYbkp)
+			}()
+
+			// define restore function
+			restore := func() {
+				if it == 0 {
+					for k := 0; k < nip; k++ {
+						e.U.States[k].Set(u_states[k])
+						e.P.States[k].Set(p_states[k])
+					}
+					return
+				}
+				for k := 0; k < nip; k++ {
+					e.U.States[k].Set(u_statesBkp[k])
+					e.P.States[k].Set(p_statesBkp[k])
+				}
+			}
+
+			// check
+			ni, nj := 1, 1
+			testing_ana_num_K(tst, "Kuu", d, e, e.U.Umap, e.U.Umap, ni, nj, e.U.K, Fbtmp, Yold, tol, verb, restore)
+			testing_ana_num_K(tst, "Kup", d, e, e.U.Umap, e.P.Pmap, ni, nj, e.Kup, Fbtmp, Yold, tol, verb, restore)
+			testing_ana_num_K(tst, "Kpu", d, e, e.P.Pmap, e.U.Umap, ni, nj, e.Kpu, Fbtmp, Yold, tol, verb, restore)
+			testing_ana_num_K(tst, "Kpp", d, e, e.P.Pmap, e.P.Pmap, ni, nj, e.P.Kpp, Fbtmp, Yold, tol, verb, restore)
+			testing_ana_num_K(tst, "Kpf", d, e, e.P.Pmap, e.P.Fmap, ni, nj, e.P.Kpf, Fbtmp, Yold, tol, verb, restore)
+			testing_ana_num_K(tst, "Kfp", d, e, e.P.Fmap, e.P.Pmap, ni, nj, e.P.Kfp, Fbtmp, Yold, tol, verb, restore)
+			testing_ana_num_K(tst, "Kff", d, e, e.P.Fmap, e.P.Fmap, ni, nj, e.P.Kff, Fbtmp, Yold, tol, verb, restore)
+		}
+	}
+}
+
+func testing_ana_num_K(tst *testing.T, label string, d *Domain, e Elem, Imap, Jmap []int, nI, nJ int, Kana [][]float64, Fbtmp, Yold []float64, tol float64, verb bool, restore func()) {
+	var imap, jmap []int
+	if nI <= len(Imap) {
+		imap = Imap[:nI]
+	}
+	if nJ <= len(Jmap) {
+		jmap = Jmap[:nJ]
+	}
+	//derivfcn := num.DerivFwd
+	//derivfcn := num.DerivBwd
+	derivfcn := num.DerivCen
+	var tmp float64
+	for i, I := range imap {
+		for j, J := range jmap {
+			dnum := derivfcn(func(x float64, args ...interface{}) (res float64) {
+				tmp, d.Sol.Y[J] = d.Sol.Y[J], x
+				for k := 0; k < d.Ny; k++ {
+					Fbtmp[k] = 0
+					d.Sol.ΔY[k] = d.Sol.Y[k] - Yold[k]
+				}
+				restore()
+				e.Update(d.Sol)
+				e.AddToRhs(Fbtmp, d.Sol)
+				res = -Fbtmp[I]
+				d.Sol.Y[J] = tmp
+				return res
+			}, d.Sol.Y[J])
+			chk.AnaNum(tst, io.Sf(label+"%3d%3d", i, j), tol, Kana[i][j], dnum, verb)
+		}
+	}
+}
+
 func testing_get_aux_vectors(d *Domain) (Fbtmp, ΔYbkp, Yold []float64) {
 	Fbtmp = make([]float64, d.Ny)
 	Yold = make([]float64, d.Ny)
@@ -328,4 +421,18 @@ func testing_get_aux_vectors(d *Domain) (Fbtmp, ΔYbkp, Yold []float64) {
 		ΔYbkp[i] = d.Sol.ΔY[i]
 	}
 	return
+}
+
+func testing_up_restore_states(it, nip int, ele *ElemUP, u_states, u_statesBkp []*msolid.State, p_states, p_statesBkp []*mporous.State) {
+	if it == 0 {
+		for k := 0; k < nip; k++ {
+			ele.U.States[k].Set(u_states[k])
+			ele.P.States[k].Set(p_states[k])
+		}
+		return
+	}
+	for k := 0; k < nip; k++ {
+		ele.U.States[k].Set(u_statesBkp[k])
+		ele.P.States[k].Set(p_statesBkp[k])
+	}
 }
