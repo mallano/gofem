@@ -465,27 +465,54 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 		IpAddToKt(o.U.K, u_nverts, ndim, coef, G, o.U.D)
 	}
 
+	// contribution from natural boundary conditions
+	if o.P.HasSeep {
+		if !o.P.add_natbcs_to_jac(sol) {
+			return
+		}
+	}
+
 	// debug
 	//if true {
 	if false {
-		//if false {
-		o.debug_print_K()
+		if o.Id() == 69 {
+			o.debug_print_K()
+			panic("stop")
+		}
 	}
 
 	// add K to sparse matrix Kb
+	//    _             _
+	//   |  Kuu Kup  0   |
+	//   |  Kpu Kpp Kpf  |
+	//   |_ Kfu Kfp Kff _|
+	//
 	for i, I := range o.P.Pmap {
 		for j, J := range o.P.Pmap {
 			Kb.Put(I, J, o.P.Kpp[i][j])
+		}
+		for j, J := range o.P.Fmap {
+			Kb.Put(I, J, o.P.Kpf[i][j])
+			Kb.Put(J, I, o.P.Kfp[j][i])
 		}
 		for j, J := range o.U.Umap {
 			Kb.Put(I, J, o.Kpu[i][j])
 			Kb.Put(J, I, o.Kup[j][i])
 		}
 	}
+	for i, I := range o.P.Fmap {
+		for j, J := range o.P.Fmap {
+			Kb.Put(I, J, o.P.Kff[i][j])
+		}
+	}
 	for i, I := range o.U.Umap {
 		for j, J := range o.U.Umap {
 			Kb.Put(I, J, o.U.K[i][j])
 		}
+		// TODO:
+		//for j, J := range o.P.Fmap {
+		//Kb.Put(J, I, o.Kfu[j][i])
+		//}
 	}
 	return true
 }
@@ -664,6 +691,9 @@ func (o *ElemUP) ipvars(idx int, sol *Solution) (ok bool) {
 
 func (o ElemUP) debug_print_K() {
 	la.PrintMat("Kpp", o.P.Kpp, "%20.10f", false)
+	la.PrintMat("Kpf", o.P.Kpf, "%20.10f", false)
+	la.PrintMat("Kfp", o.P.Kfp, "%20.10f", false)
+	la.PrintMat("Kff", o.P.Kff, "%20.10f", false)
 	la.PrintMat("Kpu", o.Kpu, "%20.10f", false)
 	la.PrintMat("Kup", o.Kup, "%20.10f", false)
 	la.PrintMat("Kuu", o.U.K, "%20.10f", false)
