@@ -1,4 +1,4 @@
 #!/bin/bash
 
-gofem o2elast.sim
+mpirun -np 4 gofem o2elast.sim
 go run doplot.go

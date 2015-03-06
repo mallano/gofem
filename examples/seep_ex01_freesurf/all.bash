@@ -1,4 +1,3 @@
 #!/bin/bash
 
-gofem coarse && GenVtu coarse
-#gofem fineNonlin && GenVtu fineNonlin
+mpirun -np 4 gofem coarse && GenVtu coarse

@@ -19,7 +19,7 @@ func main() {
 	ufine := false
 	dat.Quad = true
 	dat.ToQua9 = true
-	dat.Nparts = 8
+	dat.Nparts = 4
 	dat.Pfull = false
 
 	y := H / 2.0

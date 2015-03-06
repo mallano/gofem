@@ -1,6 +1,6 @@
 {
   "quad"   : true,
-  "nparts" : 8,
+  "nparts" : 4,
   "Sregs"  : {
     "tags" : [-1],
     "nxs"  : [ 1],

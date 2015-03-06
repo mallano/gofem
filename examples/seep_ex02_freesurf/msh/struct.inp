@@ -1,6 +1,7 @@
 {
   "quad" : true,
   "toqua9" : true,
+  "nparts" : 4,
   "Sregs" : {
     "tags" : [-1],
     "nxs"  : [7],

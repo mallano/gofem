@@ -1,3 +1,3 @@
 #!/bin/bash
 
-gofem struct && GenVtu struct
+mpirun -np 4 gofem struct && GenVtu struct
