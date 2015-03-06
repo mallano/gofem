@@ -50,14 +50,15 @@ func Test_sg52a(tst *testing.T) {
 	defer End()
 
 	// domain
-	dom := NewDomain(Global.Sim.Regions[0])
+	distr := false
+	dom := NewDomain(Global.Sim.Regions[0], distr)
 	if dom == nil {
 		tst.Errorf("test failed\n")
 		return
 	}
 
 	// set stage
-	if !dom.SetStage(0, Global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0], distr) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -363,8 +364,9 @@ func Test_sg111(tst *testing.T) {
 		sum.Read()
 
 		// allocate domain
-		d := NewDomain(Global.Sim.Regions[0])
-		if !d.SetStage(0, Global.Sim.Stages[0]) {
+		distr := false
+		d := NewDomain(Global.Sim.Regions[0], distr)
+		if !d.SetStage(0, Global.Sim.Stages[0], distr) {
 			tst.Errorf("SetStage failed\n")
 			return
 		}
@@ -441,8 +443,9 @@ func Test_sg114(tst *testing.T) {
 		sum.Read()
 
 		// allocate domain
-		d := NewDomain(Global.Sim.Regions[0])
-		if !d.SetStage(0, Global.Sim.Stages[0]) {
+		distr := false
+		d := NewDomain(Global.Sim.Regions[0], distr)
+		if !d.SetStage(0, Global.Sim.Stages[0], distr) {
 			tst.Errorf("SetStage failed\n")
 			return
 		}
@@ -529,8 +532,9 @@ func Test_sg1121(tst *testing.T) {
 		sum.Read()
 
 		// allocate domain
-		d := NewDomain(Global.Sim.Regions[0])
-		if !d.SetStage(0, Global.Sim.Stages[0]) {
+		distr := false
+		d := NewDomain(Global.Sim.Regions[0], distr)
+		if !d.SetStage(0, Global.Sim.Stages[0], distr) {
 			tst.Errorf("SetStage failed\n")
 			return
 		}

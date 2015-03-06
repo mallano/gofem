@@ -32,8 +32,9 @@ func Test_sigini01(tst *testing.T) {
 	}
 
 	// allocate domain
-	d := NewDomain(Global.Sim.Regions[0])
-	if !d.SetStage(0, Global.Sim.Stages[0]) {
+	distr := false
+	d := NewDomain(Global.Sim.Regions[0], distr)
+	if !d.SetStage(0, Global.Sim.Stages[0], distr) {
 		tst.Errorf("SetStage failed\n")
 		return
 	}
@@ -83,8 +84,9 @@ func Test_sigini02(tst *testing.T) {
 	}
 
 	// allocate domain
-	d := NewDomain(Global.Sim.Regions[0])
-	if !d.SetStage(0, Global.Sim.Stages[0]) {
+	distr := false
+	d := NewDomain(Global.Sim.Regions[0], distr)
+	if !d.SetStage(0, Global.Sim.Stages[0], distr) {
 		tst.Errorf("SetStage failed\n")
 		return
 	}

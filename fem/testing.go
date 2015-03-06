@@ -41,6 +41,11 @@ type T_results_set []*T_results
 // testing_compare_results_u compares results with u-formulation
 func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tolu, tols float64, skipK, verbose bool) {
 
+	// only root can run this test
+	if !Global.Root {
+		return
+	}
+
 	// read summary
 	if !Global.Sum.Read() {
 		tst.Error("cannot read summary file for simulation=%q\n", simfname)
@@ -48,27 +53,25 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 	}
 
 	// allocate domain
-	d := NewDomain(Global.Sim.Regions[0])
-	LogErrCond(!d.SetStage(0, Global.Sim.Stages[0]), "TestingCompareResultsU: SetStage failed")
-	if Stop() {
-		tst.Errorf("SetStage failed\n")
+	distr := false
+	d := NewDomain(Global.Sim.Regions[0], distr)
+	if !d.SetStage(0, Global.Sim.Stages[0], distr) {
+		tst.Errorf("TestingCompareResultsU: SetStage failed\n")
 		return
 	}
 
 	// read file
 	buf, err := io.ReadFile(cmpfname)
-	LogErr(err, "TestingCompareResultsU: ReadFile failed")
-	if Stop() {
-		tst.Errorf("ReadFile failed\n")
+	if err != nil {
+		tst.Errorf("TestingCompareResultsU: ReadFile failed\n")
 		return
 	}
 
 	// unmarshal json
 	var cmp_set T_results_set
 	err = json.Unmarshal(buf, &cmp_set)
-	LogErr(err, "TestingCompareResultsU: Unmarshal failed")
-	if Stop() {
-		tst.Errorf("Unmarshal failed\n")
+	if err != nil {
+		tst.Errorf("TestingCompareResultsU: Unmarshal failed\n")
 		return
 	}
 
@@ -88,9 +91,8 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 		}
 
 		// load gofem results
-		LogErrCond(!d.In(tidx), "TestingCompareResultsU: reading of results failed")
-		if Stop() {
-			tst.Errorf("reading of results failed\n")
+		if !d.In(tidx) {
+			tst.Errorf("TestingCompareResultsU: reading of results failed\n")
 			return
 		}
 		if verbose {
@@ -104,15 +106,12 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 			}
 			for eid, Ksg := range cmp.Kmats {
 				if e, ok := d.Elems[eid].(*ElemU); ok {
-					if LogErrCond(!e.AddToKb(d.Kb, d.Sol, true), "TestingCompareResultsU: AddToKb failed") {
-						tst.Errorf("AddToKb failed\n")
-						break
+					if !e.AddToKb(d.Kb, d.Sol, true) {
+						tst.Errorf("TestingCompareResultsU: AddToKb failed\n")
+						return
 					}
 					chk.Matrix(tst, io.Sf("K%d", eid), tolK, e.K, Ksg)
 				}
-			}
-			if Stop() {
-				return
 			}
 		}
 

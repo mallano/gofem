@@ -29,14 +29,15 @@ func Test_fourlayers01(tst *testing.T) {
 		tst.Errorf("test failed\n")
 	}
 	defer End()
-	dom := NewDomain(Global.Sim.Regions[0])
+	distr := false
+	dom := NewDomain(Global.Sim.Regions[0], distr)
 	if dom == nil {
 		tst.Errorf("test failed\n")
 		return
 	}
 
 	io.Pforan("stage # 0\n")
-	if !dom.SetStage(0, Global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0], distr) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -45,7 +46,7 @@ func Test_fourlayers01(tst *testing.T) {
 	chk.Ints(tst, "eqs", eqs, []int{0, 1, 12, 2, 3, 4, 5, 6, 7, 13, 8, 9, 10, 11})
 
 	io.Pforan("stage # 1\n")
-	if !dom.SetStage(1, Global.Sim.Stages[1]) {
+	if !dom.SetStage(1, Global.Sim.Stages[1], distr) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -54,7 +55,7 @@ func Test_fourlayers01(tst *testing.T) {
 	chk.Ints(tst, "eqs", eqs, []int{0, 1, 2, 3, 19, 4, 5, 20, 6, 7, 8, 9, 18, 10, 11, 12, 13, 14, 15, 16, 17})
 
 	io.Pforan("stage # 2\n")
-	if !dom.SetStage(2, Global.Sim.Stages[2]) {
+	if !dom.SetStage(2, Global.Sim.Stages[2], distr) {
 		tst.Errorf("test failed\n")
 		return
 	}
@@ -63,7 +64,7 @@ func Test_fourlayers01(tst *testing.T) {
 	chk.Ints(tst, "eqs", eqs, []int{0, 1, 2, 3, 25, 4, 5, 26, 6, 7, 8, 9, 24, 10, 11, 12, 13, 14, 15, 16, 17, 27, 18, 19, 20, 21, 22, 23})
 
 	io.Pforan("stage # 3\n")
-	if !dom.SetStage(3, Global.Sim.Stages[3]) {
+	if !dom.SetStage(3, Global.Sim.Stages[3], distr) {
 		tst.Errorf("test failed\n")
 		return
 	}

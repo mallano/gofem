@@ -21,11 +21,12 @@ func Test_beam01(tst *testing.T) {
 		tst.Errorf("test failed\n")
 	}
 	defer End()
-	dom := NewDomain(Global.Sim.Regions[0])
+	distr := false
+	dom := NewDomain(Global.Sim.Regions[0], distr)
 	if dom == nil {
 		tst.Errorf("test failed\n")
 	}
-	if !dom.SetStage(0, Global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0], distr) {
 		tst.Errorf("test failed\n")
 	}
 

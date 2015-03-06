@@ -148,14 +148,14 @@ type Domain struct {
 }
 
 // NewDomain returns a new domain
-func NewDomain(reg *inp.Region) *Domain {
+func NewDomain(reg *inp.Region, distr bool) *Domain {
 	var dom Domain
 	dom.Reg = reg
 	dom.Msh = inp.ReadMsh(Global.Sim.Data.FnameDir, reg.Mshfile)
 	if LogErrCond(dom.Msh == nil, "ERROR: ReadMsh failed\n") {
 		return nil
 	}
-	if Global.Distr {
+	if distr {
 		if LogErrCond(Global.Nproc != len(dom.Msh.Part2cells), "number of processors must be equal to the number of partitions defined in mesh file. %d != %d", Global.Nproc, len(dom.Msh.Part2cells)) {
 			return nil
 		}
@@ -165,7 +165,7 @@ func NewDomain(reg *inp.Region) *Domain {
 }
 
 // SetStage set nodes, equation numbers and auxiliary data for given stage
-func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
+func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok bool) {
 
 	// backup state
 	if idxstg > 0 {
@@ -284,7 +284,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage) (setstageisok bool) {
 
 		// allocate element
 		mycell := c.Part == Global.Rank // cell belongs to this processor
-		if !Global.Distr {
+		if !distr {
 			mycell = true // not distributed simulation => this processor has all cells
 		}
 		if mycell {

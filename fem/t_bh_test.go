@@ -41,14 +41,15 @@ func Test_bh16a(tst *testing.T) {
 	defer End()
 
 	// domain
-	dom := NewDomain(Global.Sim.Regions[0])
+	distr := false
+	dom := NewDomain(Global.Sim.Regions[0], distr)
 	if dom == nil {
 		tst.Errorf("test failed\n")
 		return
 	}
 
 	// set stage
-	if !dom.SetStage(0, Global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0], distr) {
 		tst.Errorf("test failed\n")
 		return
 	}

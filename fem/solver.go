@@ -114,7 +114,7 @@ func Run() (runisok bool) {
 	// alloc domains
 	var domains []*Domain
 	for _, reg := range Global.Sim.Regions {
-		dom := NewDomain(reg)
+		dom := NewDomain(reg, Global.Distr)
 		if dom == nil {
 			break
 		}
@@ -160,7 +160,7 @@ func Run() (runisok bool) {
 
 		// set stage
 		for _, d := range domains {
-			if LogErrCond(!d.SetStage(stgidx, Global.Sim.Stages[stgidx]), "SetStage failed") {
+			if LogErrCond(!d.SetStage(stgidx, Global.Sim.Stages[stgidx], Global.Distr), "SetStage failed") {
 				break
 			}
 			d.Sol.T = t

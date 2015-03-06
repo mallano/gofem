@@ -69,8 +69,9 @@ func Start(simfnpath string, stageIdx, regionIdx int) {
 	}
 
 	// allocate domain
-	Dom = fem.NewDomain(fem.Global.Sim.Regions[regionIdx])
-	if !Dom.SetStage(stageIdx, fem.Global.Sim.Stages[stageIdx]) {
+	distr := false
+	Dom = fem.NewDomain(fem.Global.Sim.Regions[regionIdx], distr)
+	if !Dom.SetStage(stageIdx, fem.Global.Sim.Stages[stageIdx], distr) {
 		chk.Panic("cannot allocate domain\n")
 	}
 

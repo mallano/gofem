@@ -62,13 +62,14 @@ func Test_up01a(tst *testing.T) {
 	}
 
 	// domain
-	dom := NewDomain(Global.Sim.Regions[0])
+	distr := false
+	dom := NewDomain(Global.Sim.Regions[0], distr)
 	if dom == nil {
 		chk.Panic("cannot allocate new domain")
 	}
 
 	// set stage
-	if !dom.SetStage(0, Global.Sim.Stages[0]) {
+	if !dom.SetStage(0, Global.Sim.Stages[0], distr) {
 		chk.Panic("cannot set stage")
 	}
 
