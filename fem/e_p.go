@@ -113,7 +113,7 @@ func init() {
 		}
 
 		// maps
-		info.Y2F = map[string]string{"pl": "ql"}
+		info.Y2F = map[string]string{"pl": "ql", "fl": "nil"}
 
 		// t1 and t2 variables
 		info.T1vars = ykeys
