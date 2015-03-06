@@ -36,6 +36,7 @@ var (
 	rwlkeys = []string{"rwlx", "rwly", "rwlz"}                // ρl * wl keys
 	plkeys  = []string{"pl"}                                  // liquid pressure keys
 	pgkeys  = []string{"pg"}                                  // gas pressure keys
+	flkeys  = []string{"fl"}                                  // constraint/flux/seepage face key
 
 	is_sig     map[string]bool     // is sigma key? "sx" => true
 	is_rwl     map[string]bool     // is rwl key? "rwlx" => true
@@ -45,7 +46,10 @@ var (
 func init() {
 	is_sig = map[string]bool{"sx": true, "sy": true, "sz": true, "sxy": true, "syz": true, "szx": true}
 	is_rwl = map[string]bool{"rwlx": true, "rwly": true, "rwlz": true}
-	label2keys = map[string][]string{"u": ukeys, "sig": skeys, "rwl": rwlkeys, "pl": plkeys, "pg": pgkeys}
+	label2keys = map[string][]string{
+		"u": ukeys, "sig": skeys, "rwl": rwlkeys,
+		"pl": plkeys, "pg": pgkeys, "fl": flkeys,
+	}
 }
 
 func main() {
@@ -111,6 +115,11 @@ func main() {
 		pvd["u"] = new(bytes.Buffer)
 		geo["u"] = new(bytes.Buffer)
 		vtu["u"] = new(bytes.Buffer)
+	}
+	if _, ok := out.Dom.YandC["fl"]; ok {
+		pvd["fl"] = new(bytes.Buffer)
+		geo["fl"] = new(bytes.Buffer)
+		vtu["fl"] = new(bytes.Buffer)
 	}
 	if _, ok := out.Dom.YandC["pl"]; ok {
 		pvd["pl"] = new(bytes.Buffer)
