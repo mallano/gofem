@@ -3,12 +3,12 @@
     "desc"    : "porous: 2D: desiccation of a column (lowering pressure)",
     "matfile" : "nmepaper.mat",
     "debug"   : false,
-    "showR"   : true
+    "showR"   : false
   },
   "functions" : [
     { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
-    { "name":"pbot", "type":"cte", "prms":[{"n":"c", "v":30}] },
-    { "name":"pbo_", "type":"cos", "prms":[
+    { "name":"pbo_", "type":"cte", "prms":[{"n":"c", "v":30}] },
+    { "name":"pbot", "type":"cos", "prms":[
         { "n":"a",    "v":15 },
         { "n":"b/pi", "v":0.0005 },
         { "n":"c",    "v":15 }
@@ -29,7 +29,7 @@
   },
   "stages" : [
     {
-      "geost" : { "gamw":10, "nu":0.2, "layers":[[-1],[-2]] },
+      "geost" : { "gamw":10, "nu":[0.3], "layers":[[-1,-2]] },
       "facebcs" : [
         { "tag":-10, "keys":["uy","pl"], "funcs":["zero","pbot"] },
         { "tag":-11, "keys":["ux"],      "funcs":["zero"] },
