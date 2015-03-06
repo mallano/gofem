@@ -188,8 +188,8 @@ func (o Model) InitState(s *State, pl, pg, divus float64) (err error) {
 	s.Divus = divus
 	s.Sl = 1
 	s.Ns0 = 1 - o.Nf0
-	s.RhoL = o.RhoL0
-	s.RhoG = o.RhoG0
+	s.RhoL = o.RhoL0 + o.Cl*pl
+	s.RhoG = o.RhoG0 + o.Cg*pg
 	s.Dpc = 0
 	s.Wet = false
 	pc := pg - pl
