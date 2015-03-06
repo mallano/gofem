@@ -248,16 +248,15 @@ type TimeControl struct {
 type HydroStData struct {
 	GamW   float64 `json:"gamw"`   // unit weight of water to use in HydroSt
 	Zwater float64 `json:"zwater"` // water elevation to set ponding or unsaturated condition
-	Unsat  bool    `json:"unsat"`  // consider unsaturated state with zwater < zmax
 }
 
 // GeoStData holds data for setting initial geostatic state (hydrostatic as well)
 type GeoStData struct {
 	HydroStData
-	Nu     float64 `json:"nu"`     // Poisson's coefficient to compute effective horizontal state
-	K0     float64 `json:"K0"`     // Earth pressure coefficient at rest to compute effective horizontal stresses
-	UseK0  bool    `json:"useK0"`  // use K0 to compute effective horizontal stresses instead of "nu"
-	Layers [][]int `json:"layers"` // [nlayers][ntagsInLayer]; e.g. [[-1,-2], [-3,-4]] => 2 layers
+	Nu     []float64 `json:"nu"`     // [nlayers] Poisson's coefficient to compute effective horizontal state for each layer
+	K0     []float64 `json:"K0"`     // [nlayers] Earth pressure coefficient at rest to compute effective horizontal stresses
+	UseK0  []bool    `json:"useK0"`  // [nlayers] use K0 to compute effective horizontal stresses instead of "nu"
+	Layers [][]int   `json:"layers"` // [nlayers][ntagsInLayer]; e.g. [[-1,-2], [-3,-4]] => 2 layers
 }
 
 // IniStressData holds data for setting initial stresses

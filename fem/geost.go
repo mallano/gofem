@@ -12,7 +12,6 @@ import (
 	"github.com/cpmech/gofem/mporous"
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/io"
-	"github.com/cpmech/gosl/num"
 )
 
 // Layer holds information of one soil layer
@@ -30,74 +29,20 @@ type Layer struct {
 	DsigV  float64        // ΔσV : total σV added by this layer. negative (-) means compression
 }
 
-// Saturation returns the saturation @ z corresponding to pl
-func (o Layer) Saturation(pl, z float64) (sl float64) {
-	if pl >= 0 {
-		return 1.0
-	}
-	pg := 0.0
-	divus := 0.0
-	s, err := o.Mdl.NewState(pl, pg, divus)
-	if err != nil {
-		io.PfRed("Saturation failed: %v\n", err)
-		return
-	}
-	return s.Sl
-}
-
-// MixDensity returns the mixture density @ z corresponding to pl
-func (o Layer) MixDensity(pl, z float64) (ρ float64) {
-
-	// saturations
-	sl := o.Saturation(pl, z)
-	sg := 1.0 - sl
-
-	// n variables
-	nf := o.Mdl.Nf0
-	ns := 1.0 - o.Mdl.Nf0
-	nl := nf * sl
-	ng := nf * sg
-
-	// ρ variables
-	ρl := nl * o.Mdl.RhoL0
-	ρg := ng * o.Mdl.RhoG0
-	ρs := ns * o.Mdl.RhoS0
-	ρ = ρl + ρg + ρs
-	return
-}
-
-// VoidsPressure returns the void's pressure @ z corresponding to pl
-func (o Layer) VoidsPressure(pl, z float64) (p float64) {
-	sl := o.Saturation(pl, z)
-	sg := 1.0 - sl
-	pg := 0.0
-	p = sl*pl + sg*pg
-	return
-}
-
 // StressInc1 returns the (absolute) increment of vertical stress from z to the top of this layer.
 func (o Layer) StressInc(z float64) (ΔσVabs float64) {
-	ΔσVabs = num.TrapzRange(z, o.Zmax, 10, func(zz float64) float64 {
+	ρS := o.Mdl.RhoS0
+	nf := o.Mdl.Nf0
+	ns := 1.0 - nf
+	sl := 1.0
+	ρ := func(zz float64) float64 {
 		pl := (o.Zwater - zz) * o.GamW
-		ρ := o.MixDensity(pl, zz)
-		return ρ * o.Grav
-	})
-	return
-}
-
-// StressInc returns the (absolute) increment of vertical stress from z to the top of this layer.
-// T       = [0.0, 1.0]
-// Δz      = z - zmax
-// z       = zmax + T * Δz
-// pl      = (zwater - z) * γw
-// dz/dT   = Δz
-// dpl/dT  = dpl/dz * dz/dT = -γw * Δz
-// dsl/dT  = dsl/dpl * dpl/dT = -Cc * (-γw * Δz) = Cc * γw * Δz   with  sl(zmax) = ???
-// dσz/dz  = ρ(z) * g   with   σz(zmax) = 0
-// dσz/dT  = dσz/dz * dz/dT = ρ(z(T)) * g * Δz == f(T,σz)
-func (o Layer) StressInc1(z float64) (ΔσVabs float64) {
-	// TODO
-	return
+		ρL := o.Mdl.RhoL0 + o.Mdl.Cl*pl
+		return nf*sl*ρL + ns*ρS
+	}
+	σtop := ρ(o.Zmax) * o.Grav
+	σz := ρ(z) * o.Grav
+	return (σz + σtop) * (o.Zmax - z) / 2.0
 }
 
 /* State computes the stress values at elevation z
@@ -107,7 +52,6 @@ func (o Layer) StressInc1(z float64) (ΔσVabs float64) {
  *   z      -- elevation
  *
  *  Output:
- *   σV       -- total vertical stress
  *   sx sy sz -- effective stresses
  *   pl pg    -- liquid and gas pressures
  *
@@ -119,7 +63,7 @@ func (o Layer) StressInc1(z float64) (ΔσVabs float64) {
  *  Thus:, with σr' representing the out-of-plane effective stress in plane-strain case:
  *   σh' = σr'
  */
-func (o Layer) State(σ0abs, z float64) (σV, sx, sy, sz, pl, pg float64, err error) {
+func (o Layer) State(σ0abs, z float64) (sx, sy, sz, pl, pg float64, err error) {
 
 	// check
 	if z < o.Zmin || z > o.Zmax {
@@ -129,12 +73,13 @@ func (o Layer) State(σ0abs, z float64) (σV, sx, sy, sz, pl, pg float64, err er
 
 	// pressures
 	pl = (o.Zwater - z) * o.GamW
-	p := o.VoidsPressure(pl, z)
+	sl := 1.0
+	p := pl * sl
 
 	// stresses
 	ΔσVabs := o.StressInc(z)
 	σVabs := σ0abs + ΔσVabs
-	σV = -σVabs
+	σV := -σVabs
 	σVe := σV + p
 	σHe := o.K0 * σVe
 
@@ -201,9 +146,15 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 	}
 	reg := Global.Sim.Regions[0]
 
+	// fix UseK0
+	nlayers := len(geo.Layers)
+	if len(geo.UseK0) != nlayers {
+		geo.UseK0 = make([]bool, nlayers)
+	}
+
 	// initialise layers
 	var layers Layers
-	layers = make([]*Layer, len(geo.Layers))
+	layers = make([]*Layer, nlayers)
 	tag2lay := make(map[int]*Layer)
 	for idx, laytags := range geo.Layers {
 
@@ -228,12 +179,12 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 		lay.Mdl = GetAndInitPorousModel(edat.Mat)
 
 		// parameters
-		if geo.UseK0 {
-			lay.K0 = geo.K0
-			lay.Nu = geo.K0 / (1.0 + geo.K0)
+		if geo.UseK0[idx] {
+			lay.K0 = geo.K0[idx]
+			lay.Nu = geo.K0[idx] / (1.0 + geo.K0[idx])
 		} else {
-			lay.K0 = geo.Nu / (1.0 - geo.Nu)
-			lay.Nu = geo.Nu
+			lay.K0 = geo.Nu[idx] / (1.0 - geo.Nu[idx])
+			lay.Nu = geo.Nu[idx]
 		}
 		if LogErrCond(lay.K0 < 1e-7 || lay.Nu < 0 || lay.Nu > 0.4999, "geost: K0 or Nu is incorect: K0=%g, Nu=%g", lay.K0, lay.Nu) {
 			return
@@ -299,7 +250,7 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 						pg := make([]float64, nip)
 						for i, ip := range d {
 							z := ip.X[ndim-1]
-							_, sx[i], sy[i], sz[i], pl[i], pg[i], err = lay.State(σ0abs, z)
+							sx[i], sy[i], sz[i], pl[i], pg[i], err = lay.State(σ0abs, z)
 							if LogErr(err, "geost: cannot compute State") {
 								return
 							}
@@ -334,9 +285,6 @@ func get_zmax_zwater(geo *inp.GeoStData, msh *inp.Mesh) (zmax, zwater float64) {
 	zwater = zmax
 	if geo.Zwater > zmax {
 		zwater = geo.Zwater // e.g. ponding
-	}
-	if geo.Unsat {
-		zwater = geo.Zwater // e.g. internal water level specified for unsaturated condition
 	}
 	return
 }

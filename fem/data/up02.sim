@@ -24,7 +24,7 @@
   "stages" : [
     {
       "desc" : "decrease water level @ right face",
-      "geost" : { "gamw":10, "nu":0.3, "layers":[[-1]] },
+      "geost" : { "gamw":10, "nu":[0.3], "layers":[[-1]] },
       "seepfaces" : [-11],
       "facebcs" : [
         { "tag":-10, "keys":["uy"], "funcs":["zero"] },

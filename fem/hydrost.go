@@ -29,9 +29,6 @@ func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
 	if hst.Zwater > zmax {
 		zwater = hst.Zwater // e.g. ponding
 	}
-	if hst.Unsat {
-		zwater = hst.Zwater // e.g. internal water level specified for unsaturated condition
-	}
 
 	// set Sol
 	for _, n := range o.Nodes {
