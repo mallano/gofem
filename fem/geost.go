@@ -30,6 +30,76 @@ type Layer struct {
 	DsigV  float64        // ΔσV : total σV added by this layer. negative (-) means compression
 }
 
+// Saturation returns the saturation @ z corresponding to pl
+func (o Layer) Saturation(pl, z float64) (sl float64) {
+	if pl >= 0 {
+		return 1.0
+	}
+	pg := 0.0
+	divus := 0.0
+	s, err := o.Mdl.NewState(pl, pg, divus)
+	if err != nil {
+		io.PfRed("Saturation failed: %v\n", err)
+		return
+	}
+	return s.Sl
+}
+
+// MixDensity returns the mixture density @ z corresponding to pl
+func (o Layer) MixDensity(pl, z float64) (ρ float64) {
+
+	// saturations
+	sl := o.Saturation(pl, z)
+	sg := 1.0 - sl
+
+	// n variables
+	nf := o.Mdl.Nf0
+	ns := 1.0 - o.Mdl.Nf0
+	nl := nf * sl
+	ng := nf * sg
+
+	// ρ variables
+	ρl := nl * o.Mdl.RhoL0
+	ρg := ng * o.Mdl.RhoG0
+	ρs := ns * o.Mdl.RhoS0
+	ρ = ρl + ρg + ρs
+	return
+}
+
+// VoidsPressure returns the void's pressure @ z corresponding to pl
+func (o Layer) VoidsPressure(pl, z float64) (p float64) {
+	sl := o.Saturation(pl, z)
+	sg := 1.0 - sl
+	pg := 0.0
+	p = sl*pl + sg*pg
+	return
+}
+
+// StressInc1 returns the (absolute) increment of vertical stress from z to the top of this layer.
+func (o Layer) StressInc(z float64) (ΔσVabs float64) {
+	ΔσVabs = num.TrapzRange(z, o.Zmax, 10, func(zz float64) float64 {
+		pl := (o.Zwater - zz) * o.GamW
+		ρ := o.MixDensity(pl, zz)
+		return ρ * o.Grav
+	})
+	return
+}
+
+// StressInc returns the (absolute) increment of vertical stress from z to the top of this layer.
+// T       = [0.0, 1.0]
+// Δz      = z - zmax
+// z       = zmax + T * Δz
+// pl      = (zwater - z) * γw
+// dz/dT   = Δz
+// dpl/dT  = dpl/dz * dz/dT = -γw * Δz
+// dsl/dT  = dsl/dpl * dpl/dT = -Cc * (-γw * Δz) = Cc * γw * Δz   with  sl(zmax) = ???
+// dσz/dz  = ρ(z) * g   with   σz(zmax) = 0
+// dσz/dT  = dσz/dz * dz/dT = ρ(z(T)) * g * Δz == f(T,σz)
+func (o Layer) StressInc1(z float64) (ΔσVabs float64) {
+	// TODO
+	return
+}
+
 /* State computes the stress values at elevation z
  *
  *  Input:
@@ -57,13 +127,12 @@ func (o Layer) State(σ0abs, z float64) (σV, sx, sy, sz, pl, pg float64, err er
 		return
 	}
 
-	// pressures and mixture density
+	// pressures
 	pl = (o.Zwater - z) * o.GamW
-	pg = 0.0
-	ρ, p := geost_compute_rho_and_p(z, pl, pg, o.Mdl)
+	p := o.VoidsPressure(pl, z)
 
 	// stresses
-	ΔσVabs := (o.Zmax - z) * ρ * o.Grav
+	ΔσVabs := o.StressInc(z)
 	σVabs := σ0abs + ΔσVabs
 	σV = -σVabs
 	σVe := σV + p
@@ -192,12 +261,7 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 		}
 
 		// increment of vertical stress added by this layer
-		lay.DsigV = num.TrapzRange(lay.Zmin, lay.Zmax, 10, func(z float64) float64 {
-			pl := (lay.Zwater - z) * lay.GamW
-			pg := 0.0
-			ρ, _ := geost_compute_rho_and_p(z, pl, pg, lay.Mdl)
-			return ρ * lay.Grav
-		})
+		lay.DsigV = lay.StressInc(lay.Zmin)
 
 		// append layer
 		layers[idx] = &lay
@@ -259,35 +323,6 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 }
 
 // auxiliary //////////////////////////////////////////////////////////////////////////////////////
-
-func geost_compute_rho_and_p(z, pl, pg float64, mdl *mporous.Model) (ρ, p float64) {
-
-	// compute updated saturation
-	divus := 0.0
-	s, err := mdl.NewState(pl, pg, divus)
-	if err != nil {
-		io.PfRed("geost_compute_rho failed: %v\n", err)
-		return
-	}
-
-	// saturations and voids' pressure
-	sl := s.Sl
-	sg := 1.0 - sl
-	p = sl*pl + sg*pg
-
-	// n variables
-	nf := mdl.Nf0
-	ns := s.Ns0
-	nl := nf * sl
-	ng := nf * sg
-
-	// ρ variables
-	ρl := nl * s.RhoL
-	ρg := ng * s.RhoG
-	ρs := ns * mdl.RhoS0
-	ρ = ρl + ρg + ρs
-	return
-}
 
 // get_zmax_zwater returns the max elevation and water level
 func get_zmax_zwater(geo *inp.GeoStData, msh *inp.Mesh) (zmax, zwater float64) {

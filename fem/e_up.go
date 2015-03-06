@@ -327,6 +327,19 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		}
 	}
 
+	/*
+		fp := make([]float64, len(o.P.Pmap))
+		fu := make([]float64, len(o.U.Umap))
+		for i, I := range o.P.Pmap {
+			fp[i] = fb[I]
+		}
+		for i, I := range o.U.Umap {
+			fu[i] = fb[I]
+		}
+		io.Pforan("fp = %v\n", la.VecLargest(fp, 1))
+		io.Pfyel("fu = %v\n", la.VecLargest(fu, 1))
+	*/
+
 	// external forces
 	if len(o.U.NatBcs) > 0 {
 		if !o.U.add_surfloads_to_rhs(fb, sol) {
