@@ -218,33 +218,35 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 			cells := o.Msh.CellTag2cells[tag]
 			for _, c := range cells {
 				elem := o.Cid2elem[c.Id]
-				switch ele := elem.(type) {
-				case ElemIntvars:
+				if elem != nil {
+					switch ele := elem.(type) {
+					case ElemIntvars:
 
-					// get element's integration points data
-					e := ele.(Elem)
-					d := e.OutIpsData()
-					nip := len(d)
+						// get element's integration points data
+						e := ele.(Elem)
+						d := e.OutIpsData()
+						nip := len(d)
 
-					// build maps of pressures and effective stresses
-					sx := make([]float64, nip)
-					sy := make([]float64, nip)
-					sz := make([]float64, nip)
-					pl := make([]float64, nip)
-					pg := make([]float64, nip)
-					for i, ip := range d {
-						z := ip.X[ndim-1]
-						_, sx[i], sy[i], sz[i], pl[i], pg[i], err = lay.State(σ0abs, z)
-						if LogErr(err, "geost: cannot compute State") {
+						// build maps of pressures and effective stresses
+						sx := make([]float64, nip)
+						sy := make([]float64, nip)
+						sz := make([]float64, nip)
+						pl := make([]float64, nip)
+						pg := make([]float64, nip)
+						for i, ip := range d {
+							z := ip.X[ndim-1]
+							_, sx[i], sy[i], sz[i], pl[i], pg[i], err = lay.State(σ0abs, z)
+							if LogErr(err, "geost: cannot compute State") {
+								return
+							}
+
+						}
+						ivs := map[string][]float64{"sx": sx, "sy": sy, "sz": sz, "pl": pl, "pg": pg}
+
+						// set element's states
+						if LogErrCond(!ele.SetIvs(ivs), "geost: element's internal values setting failed") {
 							return
 						}
-
-					}
-					ivs := map[string][]float64{"sx": sx, "sy": sy, "sz": sz, "pl": pl, "pg": pg}
-
-					// set element's states
-					if LogErrCond(!ele.SetIvs(ivs), "geost: element's internal values setting failed") {
-						return
 					}
 				}
 			}
