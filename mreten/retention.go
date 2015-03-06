@@ -81,6 +81,7 @@ func Update(mdl Model, pc0, sl0, Δpc float64) (slNew float64, err error) {
 	var odesol ode.ODE
 	odesol.Init("Radau5", 1, fcn, jac, nil, nil, true)
 	odesol.SetTol(1e-10, 1e-7)
+	odesol.Distr = false // this is important to avoid problems with MPI runs
 
 	// solve
 	y := []float64{sl0}
