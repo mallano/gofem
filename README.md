@@ -23,7 +23,7 @@ http://cpmech.github.io/gofem
 http://rawgit.com/cpmech/gofem/master/doc/index.html
 
 ## References
-Most of Gosl was developed to support the numerical research that resulted in the following papers:
+Most of Gofem was developed to support the numerical research that resulted in the following papers:
 
 1. Pedroso DM (2015) A consistent u-p formulation for porous media with hysteresis. Int Journal for Numerical Methods in Engineering, 101(8) 606-634 http://dx.doi.org/10.1002/nme.4808
 2. Pedroso DM (2015) A solution to transient seepage in unsaturated porous media. Computer Methods in Applied Mechanics and Engineering, 285 791-816 http://dx.doi.org/10.1016/j.cma.2014.12.009
