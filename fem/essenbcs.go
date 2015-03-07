@@ -40,7 +40,6 @@ type EssentialBc struct {
 // EssentialBcs implements a structure to record the definition of essential bcs / constraints.
 // Each constraint will have a unique Lagrange multiplier index.
 type EssentialBcs struct {
-	Ndim   int            // space dimension
 	Eq2idx map[int][]int  // maps eq number to indices in BcsTmp
 	Bcs    []*EssentialBc // active essential bcs / constraints
 	A      la.Triplet     // matrix of coefficients 'A'
@@ -51,8 +50,7 @@ type EssentialBcs struct {
 }
 
 // Reset initialises this structure. It also performs a reset of internal structures.
-func (o *EssentialBcs) Reset(ndim int) {
-	o.Ndim = ndim
+func (o *EssentialBcs) Reset() {
 	o.BcsTmp = make([]eqbcpair, 0)
 	o.Eq2idx = make(map[int][]int)
 	o.Bcs = make([]*EssentialBc, 0)
@@ -170,7 +168,7 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 	if key == "incsup" {
 
 		// check
-		if LogErrCond(o.Ndim != 2, "inclined support works only in 2D for now") {
+		if LogErrCond(Global.Ndim != 2, "inclined support works only in 2D for now") {
 			return false // problem
 		}
 
@@ -223,7 +221,7 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 				continue // node doesn't have key. ex: pl in qua8/qua4 elements
 			}
 			z := nod.Vert.C[1] // 2D
-			if o.Ndim == 3 {
+			if Global.Ndim == 3 {
 				z = nod.Vert.C[2] // 3D
 			}
 			pl := fun.Add{A: γl, Fa: fcn, B: -γl, Fb: &fun.Cte{C: z}}

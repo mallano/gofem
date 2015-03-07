@@ -325,7 +325,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 	// element conditions, essential and natural boundary conditions --------------------------------
 
 	// (re)set constraints and prescribed forces structures
-	o.EssenBcs.Reset(o.Msh.Ndim)
+	o.EssenBcs.Reset()
 	o.PtNatBcs.Reset()
 
 	// element conditions
