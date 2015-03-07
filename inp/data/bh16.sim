@@ -1,7 +1,7 @@
 {
   "data" : {
     "desc"    : "Bhatti Example 1.6 p32",
-    "matfile" : "data/bh.mat",
+    "matfile" : "bh.mat",
     "steady"  : true,
     "pstress" : true
   },

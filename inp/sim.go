@@ -308,12 +308,23 @@ func (o Stage) GetFaceBc(facetag int) *FaceBc {
 
 // Simulation holds all simulation data
 type Simulation struct {
+
+	// input
 	Data      Data       `json:"data"`      // stores global simulation data
 	Functions FuncsData  `json:"functions"` // stores all boundary condition functions
 	Regions   []*Region  `json:"regions"`   // stores all regions
 	LinSol    LinSolData `json:"linsol"`    // linear solver data
 	Solver    SolverData `json:"solver"`    // FEM solver data
 	Stages    []*Stage   `json:"stages"`    // stores all stages
+
+	// derived
+	Mdb       *MatDb   // materials database
+	Meshes    []*Mesh  // [nregion] all meshes
+	Ndim      int      // space dimension
+	MaxElev   float64  // maximum elevation
+	Gfcn      fun.Func // first stage: gravity constant function
+	WaterRho0 float64  // first stage: intrinsic density of water corresponding to pressure pl=0
+	WaterBulk float64  // first stage: bulk modulus of water
 }
 
 // ReadSim reads all simulation data from a .sim JSON file
@@ -355,19 +366,62 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 		return nil
 	}
 
+	// read materials database
+	o.Mdb = ReadMat(o.Data.FnameDir, o.Data.Matfile)
+	if LogErrCond(o.Mdb == nil, "sim: cannot read materials file") {
+		return nil
+	}
+
 	// for all regions
-	for _, reg := range o.Regions {
+	o.Meshes = make([]*Mesh, len(o.Regions))
+	for i, reg := range o.Regions {
+
+		// read mesh
+		o.Meshes[i] = ReadMsh(o.Data.FnameDir, reg.Mshfile)
+		if LogErrCond(o.Meshes[i] == nil, "cannot read mesh file") {
+			return nil
+		}
 
 		// dependent variables
 		reg.etag2idx = make(map[int]int)
 		for j, ed := range reg.ElemsData {
 			reg.etag2idx[ed.Tag] = j
 		}
+
+		// get ndim and max elevation
+		if i == 0 {
+			o.Ndim = o.Meshes[i].Ndim
+			o.MaxElev = o.Meshes[i].Ymax
+			if o.Ndim == 3 {
+				o.MaxElev = o.Meshes[i].Zmax
+			}
+		} else {
+			if LogErrCond(o.Meshes[i].Ndim != o.Ndim, "all meshes must have the same ndim. %d != %d") {
+				return nil
+			}
+			if o.Ndim == 2 {
+				o.MaxElev = max(o.MaxElev, o.Meshes[i].Ymax)
+			} else {
+				o.MaxElev = max(o.MaxElev, o.Meshes[i].Zmax)
+			}
+		}
+
+		// get water data
+		for _, mat := range o.Mdb.Materials {
+			if mat.Model == "porous" {
+				if prm := mat.Prms.Find("RhoL0"); prm != nil {
+					o.WaterRho0 = prm.V
+				}
+				if prm := mat.Prms.Find("BulkL"); prm != nil {
+					o.WaterBulk = prm.V
+				}
+			}
+		}
 	}
 
 	// for all stages
 	var t float64
-	for _, stg := range o.Stages {
+	for i, stg := range o.Stages {
 
 		// fix Tf
 		if stg.Control.Tf < 1e-14 {
@@ -407,8 +461,25 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 			stg.Control.DtOut = stg.Control.DtoFunc.F(t, nil)
 		}
 
-		// prepare stg.FaceTag2faceBc map
-		// TODO:
+		// gravity
+		if i == 0 {
+			for _, econd := range stg.EleConds {
+				for j, key := range econd.Keys {
+					if key == "g" {
+						if o.Gfcn == nil {
+							o.Gfcn = o.Functions.Get(econd.Funcs[j])
+							if LogErrCond(o.Gfcn == nil, "sim: cannot find gravity function in functions database") {
+								return nil
+							}
+							break
+						}
+					}
+				}
+			}
+			if o.Gfcn == nil {
+				o.Gfcn = &fun.Cte{C: 10}
+			}
+		}
 
 		// update time
 		t += stg.Control.Tf
