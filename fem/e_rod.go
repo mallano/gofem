@@ -18,11 +18,10 @@ import (
 type Rod struct {
 
 	// basic data
-	Cid  int         // cell/element id
-	X    [][]float64 // matrix of nodal coordinates [ndim][nnode]
-	Ndim int         // space dimension
-	Shp  *shp.Shape  // shape structure
-	Nu   int         // total number of unknowns == 2 * nsn
+	Cid int         // cell/element id
+	X   [][]float64 // matrix of nodal coordinates [ndim][nnode]
+	Shp *shp.Shape  // shape structure
+	Nu  int         // total number of unknowns == 2 * nsn
 
 	// parameters
 	A float64 // cross-sectional area
@@ -58,7 +57,7 @@ type Rod struct {
 func init() {
 
 	// information allocator
-	infogetters["rod"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
+	infogetters["rod"] = func(cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
@@ -68,7 +67,7 @@ func init() {
 
 		// solution variables
 		ykeys := []string{"ux", "uy"}
-		if ndim == 3 {
+		if Global.Ndim == 3 {
 			ykeys = []string{"ux", "uy", "uz"}
 		}
 		info.Dofs = make([][]string, nverts)
@@ -85,15 +84,15 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["rod"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["rod"] = func(cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o Rod
 		o.Cid = cid
 		o.X = x
-		o.Ndim = ndim
 		o.Shp = shp.Get(cellType)
-		o.Nu = o.Ndim * o.Shp.Nverts
+		ndim := Global.Ndim
+		o.Nu = ndim * o.Shp.Nverts
 
 		var err error
 
@@ -108,7 +107,7 @@ func init() {
 		if LogErrCond(o.Model == nil, "cannot find model named %s\n", mdlname) {
 			return nil
 		}
-		err = o.Model.Init(o.Ndim, matdata.Prms)
+		err = o.Model.Init(ndim, matdata.Prms)
 		if LogErr(err, "Model.Init failed") {
 			return nil
 		}
@@ -141,8 +140,8 @@ func init() {
 		o.Rus = make([]float64, o.Nu)
 
 		// scratchpad. computed @ each ip
-		o.grav = make([]float64, o.Ndim)
-		o.us = make([]float64, o.Ndim)
+		o.grav = make([]float64, ndim)
+		o.us = make([]float64, ndim)
 		o.fi = make([]float64, o.Nu)
 
 		// return new element
@@ -157,10 +156,11 @@ func (o Rod) Id() int { return o.Cid }
 
 // SetEqs set equations
 func (o *Rod) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
+	ndim := Global.Ndim
 	o.Umap = make([]int, o.Nu)
 	for m := 0; m < o.Shp.Nverts; m++ {
-		for i := 0; i < o.Ndim; i++ {
-			r := i + m*o.Ndim
+		for i := 0; i < ndim; i++ {
+			r := i + m*ndim
 			o.Umap[r] = eqs[m][i]
 		}
 	}
@@ -192,7 +192,7 @@ func (o Rod) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
 	nverts := o.Shp.Nverts
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions, gradients and variables @ ip
@@ -226,7 +226,7 @@ func (o Rod) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// for each integration point
 	nverts := o.Shp.Nverts
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions, gradients and variables @ ip
@@ -272,7 +272,7 @@ func (o *Rod) Update(sol *Solution) (ok bool) {
 
 	// for each integration point
 	nverts := o.Shp.Nverts
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	for idx, _ := range o.IpsElem {
 
 		// interpolation functions, gradients and variables @ ip
@@ -370,14 +370,15 @@ func (o *Rod) ipvars(idx int, sol *Solution) (ok bool) {
 	}
 
 	// clear variables
-	for i := 0; i < o.Ndim; i++ {
+	ndim := Global.Ndim
+	for i := 0; i < ndim; i++ {
 		o.us[i] = 0
 	}
 
 	// recover u-variables @ ip
 	for m := 0; m < o.Shp.Nverts; m++ {
-		for i := 0; i < o.Ndim; i++ {
-			r := o.Umap[i+m*o.Ndim]
+		for i := 0; i < ndim; i++ {
+			r := o.Umap[i+m*ndim]
 			o.us[i] += o.Shp.S[m] * sol.Y[r]
 		}
 	}

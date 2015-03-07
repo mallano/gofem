@@ -28,7 +28,6 @@ import (
 type ElemUP struct {
 
 	// auxiliary
-	Ndim   int         // space dimension
 	Fconds []*FaceCond // face conditions; e.g. seepage faces
 	CtypeU string      // u: cell type
 	CtypeP string      // p: cell type
@@ -54,7 +53,7 @@ type ElemUP struct {
 func init() {
 
 	// information allocator
-	infogetters["up"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
+	infogetters["up"] = func(cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
@@ -67,8 +66,8 @@ func init() {
 		}
 
 		// underlying cells info
-		u_info := infogetters["u"](ndim, cellType, faceConds)
-		p_info := infogetters["p"](ndim, p_cellType, faceConds)
+		u_info := infogetters["u"](cellType, faceConds)
+		p_info := infogetters["p"](p_cellType, faceConds)
 
 		// solution variables
 		nverts := shp.GetNverts(cellType)
@@ -93,11 +92,10 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["up"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["up"] = func(cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o ElemUP
-		o.Ndim = ndim
 		o.Fconds = faceConds
 
 		// p-element cell type
@@ -113,7 +111,7 @@ func init() {
 
 		// allocate u element
 		u_allocator := eallocators["u"]
-		u_elem := u_allocator(ndim, cellType, faceConds, cid, edat, x)
+		u_elem := u_allocator(cellType, faceConds, cid, edat, x)
 		if LogErrCond(u_elem == nil, "cannot allocate underlying u-element") {
 			return nil
 		}
@@ -125,13 +123,14 @@ func init() {
 
 		// allocate p-element
 		p_allocator := eallocators["p"]
-		p_elem := p_allocator(ndim, p_cellType, faceConds, cid, edat, x)
+		p_elem := p_allocator(p_cellType, faceConds, cid, edat, x)
 		if LogErrCond(p_elem == nil, "cannot allocate underlying p-element") {
 			return nil
 		}
 		o.P = p_elem.(*ElemP)
 
 		// scratchpad. computed @ each ip
+		ndim := Global.Ndim
 		o.bs = make([]float64, ndim)
 		o.hl = make([]float64, ndim)
 		o.Kup = la.MatAlloc(o.U.Nu, o.P.Np)
@@ -159,7 +158,7 @@ func (o *ElemUP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 
 	// u: equations
 	u_getter := infogetters["u"]
-	u_info := u_getter(o.Ndim, o.CtypeU, o.Fconds)
+	u_info := u_getter(o.CtypeU, o.Fconds)
 	u_nverts := len(u_info.Dofs)
 	u_eqs := make([][]int, u_nverts)
 	for i := 0; i < u_nverts; i++ {
@@ -172,7 +171,7 @@ func (o *ElemUP) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
 
 	// p: equations
 	p_getter := infogetters["p"]
-	p_info := p_getter(o.Ndim, o.CtypeP, o.Fconds)
+	p_info := p_getter(o.CtypeP, o.Fconds)
 	p_nverts := len(p_info.Dofs)
 	p_eqs := make([][]int, p_nverts)
 	for i := 0; i < p_nverts; i++ {
@@ -203,7 +202,7 @@ func (o *ElemUP) SetEleConds(key string, f fun.Func, extra string) (ok bool) {
 func (o *ElemUP) InterpStarVars(sol *Solution) (ok bool) {
 
 	// for each integration point
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	u_nverts := o.U.Shp.Nverts
 	p_nverts := o.P.Shp.Nverts
 	var r int
@@ -255,7 +254,7 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
 	dc := Global.DynCoefs
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	u_nverts := o.U.Shp.Nverts
 	p_nverts := o.P.Shp.Nverts
 	var coef, plt, klr, ρl, ρ, p, Cpl, Cvs, divus, divvs float64
@@ -358,7 +357,7 @@ func (o ElemUP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// clear matrices
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	u_nverts := o.U.Shp.Nverts
 	p_nverts := o.P.Shp.Nverts
 	la.MatFill(o.P.Kpp, 0)
@@ -555,7 +554,7 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 func (o *ElemUP) Update(sol *Solution) (ok bool) {
 
 	// auxiliary
-	ndim := o.Ndim
+	ndim := Global.Ndim
 
 	// for each integration point
 	var Δpl, divusNew float64
@@ -685,7 +684,7 @@ func (o *ElemUP) ipvars(idx int, sol *Solution) (ok bool) {
 	}
 
 	// auxiliary
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	dc := Global.DynCoefs
 	ρL := o.P.States[idx].RhoL
 
@@ -727,7 +726,7 @@ func (o *ElemUP) ipvars(idx int, sol *Solution) (ok bool) {
 func (o ElemUP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
 	// compute surface integral
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	u_nverts := o.U.Shp.Nverts
 	var tmp float64
 	var z, pl, fl, plmax, g, rmp float64

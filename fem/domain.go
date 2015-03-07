@@ -151,10 +151,7 @@ type Domain struct {
 func NewDomain(reg *inp.Region, distr bool) *Domain {
 	var dom Domain
 	dom.Reg = reg
-	dom.Msh = inp.ReadMsh(Global.Sim.Data.FnameDir, reg.Mshfile)
-	if LogErrCond(dom.Msh == nil, "ERROR: ReadMsh failed\n") {
-		return nil
-	}
+	dom.Msh = reg.Msh
 	if distr {
 		if LogErrCond(Global.Nproc != len(dom.Msh.Part2cells), "number of processors must be equal to the number of partitions defined in mesh file. %d != %d", Global.Nproc, len(dom.Msh.Part2cells)) {
 			return nil
@@ -234,7 +231,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 		}
 
 		// get element info (such as DOFs, etc.)
-		info := GetElemInfo(o.Msh.Ndim, c.Type, edat.Type, o.FaceConds[c.Id])
+		info := GetElemInfo(c.Type, edat.Type, o.FaceConds[c.Id])
 		if info == nil {
 			return
 		}

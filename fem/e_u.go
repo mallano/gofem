@@ -18,11 +18,10 @@ import (
 type ElemU struct {
 
 	// basic data
-	Cid  int         // cell/element id
-	X    [][]float64 // matrix of nodal coordinates [ndim][nnode]
-	Ndim int         // space dimension
-	Shp  *shp.Shape  // shape structure
-	Nu   int         // total number of unknowns
+	Cid int         // cell/element id
+	X   [][]float64 // matrix of nodal coordinates [ndim][nnode]
+	Shp *shp.Shape  // shape structure
+	Nu  int         // total number of unknowns
 
 	// variables for dynamics
 	Rho  float64  // density of solids
@@ -83,7 +82,7 @@ type ElemU struct {
 func init() {
 
 	// information allocator
-	infogetters["u"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
+	infogetters["u"] = func(cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
@@ -93,7 +92,7 @@ func init() {
 
 		// solution variables
 		ykeys := []string{"ux", "uy"}
-		if ndim == 3 {
+		if Global.Ndim == 3 {
 			ykeys = []string{"ux", "uy", "uz"}
 		}
 		info.Dofs = make([][]string, nverts)
@@ -110,15 +109,15 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["u"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["u"] = func(cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o ElemU
 		o.Cid = cid
 		o.X = x
-		o.Ndim = ndim
 		o.Shp = shp.Get(cellType)
-		o.Nu = o.Ndim * o.Shp.Nverts
+		ndim := Global.Ndim
+		o.Nu = ndim * o.Shp.Nverts
 
 		// parse flags
 		o.UseB, o.Debug, o.Thickness = GetSolidFlags(edat.Extra)
@@ -132,7 +131,7 @@ func init() {
 
 		// model
 		var prms fun.Prms
-		o.Model, prms = GetAndInitSolidModel(edat.Mat, o.Ndim)
+		o.Model, prms = GetAndInitSolidModel(edat.Mat, ndim)
 		if o.Model == nil {
 			return nil
 		}
@@ -156,14 +155,14 @@ func init() {
 		}
 
 		// local starred variables
-		o.ζs = la.MatAlloc(nip, o.Ndim)
-		o.χs = la.MatAlloc(nip, o.Ndim)
+		o.ζs = la.MatAlloc(nip, ndim)
+		o.χs = la.MatAlloc(nip, ndim)
 		o.divχs = make([]float64, nip)
 
 		// scratchpad. computed @ each ip
-		nsig := 2 * o.Ndim
-		o.grav = make([]float64, o.Ndim)
-		o.us = make([]float64, o.Ndim)
+		nsig := 2 * ndim
+		o.grav = make([]float64, ndim)
+		o.us = make([]float64, ndim)
 		o.fi = make([]float64, o.Nu)
 		o.D = la.MatAlloc(nsig, nsig)
 		o.K = la.MatAlloc(o.Nu, o.Nu)
@@ -179,7 +178,7 @@ func init() {
 		if o.Debug {
 			o.fex = make([]float64, o.Shp.Nverts)
 			o.fey = make([]float64, o.Shp.Nverts)
-			if o.Ndim == 3 {
+			if ndim == 3 {
 				o.fez = make([]float64, o.Shp.Nverts)
 			}
 		}
@@ -201,10 +200,11 @@ func (o ElemU) Id() int { return o.Cid }
 
 // SetEqs set equations
 func (o *ElemU) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
+	ndim := Global.Ndim
 	o.Umap = make([]int, o.Nu)
 	for m := 0; m < o.Shp.Nverts; m++ {
-		for i := 0; i < o.Ndim; i++ {
-			r := i + m*o.Ndim
+		for i := 0; i < ndim; i++ {
+			r := i + m*ndim
 			o.Umap[r] = eqs[m][i]
 		}
 	}
@@ -228,6 +228,7 @@ func (o *ElemU) InterpStarVars(sol *Solution) (ok bool) {
 	}
 
 	// for each integration point
+	ndim := Global.Ndim
 	for idx, ip := range o.IpsElem {
 
 		// interpolation functions and gradients
@@ -237,11 +238,11 @@ func (o *ElemU) InterpStarVars(sol *Solution) (ok bool) {
 
 		// interpolate starred variables
 		o.divχs[idx] = 0
-		for i := 0; i < o.Ndim; i++ {
+		for i := 0; i < ndim; i++ {
 			o.ζs[idx][i] = 0
 			o.χs[idx][i] = 0
 			for m := 0; m < o.Shp.Nverts; m++ {
-				r := o.Umap[i+m*o.Ndim]
+				r := o.Umap[i+m*ndim]
 				o.ζs[idx][i] += o.Shp.S[m] * sol.Zet[r]
 				o.χs[idx][i] += o.Shp.S[m] * sol.Chi[r]
 				o.divχs[idx] += o.Shp.G[m][i] * sol.Chi[r]
@@ -261,6 +262,7 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
 	dc := Global.DynCoefs
+	ndim := Global.Ndim
 	nverts := o.Shp.Nverts
 	for idx, ip := range o.IpsElem {
 
@@ -281,13 +283,13 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 				radius = o.Shp.AxisymGetRadius(o.X)
 				coef *= radius
 			}
-			IpBmatrix(o.B, o.Ndim, nverts, G, Global.Sim.Data.Axisym, radius, S)
+			IpBmatrix(o.B, ndim, nverts, G, Global.Sim.Data.Axisym, radius, S)
 			la.MatTrVecMulAdd(o.fi, coef, o.B, o.States[idx].Sig) // fi += coef * tr(B) * σ
 		} else {
 			for m := 0; m < nverts; m++ {
-				for i := 0; i < o.Ndim; i++ {
-					r := o.Umap[i+m*o.Ndim]
-					for j := 0; j < o.Ndim; j++ {
+				for i := 0; i < ndim; i++ {
+					r := o.Umap[i+m*ndim]
+					for j := 0; j < ndim; j++ {
 						fb[r] -= coef * tsr.M2T(o.States[idx].Sig, i, j) * G[m][j] // -fi
 					}
 				}
@@ -297,8 +299,8 @@ func (o *ElemU) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 		// dynamic term
 		if !Global.Sim.Data.Steady {
 			for m := 0; m < nverts; m++ {
-				for i := 0; i < o.Ndim; i++ {
-					r := o.Umap[i+m*o.Ndim]
+				for i := 0; i < ndim; i++ {
+					r := o.Umap[i+m*ndim]
 					fb[r] -= coef * S[m] * (o.Rho*(dc.α1*o.us[i]-o.ζs[idx][i]-o.grav[i]) + o.Cdam*(dc.α4*o.us[i]-o.χs[idx][i])) // -RuBar
 				}
 			}
@@ -324,6 +326,7 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// for each integration point
 	dc := Global.DynCoefs
+	ndim := Global.Ndim
 	nverts := o.Shp.Nverts
 	for idx, ip := range o.IpsElem {
 
@@ -355,19 +358,19 @@ func (o *ElemU) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 				radius = o.Shp.AxisymGetRadius(o.X)
 				coef *= radius
 			}
-			IpBmatrix(o.B, o.Ndim, nverts, G, Global.Sim.Data.Axisym, radius, S)
+			IpBmatrix(o.B, ndim, nverts, G, Global.Sim.Data.Axisym, radius, S)
 			la.MatTrMulAdd3(o.K, coef, o.B, o.D, o.B) // K += coef * tr(B) * D * B
 		} else {
-			IpAddToKt(o.K, nverts, o.Ndim, coef, G, o.D)
+			IpAddToKt(o.K, nverts, ndim, coef, G, o.D)
 		}
 
 		// dynamic term
 		if !Global.Sim.Data.Steady {
 			for m := 0; m < nverts; m++ {
-				for i := 0; i < o.Ndim; i++ {
-					r := i + m*o.Ndim
+				for i := 0; i < ndim; i++ {
+					r := i + m*ndim
 					for n := 0; n < nverts; n++ {
-						c := i + n*o.Ndim
+						c := i + n*ndim
 						o.K[r][c] += coef * S[m] * S[n] * (o.Rho*dc.α1 + o.Cdam*dc.α4)
 					}
 				}
@@ -420,7 +423,8 @@ func (o *ElemU) InitIvs(sol *Solution) (ok bool) {
 // SetIvs set secondary variables; e.g. during initialisation via files
 func (o *ElemU) SetIvs(ivs map[string][]float64) (ok bool) {
 	nip := len(o.IpsElem)
-	o.Sig0 = Ivs2sigmas(nip, o.Ndim, ivs)
+	ndim := Global.Ndim
+	o.Sig0 = Ivs2sigmas(nip, ndim, ivs)
 	for i := 0; i < nip; i++ {
 		copy(o.States[i].Sig, o.Sig0[i])
 		copy(o.StatesBkp[i].Sig, o.Sig0[i])
@@ -458,7 +462,7 @@ func (o ElemU) Decode(dec Decoder) (ok bool) {
 
 // OutIpsData returns data from all integration points for output
 func (o ElemU) OutIpsData() (data []*OutIpData) {
-	sigmas := StressKeys(o.Ndim)
+	sigmas := StressKeys()
 	for idx, ip := range o.IpsElem {
 		s := o.States[idx]
 		x := o.Shp.IpRealCoords(o.X, ip)
@@ -477,7 +481,7 @@ func (o ElemU) OutIpsData() (data []*OutIpData) {
 func (o *ElemU) ipupdate(idx int, S []float64, G [][]float64, sol *Solution) (ok bool) {
 
 	// compute strains
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	nverts := o.Shp.Nverts
 	if o.UseB {
 		radius := 1.0
@@ -515,14 +519,15 @@ func (o *ElemU) ipvars(idx int, sol *Solution) (ok bool) {
 	}
 
 	// clear variables
-	for i := 0; i < o.Ndim; i++ {
+	ndim := Global.Ndim
+	for i := 0; i < ndim; i++ {
 		o.us[i] = 0
 	}
 
 	// recover u-variables @ ip
 	for m := 0; m < o.Shp.Nverts; m++ {
-		for i := 0; i < o.Ndim; i++ {
-			r := o.Umap[i+m*o.Ndim]
+		for i := 0; i < ndim; i++ {
+			r := o.Umap[i+m*ndim]
 			o.us[i] += o.Shp.S[m] * sol.Y[r]
 		}
 	}
@@ -538,10 +543,11 @@ func (o *ElemU) surfloads_keys() map[string]bool {
 func (o *ElemU) add_surfloads_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 	// debugging variables
+	ndim := Global.Ndim
 	if o.Debug {
 		la.VecFill(o.fex, 0)
 		la.VecFill(o.fey, 0)
-		if o.Ndim == 3 {
+		if ndim == 3 {
 			la.VecFill(o.fez, 0)
 		}
 	}
@@ -561,14 +567,14 @@ func (o *ElemU) add_surfloads_to_rhs(fb []float64, sol *Solution) (ok bool) {
 					coef *= o.Shp.AxisymGetRadiusF(o.X, load.IdxFace)
 				}
 				for j, m := range o.Shp.FaceLocalV[load.IdxFace] {
-					for i := 0; i < o.Ndim; i++ {
-						r := o.Umap[i+m*o.Ndim]
+					for i := 0; i < ndim; i++ {
+						r := o.Umap[i+m*ndim]
 						fb[r] += coef * Sf[j] * nvec[i] // +fe
 					}
 					if o.Debug {
 						o.fex[m] += coef * Sf[j] * nvec[0]
 						o.fey[m] += coef * Sf[j] * nvec[1]
-						if o.Ndim == 3 {
+						if ndim == 3 {
 							o.fez[m] += coef * Sf[j] * nvec[2]
 						}
 					}

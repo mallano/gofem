@@ -22,11 +22,10 @@ import (
 type ElemP struct {
 
 	// basic data
-	Cid  int         // cell/element id
-	X    [][]float64 // matrix of nodal coordinates [ndim][nnode]
-	Ndim int         // space dimension
-	Shp  *shp.Shape  // shape structure
-	Np   int         // total number of unknowns == number of vertices
+	Cid int         // cell/element id
+	X   [][]float64 // matrix of nodal coordinates [ndim][nnode]
+	Shp *shp.Shape  // shape structure
+	Np  int         // total number of unknowns == number of vertices
 
 	// integration points
 	IpsElem []*shp.Ipoint // integration points of element
@@ -86,7 +85,7 @@ type ElemP struct {
 func init() {
 
 	// information allocator
-	infogetters["p"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
+	infogetters["p"] = func(cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
@@ -121,13 +120,12 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["p"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["p"] = func(cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// basic data
 		var o ElemP
 		o.Cid = cid
 		o.X = x
-		o.Ndim = ndim
 		o.Shp = shp.Get(cellType)
 		o.Np = o.Shp.Nverts
 
@@ -151,6 +149,7 @@ func init() {
 		o.ψl = make([]float64, nip)
 
 		// scratchpad. computed @ each ip
+		ndim := Global.Ndim
 		o.g = make([]float64, ndim)
 		o.gpl = make([]float64, ndim)
 		o.ρwl = make([]float64, ndim)
@@ -265,7 +264,7 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// for each integration point
 	β1 := Global.DynCoefs.β1
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	nverts := o.Shp.Nverts
 	var coef, plt, klr, RhoL, ρl, Cpl float64
 	var err error
@@ -322,7 +321,7 @@ func (o ElemP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// clear matrices
 	la.MatFill(o.Kpp, 0)
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	nverts := o.Shp.Nverts
 	if o.DoExtrap {
 		for i := 0; i < nverts; i++ {
@@ -551,7 +550,7 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 	}
 
 	// gravity
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	o.g[ndim-1] = 0
 	if o.Gfcn != nil {
 		o.g[ndim-1] = -o.Gfcn.F(sol.T, nil)
@@ -576,7 +575,7 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 
 // fipvars computes current values @ face integration points
 func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, z, pl, fl float64) {
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	Sf := o.Shp.Sf
 	iz := ndim - 1 // index of z-coordinate (elevation)
 	for i, m := range o.Shp.FaceLocalV[fidx] {

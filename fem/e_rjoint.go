@@ -55,7 +55,6 @@ type Rjoint struct {
 	// basic data
 	Edat *inp.ElemData // element data; stored in allocator to be used in Connect
 	Cid  int           // cell/element id
-	Ndim int           // space dimension
 	Ny   int           // total number of dofs == rod.Nu + sld.Nu
 
 	// essential
@@ -116,16 +115,15 @@ type Rjoint struct {
 func init() {
 
 	// information allocator
-	infogetters["rjoint"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
+	infogetters["rjoint"] = func(cellType string, faceConds []*FaceCond) *Info {
 		return &Info{}
 	}
 
 	// element allocator
-	eallocators["rjoint"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["rjoint"] = func(cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 		var o Rjoint
 		o.Edat = edat
 		o.Cid = cid
-		o.Ndim = ndim
 		return &o
 	}
 }
@@ -180,8 +178,8 @@ func (o *Rjoint) Connect(cid2elem []Elem, c *inp.Cell) (nnzK int, ok bool) {
 	}
 
 	// auxiliary
-	ndim := o.Ndim
-	nsig := 2 * o.Ndim
+	ndim := Global.Ndim
+	nsig := 2 * ndim
 
 	// rod data
 	rodH := o.Rod.Shp
@@ -347,7 +345,7 @@ func (o *Rjoint) InterpStarVars(sol *Solution) (ok bool) {
 func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 
 	// auxiliary
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	rodH := o.Rod.Shp
 	rodS := rodH.S
 	rodNn := rodH.Nverts
@@ -405,8 +403,8 @@ func (o *Rjoint) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 
 	// auxiliary
-	ndim := o.Ndim
-	nsig := 2 * o.Ndim
+	ndim := Global.Ndim
+	nsig := 2 * ndim
 	rodH := o.Rod.Shp
 	rodS := rodH.S
 	rodNn := rodH.Nverts
@@ -611,8 +609,8 @@ func (o *Rjoint) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) 
 func (o *Rjoint) Update(sol *Solution) (ok bool) {
 
 	// auxiliary
-	ndim := o.Ndim
-	nsig := 2 * o.Ndim
+	ndim := Global.Ndim
+	nsig := 2 * ndim
 	rodH := o.Rod.Shp
 	rodS := rodH.S
 	rodNn := rodH.Nverts
@@ -808,7 +806,7 @@ func (o Rjoint) debug_print_init() {
 }
 
 func (o Rjoint) debug_print_K() {
-	ndim := o.Ndim
+	ndim := Global.Ndim
 	sldNn := o.Sld.Shp.Nverts
 	rodNn := o.Rod.Shp.Nverts
 	K := la.MatAlloc(o.Ny, o.Ny)

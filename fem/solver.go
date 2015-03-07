@@ -38,6 +38,7 @@ var Global struct {
 	Sum *Summary        // output times and all residuals
 
 	// auxiliar structures
+	Ndim     int       // space dimension
 	DynCoefs *DynCoefs // dynamic coefficients
 
 	// for debugging
@@ -82,6 +83,7 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	if Stop() {
 		return
 	}
+	Global.Ndim = Global.Sim.Ndim
 	Global.Mdb = inp.ReadMat(Global.Sim.Data.FnameDir, Global.Sim.Data.Matfile)
 	LogErrCond(Global.Mdb == nil, "ReadMat failed\n")
 	if Stop() {

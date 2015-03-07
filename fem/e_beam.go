@@ -17,10 +17,9 @@ import (
 type Beam struct {
 
 	// basic data
-	Cid  int         // cell/element id
-	X    [][]float64 // matrix of nodal coordinates [ndim][nnode]
-	Ndim int         // space dimension
-	Nu   int         // total number of unknowns == 2 * nsn
+	Cid int         // cell/element id
+	X   [][]float64 // matrix of nodal coordinates [ndim][nnode]
+	Nu  int         // total number of unknowns == 2 * nsn
 
 	// parameters
 	E   float64 // Young's modulus
@@ -58,14 +57,14 @@ type Beam struct {
 func init() {
 
 	// information allocator
-	infogetters["beam"] = func(ndim int, cellType string, faceConds []*FaceCond) *Info {
+	infogetters["beam"] = func(cellType string, faceConds []*FaceCond) *Info {
 
 		// new info
 		var info Info
 
 		// solution variables
 		ykeys := []string{"ux", "uy", "rz"}
-		if ndim == 3 {
+		if Global.Ndim == 3 {
 			ykeys = []string{"ux", "uy", "uz", "rx", "ry", "rz"}
 		}
 		info.Dofs = make([][]string, 2)
@@ -82,10 +81,10 @@ func init() {
 	}
 
 	// element allocator
-	eallocators["beam"] = func(ndim int, cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
+	eallocators["beam"] = func(cellType string, faceConds []*FaceCond, cid int, edat *inp.ElemData, x [][]float64) Elem {
 
 		// check
-		if LogErrCond(ndim == 3, "beam is not implemented for 3D yet") {
+		if LogErrCond(Global.Ndim == 3, "beam is not implemented for 3D yet") {
 			return nil
 		}
 
@@ -93,9 +92,9 @@ func init() {
 		var o Beam
 		o.Cid = cid
 		o.X = x
-		o.Ndim = ndim
-		ndof := 3 * (o.Ndim - 1)
-		o.Nu = ndof * o.Ndim
+		ndim := Global.Ndim
+		ndof := 3 * (ndim - 1)
+		o.Nu = ndof * ndim
 
 		// parameters
 		matname := edat.Mat
@@ -197,7 +196,7 @@ func init() {
 		la.MatTrMul3(o.M, 1, o.T, o.Ml, o.T) // M := 1 * trans(T) * Ml * T
 
 		// scratchpad. computed @ each ip
-		o.grav = make([]float64, o.Ndim)
+		o.grav = make([]float64, Global.Ndim)
 		o.fi = make([]float64, o.Nu)
 
 		// return new element
@@ -210,7 +209,7 @@ func (o Beam) Id() int { return o.Cid }
 
 // SetEqs set equations [2][?]. Format of eqs == format of info.Dofs
 func (o *Beam) SetEqs(eqs [][]int, mixedform_eqs []int) (ok bool) {
-	ndof := 3 * (o.Ndim - 1)
+	ndof := 3 * (Global.Ndim - 1)
 	o.Umap = make([]int, o.Nu)
 	for m := 0; m < 2; m++ {
 		for i := 0; i < ndof; i++ {
