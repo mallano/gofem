@@ -29,13 +29,14 @@ type Data struct {
 	Encoder string `json:"encoder"` // encoder name; e.g. "gob" "json" "xml"
 
 	// problem definition and options
-	Steady  bool `json:"steady"`  // steady simulation
-	Pstress bool `json:"pstress"` // plane-stress
-	Axisym  bool `json:"axisym"`  // axisymmetric
-	NoLBB   bool `json:"nolbb"`   // do not satisfy Ladyženskaja-Babuška-Brezzi condition; i.e. do not use [qua8,qua4] for u-p formulation
-	LogBcs  bool `json:"logbcs"`  // log boundary conditions setting up
-	Debug   bool `json:"debug"`   // activate debugging
-	Stat    bool `json:"stat"`    // activate statistics
+	Steady  bool    `json:"steady"`  // steady simulation
+	Pstress bool    `json:"pstress"` // plane-stress
+	Axisym  bool    `json:"axisym"`  // axisymmetric
+	NoLBB   bool    `json:"nolbb"`   // do not satisfy Ladyženskaja-Babuška-Brezzi condition; i.e. do not use [qua8,qua4] for u-p formulation
+	LogBcs  bool    `json:"logbcs"`  // log boundary conditions setting up
+	Debug   bool    `json:"debug"`   // activate debugging
+	Stat    bool    `json:"stat"`    // activate statistics
+	Wlevel  float64 `json:"wlevel"`  // water level; 0 means use max elevation
 
 	// options
 	React bool `json:"react"` // indicates whether or not reaction forces must be computed
@@ -321,12 +322,13 @@ type Simulation struct {
 	Stages    []*Stage   `json:"stages"`    // stores all stages
 
 	// derived
-	Mdb       *MatDb   // materials database
-	Ndim      int      // space dimension
-	MaxElev   float64  // maximum elevation
-	Gfcn      fun.Func // first stage: gravity constant function
-	WaterRho0 float64  // first stage: intrinsic density of water corresponding to pressure pl=0
-	WaterBulk float64  // first stage: bulk modulus of water
+	Mdb        *MatDb   // materials database
+	Ndim       int      // space dimension
+	MaxElev    float64  // maximum elevation
+	Gfcn       fun.Func // first stage: gravity constant function
+	WaterRho0  float64  // first stage: intrinsic density of water corresponding to pressure pl=0
+	WaterBulk  float64  // first stage: bulk modulus of water
+	WaterLevel float64  // first stage: water level == max(Wlevel, MaxElev)
 }
 
 // ReadSim reads all simulation data from a .sim JSON file
@@ -419,6 +421,9 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 			}
 		}
 	}
+
+	// water level
+	o.WaterLevel = max(o.Data.Wlevel, o.MaxElev)
 
 	// for all stages
 	var t float64

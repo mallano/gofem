@@ -49,6 +49,7 @@ func Test_p01a(tst *testing.T) {
 	 *           10                          4
 	 */
 
+	//verbose()
 	chk.PrintTitle("p01a")
 
 	// start simulation
@@ -129,7 +130,9 @@ func Test_p01a(tst *testing.T) {
 	for _, nod := range dom.Nodes {
 		z := nod.Vert.C[1]
 		eq := nod.Dofs[0].Eq
-		chk.Scalar(tst, io.Sf("pl @ %g", z), 1e-17, dom.Sol.Y[eq], 100-10*z)
+		pl := dom.Sol.Y[eq]
+		plC, _, _ := Global.HydroSt.Calc(z)
+		chk.Scalar(tst, io.Sf("nod %3d : pl(@ %4g)= %6g", nod.Vert.Id, z, pl), 1e-17, pl, plC)
 	}
 
 	// intial values @ integration points
@@ -139,8 +142,10 @@ func Test_p01a(tst *testing.T) {
 		for idx, ip := range e.IpsElem {
 			s := e.States[idx]
 			z := e.Shp.IpRealCoords(e.X, ip)[1]
-			chk.Scalar(tst, io.Sf("sl @ %g", z), 1e-17, s.Sl, 1)
-			chk.Scalar(tst, io.Sf("pl @ %g", z), 1e-13, s.Pl, 100-10*z)
+			plC, ρlC, _ := Global.HydroSt.Calc(z)
+			chk.Scalar(tst, io.Sf("sl(@ %18g)= %18g", z, s.Sl), 1e-17, s.Sl, 1)
+			chk.Scalar(tst, io.Sf("pl(@ %18g)= %18g", z, s.Pl), 1e-13, s.Pl, plC)
+			chk.Scalar(tst, io.Sf("ρL(@ %18g)= %18g", z, s.RhoL), 1e-13, s.RhoL, ρlC)
 		}
 	}
 }

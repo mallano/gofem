@@ -55,6 +55,7 @@ func Test_sim01(tst *testing.T) {
 	io.Pfyel("grav    = %v\n", sim.Gfcn.F(0, nil))
 	io.Pfyel("Wrho0   = %v\n", sim.WaterRho0)
 	io.Pfyel("Wbulk   = %v\n", sim.WaterBulk)
+	io.Pfyel("Wlevel  = %v\n", sim.WaterLevel)
 }
 
 func Test_sim02(tst *testing.T) {
@@ -77,6 +78,7 @@ func Test_sim02(tst *testing.T) {
 	io.Pfyel("grav    = %v\n", sim.Gfcn.F(0, nil))
 	io.Pfyel("Wrho0   = %v\n", sim.WaterRho0)
 	io.Pfyel("Wbulk   = %v\n", sim.WaterBulk)
+	io.Pfyel("Wlevel  = %v\n", sim.WaterLevel)
 }
 
 func Test_mat01(tst *testing.T) {

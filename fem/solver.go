@@ -37,8 +37,9 @@ var Global struct {
 	Sum *Summary        // output times and all residuals
 
 	// auxiliar structures
-	Ndim     int       // space dimension
-	DynCoefs *DynCoefs // dynamic coefficients
+	Ndim     int          // space dimension
+	DynCoefs *DynCoefs    // dynamic coefficients
+	HydroSt  *HydroStatic // computes hydrostatic states
 
 	// for debugging
 	Debug   bool                    // debug flag
@@ -99,6 +100,8 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	if !Global.DynCoefs.Init(&Global.Sim.Solver) {
 		return
 	}
+	Global.HydroSt = new(HydroStatic)
+	Global.HydroSt.Init()
 
 	// success
 	return true

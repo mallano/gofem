@@ -182,14 +182,14 @@ func (o Model) GetPrms(example bool) fun.Prms {
 }
 
 // InitState initialises a state structure with a continous solver and saturation starting at 1
-func (o Model) InitState(s *State, pl, pg, divus float64) (err error) {
+func (o Model) InitState(s *State, ρL, ρG, pl, pg, divus float64) (err error) {
 	s.Pl = pl
 	s.Pg = pg
 	s.Divus = divus
 	s.Sl = 1
 	s.Ns0 = 1 - o.Nf0
-	s.RhoL = o.RhoL0 + o.Cl*pl
-	s.RhoG = o.RhoG0 + o.Cg*pg
+	s.RhoL = ρL
+	s.RhoG = ρG
 	s.Dpc = 0
 	s.Wet = false
 	pc := pg - pl
@@ -201,9 +201,9 @@ func (o Model) InitState(s *State, pl, pg, divus float64) (err error) {
 
 // NewState creates and initialises a new state structure
 //  Note: returns nil on errors
-func (o Model) NewState(pl, pg, divus float64) (s *State, err error) {
+func (o Model) NewState(ρL, ρG, pl, pg, divus float64) (s *State, err error) {
 	s = new(State)
-	err = o.InitState(s, pl, pg, divus)
+	err = o.InitState(s, ρL, ρG, pl, pg, divus)
 	return
 }
 

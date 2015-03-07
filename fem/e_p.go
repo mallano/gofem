@@ -467,7 +467,7 @@ func (o *ElemP) InitIvs(sol *Solution) (ok bool) {
 		}
 
 		// state initialisation
-		o.States[idx], err = o.Mdl.NewState(o.pl, 0, 0)
+		o.States[idx], err = o.Mdl.NewState(o.Mdl.RhoL0, o.Mdl.RhoG0, o.pl, 0, 0)
 		if LogErr(err, "state initialisation failed") {
 			return
 		}
@@ -480,6 +480,16 @@ func (o *ElemP) InitIvs(sol *Solution) (ok bool) {
 
 // SetIvs sets secondary variables; e.g. during initialisation via files
 func (o *ElemP) SetIvs(ivs map[string][]float64) (ok bool) {
+	if ρL, ok := ivs["ρL"]; ok {
+		for idx, _ := range o.IpsElem {
+			o.States[idx].RhoL = ρL[idx]
+		}
+	}
+	if ρG, ok := ivs["ρG"]; ok {
+		for idx, _ := range o.IpsElem {
+			o.States[idx].RhoG = ρG[idx]
+		}
+	}
 	if pl, ok := ivs["pl"]; ok {
 		for idx, _ := range o.IpsElem {
 			o.States[idx].Pl = pl[idx]
@@ -491,9 +501,11 @@ func (o *ElemP) SetIvs(ivs map[string][]float64) (ok bool) {
 		}
 	}
 	for idx, _ := range o.IpsElem {
+		ρL := o.States[idx].RhoL
+		ρG := o.States[idx].RhoG
 		pl := o.States[idx].Pl
 		pg := o.States[idx].Pg
-		if LogErr(o.Mdl.InitState(o.States[idx], pl, pg, 0), "state initialisation failed") {
+		if LogErr(o.Mdl.InitState(o.States[idx], ρL, ρG, pl, pg, 0), "state initialisation failed") {
 			return
 		}
 	}
