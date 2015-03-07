@@ -151,7 +151,7 @@ func (o *Rjoint) Connect(cid2elem []Elem, c *inp.Cell) (nnzK int, ok bool) {
 
 	// material model name
 	matname := o.Edat.Mat
-	matdata := Global.Mdb.Get(matname)
+	matdata := Global.Sim.Mdb.Get(matname)
 	if LogErrCond(matdata == nil, "materials database failed on getting %q material\n", matname) {
 		return
 	}

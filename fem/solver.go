@@ -34,7 +34,6 @@ var Global struct {
 
 	// simulation and materials
 	Sim *inp.Simulation // simulation data
-	Mdb *inp.MatDb      // materials database
 	Sum *Summary        // output times and all residuals
 
 	// auxiliar structures
@@ -84,11 +83,6 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 		return
 	}
 	Global.Ndim = Global.Sim.Ndim
-	Global.Mdb = inp.ReadMat(Global.Sim.Data.FnameDir, Global.Sim.Data.Matfile)
-	LogErrCond(Global.Mdb == nil, "ReadMat failed\n")
-	if Stop() {
-		return
-	}
 
 	// debugging and statistics
 	Global.Debug = Global.Sim.Data.Debug

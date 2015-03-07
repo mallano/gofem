@@ -19,7 +19,7 @@ import (
 func GetAndInitPorousModel(matname string) *mporous.Model {
 
 	// materials
-	cndmat, lrmmat, pormat, err := Global.Mdb.GroupGet3(matname, "c", "l", "p")
+	cndmat, lrmmat, pormat, err := Global.Sim.Mdb.GroupGet3(matname, "c", "l", "p")
 	if LogErr(err, io.Sf("materials database failed on getting %q (porous) group\n", matname)) {
 		return nil
 	}
@@ -62,7 +62,7 @@ func GetAndInitPorousModel(matname string) *mporous.Model {
 func GetAndInitSolidModel(matname string, ndim int) (msolid.Model, fun.Prms) {
 
 	// material name
-	matdata := Global.Mdb.Get(matname)
+	matdata := Global.Sim.Mdb.Get(matname)
 	if LogErrCond(matdata == nil, "materials database failed on getting %q (solid) material\n", matname) {
 		return nil, nil
 	}
@@ -72,7 +72,7 @@ func GetAndInitSolidModel(matname string, ndim int) (msolid.Model, fun.Prms) {
 	if mdlname == "group" {
 		if s_matname, found := io.Keycode(matdata.Extra, "s"); found {
 			matname = s_matname
-			matdata = Global.Mdb.Get(matname)
+			matdata = Global.Sim.Mdb.Get(matname)
 			if LogErrCond(matdata == nil, "materials database failed on getting %q (solid/sub) material\n", matname) {
 				return nil, nil
 			}

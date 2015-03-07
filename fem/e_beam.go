@@ -98,7 +98,7 @@ func init() {
 
 		// parameters
 		matname := edat.Mat
-		matdata := Global.Mdb.Get(edat.Mat)
+		matdata := Global.Sim.Mdb.Get(edat.Mat)
 		if LogErrCond(matdata == nil, "materials database failed on getting %q material\n", matname) {
 			return nil
 		}
