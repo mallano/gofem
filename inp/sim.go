@@ -195,6 +195,9 @@ type Region struct {
 	Mshfile   string      `json:"mshfile"`   // file path of file with mesh data
 	ElemsData []*ElemData `json:"elemsdata"` // list of elements data
 
+	// derived
+	Msh *Mesh // the mesh
+
 	// derived data
 	etag2idx map[int]int // maps element tag to element index in ElemsData slice
 }
@@ -319,7 +322,6 @@ type Simulation struct {
 
 	// derived
 	Mdb       *MatDb   // materials database
-	Meshes    []*Mesh  // [nregion] all meshes
 	Ndim      int      // space dimension
 	MaxElev   float64  // maximum elevation
 	Gfcn      fun.Func // first stage: gravity constant function
@@ -373,12 +375,11 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 	}
 
 	// for all regions
-	o.Meshes = make([]*Mesh, len(o.Regions))
 	for i, reg := range o.Regions {
 
 		// read mesh
-		o.Meshes[i] = ReadMsh(o.Data.FnameDir, reg.Mshfile)
-		if LogErrCond(o.Meshes[i] == nil, "cannot read mesh file") {
+		reg.Msh = ReadMsh(o.Data.FnameDir, reg.Mshfile)
+		if LogErrCond(reg.Msh == nil, "cannot read mesh file") {
 			return nil
 		}
 
@@ -390,19 +391,19 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 
 		// get ndim and max elevation
 		if i == 0 {
-			o.Ndim = o.Meshes[i].Ndim
-			o.MaxElev = o.Meshes[i].Ymax
+			o.Ndim = reg.Msh.Ndim
+			o.MaxElev = reg.Msh.Ymax
 			if o.Ndim == 3 {
-				o.MaxElev = o.Meshes[i].Zmax
+				o.MaxElev = reg.Msh.Zmax
 			}
 		} else {
-			if LogErrCond(o.Meshes[i].Ndim != o.Ndim, "all meshes must have the same ndim. %d != %d") {
+			if LogErrCond(reg.Msh.Ndim != o.Ndim, "all meshes must have the same ndim. %d != %d") {
 				return nil
 			}
 			if o.Ndim == 2 {
-				o.MaxElev = max(o.MaxElev, o.Meshes[i].Ymax)
+				o.MaxElev = max(o.MaxElev, reg.Msh.Ymax)
 			} else {
-				o.MaxElev = max(o.MaxElev, o.Meshes[i].Zmax)
+				o.MaxElev = max(o.MaxElev, reg.Msh.Zmax)
 			}
 		}
 
