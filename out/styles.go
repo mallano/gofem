@@ -10,10 +10,10 @@ import (
 )
 
 // Styles
-type Styles []plt.FmtL
+type Styles []plt.Fmt
 
 func GetDefaultStyles(qts Points) Styles {
-	sty := make([]plt.FmtL, len(qts))
+	sty := make([]plt.Fmt, len(qts))
 	for i, q := range qts {
 		sty[i].L = io.Sf("x=%v", q.X)
 	}

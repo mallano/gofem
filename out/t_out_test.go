@@ -101,7 +101,7 @@ func Test_out01(tst *testing.T) {
 	}
 
 	// check s-keys
-	skeys := fem.StressKeys(2)
+	skeys := fem.StressKeys()
 	for _, l := range plabels {
 		for _, p := range R[l] {
 			//io.Pfgreen("q = %v\n", p)

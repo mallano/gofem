@@ -43,20 +43,25 @@ func Test_plot01(tst *testing.T) {
 
 	plA := GetRes("pl", "A", 0)
 
+	// linewidth and markersize; -1 => use default
+	lw, ms := -1.0, -1.0
+
 	Splot("liquid pressure")
-	Plt("t", "pl", "B", plt.FmtS{"b.-"}, -1)
-	Plt("t", plA, "A", plt.FmtS{"r.", "-"}, -1)
+	Plot("t", "pl", "B", plt.Fmt{"b", ".", "-", lw, ms, ""}, -1)
+	Plot("t", plA, "A", plt.Fmt{"r", ".", "-", lw, ms, ""}, -1)
 
 	Splot("")
-	Plt("pl", "pl", "A", plt.FmtS{"k", "o", "-"}, -1)
+	Plot("pl", "pl", "A", plt.Fmt{"k", "o", "-", lw, ms, ""}, -1)
 
 	Splot("")
-	Plt("pl", "y", "left", plt.FmtS{"bo-"}, 0)
-	Plt("pl", "y", "left", plt.FmtS{"go-"}, -1)
+	Plot("pl", "y", "left", plt.Fmt{"b", "o", "-", lw, ms, ""}, 0)
+	Plot("pl", "y", "left", plt.Fmt{"g", "o", "-", lw, ms, ""}, -1)
 
 	Splot("")
-	Plt("y", "pl", "left", plt.FmtS{"b", "o", "-"}, 0)
-	Plt("y", "pl", "left", plt.FmtL{C: "m", M: "*", Ls: "-", Lw: 2}, -1)
+	io.Pforan("T = %v\n", T)
+	last := len(T) - 1
+	Plot("y", "pl", "left", plt.Fmt{"b", "o", "-", lw, ms, io.Sf("t=%g", T[0])}, 0)
+	Plot("y", "pl", "left", plt.Fmt{"m", "*", "-", 2, ms, io.Sf("t=%g", T[last])}, -1)
 
 	//Draw("", "", true)
 	Draw("", "", false)
