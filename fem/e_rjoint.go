@@ -730,10 +730,14 @@ func (o Rjoint) Ipoints() (coords [][]float64) {
 
 // SetIniIvs sets initial ivs for given values in sol and ivs map
 func (o *Rjoint) SetIniIvs(sol *Solution, ivs map[string][]float64) (ok bool) {
-	if !o.Rod.SetIniIvs(sol, ivs) {
-		return
+	nip := len(o.Rod.IpsElem)
+	o.States = make([]*msolid.OnedState, nip)
+	o.StatesBkp = make([]*msolid.OnedState, nip)
+	for i := 0; i < nip; i++ {
+		o.States[i], _ = o.Mdl.InitIntVars()
+		o.StatesBkp[i] = o.States[i].GetCopy()
 	}
-	return o.Sld.SetIniIvs(sol, ivs)
+	return true
 }
 
 // BackupIvs create copy of internal variables
