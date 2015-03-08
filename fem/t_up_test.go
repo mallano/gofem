@@ -51,7 +51,7 @@ func Test_up01a(tst *testing.T) {
 	 */
 
 	// capture errors and flush log
-	//verbose()
+	verbose()
 	defer End()
 
 	//verbose()

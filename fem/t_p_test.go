@@ -144,7 +144,7 @@ func Test_p01a(tst *testing.T) {
 			z := e.Shp.IpRealCoords(e.X, ip)[1]
 			plC, ρlC, _ := Global.HydroSt.Calc(z)
 			chk.Scalar(tst, io.Sf("sl(@ %18g)= %18g", z, s.Sl), 1e-17, s.Sl, 1)
-			chk.Scalar(tst, io.Sf("pl(@ %18g)= %18g", z, s.Pl), 1e-13, s.Pl, plC)
+			chk.Scalar(tst, io.Sf("pl(@ %18g)= %18g", z, s.Pl), 1e-10, s.Pl, plC)
 			chk.Scalar(tst, io.Sf("ρL(@ %18g)= %18g", z, s.RhoL), 1e-13, s.RhoL, ρlC)
 		}
 	}

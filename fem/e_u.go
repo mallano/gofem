@@ -408,26 +408,36 @@ func (o *ElemU) Update(sol *Solution) (ok bool) {
 
 // internal variables ///////////////////////////////////////////////////////////////////////////////
 
-// InitIvs reset (and fix) internal variables after primary variables have been changed
-func (o *ElemU) InitIvs(sol *Solution) (ok bool) {
+// Ipoints returns the real coordinates of integration points [nip][ndim]
+func (o ElemU) Ipoints() (coords [][]float64) {
+	coords = la.MatAlloc(len(o.IpsElem), Global.Ndim)
+	for idx, ip := range o.IpsElem {
+		coords[idx] = o.Shp.IpRealCoords(o.X, ip)
+	}
+	return
+}
+
+// SetIniIvs sets initial ivs for given values in sol and ivs map
+func (o *ElemU) SetIniIvs(sol *Solution, ivs map[string][]float64) (ok bool) {
+
+	// allocate slices of states
 	nip := len(o.IpsElem)
 	o.States = make([]*msolid.State, nip)
 	o.StatesBkp = make([]*msolid.State, nip)
+
+	// for each integration point
 	for i := 0; i < nip; i++ {
 		o.States[i], _ = o.Model.InitIntVars()
 		o.StatesBkp[i] = o.States[i].GetCopy()
 	}
-	return true
-}
 
-// SetIvs set secondary variables; e.g. during initialisation via files
-func (o *ElemU) SetIvs(ivs map[string][]float64) (ok bool) {
-	nip := len(o.IpsElem)
-	ndim := Global.Ndim
-	o.Sig0 = Ivs2sigmas(nip, ndim, ivs)
-	for i := 0; i < nip; i++ {
-		copy(o.States[i].Sig, o.Sig0[i])
-		copy(o.StatesBkp[i].Sig, o.Sig0[i])
+	// initial stresses
+	if _, ok := ivs["sx"]; ok {
+		o.Sig0 = Ivs2sigmas(nip, Global.Ndim, ivs)
+		for i := 0; i < nip; i++ {
+			copy(o.States[i].Sig, o.Sig0[i])
+			copy(o.StatesBkp[i].Sig, o.Sig0[i])
+		}
 	}
 	return true
 }

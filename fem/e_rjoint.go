@@ -723,21 +723,17 @@ func (o *Rjoint) Update(sol *Solution) (ok bool) {
 
 // internal variables ///////////////////////////////////////////////////////////////////////////////
 
-// InitIvs reset (and fix) internal variables after primary variables have been changed
-func (o *Rjoint) InitIvs(sol *Solution) (ok bool) {
-	nip := len(o.Rod.IpsElem)
-	o.States = make([]*msolid.OnedState, nip)
-	o.StatesBkp = make([]*msolid.OnedState, nip)
-	for i := 0; i < nip; i++ {
-		o.States[i], _ = o.Mdl.InitIntVars()
-		o.StatesBkp[i] = o.States[i].GetCopy()
-	}
-	return true
+// Ipoints returns the real coordinates of integration points [nip][ndim]
+func (o Rjoint) Ipoints() (coords [][]float64) {
+	return o.Rod.Ipoints()
 }
 
-// SetIvs set secondary variables; e.g. during initialisation via files
-func (o *Rjoint) SetIvs(zvars map[string][]float64) (ok bool) {
-	return true
+// SetIniIvs sets initial ivs for given values in sol and ivs map
+func (o *Rjoint) SetIniIvs(sol *Solution, ivs map[string][]float64) (ok bool) {
+	if !o.Rod.SetIniIvs(sol, ivs) {
+		return
+	}
+	return o.Sld.SetIniIvs(sol, ivs)
 }
 
 // BackupIvs create copy of internal variables

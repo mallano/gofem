@@ -27,7 +27,7 @@
   "stages" : [
     {
       "desc"    : "decrease pressure @ bottom",
-      "hydrost" : { "gamw":10 },
+      "hydrost" : true,
       "facebcs" : [
         { "tag":-10, "keys":["pl"], "funcs":["pbot"] }
       ],
@@ -36,8 +36,8 @@
       ],
       "control" : {
         "tf"    : 5000,
-        "dt"    : 10,
-        "dtout" : 10
+        "dt"    : 50,
+        "dtout" : 1000
       }
     }
   ]

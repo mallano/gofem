@@ -603,22 +603,21 @@ func (o *ElemUP) Update(sol *Solution) (ok bool) {
 
 // internal variables ///////////////////////////////////////////////////////////////////////////////
 
-// InitIvs reset (and fix) internal variables after primary variables have been changed
-func (o *ElemUP) InitIvs(sol *Solution) (ok bool) {
-	if !o.U.InitIvs(sol) {
-		return
+// Ipoints returns the real coordinates of integration points [nip][ndim]
+func (o ElemUP) Ipoints() (coords [][]float64) {
+	coords = la.MatAlloc(len(o.U.IpsElem), Global.Ndim)
+	for idx, ip := range o.U.IpsElem {
+		coords[idx] = o.U.Shp.IpRealCoords(o.U.X, ip)
 	}
-	//return o.P.InitIvs(sol)
 	return
 }
 
-// SetIvs set secondary variables; e.g. during initialisation via files
-func (o *ElemUP) SetIvs(zvars map[string][]float64) (ok bool) {
-	if !o.U.SetIvs(zvars) {
+// SetIniIvs sets initial ivs for given values in sol and ivs map
+func (o *ElemUP) SetIniIvs(sol *Solution, ivs map[string][]float64) (ok bool) {
+	if !o.U.SetIniIvs(sol, ivs) {
 		return
 	}
-	//return o.P.SetIvs(zvars)
-	return
+	return o.P.SetIniIvs(sol, ivs)
 }
 
 // BackupIvs create copy of internal variables

@@ -304,14 +304,35 @@ func (o *Rod) Update(sol *Solution) (ok bool) {
 
 // internal variables ///////////////////////////////////////////////////////////////////////////////
 
-// InitIvs reset (and fix) internal variables after primary variables have been changed
-func (o *Rod) InitIvs(sol *Solution) (ok bool) {
+// Ipoints returns the real coordinates of integration points [nip][ndim]
+func (o Rod) Ipoints() (coords [][]float64) {
+	coords = la.MatAlloc(len(o.IpsElem), Global.Ndim)
+	for idx, ip := range o.IpsElem {
+		coords[idx] = o.Shp.IpRealCoords(o.X, ip)
+	}
+	return
+}
+
+// SetIniIvs sets initial ivs for given values in sol and ivs map
+func (o *Rod) SetIniIvs(sol *Solution, ivs map[string][]float64) (ok bool) {
+
+	// allocate slices of states
 	nip := len(o.IpsElem)
 	o.States = make([]*msolid.OnedState, nip)
 	o.StatesBkp = make([]*msolid.OnedState, nip)
+
+	// for each integration point
 	for i := 0; i < nip; i++ {
 		o.States[i], _ = o.Model.InitIntVars()
 		o.StatesBkp[i] = o.States[i].GetCopy()
+	}
+
+	// initial stresses
+	if _, ok := ivs["sig"]; ok {
+		for i := 0; i < nip; i++ {
+			o.States[i].Sig = ivs["sig"][i]
+			o.StatesBkp[i].Sig = o.States[i].Sig
+		}
 	}
 	return true
 }
