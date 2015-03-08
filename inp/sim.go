@@ -248,15 +248,8 @@ type TimeControl struct {
 	DtoFunc fun.Func // output time step function
 }
 
-// HydroStData holds data to set hydrostatic initial state
-type HydroStData struct {
-	GamW   float64 `json:"gamw"`   // unit weight of water to use in HydroSt
-	Zwater float64 `json:"zwater"` // water elevation to set ponding or unsaturated condition
-}
-
 // GeoStData holds data for setting initial geostatic state (hydrostatic as well)
 type GeoStData struct {
-	HydroStData
 	Nu     []float64 `json:"nu"`     // [nlayers] Poisson's coefficient to compute effective horizontal state for each layer
 	K0     []float64 `json:"K0"`     // [nlayers] Earth pressure coefficient at rest to compute effective horizontal stresses
 	UseK0  []bool    `json:"useK0"`  // [nlayers] use K0 to compute effective horizontal stresses instead of "nu"
@@ -285,7 +278,8 @@ type Stage struct {
 	Load       string `json:"load"`       // load stage data (filename) from binary file
 
 	// specific problems data
-	HydroSt   *HydroStData   `json:"hydrost"`   // hydrostatic data
+	HydroSt   bool           `json:"hydrost"`   // hydrostatic initial condition
+	Zwater    float64        `json:"zwater"`    // water elevation to set ponding or unsaturated condition
 	SeepFaces []int          `json:"seepfaces"` // face tags corresponding to seepage faces
 	IniStress *IniStressData `json:"inistress"` // initial stress data
 	GeoSt     *GeoStData     `json:"geost"`     // initial geostatic state data (hydrostatic as well)
@@ -467,8 +461,10 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 			stg.Control.DtOut = stg.Control.DtoFunc.F(t, nil)
 		}
 
-		// gravity
+		// first stage
 		if i == 0 {
+
+			// gravity
 			for _, econd := range stg.EleConds {
 				for j, key := range econd.Keys {
 					if key == "g" {
@@ -484,6 +480,11 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 			}
 			if o.Gfcn == nil {
 				o.Gfcn = &fun.Cte{C: 10}
+			}
+
+			// geost/hydrost data
+			if stg.GeoSt != nil {
+				stg.HydroSt = true
 			}
 		}
 

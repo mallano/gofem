@@ -5,14 +5,14 @@
     "showR" : true
   },
   "functions" : [
+    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
     { "name":"Lmul", "type":"cte", "prms":[{"n":"c", "v":1}] },
     { "name":"Rmul", "type":"rmp", "prms":[
       { "n":"ca", "v":1   },
       { "n":"cb", "v":1   },
       { "n":"ta", "v":0   },
       { "n":"tb", "v":1e3 }]
-    },
-    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] }
+    }
   ],
   "regions" : [
     {
@@ -26,11 +26,11 @@
   "stages" : [
     {
       "desc" : "decrease water level @ right face",
-      "hydrost" : { "gamw":10 },
+      "hydrost" : true,
       "seepfaces" : [-11],
       "facebcs" : [
-        { "tag":-13, "keys":["Hst"],  "funcs":["Lmul"] },
-        { "tag":-11, "keys":["seep"], "funcs":["Rmul"], "extra":"!HstPlmax:true" }
+        { "tag":-13, "keys":["hst"],  "funcs":["Lmul"] },
+        { "tag":-11, "keys":["seep"], "funcs":["Rmul"], "extra":"!plmax:hst" }
       ],
       "eleconds" : [
         { "tag":-1, "keys":["g"], "funcs":["grav"] },
