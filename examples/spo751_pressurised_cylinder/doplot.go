@@ -38,8 +38,8 @@ func main() {
 	out.LoadResults(nil)
 
 	out.Splot("Pressure at inner and outer face")
-	out.Plot("ux", "t", "A", plt.Fmt{"b", ".", "-", -1, -1, "inner"}, -1)
-	out.Plot("ux", "t", "B", plt.Fmt{"r", ".", "-", -1, -1, "outer"}, -1)
+	out.Plot("ux", "t", "A", plt.Fmt{C: "b", M: ".", L: "inner"}, -1)
+	out.Plot("ux", "t", "B", plt.Fmt{C: "r", M: ".", L: "outer"}, -1)
 
 	//out.Splot("radial stress")
 	//X, _, _ := out.GetXYZ("ux", "bottom")
