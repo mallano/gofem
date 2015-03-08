@@ -608,7 +608,8 @@ func (o *ElemUP) InitIvs(sol *Solution) (ok bool) {
 	if !o.U.InitIvs(sol) {
 		return
 	}
-	return o.P.InitIvs(sol)
+	//return o.P.InitIvs(sol)
+	return
 }
 
 // SetIvs set secondary variables; e.g. during initialisation via files
@@ -616,7 +617,8 @@ func (o *ElemUP) SetIvs(zvars map[string][]float64) (ok bool) {
 	if !o.U.SetIvs(zvars) {
 		return
 	}
-	return o.P.SetIvs(zvars)
+	//return o.P.SetIvs(zvars)
+	return
 }
 
 // BackupIvs create copy of internal variables
@@ -728,15 +730,15 @@ func (o ElemUP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 	// compute surface integral
 	ndim := Global.Ndim
 	u_nverts := o.U.Shp.Nverts
-	var tmp float64
-	var z, pl, fl, plmax, g, rmp float64
-	for _, nbc := range o.P.NatBcs {
+	var mul float64
+	var pl, fl, plmax, g, rmp float64
+	for idx, nbc := range o.P.NatBcs {
 
-		// temporary value == function evaluation
-		tmp = nbc.Fcn.F(sol.T, nil)
+		// plmax multiplier
+		mul = nbc.Fcn.F(sol.T, nil)
 
 		// loop over ips of face
-		for _, ipf := range o.P.IpsFace {
+		for jdx, ipf := range o.P.IpsFace {
 
 			// interpolation functions and gradients @ face
 			iface := nbc.IdxFace
@@ -749,16 +751,11 @@ func (o ElemUP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
 			// select natural boundary condition type
 			switch nbc.Key {
-			case "seepP", "seepH":
+			case "seep":
 
 				// variables extrapolated to face
-				_, z, pl, fl = o.P.fipvars(iface, sol)
-
-				// specified condition
-				plmax = tmp
-				if nbc.Key == "seepH" {
-					plmax = max(o.P.γl*(tmp-z), 0.0)
-				}
+				_, pl, fl = o.P.fipvars(iface, sol)
+				plmax = o.P.Plmax[idx][jdx] * mul
 
 				// compute derivatives
 				g = pl - plmax // Eq. (24)

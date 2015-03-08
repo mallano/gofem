@@ -90,11 +90,6 @@ func (o HydroStatic) Calc(z float64) (pl, ρL float64, err error) {
 // SetHydroSt sets the initial state to a hydrostatic condition
 func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
 
-	// check for hydrost flag
-	if !stg.HydroSt {
-		return true
-	}
-
 	// set Sol
 	ndim := Global.Ndim
 	for _, n := range o.Nodes {
@@ -113,16 +108,13 @@ func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
 	var err error
 	for _, e := range o.ElemIntvars {
 
-		// get element's integration points data
-		ele := e.(Elem)
-		d := ele.OutIpsData()
-		nip := len(d)
-
 		// build map with pressures @ ips
+		coords := e.Ipoints()
+		nip := len(coords)
 		pl := make([]float64, nip)
 		ρL := make([]float64, nip)
-		for i, ip := range d {
-			z := ip.X[ndim-1]
+		for i := 0; i < nip; i++ {
+			z := coords[i][ndim-1]
 			pl[i], ρL[i], err = Global.HydroSt.Calc(z)
 			if LogErr(err, "hydrost: cannot compute pl and ρL") {
 				return
@@ -131,7 +123,7 @@ func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
 		ivs := map[string][]float64{"pl": pl, "ρL": ρL}
 
 		// set element's states
-		if LogErrCond(!e.SetIvs(ivs), "hydrost: element's internal values setting failed") {
+		if LogErrCond(!e.SetIniIvs(o.Sol, ivs), "hydrost: element's internal values setting failed") {
 			return
 		}
 	}

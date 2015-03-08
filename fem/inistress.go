@@ -14,13 +14,8 @@ import (
 // SetIniStress sets the initial state with initial stresses
 func (o *Domain) SetIniStress(stg *inp.Stage) (ok bool) {
 
-	// check for hydrost data
-	dat := stg.IniStress
-	if dat == nil {
-		return true
-	}
-
 	// set elements with homogeneous stress state
+	dat := stg.IniStress
 	if dat.Hom {
 
 		// isotropic state
@@ -37,7 +32,7 @@ func (o *Domain) SetIniStress(stg *inp.Stage) (ok bool) {
 				ivs := map[string][]float64{"sx": v, "sy": v, "sz": v}
 
 				// set element's states
-				if LogErrCond(!e.SetIvs(ivs), "homogeneous/isotropic: element's internal values setting failed") {
+				if LogErrCond(!e.SetIniIvs(o.Sol, ivs), "homogeneous/isotropic: element's internal values setting failed") {
 					return
 				}
 			}
@@ -62,7 +57,7 @@ func (o *Domain) SetIniStress(stg *inp.Stage) (ok bool) {
 				ivs := map[string][]float64{"sx": vx, "sy": vy, "sz": vz}
 
 				// set element's states
-				if LogErrCond(!e.SetIvs(ivs), "homogeneous/plane-strain: element's internal values setting failed") {
+				if LogErrCond(!e.SetIniIvs(o.Sol, ivs), "homogeneous/plane-strain: element's internal values setting failed") {
 					return
 				}
 			}

@@ -1,35 +1,38 @@
 {
   "data" : {
-    "matfile" : "frees.mat"
+    "matfile" : "frees.mat",
+    "showR"   : false
   },
   "functions" : [
-    { "name":"Hl", "type":"cte", "prms":[{"n":"c", "v":10}] },
-    { "name":"Hr", "type":"rmp", "prms":[
-      { "n":"ca", "v":10  },
-      { "n":"cb", "v":2   },
+    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
+    { "name":"Lmul", "type":"cte", "prms":[{"n":"c", "v":1}] },
+    { "name":"Rmul", "type":"rmp", "prms":[
+      { "n":"ca", "v":1   },
+      { "n":"cb", "v":0.2 },
       { "n":"ta", "v":0   },
       { "n":"tb", "v":1e3 }]
-    },
-    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] }
+    }
   ],
   "regions" : [
     {
       "mshfile"  : "frees01a.msh",
-      "mshfile_" : "frees01b.msh",
-      "mshfile_" : "frees01c.msh",
+      "mshfileB" : "frees01b.msh",
+      "mshfileC" : "frees01c.msh",
+      "mshfileD" : "frees01d.msh",
+      "mshfileE" : "frees01e.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"porous1", "type":"p", "extra":"!bet:70" }
+        { "tag":-1, "mat":"porous1", "type":"p", "extra":"!bet:70 !kap:1 !mac:1" }
       ]
     }
   ],
   "stages" : [
     {
       "desc" : "decrease water level @ right face",
-      "hydrost" : { "gamw":10 },
+      "hydrost" : true,
       "seepfaces" : [-11],
       "facebcs" : [
-        { "tag":-13, "keys":["H"],     "funcs":["Hl"], "extra":"!gamL:10" },
-        { "tag":-11, "keys":["seepH"], "funcs":["Hr"], "extra":"!gamL:10" }
+        { "tag":-13, "keys":["hst"],  "funcs":["Lmul"] },
+        { "tag":-11, "keys":["seep"], "funcs":["Rmul"], "extra":"!plmax:hst" }
       ],
       "eleconds" : [
         { "tag":-1, "keys":["g"], "funcs":["grav"] }

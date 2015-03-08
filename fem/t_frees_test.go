@@ -76,7 +76,7 @@ func Test_frees01b(tst *testing.T) {
 	// capture errors and flush log
 	defer End()
 
-	verbose()
+	//verbose()
 	chk.PrintTitle("frees01b")
 
 	// start simulation

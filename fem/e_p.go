@@ -10,6 +10,7 @@ import (
 	"github.com/cpmech/gofem/shp"
 
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/utl"
 )
@@ -55,14 +56,16 @@ type ElemP struct {
 	DoExtrap  bool        // do extrapolation of ρl and Cpl => for use with flux and seepage conditions
 
 	// seepage face
-	Nf         int     // number of fl variables
-	HasSeep    bool    // indicates if this element has seepage faces
-	Vid2seepId []int   // [nverts] maps local vertex id to index in Fmap
-	SeepId2vid []int   // [nf] maps seepage face variable id to local vertex id
-	Fmap       []int   // [nf] map of "fl" variables (seepage face)
-	Macaulay   bool    // use discrete ramp function instead of smooth ramp
-	βrmp       float64 // coefficient for Sramp
-	κ          float64 // κ coefficient to normalise equation for seepage face modelling
+	Nf         int         // number of fl variables
+	HasSeep    bool        // indicates if this element has seepage faces
+	Vid2seepId []int       // [nverts] maps local vertex id to index in Fmap
+	SeepId2vid []int       // [nf] maps seepage face variable id to local vertex id
+	Fmap       []int       // [nf] map of "fl" variables (seepage face)
+	Macaulay   bool        // use discrete ramp function instead of smooth ramp
+	βrmp       float64     // coefficient for Sramp
+	κ          float64     // κ coefficient to normalise equation for seepage face modelling
+	Hst        []bool      // [nf] set hydrostatic plmax
+	Plmax      [][]float64 // [nf][nipsFace] specified plmax (not corrected by multiplier)
 
 	// local starred variables
 	ψl []float64 // [nip] ψl* = β1.p + β2.dpdt
@@ -187,8 +190,10 @@ func init() {
 		}
 
 		// set natural boundary conditions
-		for _, fc := range faceConds {
+		for idx, fc := range faceConds {
 			o.NatBcs = append(o.NatBcs, &NaturalBc{fc.Cond, fc.FaceId, fc.Func, fc.Extra})
+
+			// allocate extrapolation structures
 			if fc.Cond == "qb" || fc.Cond == "seep" {
 				nv := o.Shp.Nverts
 				nip := len(o.IpsElem)
@@ -198,6 +203,16 @@ func init() {
 				o.DoExtrap = true
 				if LogErr(o.Shp.Extrapolator(o.Emat, o.IpsElem), "element allocation") {
 					return nil
+				}
+			}
+
+			// additional seepage condition structures: hydrostatic flags
+			if fc.Cond == "seep" {
+				if len(o.Hst) == 0 {
+					o.Hst = make([]bool, len(faceConds))
+				}
+				if s_val, found := io.Keycode(fc.Extra, "plmax"); found {
+					o.Hst[idx] = (s_val == "hst")
 				}
 			}
 		}
@@ -294,6 +309,9 @@ func (o ElemP) AddToRhs(fb []float64, sol *Solution) (ok bool) {
 				o.ρwl[i] += klr * o.Mdl.Klsat[i][j] * (RhoL*o.g[j] - o.gpl[j])
 			}
 		}
+
+		// debug
+		//io.Pforan("ρwl = %v\n", o.ρwl[1])
 
 		// add negative of residual term to fb. see Eqs. (12) and (17) of [1]
 		for m := 0; m < nverts; m++ {
@@ -444,69 +462,87 @@ func (o *ElemP) Update(sol *Solution) (ok bool) {
 
 // internal variables ///////////////////////////////////////////////////////////////////////////////
 
-// InitIvs resets (and fix) internal variables after primary variables have been changed
-func (o *ElemP) InitIvs(sol *Solution) (ok bool) {
+// Ipoints returns the real coordinates of integration points [nip][ndim]
+func (o ElemP) Ipoints() (coords [][]float64) {
+	coords = la.MatAlloc(len(o.IpsElem), Global.Ndim)
+	for idx, ip := range o.IpsElem {
+		coords[idx] = o.Shp.IpRealCoords(o.X, ip)
+	}
+	return
+}
 
-	// for each integration point
+// SetIniIvs sets initial ivs for given values in sol and ivs map
+func (o *ElemP) SetIniIvs(sol *Solution, ivs map[string][]float64) (ok bool) {
+
+	// extract slices from ivs map (may be nil)
+	ρLvals := ivs["ρL"]
+	ρGvals := ivs["ρG"]
+	pgVals := ivs["pg"]
+
+	// allocate slices of states
 	nip := len(o.IpsElem)
 	o.States = make([]*mporous.State, nip)
 	o.StatesBkp = make([]*mporous.State, nip)
+
+	// for each integration point
 	var err error
+	var ρL, ρG, pl, pg float64
 	for idx, _ := range o.IpsElem {
 
 		// interpolation functions and gradients
-		if LogErr(o.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "InitIvs") {
+		if LogErr(o.Shp.CalcAtIp(o.X, o.IpsElem[idx], false), "SetIniIvs") {
 			return
 		}
 
+		// get densities @ ip
+		if len(ρLvals) > 0 {
+			ρL = ρLvals[idx]
+		} else {
+			ρL = o.Mdl.RhoL0
+		}
+		if len(ρGvals) > 0 {
+			ρG = ρGvals[idx]
+		} else {
+			ρG = o.Mdl.RhoG0
+		}
+
 		// compute pl @ ip by means of interpolating from nodes
-		o.pl = 0
+		pl = 0
 		for m := 0; m < o.Shp.Nverts; m++ {
 			r := o.Pmap[m]
-			o.pl += o.Shp.S[m] * sol.Y[r]
+			pl += o.Shp.S[m] * sol.Y[r]
+		}
+
+		// pg
+		if len(pgVals) > 0 {
+			pg = pgVals[idx]
 		}
 
 		// state initialisation
-		o.States[idx], err = o.Mdl.NewState(o.Mdl.RhoL0, o.Mdl.RhoG0, o.pl, 0, 0)
-		if LogErr(err, "state initialisation failed") {
+		o.States[idx], err = o.Mdl.NewState(ρL, ρG, pl, pg, 0)
+		if LogErr(err, "SetIniIvs") {
 			return
 		}
 
 		// backup copy
 		o.StatesBkp[idx] = o.States[idx].GetCopy()
 	}
-	return true
-}
 
-// SetIvs sets secondary variables; e.g. during initialisation via files
-func (o *ElemP) SetIvs(ivs map[string][]float64) (ok bool) {
-	if ρL, ok := ivs["ρL"]; ok {
-		for idx, _ := range o.IpsElem {
-			o.States[idx].RhoL = ρL[idx]
-		}
-	}
-	if ρG, ok := ivs["ρG"]; ok {
-		for idx, _ := range o.IpsElem {
-			o.States[idx].RhoG = ρG[idx]
-		}
-	}
-	if pl, ok := ivs["pl"]; ok {
-		for idx, _ := range o.IpsElem {
-			o.States[idx].Pl = pl[idx]
-		}
-	}
-	if pg, ok := ivs["pg"]; ok {
-		for idx, _ := range o.IpsElem {
-			o.States[idx].Pg = pg[idx]
-		}
-	}
-	for idx, _ := range o.IpsElem {
-		ρL := o.States[idx].RhoL
-		ρG := o.States[idx].RhoG
-		pl := o.States[idx].Pl
-		pg := o.States[idx].Pg
-		if LogErr(o.Mdl.InitState(o.States[idx], ρL, ρG, pl, pg, 0), "state initialisation failed") {
-			return
+	// seepage face structures
+	if o.HasSeep {
+		o.Plmax = la.MatAlloc(len(o.NatBcs), len(o.IpsFace))
+		for idx, nbc := range o.NatBcs {
+			for jdx, ipf := range o.IpsFace {
+				iface := nbc.IdxFace
+				if LogErr(o.Shp.CalcAtFaceIp(o.X, ipf, iface), "SetIniIvs") {
+					return
+				}
+				switch nbc.Key {
+				case "seep":
+					_, pl, _ = o.fipvars(iface, sol)
+					o.Plmax[idx][jdx] = pl
+				}
+			}
 		}
 	}
 	return true
@@ -586,50 +622,30 @@ func (o *ElemP) ipvars(idx int, sol *Solution) (ok bool) {
 }
 
 // fipvars computes current values @ face integration points
-func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, z, pl, fl float64) {
-	ndim := Global.Ndim
+func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, pl, fl float64) {
 	Sf := o.Shp.Sf
-	iz := ndim - 1 // index of z-coordinate (elevation)
 	for i, m := range o.Shp.FaceLocalV[fidx] {
 		μ := o.Vid2seepId[m]
 		ρl += Sf[i] * o.ρl_ex[m]
-		z += Sf[i] * o.X[iz][m]
 		pl += Sf[i] * sol.Y[o.Pmap[m]]
 		fl += Sf[i] * sol.Y[o.Fmap[μ]]
 	}
 	return
 }
 
-// ramp implements the ramp function
-func (o *ElemP) ramp(x float64) float64 {
-	if o.Macaulay {
-		return fun.Ramp(x)
-	}
-	return fun.Sramp(x, o.βrmp)
-}
-
-// rampderiv returns the ramp function first derivative
-func (o *ElemP) rampD1(x float64) float64 {
-	if o.Macaulay {
-		return fun.Heav(x)
-	}
-	return fun.SrampD1(x, o.βrmp)
-}
-
 // add_natbcs_to_rhs adds natural boundary conditions to rhs
 func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 	// compute surface integral
-	var err error
-	var tmp float64
-	var ρl, z, pl, fl, plmax, g, rmp, rx, rf float64
-	for _, nbc := range o.NatBcs {
+	var mul float64
+	var ρl, pl, fl, plmax, g, rmp, rx, rf float64
+	for idx, nbc := range o.NatBcs {
 
-		// temporary value == function evaluation
-		tmp = nbc.Fcn.F(sol.T, nil)
+		// plmax multiplier
+		mul = nbc.Fcn.F(sol.T, nil)
 
 		// loop over ips of face
-		for _, ipf := range o.IpsFace {
+		for jdx, ipf := range o.IpsFace {
 
 			// interpolation functions and gradients @ face
 			iface := nbc.IdxFace
@@ -645,20 +661,20 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 			case "seep":
 
 				// variables extrapolated to face
-				ρl, z, pl, fl = o.fipvars(iface, sol)
-
-				// specified condition
-				plmax, _, err = Global.HydroSt.Calc(z)
-				if LogErr(err, "add_natbcs_to_rhs: cannot compute plmax") {
-					return
-				}
-				plmax *= tmp // tmp is a multiplier
+				ρl, pl, fl = o.fipvars(iface, sol)
+				plmax = o.Plmax[idx][jdx] * mul
 
 				// compute residuals
 				g = pl - plmax // Eq. (24)
 				rmp = o.ramp(fl + o.κ*g)
 				rx = ρl * rmp // Eq. (30)
 				rf = fl - rmp // Eq. (26)
+
+				// debug
+				//io.Pfyel("pl=%g plmax=%g g=%g\n", pl, plmax, g)
+				//io.Pfyel("pl=%g plmax=%g g=%g rmp=%g rx=%g rf=%g\n", pl, plmax, g, rmp, rx, rf)
+				//panic("stop")
+
 				for i, m := range o.Shp.FaceLocalV[iface] {
 					μ := o.Vid2seepId[m]
 					fb[o.Pmap[m]] -= coef * Sf[i] * rx
@@ -686,17 +702,16 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
 	// compute surface integral
 	nverts := o.Shp.Nverts
-	var err error
-	var tmp float64
-	var ρl, z, pl, fl, plmax, g, rmp, rmpD float64
+	var mul float64
+	var ρl, pl, fl, plmax, g, rmp, rmpD float64
 	var drxdpl, drxdfl, drfdpl, drfdfl float64
-	for _, nbc := range o.NatBcs {
+	for idx, nbc := range o.NatBcs {
 
-		// temporary value == function evaluation
-		tmp = nbc.Fcn.F(sol.T, nil)
+		// plmax multiplier
+		mul = nbc.Fcn.F(sol.T, nil)
 
 		// loop over ips of face
-		for _, ipf := range o.IpsFace {
+		for jdx, ipf := range o.IpsFace {
 
 			// interpolation functions and gradients @ face
 			iface := nbc.IdxFace
@@ -712,14 +727,8 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 			case "seep":
 
 				// variables extrapolated to face
-				ρl, z, pl, fl = o.fipvars(iface, sol)
-
-				// specified condition
-				plmax, _, err = Global.HydroSt.Calc(z)
-				if LogErr(err, "add_natbcs_to_jac: cannot compute plmax") {
-					return
-				}
-				plmax *= tmp // tmp is a multiplier
+				ρl, pl, fl = o.fipvars(iface, sol)
+				plmax = o.Plmax[idx][jdx] * mul
 
 				// compute derivatives
 				g = pl - plmax // Eq. (24)
@@ -748,4 +757,20 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 		}
 	}
 	return true
+}
+
+// ramp implements the ramp function
+func (o *ElemP) ramp(x float64) float64 {
+	if o.Macaulay {
+		return fun.Ramp(x)
+	}
+	return fun.Sramp(x, o.βrmp)
+}
+
+// rampderiv returns the ramp function first derivative
+func (o *ElemP) rampD1(x float64) float64 {
+	if o.Macaulay {
+		return fun.Heav(x)
+	}
+	return fun.SrampD1(x, o.βrmp)
 }

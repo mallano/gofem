@@ -481,11 +481,6 @@ func ReadSim(dir, fn string, erasefiles bool) *Simulation {
 			if o.Gfcn == nil {
 				o.Gfcn = &fun.Cte{C: 10}
 			}
-
-			// geost/hydrost data
-			if stg.GeoSt != nil {
-				stg.HydroSt = true
-			}
 		}
 
 		// update time

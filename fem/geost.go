@@ -46,17 +46,6 @@ func (o Layers) Less(i, j int) bool {
 
 // SetGeoSt sets the initial state to a hydrostatic condition
 func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
-
-	// check for geost data
-	geo := stg.GeoSt
-	if geo == nil {
-		return true
-	}
-
-	// check layers definition
-	if LogErrCond(len(geo.Layers) < 1, "geost: layers must be defined by stating what tags belong to which layer") {
-		return
-	}
 	return
 }
 

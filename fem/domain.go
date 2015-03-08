@@ -436,19 +436,22 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 	}
 
 	// initialise internal variables
-	for _, e := range o.ElemIntvars {
-		e.InitIvs(o.Sol)
-	}
-
-	// set initial values
-	if !o.SetHydroSt(stg) {
-		return
-	}
-	if !o.SetGeoSt(stg) {
-		return
-	}
-	if !o.SetIniStress(stg) {
-		return
+	if stg.HydroSt {
+		if !o.SetHydroSt(stg) {
+			return
+		}
+	} else if stg.GeoSt != nil {
+		if !o.SetGeoSt(stg) {
+			return
+		}
+	} else if stg.IniStress != nil {
+		if !o.SetIniStress(stg) {
+			return
+		}
+	} else {
+		for _, e := range o.ElemIntvars {
+			e.SetIniIvs(o.Sol, nil)
+		}
 	}
 
 	// logging
