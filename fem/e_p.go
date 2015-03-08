@@ -54,7 +54,7 @@ type ElemP struct {
 	Emat      [][]float64 // [nverts][nips] extrapolator matrix
 	DoExtrap  bool        // do extrapolation of ρl and Cpl => for use with flux and seepage conditions
 
-	// seepage face (seepP or seepH)
+	// seepage face
 	Nf         int     // number of fl variables
 	HasSeep    bool    // indicates if this element has seepage faces
 	Vid2seepId []int   // [nverts] maps local vertex id to index in Fmap
@@ -101,7 +101,7 @@ func init() {
 		}
 
 		// vertices on seepage faces
-		lverts := GetVertsWithCond(faceConds, "seepP", "seepH")
+		lverts := GetVertsWithCond(faceConds, "seep")
 		for _, m := range lverts {
 			if m < nverts { // avoid adding vertices of superelement (e.g. qua8 vertices in this qua4 cell)
 				info.Dofs[m] = append(info.Dofs[m], "fl")
@@ -158,7 +158,7 @@ func init() {
 
 		// vertices on seepage faces
 		var seepverts []int
-		lverts := GetVertsWithCond(faceConds, "seepP", "seepH")
+		lverts := GetVertsWithCond(faceConds, "seep")
 		for _, m := range lverts {
 			if m < o.Np { // avoid adding vertices of superelement (e.g. qua8 vertices in this qua4 cell)
 				seepverts = append(seepverts, m)
@@ -189,7 +189,7 @@ func init() {
 		// set natural boundary conditions
 		for _, fc := range faceConds {
 			o.NatBcs = append(o.NatBcs, &NaturalBc{fc.Cond, fc.FaceId, fc.Func, fc.Extra})
-			if fc.Cond == "qb" || fc.Cond == "seepP" || fc.Cond == "seepH" {
+			if fc.Cond == "qb" || fc.Cond == "seep" {
 				nv := o.Shp.Nverts
 				nip := len(o.IpsElem)
 				o.ρl_ex = make([]float64, nv)
@@ -620,6 +620,7 @@ func (o *ElemP) rampD1(x float64) float64 {
 func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 	// compute surface integral
+	var err error
 	var tmp float64
 	var ρl, z, pl, fl, plmax, g, rmp, rx, rf float64
 	for _, nbc := range o.NatBcs {
@@ -641,16 +642,17 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 			// select natural boundary condition type
 			switch nbc.Key {
-			case "seepP", "seepH":
+			case "seep":
 
 				// variables extrapolated to face
 				ρl, z, pl, fl = o.fipvars(iface, sol)
 
 				// specified condition
-				plmax = tmp
-				if nbc.Key == "seepH" {
-					plmax = max(o.γl*(tmp-z), 0.0)
+				plmax, _, err = Global.HydroSt.Calc(z)
+				if LogErr(err, "add_natbcs_to_rhs: cannot compute plmax") {
+					return
 				}
+				plmax *= tmp // tmp is a multiplier
 
 				// compute residuals
 				g = pl - plmax // Eq. (24)
@@ -684,6 +686,7 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
 	// compute surface integral
 	nverts := o.Shp.Nverts
+	var err error
 	var tmp float64
 	var ρl, z, pl, fl, plmax, g, rmp, rmpD float64
 	var drxdpl, drxdfl, drfdpl, drfdfl float64
@@ -706,16 +709,17 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
 			// select natural boundary condition type
 			switch nbc.Key {
-			case "seepP", "seepH":
+			case "seep":
 
 				// variables extrapolated to face
 				ρl, z, pl, fl = o.fipvars(iface, sol)
 
 				// specified condition
-				plmax = tmp
-				if nbc.Key == "seepH" {
-					plmax = max(o.γl*(tmp-z), 0.0)
+				plmax, _, err = Global.HydroSt.Calc(z)
+				if LogErr(err, "add_natbcs_to_jac: cannot compute plmax") {
+					return
 				}
+				plmax *= tmp // tmp is a multiplier
 
 				// compute derivatives
 				g = pl - plmax // Eq. (24)

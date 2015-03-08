@@ -139,8 +139,11 @@ func (o *EssentialBcs) add_single(key string, eq int, fcn fun.Func) {
 }
 
 // GetFirstYandCmap returns the initial "yandc" map with additional keys that EssentialBcs can handle
+//  rigid  -- define rigid element constraints
+//  incsup -- inclined support constraints
+//  hst    -- set hydrostatic pressures
 func GetIsEssenKeyMap() map[string]bool {
-	return map[string]bool{"rigid": true, "incsup": true, "H": true}
+	return map[string]bool{"rigid": true, "incsup": true, "hst": true}
 }
 
 // Set sets a constraint if it does NOT exist yet.
@@ -201,21 +204,13 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 	}
 
 	// hydraulic head
-	if key == "H" {
-
-		// get γl
-		var γl float64
-		if val, found := io.Keycode(extra, "gamL"); found {
-			γl = io.Atof(val)
-		} else {
-			LogErrCond(true, "gamL (unit weight of liquid) must be provided when using H (hydraulic head) as essential boundary condition")
-			return false // problem
-		}
+	if key == "hst" {
 
 		// set for all nodes
 		for _, nod := range nodes {
 
-			// create function: pl(t) = γl * H(t) - γl * z
+			// create function
+			// Note: fcn is a multiplier such that  pl = mul(t) * pl(z)
 			d := nod.GetDof("pl")
 			if d == nil {
 				continue // node doesn't have key. ex: pl in qua8/qua4 elements
@@ -224,7 +219,11 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 			if Global.Ndim == 3 {
 				z = nod.Vert.C[2] // 3D
 			}
-			pl := fun.Add{A: γl, Fa: fcn, B: -γl, Fb: &fun.Cte{C: z}}
+			plVal, _, err := Global.HydroSt.Calc(z)
+			if LogErr(err, "cannot set hst (hydrostatic) essential boundary condition") {
+				return
+			}
+			pl := fun.Mul{Fa: fcn, Fb: &fun.Cte{C: plVal}} // pl := mul(t) * plVal
 
 			// set constraint
 			o.add_single("pl", d.Eq, &pl)

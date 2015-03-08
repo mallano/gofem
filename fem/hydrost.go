@@ -39,6 +39,7 @@ type HydroStatic struct {
 	sol    ode.ODE
 }
 
+// Init initialises this structure
 func (o *HydroStatic) Init() {
 
 	// basic data
@@ -74,6 +75,7 @@ func (o *HydroStatic) Init() {
 	o.sol.Init("Radau5", 2, o.fcn, o.Jac, nil, nil, silent)
 }
 
+// Calc computes pressure and density
 func (o HydroStatic) Calc(z float64) (pl, ρL float64, err error) {
 	Δz := o.zwater - z
 	y := []float64{0, o.ρL0} // pl0, ρL0
@@ -88,9 +90,8 @@ func (o HydroStatic) Calc(z float64) (pl, ρL float64, err error) {
 // SetHydroSt sets the initial state to a hydrostatic condition
 func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
 
-	// check for hydrost data
-	hst := stg.HydroSt
-	if hst == nil {
+	// check for hydrost flag
+	if !stg.HydroSt {
 		return true
 	}
 
@@ -130,7 +131,7 @@ func (o *Domain) SetHydroSt(stg *inp.Stage) (ok bool) {
 		ivs := map[string][]float64{"pl": pl, "ρL": ρL}
 
 		// set element's states
-		if LogErrCond(!e.SetIvs(ivs), "hydrostatic: element's internal values setting failed") {
+		if LogErrCond(!e.SetIvs(ivs), "hydrost: element's internal values setting failed") {
 			return
 		}
 	}
