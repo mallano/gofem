@@ -1,5 +1,9 @@
 #!/bin/bash
 
-mpirun -np 4 gofem onepulse-qua9co
-GenVtu onepulse-qua9co
-go run doplot.go
+FILES="onepulse-qua9co linear-qua9co"
+
+for f in $FILES; do
+    mpirun -np 4 gofem $f
+#    GenVtu $f
+    go run doplot.go $f
+done

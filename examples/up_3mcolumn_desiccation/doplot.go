@@ -5,7 +5,10 @@
 package main
 
 import (
+	"flag"
+
 	"github.com/cpmech/gofem/out"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
 )
 
@@ -14,26 +17,56 @@ func main() {
 	// finalise analysis process and catch errors
 	defer out.End()
 
+	// input data
+	simfn := "onepulse-qua9co.sim"
+	flag.Parse()
+	if len(flag.Args()) > 0 {
+		simfn = flag.Arg(0)
+	}
+	if io.FnExt(simfn) == "" {
+		simfn += ".sim"
+	}
+
 	// start analysis process
-	out.Start("onepulse-qua9co.sim", 0, 0)
+	out.Start(simfn, 0, 0)
 
 	// define entities
 	out.Define("A B C D E", out.N{-5, -4, -3, -2, -1})
-	out.Define("a b c d e f g h i", out.P{{15, 0}, {15, 1}, {15, 2}, {15, 3}, {15, 4}, {15, 5}, {15, 6}, {15, 7}, {15, 8}})
+	out.Define("a b c d e", out.P{{15, 8}, {13, 8}, {8, 8}, {4, 8}, {0, 0}})
 
 	// load results
 	out.LoadResults(nil)
 
+	// styles
+	me := 10
+	S := []plt.Fmt{
+		plt.Fmt{C: "b", M: "*", Me: me},
+		plt.Fmt{C: "g", M: "o", Me: me},
+		plt.Fmt{C: "m", M: "x", Me: me},
+		plt.Fmt{C: "orange", M: "+", Me: me},
+		plt.Fmt{C: "r", M: "^", Me: me},
+	}
+
+	// pl
 	out.Splot("liquid pressure")
-	out.Plot("t", "pl", "A", plt.Fmt{"b", "*", "-", -1, -1, ""}, -1)
-	out.Plot("t", "pl", "B", plt.Fmt{"g", "o", "-", -1, -1, ""}, -1)
-	out.Plot("t", "pl", "C", plt.Fmt{"m", "x", "-", -1, -1, ""}, -1)
-	out.Plot("t", "pl", "D", plt.Fmt{"orange", "+", "-", -1, -1, ""}, -1)
-	out.Plot("t", "pl", "E", plt.Fmt{"r", "^", "-", -1, -1, ""}, -1)
+	for i, l := range []string{"A", "B", "C", "D", "E"} {
+		out.Plot("t", "pl", l, S[i], -1)
+	}
+
+	// uy
+	out.Splot("displacements")
+	for i, l := range []string{"A", "B", "C", "D", "E"} {
+		out.Plot("t", "uy", l, S[i], -1)
+	}
 
 	out.Splot("liquid saturation")
-	for _, l := range []string{"a", "b", "c", "d", "e", "f", "g", "h", "i"} {
-		out.Plot("t", "sl", l, plt.Fmt{}, -1)
+	for i, l := range []string{"a", "b", "c", "d", "e"} {
+		out.Plot("t", "sl", l, S[i], -1)
+	}
+
+	out.Splot("stresses")
+	for i, l := range []string{"a", "b", "c", "d", "e"} {
+		out.Plot("t", "sy", l, S[i], -1)
 	}
 
 	// show
