@@ -25,15 +25,15 @@ func main() {
 	out.LoadResults(nil)
 
 	out.Splot("liquid pressure")
-	out.Plt("t", "pl", "A", plt.FmtS{"b*-"}, -1)
-	out.Plt("t", "pl", "B", plt.FmtS{"go-"}, -1)
-	out.Plt("t", "pl", "C", plt.FmtS{"mx-"}, -1)
-	out.Plt("t", "pl", "D", plt.FmtL{M: "+", C: "orange", Ls: "-"}, -1)
-	out.Plt("t", "pl", "E", plt.FmtS{"r^-"}, -1)
+	out.Plot("t", "pl", "A", plt.Fmt{"b", "*", "-", -1, -1, ""}, -1)
+	out.Plot("t", "pl", "B", plt.Fmt{"g", "o", "-", -1, -1, ""}, -1)
+	out.Plot("t", "pl", "C", plt.Fmt{"m", "x", "-", -1, -1, ""}, -1)
+	out.Plot("t", "pl", "D", plt.Fmt{"orange", "+", "-", -1, -1, ""}, -1)
+	out.Plot("t", "pl", "E", plt.Fmt{"r", "^", "-", -1, -1, ""}, -1)
 
 	out.Splot("liquid saturation")
 	for _, l := range []string{"a", "b", "c", "d", "e", "f", "g", "h", "i"} {
-		out.Plt("t", "sl", l, plt.FmtS{""}, -1)
+		out.Plot("t", "sl", l, plt.Fmt{}, -1)
 	}
 
 	// show

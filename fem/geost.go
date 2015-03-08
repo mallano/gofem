@@ -232,6 +232,7 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 			dof := nod.GetDof("pl")
 			if dof != nil {
 				o.Sol.Y[dof.Eq] = s.pl
+				//io.Pforan("z=%v pl=%v\n", z, s.pl)
 			}
 		}
 

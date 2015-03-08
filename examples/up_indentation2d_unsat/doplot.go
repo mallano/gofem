@@ -30,8 +30,7 @@ func main() {
 		pc_a[i] = pg_a[i] - pl_a[i]
 	}
 
-	//out.Plt("t", "sl", "a", plt.FmtS{""}, -1)
-	out.Plt(pc_a, "sl", "a", plt.FmtS{""}, -1)
+	out.Plot(pc_a, "sl", "a", plt.Fmt{}, -1)
 
 	// show
 	out.Draw("", "", true)
