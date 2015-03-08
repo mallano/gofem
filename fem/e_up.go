@@ -729,12 +729,12 @@ func (o ElemUP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 	// compute surface integral
 	ndim := Global.Ndim
 	u_nverts := o.U.Shp.Nverts
-	var mul float64
+	var shift float64
 	var pl, fl, plmax, g, rmp float64
 	for idx, nbc := range o.P.NatBcs {
 
-		// plmax multiplier
-		mul = nbc.Fcn.F(sol.T, nil)
+		// plmax shift
+		shift = nbc.Fcn.F(sol.T, nil)
 
 		// loop over ips of face
 		for jdx, ipf := range o.P.IpsFace {
@@ -754,7 +754,10 @@ func (o ElemUP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
 				// variables extrapolated to face
 				_, pl, fl = o.P.fipvars(iface, sol)
-				plmax = o.P.Plmax[idx][jdx] * mul
+				plmax = o.P.Plmax[idx][jdx] - shift
+				if plmax < 0 {
+					plmax = 0
+				}
 
 				// compute derivatives
 				g = pl - plmax // Eq. (24)

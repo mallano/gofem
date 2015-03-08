@@ -5,10 +5,9 @@
   },
   "functions" : [
     { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
-    { "name":"Lmul", "type":"cte", "prms":[{"n":"c", "v":1}] },
-    { "name":"Rmul", "type":"rmp", "prms":[
-      { "n":"ca", "v":1   },
-      { "n":"cb", "v":0.2 },
+    { "name":"shift", "type":"rmp", "prms":[
+      { "n":"ca", "v":0   },
+      { "n":"cb", "v":80  },
       { "n":"ta", "v":0   },
       { "n":"tb", "v":1e3 }]
     }
@@ -31,8 +30,8 @@
       "hydrost" : true,
       "seepfaces" : [-11],
       "facebcs" : [
-        { "tag":-13, "keys":["hst"],  "funcs":["Lmul"] },
-        { "tag":-11, "keys":["seep"], "funcs":["Rmul"], "extra":"!plmax:hst" }
+        { "tag":-13, "keys":["hst"],  "funcs":["zero"] },
+        { "tag":-11, "keys":["seep"], "funcs":["shift"], "extra":"!plmax:hst" }
       ],
       "eleconds" : [
         { "tag":-1, "keys":["g"], "funcs":["grav"] }

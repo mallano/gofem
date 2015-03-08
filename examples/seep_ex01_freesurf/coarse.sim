@@ -1,42 +1,42 @@
 {
   "data" : {
     "matfile" : "materials.mat",
-    "debug" : false
+    "debug" : false,
+    "showR" : false
   },
   "functions" : [
-    { "name":"Hl", "type":"cte", "prms":[{"n":"c", "v":10}] },
-    { "name":"Hr", "type":"rmp", "prms":[
-      { "n":"ca", "v":10  },
-      { "n":"cb", "v":2   },
+    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
+    { "name":"shift", "type":"rmp", "prms":[
+      { "n":"ca", "v":0   },
+      { "n":"cb", "v":80  },
       { "n":"ta", "v":0   },
       { "n":"tb", "v":1e3 }]
-    },
-    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] }
+    }
   ],
   "regions" : [
     {
       "mshfile"   : "msh/coarse.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"ex 1 and 2", "type":"p", "extra":"!bet:70" },
-        { "tag":-2, "mat":"ex 1 and 2", "type":"p", "extra":"!bet:70" }
+        { "tag":-1, "mat":"ex 1 and 2", "type":"p", "extra":"!bet:70 !kap:1 !mac:1" },
+        { "tag":-2, "mat":"ex 1 and 2", "type":"p", "extra":"!bet:70 !kap:1 !mac:1" }
       ]
     }
   ],
   "stages" : [
     {
       "desc" : "decrease water level @ right face",
-      "hydrost" : { "gamw":10 },
+      "hydrost" : true,
       "seepfaces" : [-11],
       "facebcs" : [
-        { "tag":-13, "keys":["H"],     "funcs":["Hl"], "extra":"!gamL:10" },
-        { "tag":-11, "keys":["seepH"], "funcs":["Hr"], "extra":"!gamL:10" }
+        { "tag":-13, "keys":["hst"],  "funcs":["zero"] },
+        { "tag":-11, "keys":["seep"], "funcs":["shift"], "extra":"!plmax:hst" }
       ],
       "eleconds" : [
         { "tag":-1, "keys":["g"], "funcs":["grav"] },
         { "tag":-2, "keys":["g"], "funcs":["grav"] }
       ],
       "control" : {
-        "tf"    : 1000,
+        "tf"    : 1e3,
         "dt"    : 1,
         "dtout" : 10
       }

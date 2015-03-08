@@ -5,6 +5,7 @@
 package fem
 
 import (
+	"math"
 	"sort"
 	"testing"
 
@@ -19,6 +20,8 @@ func Test_up01a(tst *testing.T) {
 	/* this tests simulates seepage flow along a column
 	 * by reducing the initial hydrostatic pressure at
 	 * at the bottom of the column
+	 *
+	 *   using mesh from col104elay.msh
 	 *
 	 *      Nodes / Tags                       Equations
 	 *                              ux uy pl               ux uy pl
@@ -51,7 +54,7 @@ func Test_up01a(tst *testing.T) {
 	 */
 
 	// capture errors and flush log
-	verbose()
+	//verbose()
 	defer End()
 
 	//verbose()
@@ -169,7 +172,8 @@ func Test_up01a(tst *testing.T) {
 			case "uy":
 				chk.Scalar(tst, io.Sf("nod %3d : uy(@ %4g)= %6g", nod.Vert.Id, z, u), 1e-17, u, 0)
 			case "pl":
-				chk.Scalar(tst, io.Sf("nod %3d : pl(@ %4g)= %6g", nod.Vert.Id, z, u), 1e-17, u, 100-10*z)
+				plC, _, _ := Global.HydroSt.Calc(z)
+				chk.Scalar(tst, io.Sf("nod %3d : pl(@ %4g)= %6g", nod.Vert.Id, z, u), 1e-13, u, plC)
 			}
 		}
 	}
@@ -181,8 +185,9 @@ func Test_up01a(tst *testing.T) {
 		for idx, ip := range e.P.IpsElem {
 			s := e.P.States[idx]
 			z := e.P.Shp.IpRealCoords(e.P.X, ip)[1]
-			chk.Scalar(tst, io.Sf("sl(@ %18g)= %18g", z, s.Sl), 1e-17, s.Sl, 1)
-			chk.Scalar(tst, io.Sf("pl(@ %18g)= %18g", z, s.Pl), 1e-13, s.Pl, 100-10*z)
+			plC, _, _ := Global.HydroSt.Calc(z)
+			chk.AnaNum(tst, io.Sf("sl(z=%11.8f)", z), 1e-17, s.Sl, 1, chk.Verbose)
+			chk.AnaNum(tst, io.Sf("pl(z=%11.8f)", z), 1e-4, s.Pl, plC, chk.Verbose)
 		}
 	}
 
@@ -239,9 +244,16 @@ func Test_up01a(tst *testing.T) {
 			sv := sig.F(z, nil)
 			sve := sv + pres.F(z, nil)
 			she := sve * K0
-			sze := ν * (she + sve)
-			σe_cor := []float64{she, sve, sze, 0}
-			chk.Vector(tst, "σe", 1e-13, σe, σe_cor)
+			if math.Abs(σe[2]-σe[0]) > 1e-17 {
+				tst.Errorf("[1;31mσx is not equal to σz: %g != %g[0m\n", σe[2], σe[0])
+				return
+			}
+			if math.Abs(σe[3]) > 1e-17 {
+				tst.Errorf("[1;31mσxy is not equal to zero: %g != 0[0m\n", σe[3])
+				return
+			}
+			chk.AnaNum(tst, io.Sf("sx(z=%11.8f)", z), 0.000376, σe[0], she, chk.Verbose)
+			chk.AnaNum(tst, io.Sf("sy(z=%11.8f)", z), 0.00151, σe[1], sve, chk.Verbose)
 		}
 	}
 	return
@@ -251,43 +263,20 @@ func Test_up01b(tst *testing.T) {
 
 	// capture errors and flush log
 	defer End()
-	//defer func() {
-	//if err := recover(); err != nil {
-	//}
-	//}()
 
 	//verbose()
 	chk.PrintTitle("up01b")
 
 	// start simulation
-	if !Start("data/up01onelay.sim", true, chk.Verbose) {
-		chk.Panic("cannot start simulation")
-	}
-
-	// run simulation
-	if !Run() {
-		chk.Panic("cannot run simulation\n")
-	}
-}
-
-func Test_up02(tst *testing.T) {
-
-	// capture errors and flush log
-	defer End()
-
-	//verbose()
-	chk.PrintTitle("up02")
-
-	// start simulation
-	if !Start("data/up02.sim", true, chk.Verbose) {
+	if !Start("data/up01.sim", true, chk.Verbose) {
 		chk.Panic("cannot start simulation")
 	}
 
 	// for debugging Kb
 	if true {
 		defer up_DebugKb(&testKb{
-			tst: tst, eid: 69, tol: 1e-4, verb: chk.Verbose,
-			ni: 1, nj: 1, itmin: 1, itmax: -1, tmin: 7, tmax: 7,
+			tst: tst, eid: 3, tol: 1e-10, verb: chk.Verbose,
+			ni: 1, nj: 1, itmin: 0, itmax: -1, tmin: 1000, tmax: 1000,
 		})()
 	}
 

@@ -637,12 +637,12 @@ func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, pl, fl float64) {
 func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 	// compute surface integral
-	var mul float64
+	var shift float64
 	var ρl, pl, fl, plmax, g, rmp, rx, rf float64
 	for idx, nbc := range o.NatBcs {
 
-		// plmax multiplier
-		mul = nbc.Fcn.F(sol.T, nil)
+		// plmax shift
+		shift = nbc.Fcn.F(sol.T, nil)
 
 		// loop over ips of face
 		for jdx, ipf := range o.IpsFace {
@@ -662,7 +662,10 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 				// variables extrapolated to face
 				ρl, pl, fl = o.fipvars(iface, sol)
-				plmax = o.Plmax[idx][jdx] * mul
+				plmax = o.Plmax[idx][jdx] - shift
+				if plmax < 0 {
+					plmax = 0
+				}
 
 				// compute residuals
 				g = pl - plmax // Eq. (24)
@@ -702,13 +705,13 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
 	// compute surface integral
 	nverts := o.Shp.Nverts
-	var mul float64
+	var shift float64
 	var ρl, pl, fl, plmax, g, rmp, rmpD float64
 	var drxdpl, drxdfl, drfdpl, drfdfl float64
 	for idx, nbc := range o.NatBcs {
 
-		// plmax multiplier
-		mul = nbc.Fcn.F(sol.T, nil)
+		// plmax shift
+		shift = nbc.Fcn.F(sol.T, nil)
 
 		// loop over ips of face
 		for jdx, ipf := range o.IpsFace {
@@ -728,7 +731,10 @@ func (o ElemP) add_natbcs_to_jac(sol *Solution) (ok bool) {
 
 				// variables extrapolated to face
 				ρl, pl, fl = o.fipvars(iface, sol)
-				plmax = o.Plmax[idx][jdx] * mul
+				plmax = o.Plmax[idx][jdx] - shift
+				if plmax < 0 {
+					plmax = 0
+				}
 
 				// compute derivatives
 				g = pl - plmax // Eq. (24)

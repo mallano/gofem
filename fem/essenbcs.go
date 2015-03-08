@@ -210,7 +210,7 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 		for _, nod := range nodes {
 
 			// create function
-			// Note: fcn is a multiplier such that  pl = mul(t) * pl(z)
+			// Note: fcn is a shift such that  pl = pl(z) - shift(t)
 			d := nod.GetDof("pl")
 			if d == nil {
 				continue // node doesn't have key. ex: pl in qua8/qua4 elements
@@ -223,7 +223,10 @@ func (o *EssentialBcs) Set(key string, nodes []*Node, fcn fun.Func, extra string
 			if LogErr(err, "cannot set hst (hydrostatic) essential boundary condition") {
 				return
 			}
-			pl := fun.Mul{Fa: fcn, Fb: &fun.Cte{C: plVal}} // pl := mul(t) * plVal
+			pl := fun.Add{
+				B: 1, Fb: &fun.Cte{C: plVal},
+				A: -1, Fa: fcn,
+			}
 
 			// set constraint
 			o.add_single("pl", d.Eq, &pl)

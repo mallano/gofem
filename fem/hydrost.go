@@ -48,7 +48,7 @@ func (o *HydroStatic) Init() {
 	o.g = Global.Sim.Gfcn.F(0, nil)
 	o.Cl = o.ρL0 / Global.Sim.WaterBulk
 
-	// x := {pl, ρl}
+	// x := {pl, ρL}
 	o.fcn = func(f []float64, x float64, y []float64, args ...interface{}) error {
 		Δz := args[0].(float64)
 		//ρL := o.ρL0
@@ -73,6 +73,7 @@ func (o *HydroStatic) Init() {
 
 	silent := true
 	o.sol.Init("Radau5", 2, o.fcn, o.Jac, nil, nil, silent)
+	o.sol.Distr = false // must be sure to disable this; otherwise it causes problems in parallel runs
 }
 
 // Calc computes pressure and density

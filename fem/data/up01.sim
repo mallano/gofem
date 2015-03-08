@@ -2,7 +2,7 @@
   "data" : {
     "desc"    : "coupled deformation of column due to pressure decrease",
     "matfile" : "porous.mat",
-    "showR"   : true
+    "showR"   : false
   },
   "functions" : [
     { "name":"pbot", "type":"rmp", "prms":[
@@ -37,8 +37,8 @@
       ],
       "control" : {
         "tf"    : 1000,
-        "dt"    : 10,
-        "dtout" : 10
+        "dt"    : 100,
+        "dtout" : 100
       }
     }
   ]

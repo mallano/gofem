@@ -4,14 +4,13 @@
     "debug" : false
   },
   "functions" : [
-    { "name":"Hl", "type":"cte", "prms":[{"n":"c", "v":5}] },
-    { "name":"Hr", "type":"rmp", "prms":[
-      { "n":"ca", "v":5   },
-      { "n":"cb", "v":1   },
+    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
+    { "name":"shift", "type":"rmp", "prms":[
+      { "n":"ca", "v":0   },
+      { "n":"cb", "v":40  },
       { "n":"ta", "v":0   },
       { "n":"tb", "v":1e3 }]
-    },
-    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] }
+    }
   ],
   "regions" : [
     {
@@ -24,11 +23,11 @@
   "stages" : [
     {
       "desc" : "decrease water level @ right face",
-      "hydrost" : { "gamw":10 },
+      "hydrost" : true,
       "seepfaces" : [-11],
       "facebcs" : [
-        { "tag":-13, "keys":["H"],     "funcs":["Hl"], "extra":"!gamL:10" },
-        { "tag":-11, "keys":["seepH"], "funcs":["Hr"], "extra":"!gamL:10" }
+        { "tag":-13, "keys":["hst"],  "funcs":["zero"] },
+        { "tag":-11, "keys":["seep"], "funcs":["shift"], "extra":"!plmax:hst" }
       ],
       "eleconds" : [
         { "tag":-1, "keys":["g"], "funcs":["grav"] }
