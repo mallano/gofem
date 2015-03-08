@@ -178,6 +178,11 @@ func Run() (runisok bool) {
 		mporous.LogModels()
 		msolid.LogModels()
 
+		// run first to find Lagrangian multipliers
+		for _, d := range domains {
+			run_iterations(t, 0, d, true)
+		}
+
 		// time loop
 		var Δt, Δtout float64
 		var lasttimestep bool
@@ -214,7 +219,7 @@ func Run() (runisok bool) {
 
 			// run iterations
 			for _, d := range domains {
-				if !run_iterations(t, Δt, d) {
+				if !run_iterations(t, Δt, d, false) {
 					return
 				}
 			}
@@ -246,14 +251,16 @@ func Run() (runisok bool) {
 }
 
 // run_iterations solves the nonlinear problem
-func run_iterations(t, Δt float64, d *Domain) (ok bool) {
+func run_iterations(t, Δt float64, d *Domain, skipStarVars bool) (ok bool) {
 
 	// zero accumulated increments
 	la.VecFill(d.Sol.ΔY, 0)
 
 	// calculate global starred vectors and interpolate starred variables from nodes to integration points
-	if LogErr(d.star_vars(Δt), "cannot compute starred variables") {
-		return
+	if !skipStarVars {
+		if LogErr(d.star_vars(Δt), "cannot compute starred variables") {
+			return
+		}
 	}
 
 	// auxiliary variables
