@@ -765,7 +765,10 @@ func (o Rjoint) Encode(enc Encoder) (ok bool) {
 
 // Decode decodes internal variables
 func (o Rjoint) Decode(dec Decoder) (ok bool) {
-	return !LogErr(dec.Decode(&o.States), "Decode")
+	if LogErr(dec.Decode(&o.States), "Decode") {
+		return
+	}
+	return o.BackupIvs()
 }
 
 // OutIpsData returns data from all integration points for output

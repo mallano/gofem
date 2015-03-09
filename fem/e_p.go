@@ -573,7 +573,10 @@ func (o ElemP) Encode(enc Encoder) (ok bool) {
 
 // Decode decodes internal variables
 func (o ElemP) Decode(dec Decoder) (ok bool) {
-	return !LogErr(dec.Decode(&o.States), "Decode")
+	if LogErr(dec.Decode(&o.States), "Decode") {
+		return
+	}
+	return o.BackupIvs()
 }
 
 // OutIpsData returns data from all integration points for output
