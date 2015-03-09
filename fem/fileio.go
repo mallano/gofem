@@ -63,11 +63,6 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 		return
 	}
 
-	// encode L
-	if LogErr(enc.Encode(o.Sol.L), "SaveSol") {
-		return
-	}
-
 	// transient simulations
 	if !Global.Sim.Data.Steady {
 
@@ -110,11 +105,6 @@ func (o *Domain) ReadSol(dir, fnkey string, tidx int) (ok bool) {
 
 	// decode Y
 	if LogErr(dec.Decode(&o.Sol.Y), "ReadSol") {
-		return
-	}
-
-	// decode L
-	if LogErr(dec.Decode(&o.Sol.L), "ReadSol") {
 		return
 	}
 
