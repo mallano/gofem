@@ -1,5 +1,9 @@
 #!/bin/bash
 
-mpirun -np 4 gofem coarse-elast-d2-q9 && GenVtu coarse-elast-d2-q9
-go run doplot.go
+FILES="a-coarse-elast-d2-q9 b-coarse-elast-d2-q9"
 
+for f in $FILES; do
+    mpirun -np 4 gofem $f
+    GenVtu $f
+    go run doplot.go $f
+done

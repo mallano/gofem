@@ -1,0 +1,52 @@
+{
+  "data" : {
+    "matfile" : "nmepaper.mat",
+    "showR"   : false
+  },
+  "functions" : [
+    { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
+    { "name":"pbot", "type":"cte", "prms":[{"n":"c", "v":15}] },
+    { "name":"loa_", "type":"cte", "prms":[{"n":"c", "v":0}] },
+    { "name":"load", "type":"exc1", "prms":[{"n":"A", "v":-500}, {"n":"b", "v":1e-3}] }
+  ],
+  "regions" : [
+    {
+      "desc"      : "square",
+      "mshfile"   : "msh/square-coarse-q9.msh",
+      "elemsdata" : [
+        { "tag":-1, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0" },
+        { "tag":-2, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0" },
+        { "tag":-3, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0" }
+      ]
+    }
+  ],
+  "solver" : {
+    "Atol"     : 1e-12,
+    "Rtol"     : 1e-12,
+    "FbTol"    : 1e-12,
+    "FbMin"    : 1e-12,
+    "thCombo1" : true
+  },
+  "stages" : [
+    {
+      "desc"  : "apply cyclic load",
+      "import" : { "dir":"/tmp/gofem/a-coarse-elast-d2-q9", "fnk":"a-coarse-elast-d2-q9" },
+      "facebcs" : [
+        { "tag":-10, "keys":["uy","pl"], "funcs":["zero","pbot"] },
+        { "tag":-11, "keys":["ux"], "funcs":["zero"] },
+        { "tag":-13, "keys":["ux"], "funcs":["zero"] },
+        { "tag":-14, "keys":["qn"], "funcs":["load"] }
+      ],
+      "eleconds" : [
+        { "tag":-1, "keys":["g"], "funcs":["grav"] },
+        { "tag":-2, "keys":["g"], "funcs":["grav"] },
+        { "tag":-3, "keys":["g"], "funcs":["grav"] }
+      ],
+      "control" : {
+        "tf"    : 4000,
+        "dt"    : 1,
+        "dtout" : 100
+      }
+    }
+  ]
+}

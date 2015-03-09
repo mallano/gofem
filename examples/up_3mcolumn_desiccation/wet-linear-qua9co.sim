@@ -32,7 +32,7 @@
   },
   "stages" : [
     {
-      "import" : "/tmp/gofem/linear-qua9co/linear-qua9co.sim",
+      "import" : { "dir":"/tmp/gofem/linear-qua9co", "fnk":"linear-qua9co" },
       "facebcs" : [
         { "tag":-10, "keys":["uy","pl"], "funcs":["zero","pbot"] },
         { "tag":-11, "keys":["ux"],      "funcs":["zero"] },

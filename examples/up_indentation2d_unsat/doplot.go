@@ -5,7 +5,10 @@
 package main
 
 import (
+	"flag"
+
 	"github.com/cpmech/gofem/out"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/plt"
 )
 
@@ -14,8 +17,18 @@ func main() {
 	// finalise analysis process and catch errors
 	defer out.End()
 
+	// input data
+	simfn := "a-coarse-elast-d2-q9"
+	flag.Parse()
+	if len(flag.Args()) > 0 {
+		simfn = flag.Arg(0)
+	}
+	if io.FnExt(simfn) == "" {
+		simfn += ".sim"
+	}
+
 	// start analysis process
-	out.Start("coarse-elast-d2-q9.sim", 0, 0)
+	out.Start(simfn, 0, 0)
 
 	// define entities
 	out.Define("a", out.P{{18, 8}})
@@ -30,7 +43,8 @@ func main() {
 		pc_a[i] = pg_a[i] - pl_a[i]
 	}
 
-	out.Plot(pc_a, "sl", "a", plt.Fmt{}, -1)
+	out.Plot(pc_a, "sl", "a", plt.Fmt{M: "o"}, -1)
+	out.Csplot.Xlbl = "$p_c$"
 
 	// show
 	out.Draw("", "", true)
