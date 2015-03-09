@@ -225,6 +225,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 					gverts := o.faceLocal2globalVerts(lverts, c)
 					for j, key := range faceBc.Keys {
 						fcn := Global.Sim.Functions.Get(faceBc.Funcs[j])
+						if LogErrCond(fcn == nil, "cannot find function named %q corresponding to face tag %d (@ element %d)", faceBc.Funcs[j], faceTag, c.Id) {
+							return
+						}
 						fcond := &FaceCond{faceId, lverts, gverts, key, fcn, faceBc.Extra}
 						fconds := o.FaceConds[c.Id]
 						o.FaceConds[c.Id] = append(fconds, fcond)
