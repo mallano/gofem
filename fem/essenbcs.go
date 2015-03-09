@@ -89,11 +89,7 @@ func (o *EssentialBcs) Build(ny int) (nλ, nnzA int) {
 
 	// debug
 	if false {
-		if Global.Rank == 0 {
-			log.Printf("\n\nAm=%v\n", o.Am)
-		} else {
-			log.Printf("\n\nAm=%v\n", o.Am)
-		}
+		log.Printf("\n\nAm=%v\n", o.Am)
 	}
 	return
 }
