@@ -15,14 +15,9 @@ import (
 
 // Summary records summary of outputs
 type Summary struct {
-
-	// essential
 	Nproc    int         // number of processors used in last last run; equal to 1 if not distributed
 	OutTimes []float64   // [nOutTimes] output times
 	Resids   utl.DblList // [nTimes][nIter] residuals (if Stat is on; includes all stages)
-
-	// auxiliary
-	cinc int // current time-step increment (used)
 }
 
 // SaveSums saves summary to disc
@@ -46,43 +41,36 @@ func (o Summary) Save() (ok bool) {
 	}
 
 	// save file
-	return save_file("SaveSum", "summary", out_sum_path(Global.Rank), &buf)
+	fn := out_sum_path(Global.Dirout, Global.Fnkey, Global.Rank)
+	return save_file("SaveSum", "summary", fn, &buf)
 }
 
 // ReadSum reads summary back
-func (o *Summary) Read() (ok bool) {
+//  Note: returns nil on errors
+func ReadSum(dirout, fnamekey string) (o *Summary) {
 
 	// open file
-	fil, err := os.Open(out_sum_path(0)) // read always from proc # 0
+	fn := out_sum_path(dirout, fnamekey, 0) // reading always from proc # 0
+	fil, err := os.Open(fn)
 	if LogErr(err, "ReadSum") {
-		return
+		return nil
 	}
 	defer func() {
 		LogErr(fil.Close(), "ReadSum: cannot close file")
 	}()
 
 	// decode summary
+	var sum Summary
 	dec := GetDecoder(fil)
-	err = dec.Decode(&o)
+	err = dec.Decode(&sum)
 	if LogErr(err, "ReadSum") {
-		return
+		return nil
 	}
-	return true
-}
-
-// AddResid adds the residual value for a given iteration
-func (o Summary) AddResid(iter int, resid float64) {
-	// update time-step counter
-	if iter == 0 && o.cinc != 0 {
-		o.cinc += 1
-	}
-
-	// add residual
-	o.Resids.Append(o.cinc, resid)
+	return &sum
 }
 
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
 
-func out_sum_path(proc int) string {
-	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_sum.%s", Global.Sim.Data.FnameKey, proc, Global.Sim.Data.Encoder))
+func out_sum_path(dirout, fnamekey string, proc int) string {
+	return path.Join(dirout, io.Sf("%s_p%d_sum.%s", fnamekey, proc, Global.Enc))
 }

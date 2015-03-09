@@ -24,6 +24,7 @@ var (
 var (
 
 	// data set by Start
+	Sum       *fem.Summary     // summary
 	Dom       *fem.Domain      // FE domain
 	Ipoints   []*fem.OutIpData // all integration points
 	Cid2ips   [][]int          // [ncells][nip] maps cell id to index in Ipoints
@@ -31,8 +32,6 @@ var (
 	Ipkeys    map[string]bool  // all ip keys
 	NodBins   gm.Bins          // bins for nodes
 	IpsBins   gm.Bins          // bins for integration points
-
-	// auxiliary
 
 	// results loaded by LoadResults
 	R ResultsMap // maps labels => points
@@ -64,7 +63,8 @@ func Start(simfnpath string, stageIdx, regionIdx int) {
 	}
 
 	// read summary
-	if !fem.Global.Sum.Read() {
+	Sum = fem.ReadSum(fem.Global.Dirout, fem.Global.Fnkey)
+	if Sum == nil {
 		chk.Panic("cannot read summary file for simulation=%q\n", simfnpath)
 	}
 

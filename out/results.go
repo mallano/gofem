@@ -7,7 +7,6 @@ package out
 import (
 	"strings"
 
-	"github.com/cpmech/gofem/fem"
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/utl"
 )
@@ -56,15 +55,15 @@ func LoadResults(times []float64) {
 
 	// selected output times and indices
 	if times == nil {
-		times = fem.Global.Sum.OutTimes
+		times = Sum.OutTimes
 	}
-	I, T = utl.GetITout(fem.Global.Sum.OutTimes, times, TolT)
+	I, T = utl.GetITout(Sum.OutTimes, times, TolT)
 
 	// for each selected output time
 	for _, tidx := range I {
 
 		// input results into domain
-		if !Dom.In(tidx) {
+		if !Dom.In(Sum, tidx) {
 			chk.Panic("cannot load results into domain; please check log file")
 		}
 

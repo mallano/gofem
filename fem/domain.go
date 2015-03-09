@@ -448,6 +448,8 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 		if !o.SetIniStress(stg) {
 			return
 		}
+	} else if stg.Import {
+		// TODO
 	} else {
 		for _, e := range o.ElemIntvars {
 			e.SetIniIvs(o.Sol, nil)

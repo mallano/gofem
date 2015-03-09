@@ -27,7 +27,7 @@ type Decoder interface {
 
 // GetEncoder returns a new encoder
 func GetEncoder(w goio.Writer) Encoder {
-	if Global.Sim.Data.Encoder == "json" {
+	if Global.Enc == "json" {
 		return json.NewEncoder(w)
 	}
 	return gob.NewEncoder(w)
@@ -35,7 +35,7 @@ func GetEncoder(w goio.Writer) Encoder {
 
 // GetDecoder returns a new decoder
 func GetDecoder(r goio.Reader) Decoder {
-	if Global.Sim.Data.Encoder == "json" {
+	if Global.Enc == "json" {
 		return json.NewDecoder(r)
 	}
 	return gob.NewDecoder(r)
@@ -60,6 +60,11 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 
 	// encode Y
 	if LogErr(enc.Encode(o.Sol.Y), "SaveSol") {
+		return
+	}
+
+	// encode L
+	if LogErr(enc.Encode(o.Sol.L), "SaveSol") {
 		return
 	}
 
@@ -103,6 +108,11 @@ func (o *Domain) ReadSol(tidx int) (ok bool) {
 
 	// decode Y
 	if LogErr(dec.Decode(&o.Sol.Y), "ReadSol") {
+		return
+	}
+
+	// decode L
+	if LogErr(dec.Decode(&o.Sol.L), "ReadSol") {
 		return
 	}
 
@@ -183,8 +193,8 @@ func (o *Domain) Out(tidx int) (ok bool) {
 }
 
 // In performes the inverse operation from Out
-func (o *Domain) In(tidx int) (ok bool) {
-	for i := 0; i < Global.Sum.Nproc; i++ {
+func (o *Domain) In(sum *Summary, tidx int) (ok bool) {
+	for i := 0; i < sum.Nproc; i++ {
 		if !o.ReadIvs(tidx, i) {
 			return
 		}
@@ -195,11 +205,11 @@ func (o *Domain) In(tidx int) (ok bool) {
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
 
 func out_nod_path(tidx, proc int) string {
-	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_nod_%010d.%s", Global.Sim.Data.FnameKey, proc, tidx, Global.Sim.Data.Encoder))
+	return path.Join(Global.Dirout, io.Sf("%s_p%d_nod_%010d.%s", Global.Fnkey, proc, tidx, Global.Enc))
 }
 
 func out_ele_path(tidx, proc int) string {
-	return path.Join(Global.Sim.Data.DirOut, io.Sf("%s_p%d_ele_%010d.%s", Global.Sim.Data.FnameKey, proc, tidx, Global.Sim.Data.Encoder))
+	return path.Join(Global.Dirout, io.Sf("%s_p%d_ele_%010d.%s", Global.Fnkey, proc, tidx, Global.Enc))
 }
 
 func save_file(function, category, filename string, buf *bytes.Buffer) (ok bool) {

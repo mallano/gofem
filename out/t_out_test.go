@@ -39,9 +39,6 @@ func Test_out01(tst *testing.T) {
 		chk.Panic("cannot run FE simulation")
 	}
 
-	// clear old summary
-	fem.Global.Sum = nil
-
 	// start analysis process
 	Start("data/onequa4.sim", 0, 0)
 
@@ -183,9 +180,6 @@ func Test_out02(tst *testing.T) {
 	if !fem.Run() {
 		chk.Panic("cannot run FE simulation")
 	}
-
-	// clear old summary
-	fem.Global.Sum = nil
 
 	// start analysis process
 	Start("data/twoqua4.sim", 0, 0)

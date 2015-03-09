@@ -92,11 +92,10 @@ func Test_sigini02(tst *testing.T) {
 	}
 
 	// read results
-	sum := Global.Sum
-	sum.Read()
+	sum := ReadSum(Global.Dirout, Global.Fnkey)
 	io.Pforan("sum = %+v\n", sum)
 	ntout := len(sum.OutTimes)
-	d.In(ntout - 1)
+	d.In(sum, ntout-1)
 
 	// solution
 	var sol ana.CteStressPstrain

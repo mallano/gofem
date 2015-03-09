@@ -360,8 +360,7 @@ func Test_sg111(tst *testing.T) {
 	if doplot {
 
 		// read summary
-		sum := Global.Sum
-		sum.Read()
+		sum := ReadSum(Global.Dirout, Global.Fnkey)
 
 		// allocate domain
 		distr := false
@@ -439,8 +438,7 @@ func Test_sg114(tst *testing.T) {
 	if doplot {
 
 		// read summary
-		sum := Global.Sum
-		sum.Read()
+		sum := ReadSum(Global.Dirout, Global.Fnkey)
 
 		// allocate domain
 		distr := false
@@ -528,8 +526,7 @@ func Test_sg1121(tst *testing.T) {
 	if doplot {
 
 		// read summary
-		sum := Global.Sum
-		sum.Read()
+		sum := ReadSum(Global.Dirout, Global.Fnkey)
 
 		// allocate domain
 		distr := false

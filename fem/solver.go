@@ -32,21 +32,22 @@ var Global struct {
 	WspcStop []int // stop flags [nprocs]
 	WspcInum []int // workspace of integer numbers [nprocs]
 
-	// simulation and materials
-	Sim *inp.Simulation // simulation data
-	Sum *Summary        // output times and all residuals
+	// simulation, materials, meshes and convenience variables
+	Sim    *inp.Simulation // simulation data
+	Ndim   int             // space dimension
+	Dirout string          // directory for output of results
+	Fnkey  string          // filename key; e.g. mysim.sim => mysim
+	Enc    string          // encoder; e.g. "gob" or "json"
+	Stat   bool            // save residuals in summary
+	LogBcs bool            // log essential and ptnatural boundary conditions
+	Debug  bool            // debug flag
 
 	// auxiliar structures
-	Ndim     int          // space dimension
 	DynCoefs *DynCoefs    // dynamic coefficients
 	HydroSt  *HydroStatic // computes hydrostatic states
 
 	// for debugging
-	Debug   bool                    // debug flag
 	DebugKb func(d *Domain, it int) // debug Kb callback function
-
-	// options
-	LogBcs bool // log essential and ptnatural boundary conditions
 }
 
 // End must be called and the end to flush log file
@@ -75,7 +76,7 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	Global.WspcStop = make([]int, Global.Nproc)
 	Global.WspcInum = make([]int, Global.Nproc)
 
-	// simulation and  materials
+	// simulation and convenience variables
 	dir := filepath.Dir(simfilepath)
 	fn := filepath.Base(simfilepath)
 	Global.Sim = inp.ReadSim(dir, fn, erasefiles)
@@ -84,11 +85,12 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 		return
 	}
 	Global.Ndim = Global.Sim.Ndim
-
-	// debugging and statistics
-	Global.Debug = Global.Sim.Data.Debug
+	Global.Dirout = Global.Sim.Data.DirOut
+	Global.Fnkey = Global.Sim.Data.FnameKey
+	Global.Enc = Global.Sim.Data.Encoder
+	Global.Stat = Global.Sim.Data.Stat
 	Global.LogBcs = Global.Sim.Data.LogBcs
-	Global.Sum = new(Summary)
+	Global.Debug = Global.Sim.Data.Debug
 
 	// fix show residual flag
 	if !Global.Root {
@@ -139,9 +141,10 @@ func Run() (runisok bool) {
 
 	// summary of outputs; e.g. with output times
 	cputime := time.Now()
-	Global.Sum.OutTimes = []float64{t}
+	var sum Summary
+	sum.OutTimes = []float64{t}
 	defer func() {
-		Global.Sum.Save()
+		sum.Save()
 		if Global.Verbose && !Global.Debug {
 			io.Pf("\nfinal t  = %v\n", t)
 			io.Pfblue2("cpu time = %v\n", time.Now().Sub(cputime))
@@ -214,14 +217,14 @@ func Run() (runisok bool) {
 
 			// run iterations
 			for _, d := range domains {
-				if !run_iterations(t, Δt, d) {
+				if !run_iterations(t, Δt, d, &sum) {
 					return
 				}
 			}
 
 			// perform output
 			if t >= tout || lasttimestep {
-				Global.Sum.OutTimes = append(Global.Sum.OutTimes, t)
+				sum.OutTimes = append(sum.OutTimes, t)
 				for _, d := range domains {
 					//if true {
 					if false {
@@ -246,7 +249,7 @@ func Run() (runisok bool) {
 }
 
 // run_iterations solves the nonlinear problem
-func run_iterations(t, Δt float64, d *Domain) (ok bool) {
+func run_iterations(t, Δt float64, d *Domain, sum *Summary) (ok bool) {
 
 	// zero accumulated increments
 	la.VecFill(d.Sol.ΔY, 0)
@@ -305,7 +308,9 @@ func run_iterations(t, Δt float64, d *Domain) (ok bool) {
 		largFb = la.VecLargest(d.Fb, 1)
 
 		// save residual
-		Global.Sum.Resids.Append(it, largFb)
+		if Global.Stat {
+			sum.Resids.Append(it, largFb)
+		}
 
 		// check largFb value
 		if it == 0 {

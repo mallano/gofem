@@ -47,7 +47,8 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 	}
 
 	// read summary
-	if !Global.Sum.Read() {
+	sum := ReadSum(Global.Dirout, Global.Fnkey)
+	if sum == nil {
 		tst.Error("cannot read summary file for simulation=%q\n", simfname)
 		return
 	}
@@ -91,7 +92,7 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 		}
 
 		// load gofem results
-		if !d.In(tidx) {
+		if !d.In(sum, tidx) {
 			tst.Errorf("TestingCompareResultsU: reading of results failed\n")
 			return
 		}
