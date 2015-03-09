@@ -89,8 +89,7 @@ func (o *Driver) Run(pth *Path) (err error) {
 	o.Res[0].Sig[0] = pth.MultS * pth.Sx[0]
 	o.Res[0].Sig[1] = pth.MultS * pth.Sy[0]
 	o.Res[0].Sig[2] = pth.MultS * pth.Sz[0]
-	σ0 := make([]float64, o.nsig)
-	copy(σ0, o.Res[0].Sig)
+	copy(o.Res[0].Sig0, o.Res[0].Sig)
 
 	// auxiliary variables
 	Δσ := make([]float64, o.nsig)
@@ -153,7 +152,7 @@ func (o *Driver) Run(pth *Path) (err error) {
 
 				// update stresses
 				o.Res[k].Set(o.Res[k-1])
-				err = sml.Update(o.Res[k], σ0, o.Eps[k], Δε)
+				err = sml.Update(o.Res[k], o.Eps[k], Δε)
 				if err != nil {
 					if !o.Silent {
 						io.Pfred(_driver_err02, err)
@@ -189,7 +188,7 @@ func (o *Driver) Run(pth *Path) (err error) {
 									Δεtmp[l] = εnew[l] - εold[l]
 								}
 								stmp.Set(o.Res[k-1])
-								err = sml.Update(stmp, σ0, εnew, Δεtmp)
+								err = sml.Update(stmp, εnew, Δεtmp)
 								res, εnew[j] = stmp.Sig[i], tmp
 								return
 							}, εnew[j])

@@ -38,14 +38,14 @@ type Model interface {
 
 // Small defines rate type solid models for small strain analyses
 type Small interface {
-	Update(s *State, σ0, ε, Δε []float64) error        // updates stresses for given strains
+	Update(s *State, ε, Δε []float64) error            // updates stresses for given strains
 	CalcD(D [][]float64, s *State, firstIt bool) error // computes D = dσ_new/dε_new consistent with StressUpdate
 	ContD(D [][]float64, s *State) error               // computes D = dσ_new/dε_new continuous
 }
 
 // Large defines rate type solid models for large deformation analyses
 type Large interface {
-	Update(s *State, σ0, F, FΔ [][]float64) error          // updates stresses for new deformation F and FΔ
+	Update(s *State, F, FΔ [][]float64) error              // updates stresses for new deformation F and FΔ
 	CalcA(A [][][][]float64, s *State, firstIt bool) error // computes tangent modulus A = (2/J) * ∂τ/∂b . b - σ palm I
 }
 
