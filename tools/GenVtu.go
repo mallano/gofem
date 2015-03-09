@@ -146,7 +146,7 @@ func main() {
 	for tidx, t := range out.Sum.OutTimes {
 
 		// input results into domain
-		if !out.Dom.In(out.Sum, tidx) {
+		if !out.Dom.In(out.Sum, tidx, true) {
 			chk.Panic("cannot load results into domain; please check log file")
 		}
 

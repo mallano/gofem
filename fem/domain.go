@@ -466,7 +466,7 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 		if LogErrCond(sum == nil, "cannot import state from %s", stg.Import) {
 			return
 		}
-		if !o.In(sum, len(sum.OutTimes)-1) {
+		if !o.In(sum, len(sum.OutTimes)-1, false) {
 			return
 		}
 	}

@@ -67,7 +67,7 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 func (o *Domain) ReadSol(dir, fnkey string, tidx int) (ok bool) {
 
 	// open file
-	fn := out_nod_path(dir, fnkey, tidx, 0) // reading always from proc # 0
+	fn := out_nod_path(dir, fnkey, tidx, 0) // 0 => reading always from proc # 0
 	fil, err := os.Open(fn)
 	if LogErr(err, "ReadSol") {
 		return
@@ -149,11 +149,28 @@ func (o *Domain) Out(tidx int) (ok bool) {
 }
 
 // In performes the inverse operation from Out
-func (o *Domain) In(sum *Summary, tidx int) (ok bool) {
-	for i := 0; i < sum.Nproc; i++ {
-		if !o.ReadIvs(sum.Dirout, sum.Fnkey, tidx, i) {
-			return
+//
+//  allInOne -- indicates that all results must be read into the root processor only
+//              For example when plotting or generating VTU files (or testing)
+//
+//  If allInOne is false, each processor will read its part as described by Summary.
+//  Thus, recoreving the state as in the previous simulation.
+//
+func (o *Domain) In(sum *Summary, tidx int, allInOne bool) (ok bool) {
+
+	// serial run
+	if allInOne {
+		for i := 0; i < sum.Nproc; i++ {
+			if !o.ReadIvs(sum.Dirout, sum.Fnkey, tidx, i) {
+				return
+			}
 		}
+		return o.ReadSol(sum.Dirout, sum.Fnkey, tidx)
+	}
+
+	// parallel run
+	if !o.ReadIvs(sum.Dirout, sum.Fnkey, tidx, Global.Rank) {
+		return
 	}
 	return o.ReadSol(sum.Dirout, sum.Fnkey, tidx)
 }

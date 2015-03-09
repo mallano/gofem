@@ -63,7 +63,7 @@ func LoadResults(times []float64) {
 	for _, tidx := range I {
 
 		// input results into domain
-		if !Dom.In(Sum, tidx) {
+		if !Dom.In(Sum, tidx, true) {
 			chk.Panic("cannot load results into domain; please check log file")
 		}
 

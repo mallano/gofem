@@ -55,7 +55,7 @@ func Test_fileio01(tst *testing.T) {
 	io.Pfpink("domB.Sol.Y (before) = %v\n", domB.Sol.Y)
 
 	// read file
-	if !domB.ReadSol(dir, fnk, tidx) {
+	if !domB.ReadSol(dir, fnk, tidx, 0) {
 		tst.Errorf("test failed")
 		return
 	}

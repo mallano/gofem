@@ -92,7 +92,7 @@ func TestingCompareResultsU(tst *testing.T, simfname, cmpfname string, tolK, tol
 		}
 
 		// load gofem results
-		if !d.In(sum, tidx) {
+		if !d.In(sum, tidx, true) {
 			tst.Errorf("TestingCompareResultsU: reading of results failed\n")
 			return
 		}

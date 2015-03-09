@@ -378,7 +378,7 @@ func Test_sg111(tst *testing.T) {
 		ntout := len(sum.OutTimes)
 		uy := make([]float64, ntout)
 		for tidx := 0; tidx < ntout; tidx++ {
-			if !d.ReadSol(sum.Dirout, sum.Fnkey, tidx) {
+			if !d.ReadSol(sum.Dirout, sum.Fnkey, tidx, 0) {
 				tst.Errorf("cannot read solution\n")
 				return
 			}
@@ -456,7 +456,7 @@ func Test_sg114(tst *testing.T) {
 		ntout := len(sum.OutTimes)
 		uy := make([]float64, ntout)
 		for tidx := 0; tidx < ntout; tidx++ {
-			if !d.ReadSol(sum.Dirout, sum.Fnkey, tidx) {
+			if !d.ReadSol(sum.Dirout, sum.Fnkey, tidx, 0) {
 				tst.Errorf("test failed:\n")
 				return
 			}
@@ -544,7 +544,7 @@ func Test_sg1121(tst *testing.T) {
 		ntout := len(sum.OutTimes)
 		uy := make([]float64, ntout)
 		for tidx := 0; tidx < ntout; tidx++ {
-			if !d.ReadSol(sum.Dirout, sum.Fnkey, tidx) {
+			if !d.ReadSol(sum.Dirout, sum.Fnkey, tidx, 0) {
 				tst.Errorf("test failed:\n")
 				return
 			}
