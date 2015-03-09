@@ -48,6 +48,9 @@
 				<p>
 package ana implements analytical solutions
 </p>
+<p>
+package ana implements analytical solutions
+</p>
 
 			</div>
 		</div>
@@ -84,6 +87,20 @@ package ana implements analytical solutions
 					<dd>&nbsp; &nbsp; <a href="#CteStressPstrain.Solution">func (o CteStressPstrain) Solution(t float64) (σx, σy, σz, εx, εy float64)</a></dd>
 				
 			
+				
+				<dd><a href="#Hill">type Hill</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Hill.Getc">func (o Hill) Getc() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Hill.Init">func (o *Hill) Init(prms fun.Prms)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Hill.Sig">func (o Hill) Sig(c float64, R, SR, ST []float64)</a></dd>
+				
+			
 			
 			</dl>
 			</div><!-- #manual-nav -->
@@ -96,6 +113,8 @@ package ana implements analytical solutions
 			<span style="font-size:90%">
 			
 				<a href="/src/github.com/cpmech/gofem/ana/constantstress.go">constantstress.go</a>
+			
+				<a href="/src/github.com/cpmech/gofem/ana/pressurised_cylinder.go">pressurised_cylinder.go</a>
 			
 			</span>
 			</p>
@@ -219,6 +238,60 @@ Init initialises this structure
 Solution computes solution
 </p>
 
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="Hill">type <a href="https://github.com/cpmech/gofem/blob/master/ana/pressurised_cylinder.go?s=782:1104#L20">Hill</a></h2>
+			<pre>type Hill struct {
+    E <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Young&#39;s modulus</span>
+
+    P <a href="/pkg/builtin/#float64">float64</a> <span class="comment">// Pressure prescribed on the inner surface</span>
+
+    Y    <a href="/pkg/builtin/#float64">float64</a>
+    P0   <a href="/pkg/builtin/#float64">float64</a>
+    Plim <a href="/pkg/builtin/#float64">float64</a>
+    <span class="comment">// contains filtered or unexported fields</span>
+}</pre>
+			
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="Hill.Getc">func (Hill) <a href="https://github.com/cpmech/gofem/blob/master/ana/pressurised_cylinder.go?s=2231:2259#L88">Getc</a></h3>
+				<pre>func (o <a href="#Hill">Hill</a>) Getc() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Hill.Init">func (*Hill) <a href="https://github.com/cpmech/gofem/blob/master/ana/pressurised_cylinder.go?s=1141:1175#L37">Init</a></h3>
+				<pre>func (o *<a href="#Hill">Hill</a>) Init(prms <a href="/pkg/github.com/cpmech/gosl/fun/">fun</a>.<a href="/pkg/github.com/cpmech/gosl/fun/#Prms">Prms</a>)</pre>
+				<p>
+Init initialises this structure
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Hill.Sig">func (Hill) <a href="https://github.com/cpmech/gofem/blob/master/ana/pressurised_cylinder.go?s=3113:3162#L126">Sig</a></h3>
+				<pre>func (o <a href="#Hill">Hill</a>) Sig(c <a href="/pkg/builtin/#float64">float64</a>, R, SR, ST []<a href="/pkg/builtin/#float64">float64</a>)</pre>
+				
 				
 				
 				
