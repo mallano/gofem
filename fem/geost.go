@@ -14,12 +14,13 @@ import (
 )
 
 // geostate holds state @ top of layer
-type geostate struct{ pl, ρL, sl, ρ, σV float64 }
+type geostate struct{ pl, ρL, ρ, σV float64 }
 
 // GeoLayer holds information of one soil layer. It computes pressures (σVabs, pl) and
-// densities (ρL, ρ) based on the following model
+// densities (ρL, ρ) based on the following model (fully liquid saturated)
 //
 //    ρL  = ρL0 + Cl・pl   thus   dρL/dpl = Cl
+//    sl  = 1
 //    ρ   = nf・sl・ρL + (1 - nf)・ρS
 //    ns  = 1 - nf
 //
@@ -27,15 +28,13 @@ type geostate struct{ pl, ρL, sl, ρ, σV float64 }
 //    dZ   = (z - zmax)・dT
 //    dpl  = ρL(pl)・g・(-dZ)
 //    dpl  = ρL(pl)・g・(zmax - z)・dT
-//    dsl  = -Cc・dpl
-//    dσV  = ρ(pl,sl)・g・(zmax - z)・dT
+//    dσV  = ρ(pl)・g・(zmax - z)・dT
 //    Δz   = zmax - z
 //
-//            / dpl/dT \   / ρL(pl)・g・Δz                   \
-//            | dρL/dT |   | Cl・dpl/dT                      |
-//    dY/dT = | dsl/dT | = | -Cc・dpl/dT                     |
-//            | dρ/dT  |   | nf・dsl/dT・ρL + nf・sl・dρL/dT |
-//            \ dσV/dT /   \ ρ(pl,sl)・g・Δz                 /
+//            / dpl/dT \   / ρL(pl)・g・Δz  \
+//    dY/dT = | dρL/dT | = | Cl・dpl/dT     |
+//            | dρ/dT  |   | nf・sl・dρL/dT |
+//            \ dσV/dT /   \ ρ(pl)・g・Δz   /
 //
 type GeoLayer struct {
 	Tags  []int      // tags of cells within this layer
@@ -62,39 +61,37 @@ func (o *GeoLayer) Start(prev *geostate) {
 	// set state @ top
 	o.top = prev
 
-	// x := {pl, ρL, sl, ρ, σV} == geostate
+	// y := {pl, ρL, ρ, σV} == geostate
 	g := Global.Sim.Gfcn.F(0, nil)
 	nf := o.nf0
+	sl := 1.0
 	o.fcn = func(f []float64, x float64, y []float64, args ...interface{}) error {
 		Δz := args[0].(float64)
 		ρL := y[1]
-		sl := y[2]
-		ρ := y[3]
-		Cc := 0.0
-		f[0] = ρL * g * Δz             // dpl/dT
-		f[1] = o.Cl * f[0]             // dρL/dT
-		f[2] = -Cc * f[0]              // dsl/dT
-		f[3] = nf*f[2]*ρL + nf*sl*f[1] // dρ/dT
-		f[4] = ρ * g * Δz              // dσV/dT
+		ρ := y[2]
+		f[0] = ρL * g * Δz    // dpl/dT
+		f[1] = o.Cl * f[0]    // dρL/dT
+		f[2] = nf * sl * f[1] // dρ/dT
+		f[3] = ρ * g * Δz     // dσV/dT
 		return nil
 	}
 
 	// set ODE (using numerical Jacobian)
 	silent := true
-	o.sol.Init("Radau5", 5, o.fcn, nil, nil, nil, silent)
+	o.sol.Init("Radau5", 4, o.fcn, nil, nil, nil, silent)
 	o.sol.Distr = false // must be sure to disable this; otherwise it causes problems in parallel runs
 }
 
 // Calc computes state @ level z
 func (o GeoLayer) Calc(z float64) (*geostate, error) {
-	y := []float64{o.top.pl, o.top.ρL, o.top.sl, o.top.ρ, o.top.σV}
+	y := []float64{o.top.pl, o.top.ρL, o.top.ρ, o.top.σV}
 	Δz := o.Zmax - z
 	err := o.sol.Solve(y, 0, 1, 1, false, Δz)
 	if err != nil {
 		err = chk.Err("geost: failed when calculating state sing ODE solver: %v", err)
 		return nil, err
 	}
-	return &geostate{y[0], y[1], y[2], y[3], y[4]}, nil
+	return &geostate{y[0], y[1], y[2], y[3]}, nil
 }
 
 // GeoLayers is a set of Layer
@@ -201,20 +198,19 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 		var top *geostate
 		ρS := lay.RhoS0
 		nf := lay.nf0
+		sl := 1.0
 		if i == 0 {
 			pl := 0.0
 			ρL := Global.Sim.WaterRho0
-			sl := 1.0
 			ρ := nf*sl*ρL + (1.0-nf)*ρS
 			σV := 0.0
-			top = &geostate{pl, ρL, sl, ρ, σV}
+			top = &geostate{pl, ρL, ρ, σV}
 		} else {
 			top, err = L[i-1].Calc(L[i-1].Zmin)
 			if LogErr(err, "cannot compute state @ bottom of layer") {
 				return
 			}
 			ρL := top.ρL
-			sl := top.sl
 			top.ρ = nf*sl*ρL + (1.0-nf)*ρS
 		}
 
@@ -255,7 +251,7 @@ func (o *Domain) SetGeoSt(stg *inp.Stage) (ok bool) {
 						return
 					}
 					pl[i], ρL[i] = s.pl, s.ρL
-					p := s.pl * s.sl
+					p := s.pl * sl
 					σVe := -s.σV + p
 					σHe := lay.K0 * σVe
 					sx[i], sy[i], sz[i] = σHe, σVe, σHe
@@ -308,7 +304,7 @@ func (o *GeoLayer) get_porous_parameters(reg *inp.Region, ctag int) (ok bool) {
 
 // String prints geostate
 func (o *geostate) String() string {
-	return io.Sf("pl=%g ρL=%g sl=%g ρ=%g σV=%g\n", o.pl, o.ρL, o.sl, o.ρ, o.σV)
+	return io.Sf("pl=%g ρL=%g ρ=%g σV=%g\n", o.pl, o.ρL, o.ρ, o.σV)
 }
 
 // String prints a json formatted string with GeoLayers' content
