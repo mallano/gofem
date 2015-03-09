@@ -143,10 +143,10 @@ func main() {
 	}
 
 	// process results
-	for tidx, t := range fem.Global.Sum.OutTimes {
+	for tidx, t := range out.Sum.OutTimes {
 
 		// input results into domain
-		if !out.Dom.In(tidx) {
+		if !out.Dom.In(out.Sum, tidx) {
 			chk.Panic("cannot load results into domain; please check log file")
 		}
 
