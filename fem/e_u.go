@@ -43,7 +43,6 @@ type ElemU struct {
 	MdlLarge msolid.Large // model specialisation for large deformations
 
 	// internal variables
-	Sig0      [][]float64     // [nip][nsig] initial stresses
 	States    []*msolid.State // [nip] states
 	StatesBkp []*msolid.State // [nip] backup states
 
@@ -433,10 +432,10 @@ func (o *ElemU) SetIniIvs(sol *Solution, ivs map[string][]float64) (ok bool) {
 
 	// initial stresses
 	if _, ok := ivs["sx"]; ok {
-		o.Sig0 = Ivs2sigmas(nip, Global.Ndim, ivs)
 		for i := 0; i < nip; i++ {
-			copy(o.States[i].Sig, o.Sig0[i])
-			copy(o.StatesBkp[i].Sig, o.Sig0[i])
+			Ivs2sigmas(o.States[i].Sig0, i, ivs)
+			copy(o.States[i].Sig, o.States[i].Sig0)
+			copy(o.StatesBkp[i].Sig, o.States[i].Sig0)
 		}
 	}
 	return true
@@ -467,7 +466,10 @@ func (o ElemU) Encode(enc Encoder) (ok bool) {
 
 // Decode decodes internal variables
 func (o ElemU) Decode(dec Decoder) (ok bool) {
-	return !LogErr(dec.Decode(&o.States), "Decode")
+	if LogErr(dec.Decode(&o.States), "Decode") {
+		return
+	}
+	return o.BackupIvs()
 }
 
 // OutIpsData returns data from all integration points for output
@@ -505,11 +507,7 @@ func (o *ElemU) ipupdate(idx int, S []float64, G [][]float64, sol *Solution) (ok
 	}
 
 	// call model update => update stresses
-	var σ0 []float64
-	if len(o.Sig0) > 0 {
-		σ0 = o.Sig0[idx]
-	}
-	if LogErr(o.MdlSmall.Update(o.States[idx], σ0, o.ε, o.Δε), "ipupdate") {
+	if LogErr(o.MdlSmall.Update(o.States[idx], o.ε, o.Δε), "ipupdate") {
 		return
 	}
 	return true
