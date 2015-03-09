@@ -53,28 +53,9 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 	var buf bytes.Buffer
 	enc := GetEncoder(&buf)
 
-	// encode t
-	if LogErr(enc.Encode(o.Sol.T), "SaveSol") {
+	// encode Sol
+	if LogErr(enc.Encode(o.Sol), "SaveSol") {
 		return
-	}
-
-	// encode Y
-	if LogErr(enc.Encode(o.Sol.Y), "SaveSol") {
-		return
-	}
-
-	// transient simulations
-	if !Global.Sim.Data.Steady {
-
-		// encode Dydt
-		if LogErr(enc.Encode(o.Sol.Dydt), "SaveSol") {
-			return
-		}
-
-		// encode D2ydt2
-		if LogErr(enc.Encode(o.Sol.D2ydt2), "SaveSol") {
-			return
-		}
 	}
 
 	// save file
@@ -98,28 +79,9 @@ func (o *Domain) ReadSol(dir, fnkey string, tidx int) (ok bool) {
 	// get decoder
 	dec := GetDecoder(fil)
 
-	// decode t
-	if LogErr(dec.Decode(&o.Sol.T), "ReadSol") {
+	// decode Sol
+	if LogErr(dec.Decode(&o.Sol), "ReadSol") {
 		return
-	}
-
-	// decode Y
-	if LogErr(dec.Decode(&o.Sol.Y), "ReadSol") {
-		return
-	}
-
-	// transient simulations
-	if !Global.Sim.Data.Steady {
-
-		// decode Dydt
-		if LogErr(dec.Decode(&o.Sol.Dydt), "ReadSol") {
-			return
-		}
-
-		// decode D2ydt2
-		if LogErr(dec.Decode(&o.Sol.D2ydt2), "ReadSol") {
-			return
-		}
 	}
 	return true
 }
