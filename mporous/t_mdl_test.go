@@ -69,7 +69,7 @@ func Test_mdl01(tst *testing.T) {
 	// state A
 	pl0 := -5.0
 	pg, divus := 0.0, 0.0
-	A, err := mdl.NewState(pl0, pg, divus)
+	A, err := mdl.NewState(mdl.RhoL0, mdl.RhoG0, pl0, pg, divus)
 	if err != nil {
 		tst.Errorf("mporous.NewState failed: %v\n", err)
 		return
@@ -77,7 +77,7 @@ func Test_mdl01(tst *testing.T) {
 
 	// state B
 	pl0 = -10.0
-	B, err := mdl.NewState(pl0, pg, divus)
+	B, err := mdl.NewState(mdl.RhoL0, mdl.RhoG0, pl0, pg, divus)
 	if err != nil {
 		tst.Errorf("mporous.NewState failed: %v\n", err)
 		return
