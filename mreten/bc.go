@@ -75,6 +75,9 @@ func (o BrooksCorey) Cc(pc, sl float64, wet bool) (float64, error) {
 
 // L computes L = ∂Cc/∂pc
 func (o BrooksCorey) L(pc, sl float64, wet bool) (float64, error) {
+	if pc <= o.pcae {
+		return 0, nil
+	}
 	return (1.0 - o.slmin) * o.λ * (o.λ + 1.0) * math.Pow(o.pcae/pc, o.λ) / (pc * pc), nil
 }
 
