@@ -41,7 +41,8 @@ func Test_fileio01(tst *testing.T) {
 		tst.Errorf("test failed")
 		return
 	}
-	io.Pfblue2("file %v written\n", out_nod_path(tidx, Global.Rank))
+	dir, fnk := Global.Dirout, Global.Fnkey
+	io.Pfblue2("file %v written\n", out_nod_path(dir, fnk, tidx, Global.Rank))
 
 	// domain B
 	domB := NewDomain(Global.Sim.Regions[0], distr)
@@ -54,7 +55,7 @@ func Test_fileio01(tst *testing.T) {
 	io.Pfpink("domB.Sol.Y (before) = %v\n", domB.Sol.Y)
 
 	// read file
-	if !domB.ReadSol(tidx) {
+	if !domB.ReadSol(dir, fnk, tidx) {
 		tst.Errorf("test failed")
 		return
 	}

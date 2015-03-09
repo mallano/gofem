@@ -83,14 +83,16 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 	}
 
 	// save file
-	return save_file("SaveSol", "solution", out_nod_path(tidx, Global.Rank), &buf)
+	fn := out_nod_path(Global.Dirout, Global.Fnkey, tidx, Global.Rank)
+	return save_file("SaveSol", "solution", fn, &buf)
 }
 
 // ReadSol reads Solution from a file which name is set with tidx (time output index)
-func (o *Domain) ReadSol(tidx int) (ok bool) {
+func (o *Domain) ReadSol(dir, fnkey string, tidx int) (ok bool) {
 
 	// open file
-	fil, err := os.Open(out_nod_path(tidx, 0)) // read always from proc # 0
+	fn := out_nod_path(dir, fnkey, tidx, 0) // reading always from proc # 0
+	fil, err := os.Open(fn)
 	if LogErr(err, "ReadSol") {
 		return
 	}
@@ -150,14 +152,16 @@ func (o Domain) SaveIvs(tidx int) (ok bool) {
 	}
 
 	// save file
-	return save_file("SaveIvs", "internal values", out_ele_path(tidx, Global.Rank), &buf)
+	fn := out_ele_path(Global.Dirout, Global.Fnkey, tidx, Global.Rank)
+	return save_file("SaveIvs", "internal values", fn, &buf)
 }
 
 // ReadIvs reads elements's internal values from a file which name is set with tidx (time output index)
-func (o *Domain) ReadIvs(tidx, proc int) (ok bool) {
+func (o *Domain) ReadIvs(dir, fnkey string, tidx, proc int) (ok bool) {
 
 	// open file
-	fil, err := os.Open(out_ele_path(tidx, proc))
+	fn := out_ele_path(dir, fnkey, tidx, proc)
+	fil, err := os.Open(fn)
 	if LogErr(err, "ReadIvs") {
 		return
 	}
@@ -195,21 +199,21 @@ func (o *Domain) Out(tidx int) (ok bool) {
 // In performes the inverse operation from Out
 func (o *Domain) In(sum *Summary, tidx int) (ok bool) {
 	for i := 0; i < sum.Nproc; i++ {
-		if !o.ReadIvs(tidx, i) {
+		if !o.ReadIvs(sum.Dirout, sum.Fnkey, tidx, i) {
 			return
 		}
 	}
-	return o.ReadSol(tidx)
+	return o.ReadSol(sum.Dirout, sum.Fnkey, tidx)
 }
 
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
 
-func out_nod_path(tidx, proc int) string {
-	return path.Join(Global.Dirout, io.Sf("%s_p%d_nod_%010d.%s", Global.Fnkey, proc, tidx, Global.Enc))
+func out_nod_path(dir, fnkey string, tidx, proc int) string {
+	return path.Join(dir, io.Sf("%s_p%d_nod_%010d.%s", fnkey, proc, tidx, Global.Enc))
 }
 
-func out_ele_path(tidx, proc int) string {
-	return path.Join(Global.Dirout, io.Sf("%s_p%d_ele_%010d.%s", Global.Fnkey, proc, tidx, Global.Enc))
+func out_ele_path(dir, fnkey string, tidx, proc int) string {
+	return path.Join(dir, io.Sf("%s_p%d_ele_%010d.%s", fnkey, proc, tidx, Global.Enc))
 }
 
 func save_file(function, category, filename string, buf *bytes.Buffer) (ok bool) {

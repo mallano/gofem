@@ -18,6 +18,8 @@ type Summary struct {
 	Nproc    int         // number of processors used in last last run; equal to 1 if not distributed
 	OutTimes []float64   // [nOutTimes] output times
 	Resids   utl.DblList // [nTimes][nIter] residuals (if Stat is on; includes all stages)
+	Dirout   string      // directory where results are stored
+	Fnkey    string      // filename key of simulation
 }
 
 // SaveSums saves summary to disc
@@ -25,6 +27,8 @@ func (o Summary) Save() (ok bool) {
 
 	// set flags before saving
 	o.Nproc = Global.Nproc
+	o.Dirout = Global.Dirout
+	o.Fnkey = Global.Fnkey
 
 	// skip if not root
 	if !Global.Root {
@@ -47,10 +51,10 @@ func (o Summary) Save() (ok bool) {
 
 // ReadSum reads summary back
 //  Note: returns nil on errors
-func ReadSum(dirout, fnamekey string) (o *Summary) {
+func ReadSum(dir, fnkey string) (o *Summary) {
 
 	// open file
-	fn := out_sum_path(dirout, fnamekey, 0) // reading always from proc # 0
+	fn := out_sum_path(dir, fnkey, 0) // reading always from proc # 0
 	fil, err := os.Open(fn)
 	if LogErr(err, "ReadSum") {
 		return nil
@@ -71,6 +75,6 @@ func ReadSum(dirout, fnamekey string) (o *Summary) {
 
 // auxiliary ///////////////////////////////////////////////////////////////////////////////////////
 
-func out_sum_path(dirout, fnamekey string, proc int) string {
-	return path.Join(dirout, io.Sf("%s_p%d_sum.%s", fnamekey, proc, Global.Enc))
+func out_sum_path(dir, fnkey string, proc int) string {
+	return path.Join(dir, io.Sf("%s_p%d_sum.%s", fnkey, proc, Global.Enc))
 }

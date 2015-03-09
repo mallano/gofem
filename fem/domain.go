@@ -6,6 +6,8 @@ package fem
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 	"sort"
 
 	"github.com/cpmech/gofem/inp"
@@ -13,6 +15,7 @@ import (
 
 	"github.com/cpmech/gosl/chk"
 	"github.com/cpmech/gosl/fun"
+	"github.com/cpmech/gosl/io"
 	"github.com/cpmech/gosl/la"
 	"github.com/cpmech/gosl/utl"
 )
@@ -448,11 +451,23 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 		if !o.SetIniStress(stg) {
 			return
 		}
-	} else if stg.Import {
-		// TODO
 	} else {
 		for _, e := range o.ElemIntvars {
 			e.SetIniIvs(o.Sol, nil)
+		}
+	}
+
+	// import results from another set of files
+	if stg.Import != "" {
+		fnp := os.ExpandEnv(stg.Import)
+		dir := filepath.Dir(fnp)
+		fnk := io.FnKey(filepath.Base(fnp))
+		sum := ReadSum(dir, fnk)
+		if LogErrCond(sum == nil, "cannot import state from %s", stg.Import) {
+			return
+		}
+		if !o.In(sum, len(sum.OutTimes)-1) {
+			return
 		}
 	}
 
