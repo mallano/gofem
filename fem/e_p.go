@@ -103,6 +103,9 @@ func init() {
 			info.Dofs[m] = ykeys
 		}
 
+		// maps
+		info.Y2F = map[string]string{"pl": "ql"}
+
 		// vertices on seepage faces
 		lverts := GetVertsWithCond(faceConds, "seep")
 		for _, m := range lverts {
@@ -112,10 +115,8 @@ func init() {
 		}
 		if len(lverts) > 0 {
 			ykeys = append(ykeys, "fl")
+			info.Y2F["fl"] = "nil"
 		}
-
-		// maps
-		info.Y2F = map[string]string{"pl": "ql", "fl": "nil"}
 
 		// t1 and t2 variables
 		info.T1vars = ykeys
