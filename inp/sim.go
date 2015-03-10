@@ -269,8 +269,9 @@ type IniStressData struct {
 
 // ImportRes holds definitions for importing results from a previous simulation
 type ImportRes struct {
-	Dir string `json:"dir"` // output directory with previous simulation files
-	Fnk string `json:"fnk"` // previous simulation file name key (without .sim)
+	Dir    string `json:"dir"`    // output directory with previous simulation files
+	Fnk    string `json:"fnk"`    // previous simulation file name key (without .sim)
+	ResetU bool   `json:"resetu"` // reset/zero u (displacements)
 }
 
 // Stage holds stage data
