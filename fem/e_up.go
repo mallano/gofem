@@ -638,7 +638,27 @@ func (o *ElemUP) RestoreIvs() (ok bool) {
 
 // Ureset fixes internal variables after u (displacements) have been zeroed
 func (o *ElemUP) Ureset(sol *Solution) (ok bool) {
-	return true
+	ndim := Global.Ndim
+	u_nverts := o.U.Shp.Nverts
+	for idx, ip := range o.U.IpsElem {
+		if LogErr(o.U.Shp.CalcAtIp(o.U.X, ip, true), "Update") {
+			return
+		}
+		G := o.U.Shp.G
+		var divus float64
+		for m := 0; m < u_nverts; m++ {
+			for i := 0; i < ndim; i++ {
+				r := o.U.Umap[i+m*ndim]
+				divus += G[m][i] * sol.Y[r]
+			}
+		}
+		o.P.States[idx].Ns0 = (1.0 - divus) * (1.0 - o.P.Mdl.Nf0)
+		o.P.StatesBkp[idx].Ns0 = o.P.States[idx].Ns0
+	}
+	if !o.U.Ureset(sol) {
+		return
+	}
+	return o.P.Ureset(sol)
 }
 
 // writer ///////////////////////////////////////////////////////////////////////////////////////////

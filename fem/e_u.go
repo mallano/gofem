@@ -433,9 +433,8 @@ func (o *ElemU) SetIniIvs(sol *Solution, ivs map[string][]float64) (ok bool) {
 	// initial stresses
 	if _, ok := ivs["sx"]; ok {
 		for i := 0; i < nip; i++ {
-			Ivs2sigmas(o.States[i].Sig0, i, ivs)
-			copy(o.States[i].Sig, o.States[i].Sig0)
-			copy(o.StatesBkp[i].Sig, o.States[i].Sig0)
+			Ivs2sigmas(o.States[i].Sig, i, ivs)
+			copy(o.StatesBkp[i].Sig, o.States[i].Sig)
 		}
 	}
 	return true
@@ -459,6 +458,12 @@ func (o *ElemU) RestoreIvs() (ok bool) {
 
 // Ureset fixes internal variables after u (displacements) have been zeroed
 func (o *ElemU) Ureset(sol *Solution) (ok bool) {
+	for idx, _ := range o.IpsElem {
+		if len(o.States[idx].F) > 0 {
+			la.MatFill(o.States[idx].F, 0)
+			la.MatFill(o.StatesBkp[idx].F, 0)
+		}
+	}
 	return true
 }
 
