@@ -469,6 +469,11 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 			return
 		}
 		if stg.Import.ResetU {
+			for _, ele := range o.ElemIntvars {
+				if LogErrCond(!ele.Ureset(o.Sol), "cannot run reset function of element after displacements are zeroed") {
+					return
+				}
+			}
 			for _, nod := range o.Nodes {
 				for _, ukey := range []string{"ux", "uy", "uz"} {
 					eq := nod.GetEq(ukey)
@@ -479,11 +484,6 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 							o.Sol.D2ydt2[eq] = 0
 						}
 					}
-				}
-			}
-			for _, ele := range o.ElemIntvars {
-				if LogErrCond(!ele.Ureset(o.Sol), "cannot run reset function of element after displacements are zeroed") {
-					return
 				}
 			}
 		}
