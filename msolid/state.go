@@ -13,8 +13,7 @@ import (
 type State struct {
 
 	// essential
-	Sig0 []float64 // σ0: initial Cauchy stress tensor (effective) [nsig]
-	Sig  []float64 // σ: current Cauchy stress tensor (effective) [nsig]
+	Sig []float64 // σ: current Cauchy stress tensor (effective) [nsig]
 
 	// for plasticity
 	Alp        []float64 // α: internal variables of rate type [nalp]
@@ -33,7 +32,6 @@ type State struct {
 //  large  -- large deformation analyses; otherwise small strains
 func NewState(nsig, nalp, nphi int, large bool) *State {
 	var state State
-	state.Sig0 = make([]float64, nsig)
 	state.Sig = make([]float64, nsig)
 	if nalp > 0 {
 		state.Alp = make([]float64, nalp)
@@ -54,11 +52,9 @@ func (o *State) Set(other *State) {
 	o.Dgam = other.Dgam
 	o.Loading = other.Loading
 	o.ApexReturn = other.ApexReturn
-	chk.IntAssert(len(o.Sig0), len(other.Sig0))
 	chk.IntAssert(len(o.Sig), len(other.Sig))
 	chk.IntAssert(len(o.Alp), len(other.Alp))
 	chk.IntAssert(len(o.Phi), len(other.Phi))
-	copy(o.Sig0, other.Sig0)
 	copy(o.Sig, other.Sig)
 	copy(o.Alp, other.Alp)
 	copy(o.Phi, other.Phi)

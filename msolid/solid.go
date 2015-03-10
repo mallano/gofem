@@ -4,21 +4,21 @@
 
 // package msolid implements models for solids based on continuum mechanics
 /*
- *            |   Nonrate     |    Rate
- *  ==========================|=================================
- *            |               |
- *            |  σ=f(ε)       | dσdt = f(σ,dεdt)
- *    Small   |  CalcStressE  | σ_(n+1) = σ_(n) + Δt * f_(n+1)
- *            |  D=dσ/dε|_any | StressUpdate
- *            |  ContinuousD  | D = dσ/dε_(n+1)
- *            |               | ConsistentD
- *            |               |
- *  --------------------------|---------------------------------
- *            |               |
- *    Large   | σ=f(F)        | dσdt = f(σ,F,dFdt)
- *            | CalcStressF   | D = dσdF_(n+1)
- *            | ContinuousD   |
- *            |               |
+ *            |    Rate
+ *  ============================================
+ *            |
+ *            | dσdt = f(σ,dεdt)
+ *    Small   | σ_(n+1) = σ_(n) + Δt * f_(n+1)
+ *            | StressUpdate
+ *            | D = dσ/dε_(n+1)
+ *            | ConsistentD
+ *            |
+ *  --------------------------------------------
+ *            |
+ *    Large   | dσdt = f(σ,F,dFdt)
+ *            | D = dσdF_(n+1)
+ *            |
+ *            |
  */
 package msolid
 

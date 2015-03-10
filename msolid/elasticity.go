@@ -106,25 +106,20 @@ func (o SmallElasticity) GetPrms() fun.Prms {
 	}
 }
 
-// Update computes new stresses for new strains ε
-func (o SmallElasticity) Update(s *State, ε []float64) (err error) {
+// Update computes new stresses for new strain increment Δε
+func (o SmallElasticity) Update(s *State, Δε []float64) (err error) {
 	σ := s.Sig
-	defer func() {
-		for i := 0; i < len(s.Sig0); i++ {
-			σ[i] += s.Sig0[i]
-		}
-	}()
 	if o.Pse {
 		c := o.E / (1.0 - o.Nu*o.Nu)
-		σ[0] = c * (ε[0] + o.Nu*ε[1])
-		σ[1] = c * (o.Nu*ε[0] + ε[1])
-		σ[2] = 0
-		σ[3] = c * (1.0 - o.Nu) * ε[3]
+		σ[0] += c * (Δε[0] + o.Nu*Δε[1])
+		σ[1] += c * (o.Nu*Δε[0] + Δε[1])
+		σ[2] += 0
+		σ[3] += c * (1.0 - o.Nu) * Δε[3]
 		return
 	}
-	trε := ε[0] + ε[1] + ε[2]
+	trΔε := Δε[0] + Δε[1] + Δε[2]
 	for i := 0; i < o.Nsig; i++ {
-		σ[i] = o.L*trε*tsr.Im[i] + 2.0*o.G*ε[i]
+		σ[i] += o.L*trΔε*tsr.Im[i] + 2.0*o.G*Δε[i]
 	}
 	return
 }

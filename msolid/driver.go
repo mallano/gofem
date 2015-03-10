@@ -89,7 +89,6 @@ func (o *Driver) Run(pth *Path) (err error) {
 	o.Res[0].Sig[0] = pth.MultS * pth.Sx[0]
 	o.Res[0].Sig[1] = pth.MultS * pth.Sy[0]
 	o.Res[0].Sig[2] = pth.MultS * pth.Sz[0]
-	copy(o.Res[0].Sig0, o.Res[0].Sig)
 
 	// auxiliary variables
 	Δσ := make([]float64, o.nsig)
