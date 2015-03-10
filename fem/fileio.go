@@ -54,7 +54,16 @@ func (o Domain) SaveSol(tidx int) (ok bool) {
 	enc := GetEncoder(&buf)
 
 	// encode Sol
-	if LogErr(enc.Encode(o.Sol), "SaveSol") {
+	if LogErr(enc.Encode(o.Sol.T), "SaveSol") {
+		return
+	}
+	if LogErr(enc.Encode(o.Sol.Y), "SaveSol") {
+		return
+	}
+	if LogErr(enc.Encode(o.Sol.Dydt), "SaveSol") {
+		return
+	}
+	if LogErr(enc.Encode(o.Sol.D2ydt2), "SaveSol") {
 		return
 	}
 
@@ -80,7 +89,16 @@ func (o *Domain) ReadSol(dir, fnkey string, tidx int) (ok bool) {
 	dec := GetDecoder(fil)
 
 	// decode Sol
-	if LogErr(dec.Decode(&o.Sol), "ReadSol") {
+	if LogErr(dec.Decode(&o.Sol.T), "ReadSol") {
+		return
+	}
+	if LogErr(dec.Decode(&o.Sol.Y), "ReadSol") {
+		return
+	}
+	if LogErr(dec.Decode(&o.Sol.Dydt), "ReadSol") {
+		return
+	}
+	if LogErr(dec.Decode(&o.Sol.D2ydt2), "ReadSol") {
 		return
 	}
 	return true

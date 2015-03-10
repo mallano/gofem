@@ -56,6 +56,7 @@ type ElemIntvars interface {
 	SetIniIvs(sol *Solution, ivs map[string][]float64) (ok bool) // sets initial ivs for given values in sol and ivs map
 	BackupIvs() (ok bool)                                        // create copy of internal variables
 	RestoreIvs() (ok bool)                                       // restore internal variables from copies
+	Ureset(sol *Solution) (ok bool)                              // fixes internal variables after u (displacements) have been zeroed
 }
 
 // Info holds all information required to set a simulation stage

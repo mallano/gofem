@@ -305,7 +305,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 					eqs[j] = append(eqs[j], dof.Eq)
 				}
 			}
-			ele.SetEqs(eqs, nil)
+			if LogErrCond(!ele.SetEqs(eqs, nil), "cannot set element equations") {
+				return
+			}
 
 			// subsets of elements
 			o.add_element_to_subsets(ele)
@@ -465,6 +467,25 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 		}
 		if !o.In(sum, len(sum.OutTimes)-1, false) {
 			return
+		}
+		if stg.Import.ResetU {
+			for _, nod := range o.Nodes {
+				for _, ukey := range []string{"ux", "uy", "uz"} {
+					eq := nod.GetEq(ukey)
+					if eq >= 0 {
+						o.Sol.Y[eq] = 0
+						if len(o.Sol.Dydt) > 0 {
+							o.Sol.Dydt[eq] = 0
+							o.Sol.D2ydt2[eq] = 0
+						}
+					}
+				}
+			}
+			for _, ele := range o.ElemIntvars {
+				if LogErrCond(!ele.Ureset(o.Sol), "cannot run reset function of element after displacements are zeroed") {
+					return
+				}
+			}
 		}
 	}
 

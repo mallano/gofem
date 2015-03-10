@@ -756,6 +756,11 @@ func (o *Rjoint) RestoreIvs() (ok bool) {
 	return true
 }
 
+// Ureset fixes internal variables after u (displacements) have been zeroed
+func (o *Rjoint) Ureset(sol *Solution) (ok bool) {
+	return true
+}
+
 // writer ///////////////////////////////////////////////////////////////////////////////////////////
 
 // Encode encodes internal variables
