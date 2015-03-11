@@ -11,12 +11,19 @@
       { "n":"cb", "v":15 },
       { "n":"ta", "v":0 },
       { "n":"tb", "v":2e3 }]
+    },
+    { "name":"ptop", "type":"rmp", "prms":[
+      { "n":"ca", "v":0 },
+      { "n":"cb", "v":-15 },
+      { "n":"ta", "v":0 },
+      { "n":"tb", "v":500 }]
     }
   ],
   "regions" : [
     {
       "desc"      : "square",
       "mshfile"   : "msh/square-coarse-q9.msh",
+      "mshfile_"  : "msh/square-ufine-q9.msh",
       "elemsdata" : [
         { "tag":-1, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0" },
         { "tag":-2, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0" },
@@ -47,9 +54,15 @@
       ],
       "control" : {
         "tf"    : 4000,
-        "dt"    : 50,
+        "dt"    : 25,
         "dtout" : 50
       }
     }
+  ],
+  "temp" : [
+        { "tag":-10, "keys":["uy","pl"], "funcs":["zero","pbot"] },
+        { "tag":-10, "keys":["uy"], "funcs":["zero"] },
+        { "tag":-12, "keys":["pl"], "funcs":["ptop"] },
+        { "tag":-14, "keys":["pl"], "funcs":["ptop"] }
   ]
 }

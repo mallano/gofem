@@ -18,7 +18,7 @@ func main() {
 	defer out.End()
 
 	// input data
-	simfn := "a-coarse-elast-d2-q9"
+	simfn := "a-coarse-elast-d2-q9.sim"
 	flag.Parse()
 	if len(flag.Args()) > 0 {
 		simfn = flag.Arg(0)
@@ -31,20 +31,43 @@ func main() {
 	out.Start(simfn, 0, 0)
 
 	// define entities
-	out.Define("a", out.P{{18, 8}})
+	out.Define("A B C D E", out.N{-1, -2, -3, -4, -5})                       // top => bottom
+	out.Define("a b c d e", out.P{{18, 8}, {8, 8}, {4, 8}, {30, 8}, {0, 0}}) // top => bottom
 
 	// load results
 	out.LoadResults(nil)
 
-	pg_a := out.GetRes("pg", "a", -1)
-	pl_a := out.GetRes("pl", "a", -1)
-	pc_a := make([]float64, len(pg_a))
-	for i, _ := range pg_a {
-		pc_a[i] = pg_a[i] - pl_a[i]
+	// styles
+	me := 10
+	S := []plt.Fmt{
+		plt.Fmt{C: "b", M: "*", Me: me},
+		plt.Fmt{C: "g", M: "o", Me: me},
+		plt.Fmt{C: "m", M: "x", Me: me},
+		plt.Fmt{C: "orange", M: "+", Me: me},
+		plt.Fmt{C: "r", M: "^", Me: me},
 	}
 
-	out.Plot(pc_a, "sl", "a", plt.Fmt{M: "o"}, -1)
-	out.Csplot.Xlbl = "$p_c$"
+	// pl
+	out.Splot("liquid pressure")
+	for i, l := range []string{"A", "B", "C", "D", "E"} {
+		out.Plot("t", "pl", l, S[i], -1)
+	}
+
+	// uy
+	out.Splot("displacements")
+	for i, l := range []string{"A", "B", "C", "D", "E"} {
+		out.Plot("t", "uy", l, S[i], -1)
+	}
+
+	out.Splot("liquid saturation")
+	for i, l := range []string{"a", "b", "c", "d", "e"} {
+		out.Plot("t", "sl", l, S[i], -1)
+	}
+
+	out.Splot("stresses")
+	for i, l := range []string{"a", "b", "c", "d", "e"} {
+		out.Plot("t", "sy", l, S[i], -1)
+	}
 
 	// show
 	out.Draw("", "", true)
