@@ -114,7 +114,7 @@ type SolverData struct {
 	Rtol    float64 `json:"rtol"`    // relative tolerance
 	FbTol   float64 `json:"fbtol"`   // tolerance for convergence on fb
 	FbMin   float64 `json:"fbmin"`   // minimum value of fb
-	Diverg  bool    `json:"diverg"`  // use divergence control
+	DvgCtrl bool    `json:"dvgctrl"` // use divergence control
 	NdvgMax int     `json:"ndvgmax"` // max number of continued divergence
 
 	// transient analyses

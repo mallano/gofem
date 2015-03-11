@@ -237,7 +237,7 @@ func Run() (runisok bool) {
 			for _, d := range domains {
 
 				// backup solution if divergence control is on
-				if Global.Sim.Solver.Diverg {
+				if Global.Sim.Solver.DvgCtrl {
 					d.backup()
 				}
 
@@ -248,7 +248,7 @@ func Run() (runisok bool) {
 				}
 
 				// restore solution and reduce time step if divergence control is on
-				if Global.Sim.Solver.Diverg {
+				if Global.Sim.Solver.DvgCtrl {
 					if diverging {
 						if Global.Verbose {
 							io.Pfred(". . . iterations diverging . . .\n")
@@ -371,7 +371,7 @@ func run_iterations(t, Δt float64, d *Domain, sum *Summary) (diverging, ok bool
 		}
 
 		// check divergence on fb
-		if it > 1 && Global.Sim.Solver.Diverg {
+		if it > 1 && Global.Sim.Solver.DvgCtrl {
 			if largFb > prevFb {
 				diverging = true
 				break
@@ -492,7 +492,7 @@ func run_iterations(t, Δt float64, d *Domain, sum *Summary) (diverging, ok bool
 		}
 
 		// check divergence on Lδu
-		if it > 1 && Global.Sim.Solver.Diverg {
+		if it > 1 && Global.Sim.Solver.DvgCtrl {
 			if Lδu > prevLδu {
 				diverging = true
 				break
