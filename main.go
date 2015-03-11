@@ -20,6 +20,10 @@ func main() {
 	defer func() {
 		if err := recover(); err != nil {
 			if mpi.Rank() == 0 {
+				chk.Verbose = true
+				for i := 8; i > 3; i-- {
+					chk.CallerInfo(i)
+				}
 				io.PfRed("ERROR: %v\n", err)
 			}
 		}
