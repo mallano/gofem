@@ -468,6 +468,9 @@ func (o *Domain) SetStage(idxstg int, stg *inp.Stage, distr bool) (setstageisok 
 		if !o.In(sum, len(sum.OutTimes)-1, false) {
 			return
 		}
+		if LogErrCond(o.Ny != len(o.Sol.Y), "import failed: length of primary variables vector imported is not equal to the one allocated. make sure the number of DOFs of the imported simulation matches this one. %d != %d", o.Ny, len(o.Sol.Y)) {
+			return
+		}
 		if stg.Import.ResetU {
 			for _, ele := range o.ElemIntvars {
 				if LogErrCond(!ele.Ureset(o.Sol), "cannot run reset function of element after displacements are zeroed") {
