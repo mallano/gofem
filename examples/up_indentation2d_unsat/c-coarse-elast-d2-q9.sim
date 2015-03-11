@@ -1,16 +1,30 @@
 {
   "data" : {
-    "desc"    : "porous: 2D: desiccation of square domain (lowering pressure)",
+    "desc"    : "porous: 2D: desiccation of square domain (flux prescribed)",
     "matfile" : "nmepaper.mat",
     "showR"   : false
   },
+  "plotF" : { "ti":0, "tf":4000, "np":101, "skip":["grav", "qtoA", "qtoB", "qtoC"] },
   "functions" : [
     { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
-    { "name":"ptop", "type":"rmp", "prms":[
-      { "n":"ca", "v":  0 },
-      { "n":"cb", "v":-15 },
-      { "n":"ta", "v":  0 },
-      { "n":"tb", "v":500 }]
+    { "name":"qtoA", "type":"cte", "prms":[{"n":"c", "v":0}] },
+    { "name":"qtoB", "type":"rmp", "prms":[
+      { "n":"ca", "v":   0 },
+      { "n":"cb", "v":1e-3 },
+      { "n":"ta", "v":   0 },
+      { "n":"tb", "v": 100 }]
+    },
+    { "name":"qtoC", "type":"pts", "prms":[
+      {"n":"t0", "v":   0}, {"n":"y0", "v":   0},
+      {"n":"t1", "v": 200}, {"n":"y1", "v":1e-3},
+      {"n":"t4", "v": 800}, {"n":"y4", "v":1e-3},
+      {"n":"t5", "v":1000}, {"n":"y5", "v":   0}]
+    },
+    { "name":"qtop", "type":"pulse", "prms":[
+      { "n":"ca", "v":     0 },
+      { "n":"cb", "v":5.5e-4 },
+      { "n":"ta", "v":     0 },
+      { "n":"tb", "v":  1000 }]
     }
   ],
   "regions" : [
@@ -19,9 +33,9 @@
       "mshfile"   : "msh/square-coarse-q9.msh",
       "mshfile_"  : "msh/square-ufine-q9.msh",
       "elemsdata" : [
-        { "tag":-1, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0" },
-        { "tag":-2, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0" },
-        { "tag":-3, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0" }
+        { "tag":-1, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0 !mac:1" },
+        { "tag":-2, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0 !mac:1" },
+        { "tag":-3, "mat":"grp1", "type":"up", "extra":"!ncns:0 !ncns2:0 !mac:1" }
       ]
     }
   ],
@@ -30,18 +44,21 @@
     "Rtol"     : 1e-12,
     "FbTol"    : 1e-12,
     "FbMin"    : 1e-12,
-    "thCombo1" : true
+    "thCombo1" : true,
+    "dvgctrl"  : true,
+    "ndvgmax"  : 20
   },
   "stages" : [
     {
-      "desc"  : "lower pressure @ bottom",
+      "skip"  : false,
+      "desc"  : "apply flux @ top",
       "geost" : { "nu":[0.3], "layers":[[-1,-2,-3]] },
       "facebcs" : [
         { "tag":-10, "keys":["uy"], "funcs":["zero"] },
         { "tag":-11, "keys":["ux"], "funcs":["zero"] },
         { "tag":-13, "keys":["ux"], "funcs":["zero"] },
-        { "tag":-12, "keys":["pl"], "funcs":["ptop"] },
-        { "tag":-14, "keys":["pl"], "funcs":["ptop"] }
+        { "tag":-12, "keys":["ql","seep"], "funcs":["qtop","zero"] },
+        { "tag":-14, "keys":["ql","seep"], "funcs":["qtop","zero"] }
       ],
       "eleconds" : [
         { "tag":-1, "keys":["g"], "funcs":["grav"] },
@@ -50,7 +67,7 @@
       ],
       "control" : {
         "tf"    : 4000,
-        "dt"    : 25,
+        "dt"    : 10,
         "dtout" : 50
       }
     }

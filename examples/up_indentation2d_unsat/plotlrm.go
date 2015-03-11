@@ -43,11 +43,24 @@ func main() {
 		pc_a[i] = pg_a[i] - pl_a[i]
 	}
 
+	divus := out.GetRes("divus", "a", -1)
+	ns0 := out.GetRes("ns0", "a", -1)
+	nf := make([]float64, len(divus))
+	for i, _ := range divus {
+		ns := (1.0 - divus[i]) * ns0[i]
+		nf[i] = 1.0 - ns
+	}
+
+	out.Splot("LRM")
+	_, d, _ := io.ReadTable("lrm.dat")
+	plt.Plot(d["pc"], d["sl"], "'c-',lw=2")
+
 	out.Plot(pc_a, "sl", "a", plt.Fmt{M: "o"}, -1)
 	out.Csplot.Xlbl = "$p_c$"
 
-	//_, d, _ := io.ReadTable("lrm.dat")
-	//plt.Plot(d["pc"], d["sl"], "'c-',lw=2")
+	out.Splot("porosity")
+	out.Plot("t", nf, "a", plt.Fmt{M: "+"}, -1)
+	out.Csplot.Ylbl = "$n_f$"
 
 	// show
 	out.Draw("", "", true)

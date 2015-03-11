@@ -3,6 +3,7 @@
     "matfile" : "nmepaper.mat",
     "showR"   : false
   },
+  "plotF" : { "ti":0, "tf":4000, "np":101, "skip":["grav", "loa_"] },
   "functions" : [
     { "name":"grav", "type":"cte", "prms":[{"n":"c", "v":10}] },
     { "name":"loa_", "type":"cte", "prms":[{"n":"c", "v":0}] },
@@ -30,12 +31,13 @@
   "stages" : [
     {
       "desc"  : "apply cyclic load",
-      "import" : { "resetU":true, "dir":"/tmp/gofem/c-coarse-elast-d2-q9", "fnk":"c-coarse-elast-d2-q9" },
+      "import" : { "resetU":false, "dir":"/tmp/gofem/c-coarse-elast-d2-q9", "fnk":"c-coarse-elast-d2-q9" },
       "facebcs" : [
         { "tag":-10, "keys":["uy"], "funcs":["zero"] },
         { "tag":-11, "keys":["ux"], "funcs":["zero"] },
         { "tag":-13, "keys":["ux"], "funcs":["zero"] },
-        { "tag":-14, "keys":["qn"], "funcs":["load"] }
+        { "tag":-14, "keys":["qn","seep"], "funcs":["load","zero"] },
+        { "tag":-12, "keys":["seep"], "funcs":["zero"] }
       ],
       "eleconds" : [
         { "tag":-1, "keys":["g"], "funcs":["grav"] },
@@ -44,7 +46,7 @@
       ],
       "control" : {
         "tf"    : 4000,
-        "dt"    : 25,
+        "dt"    : 10,
         "dtout" : 50
       }
     }
