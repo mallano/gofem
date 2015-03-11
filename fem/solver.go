@@ -254,6 +254,8 @@ func Run() (runisok bool) {
 							io.Pfred(". . . iterations diverging (%2d) . . .\n", ndiverg+1)
 						}
 						d.restore()
+						t -= Δt
+						d.Sol.T = t
 						ndiverg += 1
 						md *= 0.5
 						continue
