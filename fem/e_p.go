@@ -195,7 +195,7 @@ func init() {
 			o.NatBcs = append(o.NatBcs, &NaturalBc{fc.Cond, fc.FaceId, fc.Func, fc.Extra})
 
 			// allocate extrapolation structures
-			if fc.Cond == "qb" || fc.Cond == "seep" {
+			if fc.Cond == "ql" || fc.Cond == "seep" {
 				nv := o.Shp.Nverts
 				nip := len(o.IpsElem)
 				o.ρl_ex = make([]float64, nv)

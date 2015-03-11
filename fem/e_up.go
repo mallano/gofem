@@ -542,10 +542,6 @@ func (o ElemUP) AddToKb(Kb *la.Triplet, sol *Solution, firstIt bool) (ok bool) {
 		for j, J := range o.U.Umap {
 			Kb.Put(I, J, o.U.K[i][j])
 		}
-		// TODO:
-		//for j, J := range o.P.Fmap {
-		//Kb.Put(J, I, o.Kfu[j][i])
-		//}
 	}
 	return true
 }
