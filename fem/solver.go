@@ -92,6 +92,11 @@ func Start(simfilepath string, erasefiles, verbose bool) (startisok bool) {
 	Global.LogBcs = Global.Sim.Data.LogBcs
 	Global.Debug = Global.Sim.Data.Debug
 
+	// plot functions
+	if Global.Sim.PlotF != nil && Global.Root {
+		Global.Sim.Functions.PlotAll(Global.Sim.PlotF, Global.Dirout, Global.Fnkey)
+	}
+
 	// fix show residual flag
 	if !Global.Root {
 		Global.Sim.Data.ShowR = false
@@ -180,6 +185,11 @@ func Run() (runisok bool) {
 		mreten.LogModels()
 		mporous.LogModels()
 		msolid.LogModels()
+
+		// skip stage?
+		if stg.Skip {
+			continue
+		}
 
 		// time loop
 		var Δt, Δtout float64

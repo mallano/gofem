@@ -7,7 +7,19 @@ package inp
 import (
 	"github.com/cpmech/gosl/fun"
 	"github.com/cpmech/gosl/io"
+	"github.com/cpmech/gosl/utl"
 )
+
+// PlotFdata holds information to plot functions
+type PlotFdata struct {
+	Ti    float64  `json:"ti"`    // initial time
+	Tf    float64  `json:"tf"`    // final time
+	Np    int      `json:"np"`    // number of points
+	Skip  []string `json:"skip"`  // skip functions
+	WithG bool     `json:"withg"` // with dF/dt
+	WithH bool     `json:"withh"` // with d²F/dt²
+	Eps   bool     `json:"eps"`   // save eps instead of png
+}
 
 // FuncData holds function definition
 type FuncData struct {
@@ -36,6 +48,26 @@ func (o FuncsData) Get(name string) fun.Func {
 	}
 	return nil
 }
+
+// PlotAll plot all functions
+func (o FuncsData) PlotAll(pd *PlotFdata, dirout, fnkey string) {
+	ext := "png"
+	if pd.Eps {
+		ext = "eps"
+	}
+	for _, f := range o {
+		if utl.StrIndexSmall(pd.Skip, f.Name) >= 0 {
+			continue
+		}
+		fn := io.Sf("fcn-%s-%s.%s", fnkey, f.Name, ext)
+		ff := o.Get(f.Name)
+		if ff != nil {
+			fun.PlotT(ff, dirout, fn, pd.Ti, pd.Tf, nil, pd.Np, "", pd.WithG, pd.WithH, true, false, nil)
+		}
+	}
+}
+
+// auxiliary //////////////////////////////////////////////////////////////////////////////////////////
 
 // String prints one function
 func (o FuncData) String() string {

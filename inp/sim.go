@@ -283,6 +283,7 @@ type Stage struct {
 	Deactivate []int  `json:"deactivate"` // array of tags of elements to be deactivated
 	Save       bool   `json:"save"`       // save stage data to binary file
 	Load       string `json:"load"`       // load stage data (filename) from binary file
+	Skip       bool   `json:"skip"`       // do not run stage
 
 	// specific problems data
 	HydroSt   bool           `json:"hydrost"`   // hydrostatic initial condition
@@ -319,6 +320,7 @@ type Simulation struct {
 	// input
 	Data      Data       `json:"data"`      // stores global simulation data
 	Functions FuncsData  `json:"functions"` // stores all boundary condition functions
+	PlotF     *PlotFdata `json:"plotf"`     // plot functions
 	Regions   []*Region  `json:"regions"`   // stores all regions
 	LinSol    LinSolData `json:"linsol"`    // linear solver data
 	Solver    SolverData `json:"solver"`    // FEM solver data
