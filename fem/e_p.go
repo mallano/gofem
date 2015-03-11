@@ -646,12 +646,12 @@ func (o *ElemP) fipvars(fidx int, sol *Solution) (ρl, pl, fl float64) {
 func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 	// compute surface integral
-	var shift float64
+	var tmp float64
 	var ρl, pl, fl, plmax, g, rmp, rx, rf float64
 	for idx, nbc := range o.NatBcs {
 
-		// plmax shift
-		shift = nbc.Fcn.F(sol.T, nil)
+		// tmp := plmax shift or qlb
+		tmp = nbc.Fcn.F(sol.T, nil)
 
 		// loop over ips of face
 		for jdx, ipf := range o.IpsFace {
@@ -667,11 +667,20 @@ func (o ElemP) add_natbcs_to_rhs(fb []float64, sol *Solution) (ok bool) {
 
 			// select natural boundary condition type
 			switch nbc.Key {
+			case "ql":
+				// flux prescribed
+				ρl = 0
+				for i, m := range o.Shp.FaceLocalV[iface] {
+					ρl += Sf[i] * o.ρl_ex[m]
+				}
+				for i, m := range o.Shp.FaceLocalV[iface] {
+					fb[o.Pmap[m]] -= coef * ρl * tmp * Sf[i]
+				}
 			case "seep":
 
 				// variables extrapolated to face
 				ρl, pl, fl = o.fipvars(iface, sol)
-				plmax = o.Plmax[idx][jdx] - shift
+				plmax = o.Plmax[idx][jdx] - tmp
 				if plmax < 0 {
 					plmax = 0
 				}
