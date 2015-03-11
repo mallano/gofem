@@ -200,7 +200,7 @@ func Run() (runisok bool) {
 
 			// check for continued divergence
 			if ndiverg >= Global.Sim.Solver.NdvgMax {
-				LogErrCond(true, "maximum number of steps diverging reached: %d", ndiverg)
+				LogErrCond(true, "continuous divergence after %d steps reached", ndiverg)
 				return
 			}
 
@@ -251,7 +251,7 @@ func Run() (runisok bool) {
 				if Global.Sim.Solver.DvgCtrl {
 					if diverging {
 						if Global.Verbose {
-							io.Pfred(". . . iterations diverging . . .\n")
+							io.Pfred(". . . iterations diverging (%2d) . . .\n", ndiverg+1)
 						}
 						d.restore()
 						ndiverg += 1
