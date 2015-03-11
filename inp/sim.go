@@ -109,11 +109,13 @@ type SolverData struct {
 	Eps float64 // smallest number satisfying 1.0 + ϵ > 1.0
 
 	// nonlinear solver
-	NmaxIt int     `json:"nmaxit"` // number of max iterations
-	Atol   float64 `json:"atol"`   // absolute tolerance
-	Rtol   float64 `json:"rtol"`   // relative tolerance
-	FbTol  float64 `json:"fbtol"`  // tolerance for convergence on fb
-	FbMin  float64 `json:"fbmin"`  // minimum value of fb
+	NmaxIt  int     `json:"nmaxit"`  // number of max iterations
+	Atol    float64 `json:"atol"`    // absolute tolerance
+	Rtol    float64 `json:"rtol"`    // relative tolerance
+	FbTol   float64 `json:"fbtol"`   // tolerance for convergence on fb
+	FbMin   float64 `json:"fbmin"`   // minimum value of fb
+	Diverg  bool    `json:"diverg"`  // use divergence control
+	NdvgMax int     `json:"ndvgmax"` // max number of continued divergence
 
 	// transient analyses
 	DtMin      float64 `json:"dtmin"`      // minium value of Dt for transient (θ and Newmark / Dyn coefficients)
@@ -146,6 +148,7 @@ func (o *SolverData) SetDefault() {
 	o.Rtol = 1e-6
 	o.FbTol = 1e-8
 	o.FbMin = 1e-14
+	o.NdvgMax = 20
 
 	// transient analyses
 	o.DtMin = 1e-8

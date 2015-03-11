@@ -145,6 +145,9 @@ type Domain struct {
 	Fb       []float64   // residual == -fb
 	Wb       []float64   // workspace
 	InitLSol bool        // flag telling that linear solver needs to be initialised prior to any further call
+
+	// for divergence control
+	bkpSol *Solution // backup solution
 }
 
 // NewDomain returns a new domain
@@ -573,4 +576,47 @@ func (o Domain) faceLocal2globalVerts(faceLverts []int, cell *inp.Cell) (faceGve
 		faceGverts[i] = cell.Verts[l]
 	}
 	return
+}
+
+// backup saves a copy of solution
+func (o *Domain) backup() {
+	if o.bkpSol == nil {
+		o.bkpSol = new(Solution)
+		o.bkpSol.Y = make([]float64, o.Ny)
+		o.bkpSol.ΔY = make([]float64, o.Ny)
+		o.bkpSol.L = make([]float64, o.Nlam)
+		if !Global.Sim.Data.Steady {
+			o.bkpSol.Dydt = make([]float64, o.Ny)
+			o.bkpSol.D2ydt2 = make([]float64, o.Ny)
+			o.bkpSol.Psi = make([]float64, o.Ny)
+			o.bkpSol.Zet = make([]float64, o.Ny)
+			o.bkpSol.Chi = make([]float64, o.Ny)
+		}
+	}
+	o.bkpSol.T = o.Sol.T
+	copy(o.bkpSol.Y, o.Sol.Y)
+	copy(o.bkpSol.ΔY, o.Sol.ΔY)
+	copy(o.bkpSol.L, o.Sol.L)
+	if !Global.Sim.Data.Steady {
+		copy(o.bkpSol.Dydt, o.Sol.Dydt)
+		copy(o.bkpSol.D2ydt2, o.Sol.D2ydt2)
+		copy(o.bkpSol.Psi, o.Sol.Psi)
+		copy(o.bkpSol.Zet, o.Sol.Zet)
+		copy(o.bkpSol.Chi, o.Sol.Chi)
+	}
+}
+
+// restore restores solution
+func (o *Domain) restore() {
+	o.Sol.T = o.bkpSol.T
+	copy(o.Sol.Y, o.bkpSol.Y)
+	copy(o.Sol.ΔY, o.bkpSol.ΔY)
+	copy(o.Sol.L, o.bkpSol.L)
+	if !Global.Sim.Data.Steady {
+		copy(o.Sol.Dydt, o.bkpSol.Dydt)
+		copy(o.Sol.D2ydt2, o.bkpSol.D2ydt2)
+		copy(o.Sol.Psi, o.bkpSol.Psi)
+		copy(o.Sol.Zet, o.bkpSol.Zet)
+		copy(o.Sol.Chi, o.bkpSol.Chi)
+	}
 }

@@ -192,12 +192,20 @@ func Run() (runisok bool) {
 		}
 
 		// time loop
+		ndiverg := 0 // number of steps diverging
+		md := 1.0    // time step multiplier if divergence control is on
 		var Δt, Δtout float64
 		var lasttimestep bool
 		for t < tf {
 
+			// check for continued divergence
+			if ndiverg >= Global.Sim.Solver.NdvgMax {
+				LogErrCond(true, "maximum number of steps diverging reached: %d", ndiverg)
+				return
+			}
+
 			// time increment
-			Δt = Dt.F(t, nil)
+			Δt = Dt.F(t, nil) * md
 			if t+Δt >= tf {
 				Δt = tf - t
 				lasttimestep = true
@@ -225,10 +233,33 @@ func Run() (runisok bool) {
 				}
 			}
 
-			// run iterations
+			// for all domains
 			for _, d := range domains {
-				if !run_iterations(t, Δt, d, &sum) {
+
+				// backup solution if divergence control is on
+				if Global.Sim.Solver.Diverg {
+					d.backup()
+				}
+
+				// run iterations
+				diverging, ok := run_iterations(t, Δt, d, &sum)
+				if !ok {
 					return
+				}
+
+				// restore solution and reduce time step if divergence control is on
+				if Global.Sim.Solver.Diverg {
+					if diverging {
+						if Global.Verbose {
+							io.Pfred(". . . iterations diverging . . .\n")
+						}
+						d.restore()
+						ndiverg += 1
+						md *= 0.5
+						continue
+					}
+					ndiverg = 0
+					md = 1.0
 				}
 			}
 
@@ -259,7 +290,7 @@ func Run() (runisok bool) {
 }
 
 // run_iterations solves the nonlinear problem
-func run_iterations(t, Δt float64, d *Domain, sum *Summary) (ok bool) {
+func run_iterations(t, Δt float64, d *Domain, sum *Summary) (diverging, ok bool) {
 
 	// zero accumulated increments
 	la.VecFill(d.Sol.ΔY, 0)
@@ -272,6 +303,7 @@ func run_iterations(t, Δt float64, d *Domain, sum *Summary) (ok bool) {
 	// auxiliary variables
 	var it int
 	var largFb, largFb0, Lδu float64
+	var prevFb, prevLδu float64
 
 	// message
 	if Global.Sim.Data.ShowR {
@@ -337,6 +369,15 @@ func run_iterations(t, Δt float64, d *Domain, sum *Summary) (ok bool) {
 		if largFb < Global.Sim.Solver.FbMin { // converged with smallest value of fb
 			break
 		}
+
+		// check divergence on fb
+		if it > 1 && Global.Sim.Solver.Diverg {
+			if largFb > prevFb {
+				diverging = true
+				break
+			}
+		}
+		prevFb = largFb
 
 		// assemble Jacobian matrix
 		do_asm_fact := (it == 0 || !Global.Sim.Data.CteTg)
@@ -449,6 +490,15 @@ func run_iterations(t, Δt float64, d *Domain, sum *Summary) (ok bool) {
 		if Lδu < Global.Sim.Solver.Itol {
 			break
 		}
+
+		// check divergence on Lδu
+		if it > 1 && Global.Sim.Solver.Diverg {
+			if Lδu > prevLδu {
+				diverging = true
+				break
+			}
+		}
+		prevLδu = Lδu
 	}
 
 	// check if iterations diverged
@@ -458,7 +508,8 @@ func run_iterations(t, Δt float64, d *Domain, sum *Summary) (ok bool) {
 	}
 
 	// success
-	return true
+	ok = true
+	return
 }
 
 func debug_print_p_results(d *Domain) {
