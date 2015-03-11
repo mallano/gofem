@@ -30,7 +30,7 @@
   "stages" : [
     {
       "desc"  : "apply cyclic load",
-      "import" : { "resetU":true, "dir":"/tmp/gofem/c-coarse-elast-d2-q9", "fnk":"c-coarse-elast-d2-q9" },
+      "import" : { "resetU":true, "dir":"/tmp/gofem/a-coarse-elast-d2-q9", "fnk":"a-coarse-elast-d2-q9" },
       "facebcs" : [
         { "tag":-10, "keys":["uy"], "funcs":["zero"] },
         { "tag":-11, "keys":["ux"], "funcs":["zero"] },
